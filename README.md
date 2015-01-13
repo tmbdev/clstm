@@ -11,6 +11,12 @@ To build a standalone C library, run
     scons
     sudo scons install
 
+If you have an older ZMQPP library, you need to compile with:
+
+    scons oldzmqpp=1
+
+For debugging, you can compile with `debug=1`
+
 To build the Python extension, run
 
     python setup.py build
@@ -87,6 +93,34 @@ There are two command line drivers:
 
   - clstmseq learns sequence-to-sequence mappings
   - clstmctc learns sequence-to-string mappings using CTC alignment
+
+Note that most parameters are passed through the environment:
+
+    lrate=3e-5 clstmctc uw3-dew.h5
+
+Parameters are:
+
+    clstmctc:
+
+        load= model file to load before training
+        lrate= learning rate
+        save_name= pattern for saving model files, like model-%08d.h5
+        start= starting trial for training
+        ntrain= total number of training steps
+        nhidden= number of state units
+        save_every= how often to save models (0=never)
+        display_every= how often to display recognition output (0=never)
+
+    clstmseq:
+
+        lrate= learning reate
+        display_every= how often to display recognition output (0=never)
+        report= how often to report progress
+        ntrain= total number of training steps
+        mode= lstm or bidi
+        state= number of internal state variables (2 by default)
+
+(You can find all parameters via `grep 'get.env' *.cc`.)
 
 For debugging and testing, there are equivalent Python implementations
 (`pylstmseq` and `pylstmctc`) that should work the same way in Python.
