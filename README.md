@@ -127,3 +127,10 @@ For debugging and testing, there are equivalent Python implementations
 
 The `rnntests.py` script will generate a number of simple sequence
 recognition tasks for testing.
+
+# TODO
+
+  - consistently provide a separate `update()` method
+  - canned support for multilayer, logistic outputs
+  - 2D LSTM support
+  - more testing
