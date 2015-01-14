@@ -105,9 +105,9 @@ struct OcrDataset {
         h5.shape(odims, oname.c_str());
         assert(idims(0) == odims(0));
         nsamples = idims(0);
-        print("got", nsamples, "training samples");
+        cerr << "# lines " << nsamples << endl;
         h5.get(codec, "codec");
-        print("got codec:", codec.size());
+        cerr << "# codec " << codec.size() << endl;
         nclasses = codec.size();
         mdarray<float> a;
         h5.getdrow(a, 0, iname.c_str());
@@ -247,9 +247,9 @@ int main_ocr(int argc, char **argv) {
 
     for (int trial = start; trial < ntrain; trial++) {
         int sample = trial % dataset.nsamples;
-        if (sample > 0 && save_every > 0 && sample%save_every == 0) {
+        if (trial > 0 && save_every > 0 && trial%save_every == 0) {
             char fname[4096];
-            sprintf(fname, save_name.c_str(), sample);
+            sprintf(fname, save_name.c_str(), trial);
             print("saving", fname);
             net->save(fname);
         }
@@ -322,6 +322,7 @@ int main_ocr(int argc, char **argv) {
 
 int main_eval(int argc, char **argv) {
     const char *h5file = argc > 1 ? argv[1] : "uw3-dew-test.h5";
+    string mode = getsenv("mode","errs");
     string load_name = getsenv("load", "");
     OcrDataset dataset(h5file);
     shared_ptr<INetwork> net(make_BIDILSTM());
@@ -348,10 +349,19 @@ int main_eval(int argc, char **argv) {
         trivial_decode(output_classes, net->outputs);
         string gt = dataset.to_string(transcript);;
         string out = dataset.to_string(output_classes);
-        print(to_string(sample)+"\t"+out);
         total += gt.size();
         double err = levenshtein(gt,out);
         errs += err;
+        if(mode=="errs") {
+            print(to_string(int(err))+"\t"+out);
+        } else if(mode=="text") {
+            print(to_string(sample)+"\t"+out);
+        } else if(mode=="full") {
+            cout << int(err) << "\t";
+            cout << int(sample) << "\t";
+            cout << out << "\t";
+            cout << gt << "\n";
+        }
         cout.flush();
     }
     print("errs",errs,"total",total,"rate",errs*100.0/total);
