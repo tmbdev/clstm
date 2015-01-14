@@ -9,7 +9,7 @@ else:
     env.Append(CXXFLAGS="--std=c++11 -g -O3 -finline".split())
 env.Append(CPPPATH=["/usr/include/eigen3"])
 env.Append(LIBS=["hdf5_cpp","hdf5"])
-if ARGUMENTS.get('oldzmqpp',0):
+if ARGUMENTS.get('oldzmqpp',0) or os.environ.get('oldzmqpp',0):
     env.Append(CPPDEFINES={'add_raw' : 'add'})
 
 libclstm = env.StaticLibrary("clstm", source = ["clstm.cc"])

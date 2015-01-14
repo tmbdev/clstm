@@ -217,6 +217,7 @@ int main_ocr(int argc, char **argv) {
     int nhidden = getienv("hidden", 100);
     int save_every = getienv("save_every", 0);
     int display_every = getienv("display_every", 0);
+    int report_every = getienv("report_every", 1);
 
     unique_ptr<PyServer> py;
     if (display_every > 0) {
@@ -246,6 +247,7 @@ int main_ocr(int argc, char **argv) {
     double start_time = now();
 
     for (int trial = start; trial < ntrain; trial++) {
+        bool report = (report_every>0) && (trial % report_every == 0);
         int sample = trial % dataset.nsamples;
         if (sample > 0 && save_every > 0 && sample%save_every == 0) {
             char fname[4096];
@@ -257,11 +259,13 @@ int main_ocr(int argc, char **argv) {
         float m = amax(image);
         for (int i = 0; i < image.size(); i++) image[i] /= m;
         dataset.transcript(transcript, sample);
-        print(trial, sample,
-              "dim", image.dim(0), image.dim(1),
-              "time", now()-start_time,
-              "lrate", lrate, "hidden", nhidden);
-        print("TRU:", "'"+dataset.to_string(transcript)+"'");
+        if (report) {
+            print(trial, sample,
+                  "dim", image.dim(0), image.dim(1),
+                  "time", now()-start_time,
+                  "lrate", lrate, "hidden", nhidden);
+            print("TRU:", "'"+dataset.to_string(transcript)+"'");
+        }
         assign(net->inputs, image);
         net->forward();
         assign(classes, transcript);
@@ -284,9 +288,11 @@ int main_ocr(int argc, char **argv) {
         string gt = dataset.to_string(transcript);;
         string out = dataset.to_string(output_classes);
         string aln = dataset.to_string(aligned_classes);
-        print("OUT:", "'"+out+"'");
-        print("ALN:", "'"+aln+"'");
-        print(levenshtein(gt,out));
+        if (report) {
+            print("OUT:", "'"+out+"'");
+            print("ALN:", "'"+aln+"'");
+            print(levenshtein(gt,out));
+        }
 
         if (display_every > 0 && sample%display_every == 0) {
             net->d_outputs.resize(saligned.size());
