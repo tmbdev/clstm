@@ -172,9 +172,12 @@ void mktargets(Sequence &seq, Classes &targets, int ndim);
 
 extern Mat debugmat;
 
+}
+
 namespace {
 template <class A,class B>
 double levenshtein(A &a,B &b) {
+    using std::vector;
     int n = a.size();
     int m = b.size();
     if(n>m) return levenshtein(b,a);
@@ -197,7 +200,5 @@ double levenshtein(A &a,B &b) {
 }
 }
 
-
-}
 
 #endif

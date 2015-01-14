@@ -131,6 +131,6 @@ recognition tasks for testing.
 # TODO
 
   - consistently provide a separate `update()` method
-  - canned support for multilayer, logistic outputs
+  - canned support for multilayer, logistic outputs, linear outputs
   - 2D LSTM support
   - more testing
