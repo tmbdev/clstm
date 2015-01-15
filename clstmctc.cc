@@ -211,7 +211,9 @@ int main_ocr(int argc, char **argv) {
     const char *h5file = argc > 1 ? argv[1] : "uw3-dew.h5";
     string load_name = getsenv("load", "");
     double lrate = getdenv("lrate", 1e-4);
-    string save_name = getsenv("save_name", "model-%08d.h5");
+    string save_name = getsenv("save_name", "");
+    if (save_name=="") throw "must give save_name=";
+    if (save_name.find('%')==string::npos) save_name += "-%08d.h5";
     int start = getienv("start", 0);
     int ntrain = getienv("ntrain", 1000000);
     int nhidden = getienv("hidden", 100);
@@ -358,7 +360,9 @@ int main_eval(int argc, char **argv) {
         total += gt.size();
         double err = levenshtein(gt,out);
         errs += err;
-        if(mode=="errs") {
+        if  (mode=="quiet") {
+            // do nothing
+        } else if(mode=="errs") {
             print(to_string(int(err))+"\t"+out);
         } else if(mode=="text") {
             print(to_string(sample)+"\t"+out);

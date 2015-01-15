@@ -24,6 +24,3 @@ env.Program("clstmctc",
 env.Program("clstmseq",
             ["clstmseq.cc"],
             LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq"])
-env.Program("test-edit",
-            ["test-edit.cc"],
-            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq"])
