@@ -3,8 +3,10 @@ import distutils.sysconfig
 
 prefix = ARGUMENTS.get('prefix', "/usr/local")
 env = Environment()
-if ARGUMENTS.get('debug',0):
+if int(ARGUMENTS.get('debug',0)):
     env.Append(CXXFLAGS="--std=c++11 -g -fno-inline".split())
+    env.Append(CCFLAGS="-g".split())
+    env.Append(LINKFLAGS="-g".split())
 else:
     env.Append(CXXFLAGS="--std=c++11 -g -O3 -finline".split())
 env.Append(CPPPATH=["/usr/include/eigen3"])
@@ -12,7 +14,7 @@ env.Append(LIBS=["hdf5_cpp","hdf5"])
 if ARGUMENTS.get('oldzmqpp',0) or os.environ.get('oldzmqpp',0):
     env.Append(CPPDEFINES={'add_raw' : 'add'})
 
-libclstm = env.StaticLibrary("clstm", source = ["clstm.cc"])
+libclstm = env.StaticLibrary("clstm", source = ["clstm.cc", "extras.cc"])
 
 Alias('install-lib', Install(os.path.join(prefix,"lib"), libclstm))
 Alias('install-include', Install(os.path.join(prefix,"include"), ["clstm.h"]))

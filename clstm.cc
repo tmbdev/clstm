@@ -127,7 +127,7 @@ void INetwork::cpred(Classes &preds, Sequence &xs) {
 
 void INetwork::info(string prefix){
     string nprefix = prefix + "." + name;
-    cout << nprefix << ": " << lr << " " << momentum << " ";
+    cout << nprefix << ": " << learning_rate << " " << momentum << " ";
     cout << inputs.size() << " " << (inputs.size() > 0 ? inputs[0].size() : -1) << " ";
     cout << outputs.size() << " " << (outputs.size() > 0 ? outputs[0].size() : -1) << endl;
     for (auto s : sub) s->info(nprefix);
@@ -172,7 +172,7 @@ Sequence *INetwork::getState(string name) {
 void INetwork::save(const char *fname) {
     using namespace h5eigen;
     unique_ptr<HDF5> h5(make_HDF5());
-    h5->open(fname, "w");
+    h5->open(fname, true);
 #ifdef USE_ATTRS
     h5->setAttr("ocropus", "0.0");
     for (auto &kv : attributes) {
@@ -284,6 +284,8 @@ struct Full : Network {
             d_inputs[t] = W.transpose() * d_outputs[t];
         }
         if (no_update) return;
+        float lr = learning_rate;
+        if (normalization==NORM_LEN) lr /= d_outputs.size();
         for (int t = 0; t < d_outputs.size(); t++) {
             W += lr * d_outputs[t] * inputs[t].transpose();
             w += lr * d_outputs[t];
@@ -395,6 +397,8 @@ struct SoftmaxLayer : Network {
         }
         d_W *= momentum;
         d_w *= momentum;
+        float lr = learning_rate;
+        if (normalization==NORM_LEN) lr /= d_outputs.size();
         for (int t = 0; t < d_outputs.size(); t++) {
             d_W += lr * d_outputs[t] * inputs[t].transpose();
             d_w += lr * d_outputs[t];
@@ -578,7 +582,7 @@ void each(F f, T &a) {
     f(a);
 }
 template <typename F, typename T, typename ... Args>
-void each(F f, T &a, Args&&... args ...) {
+void each(F f, T &a, Args&&... args) {
     f(a);
     each(f, args ...);
 }
@@ -721,6 +725,8 @@ struct LSTM : Network {
         }
     }
     void update() {
+        float lr = learning_rate;
+        if (normalization==NORM_LEN) lr /= d_outputs.size();
         WGI += lr * DWGI;
         WGF += lr * DWGF;
         WGO += lr * DWGO;
@@ -880,6 +886,40 @@ INetwork *make_BIDILSTM() {
     return new BIDILSTM();
 }
 
+shared_ptr<INetwork> make_fwdbwd(int nh,int ni) {
+  shared_ptr<INetwork> fwd, bwd, parallel, reversed;
+  fwd = make_shared<LSTM>();
+  fwd->init(nh, ni);
+  bwd = make_shared<LSTM>();
+  bwd->init(nh, ni);
+  reversed = make_shared<Reversed>();
+  reversed->add(bwd);
+  parallel = make_shared<Parallel>();
+  parallel->add(fwd);
+  parallel->add(reversed);
+  return parallel;
+}
+
+struct BIDILSTM2 : Stacked {
+    BIDILSTM2() {
+        name = "bidilstm2";
+    }
+    void init(int no, int nh2, int nh, int ni) {
+        shared_ptr<INetwork> parallel1, parallel2, logreg;
+        parallel1 = make_fwdbwd(nh, ni);
+        add(parallel1);
+        parallel2 = make_fwdbwd(nh2, 2*nh);
+        add(parallel2);
+        logreg = make_shared<SoftmaxLayer>();
+        logreg->init(no, 2*nh2);
+        add(logreg);
+    }
+};
+
+INetwork *make_BIDILSTM2() {
+    return new BIDILSTM2();
+}
+
 inline Float log_add(Float x, Float y) {
     if (abs(x-y) > 10) return fmax(x, y);
     return log(exp(x-y)+1) + y;
@@ -1000,4 +1040,3 @@ void mktargets(Sequence &seq, Classes &transcript, int ndim) {
 // direct access to internal variables from the test cases.
 #include "lstm_test.i"
 #endif
-

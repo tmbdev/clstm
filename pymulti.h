@@ -3,14 +3,21 @@
 #ifndef pymulti__
 #define pymulti__
 
+#ifndef NODISPLAY
 #include <zmqpp/zmqpp.hpp>
+#endif
 #include <string>
 #include <stdarg.h>
 #include <iostream>
 #include "multidim.h"
 
 namespace pymulti {
-using namespace std;
+using std::string;
+using std::unique_ptr;
+using std::shared_ptr;
+using std::cout;
+using std::cerr;
+using std::endl;
 using namespace multidim;
 
 inline string stringf(const char *format, ...) {
@@ -22,6 +29,36 @@ inline string stringf(const char *format, ...) {
     return string(buf);
 }
 
+#ifdef NODISPLAY
+struct PyServer {
+    void open(const char *where="tcp://127.0.0.1:9876"){}
+    void setMode(int mode) {}
+    string eval(string s) {
+        return "";
+    }
+    string eval(string s, const float *a, int na) {
+        return "";
+    }
+    string eval(string s, const float *a, int na, const float *b, int nb) {
+        return "";
+    }
+    string evalf(const char *format, ...) {
+        return "";
+    }
+    void clf() {
+    }
+    void subplot(int rows, int cols, int n) {
+    }
+    void plot(mdarray<float> &v, string extra="") {
+    }
+    void plot2(mdarray<float> &u, mdarray<float> &v, string extra="") {
+    }
+    void imshow(mdarray<float> &a, string extra="") {
+    }
+    void imshowT(mdarray<float> &a, string extra="") {
+    }
+};
+#else
 struct PyServer {
     int mode = 0;  // -1=ignore, 0=uninit, 1=output
     zmqpp::context context;
@@ -118,6 +155,7 @@ struct PyServer {
              a.data, a.dim(0)*a.dim(1));
     }
 };
+#endif
 
 inline PyServer *make_PyServer() {
     return new PyServer();

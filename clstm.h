@@ -12,7 +12,11 @@
 #include <Eigen/Dense>
 
 namespace ocropus {
-using namespace std;
+using std::string;
+using std::vector;
+using std::map;
+using std::shared_ptr;
+using std::function;
 using Eigen::Ref;
 
 #ifdef LSTM_DOUBLE
@@ -69,8 +73,9 @@ struct INetwork {
     vector<shared_ptr<INetwork> > sub;
 
     // Learning rate and momentum used for training.
-    Float lr = 1e-4;
+    Float learning_rate = 1e-4;
     Float momentum = 0.9;
+    enum Normalization : int { NORM_DFLT, NORM_LEN } normalization;
 
     // Data used for loading and saving networks; these
     // are generally only meaningful for the toplevel network.
@@ -126,7 +131,7 @@ struct INetwork {
 
     // Set the learning rate for this network and all subnetworks.
     virtual void setLearningRate(Float lr, Float momentum) {
-        this->lr = lr;
+        this->learning_rate = lr;
         this->momentum = momentum;
         for (int i = 0; i < sub.size(); i++)
             sub[i]->setLearningRate(lr, momentum);
@@ -163,6 +168,7 @@ INetwork *make_LSTM();
 INetwork *make_LSTM1();
 INetwork *make_REVLSTM1();
 INetwork *make_BIDILSTM();
+INetwork *make_BIDILSTM2();
 
 void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5.0);
 void forwardbackward(Mat &both, Mat &lmatch);
@@ -198,6 +204,7 @@ double levenshtein(A &a,B &b) {
     }
     return current[n];
 }
+
 }
 
 

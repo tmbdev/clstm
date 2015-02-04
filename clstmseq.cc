@@ -10,6 +10,7 @@
 #include "multidim.h"
 #include "h5multi.h"
 #include "pymulti.h"
+#include "extras.h"
 
 using namespace std;
 using namespace Eigen;
@@ -18,17 +19,6 @@ using namespace h5multi;
 using namespace pymulti;
 
 namespace {
-template <class T>
-inline void print(const T &arg) {
-    cout << arg << endl;
-}
-
-template <class T, typename ... Args>
-inline void print(T arg, Args ... args) {
-    cout << arg << " ";
-    print(args ...);
-}
-
 template <class S, class T>
 void assign(S &dest, T &src) {
     dest.resize_(src.dims);
@@ -236,7 +226,7 @@ int main_seq(int argc, char **argv) {
 
     if (getienv("debug_nets")) {
         net->networks("net", [] (string name, INetwork *net) {
-                          print("net", name, net->lr, net->momentum);
+                          print("net", name, net->learning_rate, net->momentum);
                       });
     }
     if (getienv("debug_states")) {
@@ -318,4 +308,3 @@ int main(int argc, char **argv) {
         print("UNKNOWN EXCEPTION");
     }
 }
-

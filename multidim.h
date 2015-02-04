@@ -9,7 +9,10 @@
 #define MDSTR1(X) MDSTR(X)
 #define MDCHECK(X) while (!(X)) { throw "FAILED: " __FILE__ ":" MDSTR1(__LINE__) ":"  # X; }
 
+#include <stdlib.h>
+
 namespace multidim {
+
 template <class T>
 struct mdarray {
     static const int MAXRANK = 8;
@@ -18,6 +21,19 @@ struct mdarray {
     int fill = 0;
     T *data = 0;
     bool owned = false;
+
+    void take(mdarray<T> &other) {
+        for(int i=0;i<MAXRANK+1;i++) dims[i] = other.dims[i];
+        total = other.total;
+        fill = other.fill;
+        data = other.data;
+        owned = other.owned;
+        for(int i=0;i<MAXRANK+1;i++) other.dims[i] = 0;
+        other.total = 0;
+        other.fill = 0;
+        other.data = 0;
+        other.owned = false;
+    }
 
     // cleared array by default
     mdarray() {
@@ -64,6 +80,15 @@ struct mdarray {
         owned = true;
     }
 
+    // copy another array
+    void copy(mdarray<T> &other) {
+        clear();
+        allocate(other.total);
+        for(int i=0;i<MAXRANK+1;i++) dims[i] = other.dims[i];
+        fill = other.fill;
+        for(int i=0;i<fill;i++) data[i] = other.data[i];
+    }
+
     // get the extent of dimension i
     int dim(int i) {
         MDCHECK(unsigned(i) < MAXRANK);
@@ -94,6 +119,17 @@ struct mdarray {
         int index = indexes[0];
         for (int i = 1; i < rank; i++) {
             MDCHECK(unsigned(indexes[i]) < unsigned(dims[i]));
+            index = index * dims[i] + indexes[i];
+        }
+        return data[index];
+    }
+    // multidimensional subscripting
+    template <typename ... Args>
+    T &unsafe_at(Args ... args) {
+        int indexes[] = {args ...};
+        int rank = sizeof indexes / sizeof indexes[0];
+        int index = indexes[0];
+        for (int i = 1; i < rank; i++) {
             index = index * dims[i] + indexes[i];
         }
         return data[index];
@@ -230,31 +266,6 @@ inline void from_eigen_matrix(mdarray<S> &result, T a) {
     for (int i = 0; i < a.rows(); i++)
         for (int j = 0; j < a.cols(); j++)
             result(i, j) = a(i, j);
-}
-
-template <class T, class S>
-inline void from_eigen_vector(mdarray<S> &result, T a) {
-    result.resize(a.rows());
-    for (int i = 0; i < a.rows(); i++)
-        result(i) = a(i);
-}
-
-inline const char *getsenv(const char *name, const char *dflt) {
-    const char *result = std::getenv(name);
-    if (result) return result;
-    return dflt;
-}
-
-inline int getienv(const char *name, int dflt=0) {
-    const char *result = std::getenv(name);
-    if (result) return atoi(result);
-    return dflt;
-}
-
-inline double getdenv(const char *name, double dflt=0) {
-    const char *result = std::getenv(name);
-    if (result) return std::atof(result);
-    return dflt;
 }
 }
 

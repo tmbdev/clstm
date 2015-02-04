@@ -11,8 +11,10 @@
 #include "multidim.h"
 
 namespace h5multi {
+using std::string;
+using std::shared_ptr;
+using std::remove_reference;
 using namespace H5;
-using namespace std;
 using namespace multidim;
 
 struct HDF5 {
@@ -108,7 +110,7 @@ struct HDF5 {
         DataSpace space = dataset.getSpace();
         hsize_t dims[] = {0, 0, 0, 0};
         int rank = space.getSimpleExtentDims(dims);
-        assert(rank == 1);
+        if (rank != 1) throw "wrong rank";
         hsize_t start0[] = {0, 0};
         hsize_t start[] = {hsize_t(index), 0};
         hsize_t count[] = {1, 0};

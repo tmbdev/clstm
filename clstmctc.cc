@@ -2,46 +2,27 @@
 #include <assert.h>
 #include <iostream>
 #include <vector>
-#include <string>
 #include <memory>
 #include <math.h>
 #include <Eigen/Dense>
-#include <sys/time.h>
+#include <string>
 
 #include "multidim.h"
-#include "h5multi.h"
 #include "pymulti.h"
+#include "extras.h"
 
-using namespace std;
+using std_string = std::string;
+#define string std_string
+using std::vector;
+using std::shared_ptr;
+using std::unique_ptr;
+using std::to_string;
+using std::cout;
 using namespace Eigen;
 using namespace ocropus;
-using namespace h5multi;
 using namespace pymulti;
 
 namespace {
-double now() {
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
-    return tv.tv_sec + 1e-6 * tv.tv_usec;
-}
-
-template <class T>
-inline void print(const T &arg) {
-    cout << arg << endl;
-}
-
-template <class T, typename ... Args>
-inline void print(T arg, Args ... args) {
-    cout << arg << " ";
-    print(args ...);
-}
-
-inline const char *getenv(const char *name, const char *dflt) {
-    const char *result = std::getenv(name);
-    if (result) return result;
-    return dflt;
-}
-
 template <class S, class T>
 void assign(S &dest, T &src) {
     dest.resize_(src.dims);
@@ -88,60 +69,6 @@ void assign(Classes &classes, mdarray<int> &transcript) {
         classes[i] = transcript(i);
 }
 
-struct OcrDataset {
-    string iname = "images";
-    string oname = "transcripts";
-    HDF5 h5;
-    mdarray<int> codec;
-    int nsamples = -1;
-    int ndims = -1;
-    int nclasses = -1;
-
-    OcrDataset(const char *h5file) {
-        H5::Exception::dontPrint();
-        h5.open(h5file);
-        mdarray<int> idims, odims;
-        h5.shape(idims, iname.c_str());
-        h5.shape(odims, oname.c_str());
-        assert(idims(0) == odims(0));
-        nsamples = idims(0);
-        cerr << "# lines " << nsamples << endl;
-        h5.get(codec, "codec");
-        cerr << "# codec " << codec.size() << endl;
-        nclasses = codec.size();
-        mdarray<float> a;
-        h5.getdrow(a, 0, iname.c_str());
-        assert(a.rank() == 2);
-        ndims = a.dim(1);
-        h5.getarow(a, 0, oname.c_str());
-        assert(a.rank() == 1);
-    }
-    void image(mdarray<float> &a, int index) {
-        h5.getdrow(a, index, iname.c_str());
-        assert(a.rank() == 2);
-        assert(a.dim(1) == ndims);
-    }
-    void transcript(mdarray<int> &a, int index) {
-        h5.getarow(a, index, oname.c_str());
-        assert(a.rank() == 1);
-    }
-    string to_string(mdarray<int> &transcript) {
-        string result;
-        for (int i = 0; i < transcript.size(); i++) {
-            int label = transcript(i);
-            int codepoint = codec(label);
-            char chr = char(min(255, codepoint));
-            result.push_back(chr);
-        }
-        return result;
-    }
-    string to_string(vector<int> &transcript) {
-        mdarray<int> transcript_(int(transcript.size()));
-        for (int i = 0; i < transcript.size(); i++) transcript_[i] = transcript[i];
-        return to_string(transcript_);
-    }
-};
-
 template <class A, class T>
 int indexof(A &a, const T &t) {
     for (int i = 0; i < a.size(); i++)
@@ -149,22 +76,7 @@ int indexof(A &a, const T &t) {
     return -1;
 }
 
-template <class T>
-T amin(mdarray<T> &a) {
-    T m = a[0];
-    for (int i = 1; i < a.size(); i++) if (a[i] < m) m = a[i];
-    return m;
 }
-
-template <class T>
-T amax(mdarray<T> &a) {
-    T m = a[0];
-    for (int i = 1; i < a.size(); i++) if (a[i] > m) m = a[i];
-    return m;
-}
-}
-
-mdarray<int> codec;
 
 void debug_decode(Sequence &outputs, Sequence &aligned) {
     for (int t = 0; t < outputs.size(); t++) {
@@ -207,19 +119,64 @@ bool anynan(mdarray<float> &a) {
     return false;
 }
 
+double error_rate(shared_ptr<INetwork> net,const string &testset) {
+    int maxeval = getienv("maxeval", 1000000000);
+    shared_ptr<IOcrDataset> dataset(make_Dataset(testset));
+
+    mdarray<float> image;
+    mdarray<int> transcript;
+    Classes classes;
+
+    double total = 0;
+    double errs = 0;
+
+    int N = min(dataset->samples(), maxeval);
+
+    for (int sample = 0; sample < N; sample++) {
+        dataset->image(image, sample);
+        dataset->transcript(transcript, sample);
+        assign(net->inputs, image);
+        net->forward();
+        Classes output_classes;
+        trivial_decode(output_classes, net->outputs);
+        string gt = dataset->to_string(transcript);;
+        string out = dataset->to_string(output_classes);
+        total += gt.size();
+        double err = levenshtein(gt, out);
+        errs += err;
+    }
+    return errs/total;
+}
+
 int main_ocr(int argc, char **argv) {
     const char *h5file = argc > 1 ? argv[1] : "uw3-dew.h5";
     string load_name = getsenv("load", "");
     double lrate = getdenv("lrate", 1e-4);
+
+    int save_every = getienv("save_every", 0);
     string save_name = getsenv("save_name", "");
-    if (save_name=="") throw "must give save_name=";
-    if (save_name.find('%')==string::npos) save_name += "-%08d.h5";
+    if (save_every>=0 && save_name=="") throw "must give save_name=";
+    if (save_every>0 && save_name.find('%')==string::npos)
+        save_name += "-%08d";
+    else
+        save_name += ".h5";
+    string after_save = getsenv("after_save", "");
+
     int start = getienv("start", 0);
     int ntrain = getienv("ntrain", 1000000);
     int nhidden = getienv("hidden", 100);
-    int save_every = getienv("save_every", 0);
+    int nhidden2 = getienv("hidden2", -1);
     int display_every = getienv("display_every", 0);
     int report_every = getienv("report_every", 1);
+    int randseed = getienv("seed", int(fmod(now()*1e6, 1e9)));
+    bool randomize = getienv("randomize", 1);
+    string normalization = getsenv("normalization", "batch");
+
+    string testset = getsenv("testset", "");
+    int test_every = getienv("test_every", -1);
+    string after_test = getsenv("after_test", "");
+
+    srand48(randseed);
 
     unique_ptr<PyServer> py;
     if (display_every > 0) {
@@ -231,48 +188,71 @@ int main_ocr(int argc, char **argv) {
         py->eval("matplotlib.rcParams.update({'font.size':7})");
     }
 
-    OcrDataset dataset(h5file);
-    assign(codec, dataset.codec);
+    shared_ptr<IOcrDataset> dataset;
+    dataset.reset(make_Dataset(h5file));
+    print("dataset", dataset->samples(), dataset->dim());
 
-    shared_ptr<INetwork> net(make_BIDILSTM());
-    net->init(dataset.nclasses, nhidden, dataset.ndims);
+    shared_ptr<INetwork> net;
+    if (nhidden2<0) {
+        net.reset(make_BIDILSTM());
+        net->init(dataset->classes(), nhidden, dataset->dim());
+    } else {
+        net.reset(make_BIDILSTM2());
+        net->init(dataset->classes(), nhidden2, nhidden, dataset->dim());
+    }
     net->setLearningRate(lrate, 0.9);
-    assign(net->codec, dataset.codec);
+    dataset->getCodec(net->codec);
     if (load_name != "") net->load(load_name.c_str());
+    INetwork::Normalization norm = normalization=="len" ? INetwork::NORM_LEN : INetwork::NORM_DFLT;
+    if (norm!=INetwork::NORM_DFLT) print("nonstandard normalization: ", normalization);
+    net->networks("", [norm](string s, INetwork *net) {net->normalization = norm;});
 
-    mdarray<float> image, outputs, aligned;
+    mdarray<float> raw_image, image, outputs, aligned;
     mdarray<int> transcript;
     Sequence targets;
     Sequence saligned;
     Classes classes;
 
     double start_time = now();
+    double best_erate = 1e38;
 
     for (int trial = start; trial < ntrain; trial++) {
         bool report = (report_every>0) && (trial % report_every == 0);
-        int sample = trial % dataset.nsamples;
+        int sample = trial % dataset->samples();
+        if (randomize) sample = lrand48() % dataset->samples();
         if (trial > 0 && save_every > 0 && trial%save_every == 0) {
             char fname[4096];
             sprintf(fname, save_name.c_str(), trial);
             print("saving", fname);
             net->save(fname);
+            if (after_save!="") system(after_save.c_str());
         }
-        dataset.image(image, sample);
-        float m = amax(image);
-        for (int i = 0; i < image.size(); i++) image[i] /= m;
-        dataset.transcript(transcript, sample);
+        if (trial > 0 && test_every > 0 && trial%test_every == 0 && testset != "") {
+            double erate = error_rate(net, testset);
+            print("TESTERR", now()-start_time, save_name, trial, erate,
+                  "lrate", lrate, "hidden", nhidden, nhidden2);
+            if (save_every==0 && erate < best_erate) {
+                best_erate = erate;
+                print("saving", save_name, "at", erate);
+                net->save(save_name.c_str());
+                if (after_save!="") system(after_save.c_str());
+            }
+            if (after_test!="") system(after_test.c_str());
+        }
+        dataset->image(image, sample);
+        dataset->transcript(transcript, sample);
         if (report) {
             print(trial, sample,
                   "dim", image.dim(0), image.dim(1),
                   "time", now()-start_time,
-                  "lrate", lrate, "hidden", nhidden);
-            print("TRU:", "'"+dataset.to_string(transcript)+"'");
+                  "lrate", lrate, "hidden", nhidden, nhidden2);
+            print("TRU:", "'"+dataset->to_string(transcript)+"'");
         }
         assign(net->inputs, image);
         net->forward();
         assign(classes, transcript);
         assign(outputs, net->outputs);
-        mktargets(targets, classes, dataset.nclasses);
+        mktargets(targets, classes, dataset->classes());
         ctc_align_targets(saligned, net->outputs, targets);
         assert(saligned.size() == net->outputs.size());
         net->d_outputs.resize(net->outputs.size());
@@ -287,16 +267,16 @@ int main_ocr(int argc, char **argv) {
         Classes output_classes, aligned_classes;
         trivial_decode(output_classes, net->outputs);
         trivial_decode(aligned_classes, saligned);
-        string gt = dataset.to_string(transcript);;
-        string out = dataset.to_string(output_classes);
-        string aln = dataset.to_string(aligned_classes);
+        string gt = dataset->to_string(transcript);;
+        string out = dataset->to_string(output_classes);
+        string aln = dataset->to_string(aligned_classes);
         if (report) {
             print("OUT:", "'"+out+"'");
             print("ALN:", "'"+aln+"'");
             print(levenshtein(gt,out));
         }
 
-        if (display_every > 0 && sample%display_every == 0) {
+        if (display_every > 0 && trial%display_every == 0) {
             net->d_outputs.resize(saligned.size());
             py->eval("clf()");
             py->subplot(4, 1, 1);
@@ -326,16 +306,17 @@ int main_ocr(int argc, char **argv) {
             py->eval("ginput(1,1e-3)");
         }
     }
+    return 0;
 }
 
 int main_eval(int argc, char **argv) {
     const char *h5file = argc > 1 ? argv[1] : "uw3-dew-test.h5";
     string mode = getsenv("mode","errs");
     string load_name = getsenv("load", "");
-    OcrDataset dataset(h5file);
+    shared_ptr<IOcrDataset> dataset(make_Dataset(h5file));
     shared_ptr<INetwork> net(make_BIDILSTM());
     int nhidden = 17;
-    net->init(dataset.nclasses, nhidden, dataset.ndims);
+    net->init(dataset->classes(), nhidden, dataset->dim());
     if(load_name=="") throw "must give load=";
     net->load(load_name.c_str());
 
@@ -346,17 +327,15 @@ int main_eval(int argc, char **argv) {
     double total = 0;
     double errs = 0;
 
-    for (int sample = 0; sample < dataset.nsamples; sample++) {
-        dataset.image(image, sample);
-        float m = amax(image);
-        for (int i = 0; i < image.size(); i++) image[i] /= m;
-        dataset.transcript(transcript, sample);
+    for (int sample = 0; sample < dataset->samples(); sample++) {
+        dataset->image(image, sample);
+        dataset->transcript(transcript, sample);
         assign(net->inputs, image);
         net->forward();
         Classes output_classes;
         trivial_decode(output_classes, net->outputs);
-        string gt = dataset.to_string(transcript);;
-        string out = dataset.to_string(output_classes);
+        string gt = dataset->to_string(transcript);;
+        string out = dataset->to_string(output_classes);
         total += gt.size();
         double err = levenshtein(gt,out);
         errs += err;
@@ -376,18 +355,42 @@ int main_eval(int argc, char **argv) {
     }
     print("errs",errs,"total",total,"rate",errs*100.0/total);
     cout.flush();
+    return 0;
 }
 
 int main_dump(int argc, char **argv) {
     const char *h5file = argc > 1 ? argv[1] : "uw3-dew-test.h5";
-    OcrDataset dataset(h5file);
-    for (int sample = 0; sample < dataset.nsamples; sample++) {
+    shared_ptr<IOcrDataset> dataset(make_Dataset(h5file));
+    for (int sample = 0; sample < dataset->samples(); sample++) {
         mdarray<int> transcript;
-        dataset.transcript(transcript, sample);
-        string gt = dataset.to_string(transcript);;
+        dataset->transcript(transcript, sample);
+        string gt = dataset->to_string(transcript);;
         print(to_string(sample)+"\t"+gt);
         cout.flush();
     }
+    return 0;
+}
+
+int main_testdewarp(int argc, char **argv) {
+    if (argc!=3) throw "usage: ... hdf5 index";
+    shared_ptr<IOcrDataset> dataset(make_HDF5Dataset(argv[1],true));
+    int index = atoi(argv[2]);
+    mdarray<float> image, dewarped;
+    unique_ptr<PyServer> py;
+    py.reset(new PyServer());
+    py->open();
+    py->eval("ion()");
+    py->eval("clf()");
+    dataset->image(image, index);
+    unique_ptr<INormalizer> normalizer;
+    normalizer.reset(make_MeanNormalizer());
+    normalizer->measure(image);
+    py->eval("subplot(211)");
+    py->imshowT(image, "cmap=cm.gray,interpolation='nearest'");
+    py->eval("subplot(212)");
+    normalizer->normalize(dewarped, image);
+    py->imshowT(dewarped, "cmap=cm.gray,interpolation='nearest'");
+    return 0;
 }
 
 const char *usage = /*program+*/ R"(data.h5
@@ -405,12 +408,18 @@ int main(int argc, char **argv) {
         exit(1);
     }
     try {
-        if(getienv("dump")) {
-            return main_dump(argc, argv);
-        } else if(getienv("eval")) {
+        string mode = getsenv("mode", "train");
+        if (getienv("eval", 0)) { // for old scripts
             return main_eval(argc, argv);
-        } else {
+        }
+        if (mode=="dump") {
+            return main_dump(argc, argv);
+        } else if (mode=="train") {
             return main_ocr(argc, argv);
+        } else if (mode=="testdewarp") {
+            return main_testdewarp(argc, argv);
+        } else {
+            return main_eval(argc, argv);
         }
     } catch(const char *msg) {
         print("EXCEPTION", msg);
@@ -418,4 +427,3 @@ int main(int argc, char **argv) {
         print("UNKNOWN EXCEPTION");
     }
 }
-
