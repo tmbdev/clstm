@@ -104,23 +104,48 @@ Parameters are:
 
     clstmctc:
 
-        load= model file to load before training
+        Learns image->text transformations, modeling sequences of
+        vertical slices through the input image.
+
+        maxeval= max # evaluation samples
+        randseed= random seed
+        load= model to preload
+        save_every= how often to save (0: save only improved models)
+        after_save= shell command to execute after saving
+        ntrain= number of training samples
         lrate= learning rate
-        save_name= pattern for saving model files, like model-%08d.h5
-        start= starting trial for training
-        ntrain= total number of training steps
-        nhidden= number of state units
-        save_every= how often to save models (0=never)
-        display_every= how often to display recognition output (0=never)
+        nhidden= #hidden units
+        nhidden2= #hidden units second lstm layer
+        batch= batching for updates
+        momentum= momentum
+        display_every= how often to display results
+        report_every= how often to report progress
+        randomize= shuffle training examples
+        lrnorm= learning rate normalization
+        dewarp= image dewarping method
+        lstm= kind of LSTM to be used
+        testset= test set file
+        test_every= how often to compute test error rate
+        after_test= shell command to run after testing
+        start= start sample for training
+        mode= command line mode (training, errors, etc.)
 
     clstmseq:
 
-        lrate= learning reate
+        lrate= learning rate
         display_every= how often to display recognition output (0=never)
         report= how often to report progress
         ntrain= total number of training steps
-        mode= lstm or bidi
+        kind= bidi, bidi2, lstm1
         state= number of internal state variables (2 by default)
+
+    clstmtext:
+
+        Training files contain lines of the form: "input\toutput\n"
+        With mode=filter, the input file is transformed using the
+        trained filter.
+
+        (similar to clstmctc)
 
 (You can find all parameters via `grep 'get.env' *.cc`.)
 
