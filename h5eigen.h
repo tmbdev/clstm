@@ -39,6 +39,16 @@ struct HDF5 {
     H5::PredType pred_type(double) {
         return PredType::NATIVE_DOUBLE;
     }
+    bool exists(const char *name) {
+        try {
+            DataSet dataset = h5->openDataSet(name);
+            return true;
+        } catch (FileIException e) {
+            return false;
+        } catch (GroupIException e) {
+            return false;
+        }
+    }
     template <class T>
     void get(T &a, const char *name) {
         DataSet dataset = h5->openDataSet(name);
@@ -114,55 +124,30 @@ struct HDF5 {
         for (int i = 0; i < N; i++) a(i, 0) = data[i];
         dataset.vlenReclaim(dtype, mspace, DSetMemXferPropList::DEFAULT, vl);
     }
-    DataSet attrDataSet() {
-        const char *name = "attributes";
-        try {
-            DataSet dataset = h5->openDataSet(name);
-            return dataset;
-        } catch(...) {
-        }
-        try {
-            DSetCreatPropList plist;  // setFillValue, etc.
-            hsize_t dim[] = {1};
-            DataSpace fspace(1, dim);
-            DataSet dataset = h5->createDataSet(name, pred_type(0), fspace, plist);
-            return dataset;
-        } catch(...) {
-        }
-        throw "cannot open or create attrDataSet";
-    }
     void setAttr(string name, string value) {
-        DataSet dataset = attrDataSet();
+        Group root(h5->openGroup("/"));
         StrType strdatatype(PredType::C_S1, 256);
         DataSpace attr_dataspace = DataSpace(H5S_SCALAR);
         H5std_string buffer(value);
-        dataset.createAttribute(name, strdatatype, attr_dataspace)
-        .write(strdatatype, buffer);
+        root.createAttribute(name, strdatatype, attr_dataspace)
+            .write(strdatatype, buffer);
     }
     string getAttr(string name) {
-        DataSet dataset;
-        try {dataset = attrDataSet(); }
-        catch(FileIException e) {
-            return "";
-        }
+        Group root(h5->openGroup("/"));
         StrType strdatatype(PredType::C_S1, 256);
         DataSpace attr_dataspace = DataSpace(H5S_SCALAR);
         H5std_string buffer;
-        dataset.createAttribute(name, strdatatype, attr_dataspace)
-        .read(strdatatype, buffer);
+        root.createAttribute(name, strdatatype, attr_dataspace)
+            .read(strdatatype, buffer);
         return buffer;
     }
     void getAttrs(map<string, string> &result) {
-        DataSet dataset;
-        try {dataset = attrDataSet(); }
-        catch(FileIException e) {
-            return;
-        }
+        Group root(h5->openGroup("/"));
         StrType strdatatype(PredType::C_S1, 256);
         DataSpace attr_dataspace = DataSpace(H5S_SCALAR);
         H5std_string buffer;
-        for (int i = 0; i < dataset.getNumAttrs(); i++) {
-            Attribute a = dataset.openAttribute(i);
+        for (int i = 0; i < root.getNumAttrs(); i++) {
+            Attribute a = root.openAttribute(i);
             string key = a.getName();
             a.read(strdatatype, buffer);
             result[key] = buffer;

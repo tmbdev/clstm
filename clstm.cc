@@ -66,6 +66,7 @@ void INetwork::train(Sequence &xs, Sequence &targets) {
     forward();
     setTargets(targets);
     backward();
+    update();
 }
 
 void INetwork::ctrain(Sequence &xs, Classes &cs) {
@@ -87,6 +88,7 @@ void INetwork::ctrain(Sequence &xs, Classes &cs) {
         }
     }
     backward();
+    update();
 }
 
 void INetwork::ctrain_accelerated(Sequence &xs, Classes &cs, Float lo) {
@@ -112,6 +114,7 @@ void INetwork::ctrain_accelerated(Sequence &xs, Classes &cs, Float lo) {
         }
     }
     backward();
+    update();
 }
 
 void INetwork::cpred(Classes &preds, Sequence &xs) {
@@ -128,8 +131,8 @@ void INetwork::cpred(Classes &preds, Sequence &xs) {
 void INetwork::info(string prefix){
     string nprefix = prefix + "." + name;
     cout << nprefix << ": " << learning_rate << " " << momentum << " ";
-    cout << inputs.size() << " " << (inputs.size() > 0 ? inputs[0].size() : -1) << " ";
-    cout << outputs.size() << " " << (outputs.size() > 0 ? outputs[0].size() : -1) << endl;
+    cout << "in " << inputs.size() << " " << ninput() << " ";
+    cout << "out " << outputs.size() << " " << noutput() << endl;
     for (auto s : sub) s->info(nprefix);
 }
 
@@ -173,12 +176,10 @@ void INetwork::save(const char *fname) {
     using namespace h5eigen;
     unique_ptr<HDF5> h5(make_HDF5());
     h5->open(fname, true);
-#ifdef USE_ATTRS
-    h5->setAttr("ocropus", "0.0");
+    attributes["clstm-version"] = "1";
     for (auto &kv : attributes) {
         h5->setAttr(kv.first, kv.second);
     }
-#endif
     if(codec.size()==0) {
         codec.resize(noutput());
         for(int i=0;i<codec.size();i++) codec[i] = i;
@@ -188,6 +189,11 @@ void INetwork::save(const char *fname) {
     mycodec.resize(codec.size());
     for(int i=0; i<codec.size(); i++) mycodec[i] = codec[i];
     h5->put(mycodec, "codec");
+    if (icodec.size()>0) {
+        mycodec.resize(icodec.size());
+        for(int i=0; i<icodec.size(); i++) mycodec[i] = icodec[i];
+        h5->put(mycodec, "icodec");
+    }
 
     weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
                 if (a.mat) h5->put(*a.mat, prefix.c_str());
@@ -200,14 +206,17 @@ void INetwork::load(const char *fname) {
     using namespace h5eigen;
     unique_ptr<HDF5> h5(make_HDF5());
     h5->open(fname);
-#ifdef USE_ATTRS
     h5->getAttrs(attributes);
-#endif
 
     Vec mycodec;
     h5->get(mycodec, "codec");
     codec.resize(mycodec.size());
     for(int i=0; i<codec.size(); i++) codec[i] = mycodec[i];
+    if (h5->exists("icodec")) {
+        h5->get(mycodec, "icodec");
+        icodec.resize(mycodec.size());
+        for(int i=0; i<icodec.size(); i++) icodec[i] = mycodec[i];
+    }
 
     weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
                 if (a.mat) h5->get(*a.mat, prefix.c_str());
@@ -231,6 +240,7 @@ struct Network : INetwork {
             d_outputs[t] = delta;
         }
         backward();
+        update();
         return total;
     }
 };
@@ -255,8 +265,10 @@ inline Float sigmoid(Float x) {
 
 template <class NONLIN>
 struct Full : Network {
-    Mat W;
-    Vec w;
+    Mat W, d_W;
+    Vec w, d_w;
+    int nseq = 0;
+    int nsteps = 0;
     Full() {
         name = "full";
     }
@@ -269,6 +281,8 @@ struct Full : Network {
     void init(int no, int ni) {
         W = Mat::Random(no, ni) * 0.01;
         w = Vec::Random(no) * 0.01;
+        d_W = Mat::Zero(no, ni);
+        d_w = Vec::Zero(no);
     }
     void forward() {
         outputs.resize(inputs.size());
@@ -283,14 +297,26 @@ struct Full : Network {
             NONLIN::df(d_outputs[t], outputs[t]);
             d_inputs[t] = W.transpose() * d_outputs[t];
         }
-        if (no_update) return;
-        float lr = learning_rate;
-        if (normalization==NORM_LEN) lr /= d_outputs.size();
         for (int t = 0; t < d_outputs.size(); t++) {
-            W += lr * d_outputs[t] * inputs[t].transpose();
-            w += lr * d_outputs[t];
+            d_W += d_outputs[t] * inputs[t].transpose();
+            d_w += d_outputs[t];
         }
+        nseq += 1;
+        nsteps += d_outputs.size();
         d_outputs[0](0, 0) = NAN;
+    }
+    void update() {
+        float lr = learning_rate;
+        if (normalization==NORM_BATCH) lr /= nseq;
+        else if (normalization==NORM_LEN) lr /= nsteps;
+        else if (normalization==NORM_NONE) /* do nothing */;
+        else throw "unknown normalization";
+        W += lr * d_W;
+        w += lr * d_w;
+        nsteps = 0;
+        nseq = 0;
+        d_W *= momentum;
+        d_w *= momentum;
     }
     void weights(const string &prefix, WeightFun f) {
         f(prefix+".W", &W, (Mat*)0);
@@ -367,6 +393,8 @@ INetwork *make_ReluLayer() {
 struct SoftmaxLayer : Network {
     Mat W, d_W;
     Vec w, d_w;
+    int nsteps = 0;
+    int nseq = 0;
     SoftmaxLayer() {
         name = "softmax";
     }
@@ -379,8 +407,16 @@ struct SoftmaxLayer : Network {
     void init(int no, int ni) {
         W = Mat::Random(no, ni) * 0.01;
         w = Vec::Random(no) * 0.01;
+        clearUpdates();
+    }
+    void clearUpdates() {
+        int no = W.rows();
+        int ni = W.cols();
         d_W = Mat::Zero(no, ni);
         d_w = Vec::Zero(no);
+    }
+    void postLoad() {
+        clearUpdates();
     }
     void forward() {
         outputs.resize(inputs.size());
@@ -395,17 +431,25 @@ struct SoftmaxLayer : Network {
         for (int t = d_outputs.size()-1; t >= 0; t--) {
             d_inputs[t] = W.transpose() * d_outputs[t];
         }
+        for (int t = 0; t < d_outputs.size(); t++) {
+            d_W += d_outputs[t] * inputs[t].transpose();
+            d_w += d_outputs[t];
+        }
+        nsteps += d_outputs.size();
+        nseq += 1;
+    }
+    void update() {
+        float lr = learning_rate;
+        if (normalization==NORM_BATCH) lr /= nseq;
+        else if (normalization==NORM_LEN) lr /= nsteps;
+        else if (normalization==NORM_NONE) /* do nothing */;
+        else throw "unknown normalization";
+        W += lr * d_W;
+        w += lr * d_w;
+        nsteps = 0;
+        nseq = 0;
         d_W *= momentum;
         d_w *= momentum;
-        float lr = learning_rate;
-        if (normalization==NORM_LEN) lr /= d_outputs.size();
-        for (int t = 0; t < d_outputs.size(); t++) {
-            d_W += lr * d_outputs[t] * inputs[t].transpose();
-            d_w += lr * d_outputs[t];
-        }
-        if (no_update) return;
-        W += d_W;
-        w += d_w;
     }
     void myweights(const string &prefix, WeightFun f) {
         f(prefix+".W", &W, &d_W);
@@ -450,6 +494,10 @@ struct Stacked : Network {
         }
         d_inputs = sub[0]->d_inputs;
     }
+    void update() {
+        for (int i=0; i<sub.size(); i++)
+            sub[i]->update();
+    }
 };
 
 INetwork *make_Stacked() {
@@ -489,6 +537,9 @@ struct Reversed : Network {
         revcopy(net->d_outputs, d_outputs);
         net->backward();
         revcopy(d_inputs, net->d_inputs);
+    }
+    void update() {
+        sub[0]->update();
     }
 };
 
@@ -550,6 +601,9 @@ struct Parallel : Network {
             d_inputs[t] += net2->d_inputs[t];
         }
     }
+    void update() {
+        for (int i=0; i<sub.size(); i++) sub[i]->update();
+    }
 };
 
 INetwork *make_Parallel() {
@@ -605,6 +659,8 @@ struct LSTM : Network {
     typedef TanhNonlin H;
     Float gradient_clipping = 10.0;
     int ni, no, nf;
+    int nsteps = 0;
+    int nseq = 0;
     LSTM() {
         name = "lstm";
     }
@@ -619,6 +675,7 @@ struct LSTM : Network {
         nf = WGI.cols();
         assert(nf > no);
         ni = nf-no-1;
+        clearUpdates();
     }
     void init(int no, int ni) {
         int nf = 1+ni+no;
@@ -714,19 +771,22 @@ struct LSTM : Network {
             DWGO += goerr[t] * source[t].transpose();
             DWCI += cierr[t] * source[t].transpose();
         }
-        if (no_update) return;
-        update();
-        applyMomentum(momentum);
+        nsteps += N;
+        nseq += 1;
     }
 #undef A
     void gradient_clip(Sequence &s, Float m=1.0) {
         for (int t = 0; t < s.size(); t++) {
-            s[t] = s[t].unaryExpr([m](Float x) { return x > m ? m : x < -m ? -m : x; });
+            s[t] = s[t].unaryExpr([m](Float x)
+                                  { return x > m ? m : x < -m ? -m : x; });
         }
     }
     void update() {
         float lr = learning_rate;
-        if (normalization==NORM_LEN) lr /= d_outputs.size();
+        if (normalization==NORM_BATCH) lr /= nseq;
+        else if (normalization==NORM_LEN) lr /= nsteps;
+        else if (normalization==NORM_NONE) /* do nothing */;
+        else throw "unknown normalization";
         WGI += lr * DWGI;
         WGF += lr * DWGF;
         WGO += lr * DWGO;
@@ -734,8 +794,6 @@ struct LSTM : Network {
         WIP += lr * DWIP;
         WFP += lr * DWFP;
         WOP += lr * DWOP;
-    }
-    void applyMomentum(Float r) {
         DWGI *= momentum;
         DWGF *= momentum;
         DWGO *= momentum;
@@ -802,6 +860,10 @@ struct MLP : Network {
         l1.backward();
         d_inputs = l1.d_inputs;
     }
+    void update() {
+        l1.update();
+        l2.update();
+    }
     void weights(const string &prefix, WeightFun f) {
         l1.weights(prefix+".l1", f);
         l2.weights(prefix+".l2", f);
@@ -823,6 +885,7 @@ INetwork *make_MLP() {
 struct LSTM1 : Stacked {
     LSTM1() {
         name = "lstm1";
+        attributes["kind"] = "lstm1";
     }
     void init(int no, int nh, int ni) {
         shared_ptr<INetwork> fwd, logreg;
@@ -863,6 +926,7 @@ INetwork *make_REVLSTM1() {
 struct BIDILSTM : Stacked {
     BIDILSTM() {
         name = "bidilstm";
+        attributes["kind"] = "bidi";
     }
     void init(int no, int nh, int ni) {
         shared_ptr<INetwork> fwd, bwd, parallel, reversed, logreg;
@@ -903,6 +967,7 @@ shared_ptr<INetwork> make_fwdbwd(int nh,int ni) {
 struct BIDILSTM2 : Stacked {
     BIDILSTM2() {
         name = "bidilstm2";
+        attributes["kind"] = "bidi2";
     }
     void init(int no, int nh2, int nh, int ni) {
         shared_ptr<INetwork> parallel1, parallel2, logreg;
@@ -1033,6 +1098,50 @@ void mktargets(Sequence &seq, Classes &transcript, int ndim) {
         else seq[t](0) = 1;
     }
 }
+
+// Loading and saving networks; the logic of this is quite twisted and needs
+// to be cleaned up. However, for now it works.
+
+shared_ptr<INetwork> make_net(const string &kind) {
+    shared_ptr<INetwork> net;
+    if (kind=="bidi") {
+        net.reset(make_BIDILSTM());
+    } else if (kind=="bidi2") {
+        net.reset(make_BIDILSTM2());
+    } else if (kind=="uni") {
+        net.reset(make_LSTM1());
+    } else {
+        throw "unknown network type";
+    }
+    net->attributes["kind"] = kind;
+    return net;
+}
+
+void load_attributes(map<string, string> &attributes, const string &fname) {
+    using namespace h5eigen;
+    unique_ptr<HDF5> h5(make_HDF5());
+    h5->open(fname.c_str());
+    h5->getAttrs(attributes);
+}
+
+shared_ptr<INetwork> load_net(const string &fname) {
+    map<string, string> attributes;
+    load_attributes(attributes, fname);
+    string kind = attributes["kind"];
+    cout << "loading " << kind << endl;
+    shared_ptr<INetwork> net;
+    net = make_net(kind);
+    if (kind=="bidi2") net->init(1,1,1,1); else net->init(1,1,1); // FIXME
+    net->load(fname.c_str());
+    net->info("");
+    return net;
+}
+
+void save_net(const string &fname, shared_ptr<INetwork> net) {
+    rename(fname.c_str(), (fname+"~").c_str());
+    net->save(fname.c_str());
+}
+
 }  // namespace ocropus
 
 #ifdef LSTM_TEST

@@ -256,6 +256,7 @@ int main_seq(int argc, char **argv) {
         else net->setTargets(target_);
         stats.add(target_, net->outputs);
         net->backward();
+        net->update();
         if (report > 0 && trial%report == 0) {
             print(trial, stats.error());
         }

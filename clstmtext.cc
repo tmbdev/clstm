@@ -6,6 +6,12 @@
 #include <math.h>
 #include <Eigen/Dense>
 #include <string>
+#include <boost/locale.hpp>
+#include <sstream>
+#include <string>
+#include <fstream>
+#include <iostream>
+#include <set>
 
 #include "multidim.h"
 #include "pymulti.h"
@@ -14,13 +20,21 @@
 
 using std_string = std::string;
 #define string std_string
+using std::stoi;
+using std::to_string;
 using std::vector;
+using std::map;
+using std::make_pair;
 using std::shared_ptr;
 using std::unique_ptr;
 using std::to_string;
-using std::make_pair;
 using std::cout;
-using std::stoi;
+using std::wstring;
+using std::ifstream;
+using std::set;
+using boost::locale::conv::to_utf;
+using boost::locale::conv::from_utf;
+using boost::locale::conv::utf_to_utf;
 using namespace Eigen;
 using namespace ocropus;
 using namespace pymulti;
@@ -31,6 +45,18 @@ void assign(S &dest, T &src) {
     dest.resize_(src.dims);
     int n = dest.size();
     for (int i = 0; i < n; i++) dest.data[i] = src.data[i];
+}
+
+void assign(mdarray<int> &dest, vector<int> &src) {
+    int n = src.size();
+    dest.resize(n);
+    for (int i = 0; i < n; i++) dest[i] = src[i];
+}
+
+void assign(vector<int> &dest, mdarray<int> &src) {
+    int n = src.dim(0);
+    dest.resize(n);
+    for (int i = 0; i < n; i++) dest[i] = src[i];
 }
 
 template <class S, class T>
@@ -66,11 +92,13 @@ void assign(T &a, Sequence &seq) {
     }
 }
 
+#if 0
 void assign(Classes &classes, mdarray<int> &transcript) {
     classes.resize(transcript.size());
     for (int i = 0; i < transcript.size(); i++)
         classes[i] = transcript(i);
 }
+#endif
 
 template <class A, class T>
 int indexof(A &a, const T &t) {
@@ -79,6 +107,93 @@ int indexof(A &a, const T &t) {
     return -1;
 }
 
+}
+
+struct Sample {
+    wstring in,out;
+};
+
+wstring utf32(string s) {
+    return to_utf<wchar_t>(s, "UTF-8");
+}
+
+string utf8(wstring s) {
+    return utf_to_utf<char>(s);
+}
+
+void read_samples(vector<Sample> &samples,const string &fname) {
+    ifstream stream(fname);
+    string line;
+    wstring in,out;;
+    samples.clear();
+    while (getline(stream, line)) {
+        int where = line.find("\t");
+        if (where<0) throw "no tab found in input line";
+        in = utf32(line.substr(0,where));
+        out = utf32(line.substr(where+1));
+        if (in.size()==0) continue;
+        if (out.size()==0) continue;
+        samples.push_back(Sample{in, out});
+    }
+}
+
+void get_codec(mdarray<int> &codec, vector<Sample> &samples, wstring Sample::* p) {
+    set<int> codes;
+    codes.insert(0);
+    for (auto e : samples) {
+        for (auto c : e.*p) codes.insert(int(c));
+    }
+    int n = codes.size();
+    codec.resize(n);
+    int i = 0;
+    for (auto c : codes) codec[i++] = c;
+    assert(i==n);
+}
+
+void encoder_of_codec(map<wchar_t,int> &encoder, mdarray<int> &codec) {
+    for (int i=0; i<codec.dim(0); i++) {
+        encoder.insert(make_pair(wchar_t(codec[i]), i));
+    }
+}
+
+void sequence_of_wstring(Sequence &seq, wstring &s, map<wchar_t,int> &encoder, int d, int neps) {
+    seq.clear();
+    for(int i=0;i<neps;i++) seq.push_back(Vec::Zero(d));
+    for(int pos=0; pos<s.size(); pos++) {
+        int c = encoder[s[pos]];
+        Vec v = Vec::Zero(d);
+        v[c] = 1.0;
+        seq.push_back(v);
+        for(int i=0;i<neps;i++) seq.push_back(Vec::Zero(d));
+    }
+}
+
+void classes_of_wstring(Classes &classes, wstring &s, map<wchar_t,int> &encoder) {
+    classes.clear();
+    for(int pos=0; pos<s.size(); pos++) {
+        int c = encoder[s[pos]];
+        classes.push_back(c);
+    }
+}
+
+wstring wstring_of_classes(Classes &classes, mdarray<int> &codec) {
+    wstring s;
+    for(int pos=0; pos<classes.size(); pos++) {
+        s.push_back(wchar_t(codec[classes[pos]]));
+    }
+    return s;
+}
+
+string utfdecode(Classes &classes, mdarray<int> &codec) {
+    // FIXME: not utf yet
+    string result;
+    for(int i=0; i<classes.size(); i++) {
+        int c = codec[classes[i]];
+        if (c==0) continue;
+        if (c>126) c = int('~');
+        result.push_back(char(c));
+    }
+    return result;
 }
 
 void debug_decode(Sequence &outputs, Sequence &aligned) {
@@ -122,53 +237,57 @@ bool anynan(mdarray<float> &a) {
     return false;
 }
 
-void encoder_of_codec(map<wchar_t,int> &encoder, mdarray<int> &codec) {
-    for (int i=0; i<codec.dim(0); i++) {
-        encoder.insert(make_pair(wchar_t(codec[i]), i));
+string string_of_wstring(const wstring &s) {
+    string result;
+    for (auto c : s) {
+        if (int(c)>=127) result.push_back('~');
+        else result.push_back(char(int(c)));
     }
+    return result;
 }
 
-double error_rate(shared_ptr<INetwork> net,const string &testset) {
+double error_rate(shared_ptr<INetwork> net,const string &testset, map<wchar_t,int> &iencoder, mdarray<int> &codec, int nclasses, int neps) {
     int maxeval = getienv("maxeval", 1000000000);
-    shared_ptr<IOcrDataset> dataset(make_Dataset(testset));
+    vector<Sample> samples;
+    read_samples(samples, testset);
 
-    mdarray<float> image;
-    mdarray<int> transcript;
-    Classes classes;
-
+    int N = fmin(samples.size(), maxeval);
+    double errs = 0.0;
     double total = 0;
-    double errs = 0;
-
-    int N = min(dataset->samples(), maxeval);
 
     for (int sample = 0; sample < N; sample++) {
-        dataset->image(image, sample);
-        dataset->transcript(transcript, sample);
-        assign(net->inputs, image);
+        sequence_of_wstring(net->inputs, samples[sample].in, iencoder, nclasses, neps);
+        mdarray<float> image;
+        assign(image, net->inputs);
         net->forward();
+        mdarray<float> outputs;
+        assign(outputs, net->outputs);
         Classes output_classes;
         trivial_decode(output_classes, net->outputs);
-        string gt = dataset->to_string(transcript);;
-        string out = dataset->to_string(output_classes);
-        total += gt.size();
+        wstring gt = samples[sample].out;
+        wstring out = wstring_of_classes(output_classes, codec);
         double err = levenshtein(gt, out);
         errs += err;
     }
     return errs/total;
 }
 
-int main_ocr(int argc, char **argv) {
+int main_train(int argc, char **argv) {
     int randseed = getienv("seed", int(fmod(now()*1e6, 1e9)));
     srand48(randseed);
 
-    const char *h5file = argc > 1 ? argv[1] : "uw3-dew.h5";
-    string load_name = getsenv("load", "");
+    const char *textfile = argc > 1 ? argv[1] : "training.txt";
+    vector<Sample> samples;
+    read_samples(samples, textfile);
+    print("got", samples.size(), "lines");
+    int nsamples = samples.size();
 
+    string load_name = getsenv("load", "");
     int save_every = getienv("save_every", 0);
     string save_name = getsenv("save_name", "");
     if (save_every>=0 && save_name=="") throw "must give save_name=";
     if (save_every>0 && save_name.find('%')==string::npos)
-        save_name += "-%08d";
+        save_name += "-%08d.h5";
     else
         save_name += ".h5";
     string after_save = getsenv("after_save", "");
@@ -183,7 +302,7 @@ int main_ocr(int argc, char **argv) {
     int report_every = getienv("report_every", 1);
     bool randomize = getienv("randomize", 1);
     string lrnorm = getsenv("lrnorm", "batch");
-    string dewarp = getsenv("dewarp", "none");
+    int neps = int(getuenv("neps", 3));
     string lstm_type = getsenv("lstm", "bidi");
 
     string testset = getsenv("testset", "");
@@ -208,40 +327,45 @@ int main_ocr(int argc, char **argv) {
         py->eval("matplotlib.rcParams.update({'font.size':7})");
     }
 
-    shared_ptr<IOcrDataset> dataset;
-    dataset.reset(make_Dataset(h5file));
-    print("dataset", dataset->samples(), dataset->dim(), dewarp);
-
     shared_ptr<INetwork> net;
-    int nclasses = -1;
-    int dim = dataset->dim();
+
+    mdarray<int> codec, icodec;
+    int nclasses = -1, iclasses = -1;
     if (load_name != "") {
         net = load_net(load_name);
-        nclasses = net->codec.size();
+        assign(icodec, net->icodec);
+        assign(codec, net->codec);
+        nclasses = codec.dim(0);
+        iclasses = icodec.dim(0);
+        neps = stoi(net->attributes["neps"]);
     } else {
-        vector<int> codec;
-        dataset->getCodec(codec);
-        nclasses = codec.size();
+        get_codec(icodec, samples, &Sample::in);
+        get_codec(codec, samples, &Sample::out);
+        nclasses = codec.dim(0);
+        iclasses = icodec.dim(0);
         net = make_net(lstm_type);
         if (lstm_type=="bidi2") {
-            net->init(nclasses, nhidden2, nhidden, dim);
-            print("init-bidi2", nclasses, nhidden2, nhidden, dim);
+            net->init(nclasses, nhidden2, nhidden, iclasses);
+            print("init-bidi2", nclasses, nhidden2, nhidden, iclasses);
         } else {
-            net->init(nclasses, nhidden, dim);
-            print("init", nclasses, nhidden, dim);
+            net->init(nclasses, nhidden, iclasses);
+            print("init", nclasses, nhidden, iclasses);
         }
+        assign(net->icodec, icodec);
+        assign(net->codec, codec);
+        net->attributes["neps"] = to_string(int(neps));
     }
     net->setLearningRate(lrate, momentum);
-    dataset->getCodec(net->codec);
-    // if (load_name != "") net->load(load_name.c_str());
+    map<wchar_t, int> encoder, iencoder;
+    encoder_of_codec(iencoder, icodec);
+    encoder_of_codec(encoder, codec);
+    print("codec", codec.dim(0), "icodec", icodec.dim(0));
     INetwork::Normalization norm = INetwork::NORM_DFLT;
     if (lrnorm=="len") norm = INetwork::NORM_LEN;
     if (lrnorm=="none") norm = INetwork::NORM_NONE;
     if (norm!=INetwork::NORM_DFLT) print("nonstandard lrnorm: ", lrnorm);
     net->networks("", [norm](string s, INetwork *net) {net->normalization = norm;});
 
-    mdarray<float> raw_image, image, outputs, aligned;
-    mdarray<int> transcript;
     Sequence targets;
     Sequence saligned;
     Classes classes;
@@ -253,8 +377,8 @@ int main_ocr(int argc, char **argv) {
     if (start>0) print("start", start);
     for (int trial = start; trial < ntrain; trial++) {
         bool report = (report_every>0) && (trial % report_every == 0);
-        int sample = trial % dataset->samples();
-        if (randomize) sample = lrand48() % dataset->samples();
+        int sample = trial % nsamples;
+        if (randomize) sample = lrand48() % nsamples;
         if (trial > 0 && save_every > 0 && trial%save_every == 0) {
             char fname[4096];
             sprintf(fname, save_name.c_str(), trial);
@@ -264,7 +388,7 @@ int main_ocr(int argc, char **argv) {
             if (after_save!="") system(after_save.c_str());
         }
         if (trial > 0 && test_every > 0 && trial%test_every == 0 && testset != "") {
-            double erate = error_rate(net, testset);
+            double erate = error_rate(net, testset, iencoder, codec, nclasses, neps);
             print("TESTERR", now()-start_time, save_name, trial, erate,
                   "lrate", lrate, "hidden", nhidden, nhidden2,
                   "batch", batch, "momentum", momentum);
@@ -278,20 +402,16 @@ int main_ocr(int argc, char **argv) {
             }
             if (after_test!="") system(after_test.c_str());
         }
-        dataset->image(image, sample);
-        dataset->transcript(transcript, sample);
-        if (report) {
-            print(trial, sample,
-                  "dim", image.dim(0), image.dim(1),
-                  "time", now()-start_time,
-                  "lrate", lrate, "hidden", nhidden, nhidden2);
-            print("TRU:", "'"+dataset->to_string(transcript)+"'");
-        }
-        assign(net->inputs, image);
+        sequence_of_wstring(net->inputs, samples[sample].in, iencoder, iclasses, neps);
+        mdarray<float> image;
+        assign(image, net->inputs);
+        Classes transcript;
+        classes_of_wstring(transcript, samples[sample].out, encoder);
         net->forward();
-        assign(classes, transcript);
+        classes = transcript;
+        mdarray<float> outputs;
         assign(outputs, net->outputs);
-        mktargets(targets, classes, dataset->classes());
+        mktargets(targets, classes, nclasses);
         ctc_align_targets(saligned, net->outputs, targets);
         assert(saligned.size() == net->outputs.size());
         net->d_outputs.resize(net->outputs.size());
@@ -299,6 +419,7 @@ int main_ocr(int argc, char **argv) {
             net->d_outputs[t] = saligned[t] - net->outputs[t];
         net->backward();
         if (trial%batch==0) net->update();
+        mdarray<float> aligned;
         assign(aligned, saligned);
         if (anynan(outputs) || anynan(aligned)) {
             print("got nan");
@@ -307,12 +428,16 @@ int main_ocr(int argc, char **argv) {
         Classes output_classes, aligned_classes;
         trivial_decode(output_classes, net->outputs);
         trivial_decode(aligned_classes, saligned);
-        string gt = dataset->to_string(transcript);;
-        string out = dataset->to_string(output_classes);
-        string aln = dataset->to_string(aligned_classes);
+        wstring gt = wstring_of_classes(transcript, codec);
+        wstring out = wstring_of_classes(output_classes, codec);
+        wstring aln = wstring_of_classes(aligned_classes, codec);
         if (report) {
-            print("OUT:", "'"+out+"'");
-            print("ALN:", "'"+aln+"'");
+            wstring s = samples[sample].in;
+            print("trial", trial);
+            print("INP:", "'"+utf8(s)+"'");
+            print("TRU:", "'"+utf8(gt)+"'");
+            print("OUT:", "'"+utf8(out)+"'");
+            print("ALN:", "'"+utf8(aln)+"'");
             print(levenshtein(gt,out));
         }
 
@@ -349,109 +474,45 @@ int main_ocr(int argc, char **argv) {
     return 0;
 }
 
-int main_eval(int argc, char **argv) {
-    const char *h5file = argc > 1 ? argv[1] : "uw3-dew-test.h5";
-    string mode = getsenv("mode","errs");
+int main_filter(int argc, char **argv) {
+    if (argc!=2) throw "give text file as an argument";
+    const char *fname = argv[1];
     string load_name = getsenv("load", "");
-    shared_ptr<IOcrDataset> dataset(make_Dataset(h5file));
-    shared_ptr<INetwork> net(make_BIDILSTM());
-    int nhidden = 17;
-    net->init(dataset->classes(), nhidden, dataset->dim());
-    if(load_name=="") throw "must give load=";
-    net->load(load_name.c_str());
+    if (load_name=="") throw "must give load= parameter";
+    shared_ptr<INetwork> net;
+    net = load_net(load_name);
+    int neps = stoi(net->attributes["neps"]);
+    mdarray<int> codec, icodec;
+    assign(icodec, net->icodec);
+    assign(codec, net->codec);
+    int nclasses = codec.dim(0), iclasses = icodec.dim(0);
+    map<wchar_t, int> encoder, iencoder;
+    encoder_of_codec(iencoder, icodec);
+    encoder_of_codec(encoder, codec);
+    dprint("codec", codec.dim(0), "icodec", icodec.dim(0));
 
-    mdarray<float> image;
-    mdarray<int> transcript;
-    Classes classes;
-
-    double total = 0;
-    double errs = 0;
-
-    for (int sample = 0; sample < dataset->samples(); sample++) {
-        dataset->image(image, sample);
-        dataset->transcript(transcript, sample);
-        assign(net->inputs, image);
+    string line;
+    wstring in,out;;
+    ifstream stream(fname);
+    while (getline(stream, line)) {
+        in = utf32(line);
+        sequence_of_wstring(net->inputs, in, iencoder, iclasses, neps);
         net->forward();
         Classes output_classes;
         trivial_decode(output_classes, net->outputs);
-        string gt = dataset->to_string(transcript);;
-        string out = dataset->to_string(output_classes);
-        total += gt.size();
-        double err = levenshtein(gt,out);
-        errs += err;
-        if  (mode=="quiet") {
-            // do nothing
-        } else if(mode=="errs") {
-            print(to_string(int(err))+"\t"+out);
-        } else if(mode=="text") {
-            print(to_string(sample)+"\t"+out);
-        } else if(mode=="full") {
-            cout << int(err) << "\t";
-            cout << int(sample) << "\t";
-            cout << out << "\t";
-            cout << gt << "\n";
-        }
-        cout.flush();
+        wstring out = wstring_of_classes(output_classes, codec);
+        print(utf8(out));
     }
-    print("errs",errs,"total",total,"rate",errs*100.0/total);
-    cout.flush();
-    return 0;
 }
 
-int main_dump(int argc, char **argv) {
-    const char *h5file = argc > 1 ? argv[1] : "uw3-dew-test.h5";
-    shared_ptr<IOcrDataset> dataset(make_Dataset(h5file));
-    for (int sample = 0; sample < dataset->samples(); sample++) {
-        mdarray<int> transcript;
-        dataset->transcript(transcript, sample);
-        string gt = dataset->to_string(transcript);;
-        print(to_string(sample)+"\t"+gt);
-        cout.flush();
-    }
-    return 0;
-}
+const char *usage = /*program+*/ R"(training.txt
 
-int main_testdewarp(int argc, char **argv) {
-    int randseed = getienv("seed", int(fmod(now()*1e6, 1e9)));
-    srand48(randseed);
-    if (argc!=2) throw "usage: ... image.png";
-    mdarray<unsigned char> raw;
-    mdarray<float> image, dewarped;
-    read_png(raw, argv[1]);
-    print("raw",raw.dim(0), raw.dim(1));
-    image.resize(raw.dim(0),raw.dim(1));
-    for(int i=0;i<raw.dim(0);i++) {
-        for(int j=0;j<raw.dim(1);j++) {
-            int jj = raw.dim(1)-j-1;
-            if(raw.rank()==2) image(i,jj) = 1.0-raw(i,j)/255.0;
-            else image(i,jj) = 1.0-raw(i,j,0)/255.0;
-        }
-    }
-    PyServer *py = new PyServer();
-    py->open();
-    unique_ptr<INormalizer> normalizer;
-    normalizer.reset(make_CenterNormalizer());
-    normalizer->target_height = int(getrenv("target_height",48));
-    normalizer->getparams(true);
-    // normalizer->setPyServer(py);
-    py->eval("ion()");
-    py->eval("clf()");
-    normalizer->measure(image);
-    py->eval("subplot(211)");
-    py->imshowT(image, "cmap=cm.gray,interpolation='nearest'");
-    py->eval("subplot(212)");
-    normalizer->normalize(dewarped, image);
-    py->imshowT(dewarped, "cmap=cm.gray,interpolation='nearest'");
-    return 0;
-}
+training.txt is a text file consisting of lines of the form:
 
-const char *usage = /*program+*/ R"(data.h5
+input\toutput\n
 
-data.h5 is an HDF5 file containing:
+UTF-8 encoding is assumed.
 
-float images(N,*): text line images (or sequences of vectors)
-int images_dims(N,2): shape of the images
-int transcripts(N,*): corresponding transcripts
 )";
 
 int main(int argc, char **argv) {
@@ -461,17 +522,10 @@ int main(int argc, char **argv) {
     }
     try {
         string mode = getsenv("mode", "train");
-        if (getienv("eval", 0)) { // for old scripts
-            return main_eval(argc, argv);
-        }
-        if (mode=="dump") {
-            return main_dump(argc, argv);
-        } else if (mode=="train") {
-            return main_ocr(argc, argv);
-        } else if (mode=="testdewarp") {
-            return main_testdewarp(argc, argv);
-        } else {
-            return main_eval(argc, argv);
+        if (mode=="train") {
+            return main_train(argc, argv);
+        } else if (mode=="filter") {
+            return main_filter(argc, argv);
         }
     } catch(const char *msg) {
         print("EXCEPTION", msg);

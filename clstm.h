@@ -75,11 +75,14 @@ struct INetwork {
     // Learning rate and momentum used for training.
     Float learning_rate = 1e-4;
     Float momentum = 0.9;
-    enum Normalization : int { NORM_DFLT, NORM_LEN } normalization;
+    enum Normalization : int {
+        NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
+    } normalization;
 
     // Data used for loading and saving networks; these
     // are generally only meaningful for the toplevel network.
     vector<int> codec;
+    vector<int> icodec;
     map<string, string> attributes;
 
     // Parameters specific to softmax.
@@ -105,6 +108,7 @@ struct INetwork {
     // of activations.
     virtual void forward() = 0;
     virtual void backward() = 0;
+    virtual void update() = 0;
 
     // Expected number of input/output features.
     virtual int ninput() { return -999999; }
@@ -177,6 +181,11 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets
 void mktargets(Sequence &seq, Classes &targets, int ndim);
 
 extern Mat debugmat;
+
+void load_attributes(map<string, string> &attrs, const string &file);
+shared_ptr<INetwork> make_net(const string &kind);
+shared_ptr<INetwork> load_net(const string &file);
+void save_net(const string &file, shared_ptr<INetwork> net);
 
 }
 
