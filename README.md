@@ -1,5 +1,7 @@
 # clstm
 
+[![Join the chat at https://gitter.im/tmbdev/clstm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tmbdev/clstm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A small C++ implementation of LSTM networks, focused on OCR.
 The only essential external dependencies are Eigen and STL.
 
