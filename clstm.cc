@@ -21,111 +21,158 @@ using Eigen::Ref;
 bool no_update = false;
 bool verbose = false;
 
-void INetwork::setInputs(Sequence &inputs) {
-    this->inputs.resize(inputs.size());
-    for (int t = 0; t < this->inputs.size(); t++)
-        this->inputs[t] = inputs[t];
+void set_inputs(INetwork *net,Sequence &inputs) {
+    net->inputs.resize(inputs.size());
+    for (int t = 0; t < net->inputs.size(); t++)
+        net->inputs[t] = inputs[t];
 }
-
-void INetwork::setTargetsAccelerated(Sequence &targets) {
+void set_targets(INetwork *net,Sequence &targets) {
+    int N = net->outputs.size();
+    assert(N == targets.size());
+    net->d_outputs.resize(N);
+    for (int t = 0; t < N; t++)
+        net->d_outputs[t] = targets[t] - net->outputs[t];
+}
+void set_targets_accelerated(INetwork *net,Sequence &targets) {
     Float lo = 1e-5;
-    assert(outputs.size() == targets.size());
-    d_outputs.resize(outputs.size());
-    for (int t = 0; t < outputs.size(); t++) {
-        d_outputs[t] = - outputs[t];
-        for (int i = 0; i < targets[t].size(); i++) {
-            // only allow binary classification
-            assert(fabs(targets[t][i]-0)<1e-5 || fabs(targets[t][i]-1)<1e-5);
-            if (targets[t][i] > 0.5) {
-                d_outputs[t][i] = 1.0/fmax(lo, outputs[t][i]);
+    assert(net->outputs.size() == targets.size());
+    int N = net->outputs.size();
+    net->d_outputs.resize(N);
+    for (int t = 0; t < N; t++) {
+        net->d_outputs[t] = - net->outputs[t];
+        for (int i = 0; i < targets[t].rows(); i++) {
+            for (int b=0; b < targets[t].cols(); b++) {
+                // only allow binary classification
+                assert(fabs(targets[t](i,b)-0)<1e-5 || fabs(targets[t](i,b)-1)<1e-5);
+                if (targets[t](i,b) > 0.5) {
+                    net->d_outputs[t](i,b) = 1.0/fmax(lo, net->outputs[t](i,b));
+                }
             }
         }
     }
 }
-
-void INetwork::setTargets(Sequence &targets) {
-    assert(outputs.size() == targets.size());
-    d_outputs.resize(outputs.size());
-    for (int t = 0; t < outputs.size(); t++)
-        d_outputs[t] = targets[t] - outputs[t];
-}
-
-void INetwork::setClasses(Classes &classes) {
-    assert(outputs.size() == classes.size());
-    d_outputs.resize(outputs.size());
-    for (int t = 0; t < outputs.size(); t++) {
-        d_outputs[t] = -outputs[t];
-        d_outputs[t](classes[t]) += 1;
+void set_classes(INetwork *net,Classes &classes) {
+    int N = net->outputs.size();
+    assert(N == classes.size());
+    net->d_outputs.resize(N);
+    for (int t = 0; t < N; t++) {
+        net->d_outputs[t] = -net->outputs[t];
+        net->d_outputs[t](classes[t]) += 1;
     }
 }
-
-void INetwork::train(Sequence &xs, Sequence &targets) {
+void train(INetwork *net,Sequence &xs, Sequence &targets) {
     assert(xs.size() > 0);
     assert(xs.size() == targets.size());
-    inputs = xs;
-    forward();
-    setTargets(targets);
-    backward();
-    update();
+    net->inputs = xs;
+    net->forward();
+    set_targets(net, targets);
+    net->backward();
+    net->update();
 }
-
-void INetwork::ctrain(Sequence &xs, Classes &cs) {
-    inputs = xs;
-    forward();
-    int len = outputs.size();
+void ctrain(INetwork *net,Sequence &xs, Classes &cs) {
+    net->inputs = xs;
+    net->forward();
+    int len = net->outputs.size();
     assert(len > 0);
-    int N = outputs[0].size();
-    assert(N > 0);
-    d_outputs.resize(len);
-    if (N == 1) {
+    int dim = net->outputs[0].size();
+    assert(dim > 0);
+    net->d_outputs.resize(len);
+    if (dim == 1) {
         for (int t = 0; t < len; t++)
-            d_outputs[t](0) = cs[t] ? 1.0-outputs[t](0) : -outputs[t](0);
+            net->d_outputs[t](0) = cs[t] ?
+                1.0-net->outputs[t](0) : -net->outputs[t](0);
     } else {
         for (int t = 0; t < len; t++) {
-            d_outputs[t] = -outputs[t];
+            net->d_outputs[t] = -net->outputs[t];
             int c = cs[t];
-            d_outputs[t](c) = 1-outputs[t](c);
+            net->d_outputs[t](c) = 1-net->outputs[t](c);
         }
     }
-    backward();
-    update();
+    net->backward();
+    net->update();
 }
 
-void INetwork::ctrain_accelerated(Sequence &xs, Classes &cs, Float lo) {
-    inputs = xs;
-    forward();
-    int len = outputs.size();
+void ctrain_accelerated(INetwork *net,Sequence &xs, Classes &cs, Float lo) {
+    net->inputs = xs;
+    net->forward();
+    int len = net->outputs.size();
     assert(len > 0);
-    int N = outputs[0].size();
-    assert(N > 0);
-    d_outputs.resize(len);
-    if (N == 1) {
+    int dim = net->outputs[0].size();
+    assert(dim > 0);
+    net->d_outputs.resize(len);
+    if (dim == 1) {
         for (int t = 0; t < len; t++) {
             if (cs[t] == 0)
-                d_outputs[t](0) = -1.0/fmax(lo, 1.0-outputs[t](0));
+                net->d_outputs[t](0) = -1.0/fmax(lo, 1.0-net->outputs[t](0));
             else
-                d_outputs[t](0) = 1.0/fmax(lo, outputs[t](0));
+                net->d_outputs[t](0) = 1.0/fmax(lo, net->outputs[t](0));
         }
     } else {
         for (int t = 0; t < len; t++) {
-            d_outputs[t] = -outputs[t];
+            net->d_outputs[t] = -net->outputs[t];
             int c = cs[t];
-            d_outputs[t](c) = 1.0/fmax(lo, outputs[t](c));
+            net->d_outputs[t](c) = 1.0/fmax(lo, net->outputs[t](c));
         }
     }
-    backward();
-    update();
+    net->backward();
+    net->update();
 }
 
-void INetwork::cpred(Classes &preds, Sequence &xs) {
-    inputs = xs;
-    preds.resize(xs.size());
-    forward();
-    for (int t = 0; t < outputs.size(); t++) {
+void cpred(INetwork *net,Classes &preds, Sequence &xs) {
+    int N = xs.size();
+    assert(xs[0].cols()==0);
+    net->inputs = xs;
+    preds.resize(N);
+    net->forward();
+    assert(net->outputs.size()==N);
+    for (int t = 0; t < N; t++) {
         int index = -1;
-        outputs[t].maxCoeff(&index);
+        net->outputs[t].col(0).maxCoeff(&index);
         preds[t] = index;
     }
+}
+
+void INetwork::makeEncoders() {
+    encoder.reset(new map<int,int>());
+    for (int i=0; i<codec.size(); i++) {
+        encoder->insert(make_pair(codec[i], i));
+    }
+    iencoder.reset(new map<int,int>());
+    for (int i=0; i<icodec.size(); i++) {
+        iencoder->insert(make_pair(icodec[i], i));
+    }
+}
+
+void INetwork::encode(Classes &classes, std::wstring &s) {
+    if (!encoder) makeEncoders();
+    classes.clear();
+    for(int pos=0; pos<s.size(); pos++) {
+        unsigned c = s[pos];
+        assert(encoder->count(c)>0);
+        c = (*encoder)[c];
+        assert(c!=0);
+        classes.push_back(c);
+    }
+}
+void INetwork::iencode(Classes &classes, std::wstring &s) {
+    if (!iencoder) makeEncoders();
+    classes.clear();
+    for(int pos=0; pos<s.size(); pos++) {
+        int c = (*iencoder)[int(s[pos])];
+        classes.push_back(c);
+    }
+}
+std::wstring INetwork::decode(Classes &classes) {
+    std::wstring s;
+    for (int i=0; i<classes.size(); i++)
+        s.push_back(wchar_t(codec[classes[i]]));
+    return s;
+}
+std::wstring INetwork::idecode(Classes &classes) {
+    std::wstring s;
+    for (int i=0; i<classes.size(); i++)
+        s.push_back(wchar_t(icodec[classes[i]]));
+    return s;
 }
 
 void INetwork::info(string prefix){
@@ -172,62 +219,6 @@ Sequence *INetwork::getState(string name) {
     return result;
 }
 
-void INetwork::save(const char *fname) {
-    using namespace h5eigen;
-    unique_ptr<HDF5> h5(make_HDF5());
-    h5->open(fname, true);
-    attributes["clstm-version"] = "1";
-    for (auto &kv : attributes) {
-        h5->setAttr(kv.first, kv.second);
-    }
-    if(codec.size()==0) {
-        codec.resize(noutput());
-        for(int i=0;i<codec.size();i++) codec[i] = i;
-    }
-
-    Vec mycodec;
-    mycodec.resize(codec.size());
-    for(int i=0; i<codec.size(); i++) mycodec[i] = codec[i];
-    h5->put(mycodec, "codec");
-    if (icodec.size()>0) {
-        mycodec.resize(icodec.size());
-        for(int i=0; i<icodec.size(); i++) mycodec[i] = icodec[i];
-        h5->put(mycodec, "icodec");
-    }
-
-    weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
-                if (a.mat) h5->put(*a.mat, prefix.c_str());
-                else if (a.vec) h5->put(*a.vec, prefix.c_str());
-                else throw "oops (save type)";
-            });
-}
-
-void INetwork::load(const char *fname) {
-    using namespace h5eigen;
-    unique_ptr<HDF5> h5(make_HDF5());
-    h5->open(fname);
-    h5->getAttrs(attributes);
-
-    Vec mycodec;
-    h5->get(mycodec, "codec");
-    codec.resize(mycodec.size());
-    for(int i=0; i<codec.size(); i++) codec[i] = mycodec[i];
-    if (h5->exists("icodec")) {
-        h5->get(mycodec, "icodec");
-        icodec.resize(mycodec.size());
-        for(int i=0; i<icodec.size(); i++) icodec[i] = mycodec[i];
-    }
-
-    weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
-                if (a.mat) h5->get(*a.mat, prefix.c_str());
-                else if (a.vec) h5->get1d(*a.vec, prefix.c_str());
-                else throw "oops (load type)";
-            });
-    networks("", [] (string s, INetwork *net) {
-                 net->postLoad();
-             });
-}
-
 struct Network : INetwork {
     Float error2(Sequence &xs, Sequence &targets) {
         inputs = xs;
@@ -270,7 +261,8 @@ struct Full : Network {
     int nseq = 0;
     int nsteps = 0;
     Full() {
-        name = "full";
+        name = "full_";
+        name += NONLIN::kind;
     }
     int noutput() {
         return W.rows();
@@ -287,7 +279,9 @@ struct Full : Network {
     void forward() {
         outputs.resize(inputs.size());
         for (int t = 0; t < inputs.size(); t++) {
-            outputs[t] = (W * inputs[t] + w);
+            int bs = outputs[t].cols();
+            outputs[t] = W * inputs[t];
+            for(int b = 0; b< bs; b++) outputs[t].col(b) += w;
             NONLIN::f(outputs[t]);
         }
     }
@@ -298,8 +292,9 @@ struct Full : Network {
             d_inputs[t] = W.transpose() * d_outputs[t];
         }
         for (int t = 0; t < d_outputs.size(); t++) {
+            int bs = outputs[t].cols();
             d_W += d_outputs[t] * inputs[t].transpose();
-            d_w += d_outputs[t];
+            for (int b=0; b<bs; b++) d_w += d_outputs[t].col(b);
         }
         nseq += 1;
         nsteps += d_outputs.size();
@@ -318,13 +313,14 @@ struct Full : Network {
         d_W *= momentum;
         d_w *= momentum;
     }
-    void weights(const string &prefix, WeightFun f) {
+    void myweights(const string &prefix, WeightFun f) {
         f(prefix+".W", &W, (Mat*)0);
         f(prefix+".w", &w, (Vec*)0);
     }
 };
 
 struct NoNonlin {
+    static constexpr const char *kind = "linear";
     template <class T>
     static void f(T &x) {
     }
@@ -334,6 +330,7 @@ struct NoNonlin {
 };
 
 struct SigmoidNonlin {
+    static constexpr const char *kind = "sigmoid";
     template <class T>
     static void f(T &x) {
         x = x.unaryExpr(ptr_fun(sigmoid));
@@ -348,6 +345,7 @@ Float tanh_(Float x) {
     return tanh(x);
 }
 struct TanhNonlin {
+    static constexpr const char *kind = "tanh";
     template <class T>
     static void f(T &x) {
         x = x.unaryExpr(ptr_fun(tanh_));
@@ -359,6 +357,7 @@ struct TanhNonlin {
 };
 
 struct ReluNonlin {
+    static constexpr const char *kind = "relu";
     template <class T>
     static void f(T &x) {
         x = x.unaryExpr([] (Float x) { return fmax(0, x); });
@@ -369,17 +368,30 @@ struct ReluNonlin {
     }
 };
 
+struct ReluDecNonlin {
+    static constexpr const char *kind = "reludec";
+    template <class T>
+    static void f(T &x) {
+        x = x.unaryExpr([] (Float x) { return x>0?x:0.1*x; });
+    }
+    template <class T, class U>
+    static void df(T &dx, U &y) {
+        dx.array() *= y.unaryExpr([] (Float x) { return x>0?1.0:0.1; }).array();
+    }
+};
+
 typedef Full<NoNonlin> LinearLayer;
-typedef Full<SigmoidNonlin> LogregLayer;
+typedef Full<SigmoidNonlin> SigmoidLayer;
 typedef Full<TanhNonlin> TanhLayer;
 typedef Full<ReluNonlin> ReluLayer;
+typedef Full<ReluDecNonlin> ReluDecLayer;
 
 INetwork *make_LinearLayer() {
     return new LinearLayer();
 }
 
-INetwork *make_LogregLayer() {
-    return new LogregLayer();
+INetwork *make_SigmoidLayer() {
+    return new SigmoidLayer();
 }
 
 INetwork *make_TanhLayer() {
@@ -417,23 +429,30 @@ struct SoftmaxLayer : Network {
     }
     void postLoad() {
         clearUpdates();
+        makeEncoders();
     }
     void forward() {
         outputs.resize(inputs.size());
+        int no = W.rows(), bs = inputs[0].cols();
         for (int t = 0; t < inputs.size(); t++) {
-            outputs[t] = (W * inputs[t] + w).array().unaryExpr(ptr_fun(limexp));
-            Float total = fmax(outputs[t].sum(), 1e-9);
-            outputs[t] /= total;
+            outputs[t].resize(no,bs);
+            for (int b=0; b < outputs[t].cols(); b++) {
+                outputs[t].col(b) = (W * inputs[t].col(b) + w).array().unaryExpr(ptr_fun(limexp));
+                Float total = fmax(outputs[t].col(b).sum(), 1e-9);
+                outputs[t].col(b) /= total;
+            }
         }
     }
     void backward() {
         d_inputs.resize(d_outputs.size());
+        int no = W.rows(), ni = W.cols(), bs = d_outputs[0].cols();
         for (int t = d_outputs.size()-1; t >= 0; t--) {
             d_inputs[t] = W.transpose() * d_outputs[t];
         }
         for (int t = 0; t < d_outputs.size(); t++) {
             d_W += d_outputs[t] * inputs[t].transpose();
-            d_w += d_outputs[t];
+            int bs = d_outputs[t].cols();
+            for (int b=0; b<bs; b++) d_w += d_outputs[t].col(b);
         }
         nsteps += d_outputs.size();
         nseq += 1;
@@ -568,13 +587,15 @@ struct Parallel : Network {
         int N = inputs.size();
         assert(net1->outputs.size() == N);
         assert(net2->outputs.size() == N);
-        int n1 = net1->outputs[0].size();
-        int n2 = net2->outputs[0].size();
+        int n1 = net1->outputs[0].rows();
+        int n2 = net2->outputs[0].rows();
         outputs.resize(N);
+        int bs = net1->outputs[0].cols();
+        assert(bs==net2->outputs[0].cols());
         for (int t = 0; t < N; t++) {
-            outputs[t].resize(n1+n2);
-            outputs[t].segment(0, n1) = net1->outputs[t];
-            outputs[t].segment(n1, n2) = net2->outputs[t];
+            outputs[t].resize(n1+n2,bs);
+            outputs[t].block(0, 0, n1, bs) = net1->outputs[t];
+            outputs[t].block(n1, 0, n2, bs) = net2->outputs[t];
         }
     }
     void backward() {
@@ -584,14 +605,18 @@ struct Parallel : Network {
         assert(outputs.size() > 0);
         assert(outputs.size() == inputs.size());
         assert(d_outputs.size() > 0);
-        int n1 = net1->outputs[0].size();
-        int n2 = net2->outputs[0].size();
+        int n1 = net1->outputs[0].rows();
+        int n2 = net2->outputs[0].rows();
         int N = outputs.size();
         net1->d_outputs.resize(N);
         net2->d_outputs.resize(N);
+        int bs = net1->outputs[0].cols();
+        assert(bs==net2->outputs[0].cols());
         for (int t = 0; t < N; t++) {
-            net1->d_outputs[t] = d_outputs[t].segment(0, n1);
-            net2->d_outputs[t] = d_outputs[t].segment(n1, n2);
+            net1->d_outputs[t].resize(n1,bs);
+            net1->d_outputs[t] = d_outputs[t].block(0, 0, n1, bs);
+            net2->d_outputs[t].resize(n2,bs);
+            net2->d_outputs[t] = d_outputs[t].block(n1, 0, n2, bs);
         }
         net1->backward();
         net2->backward();
@@ -612,21 +637,21 @@ INetwork *make_Parallel() {
 
 namespace {
 template <class NONLIN, class T>
-inline Vec nonlin(T &a) {
-    Vec result = a;
+inline Mat nonlin(T &a) {
+    Mat result = a;
     NONLIN::f(result);
     return result;
 }
 template <class NONLIN, class T>
-inline Vec yprime(T &a) {
-    Vec result = Vec::Ones(a.size());
+inline Mat yprime(T &a) {
+    Mat result = Mat::Ones(a.rows(),a.cols());
     NONLIN::df(result, a);
     return result;
 }
 template <class NONLIN, class T>
-inline Vec xprime(T &a) {
-    Vec result = Vec::Ones(a.size());
-    Vec temp = a;
+inline Mat xprime(T &a) {
+    Mat result = Mat::Ones(a.rows(), a.cols());
+    Mat temp = a;
     NONLIN::f(temp);
     NONLIN::df(result, temp);
     return result;
@@ -708,18 +733,22 @@ struct LSTM : Network {
         int N = inputs.size();
         resize(N);
         for (int t = 0; t < N; t++) {
-            source[t].resize(nf);
-            source[t](0) = 1;
-            source[t].segment(1, ni) = inputs[t];
-            if (t == 0) source[t].segment(1+ni, no).setConstant(0);
-            else source[t].segment(1+ni, no) = outputs[t-1];
+            int bs = inputs[t].cols();
+            source[t].resize(nf,bs);
+            source[t].block(0, 0, 1, bs).setConstant(1);
+            source[t].block(1, 0, ni, bs) = inputs[t];
+            if (t == 0) source[t].block(1+ni, 0, no, bs).setConstant(0);
+            else source[t].block(1+ni, 0, no, bs) = outputs[t-1];
             gix[t] = WGI * source[t];
             gfx[t] = WGF * source[t];
             gox[t] = WGO * source[t];
             cix[t] = WCI * source[t];
             if (t > 0) {
-                gix[t].A += WIP.A * state[t-1].A;
-                gfx[t].A += WFP.A * state[t-1].A;
+                int bs = state[t-1].cols();
+                for(int b=0;b<bs;b++) {
+                    gix[t].col(b).A += WIP.A * state[t-1].col(b).A;
+                    gfx[t].col(b).A += WFP.A * state[t-1].col(b).A;
+                }
             }
             gi[t] = nonlin<F>(gix[t]);
             gf[t] = nonlin<F>(gfx[t]);
@@ -727,7 +756,9 @@ struct LSTM : Network {
             state[t] = ci[t].A * gi[t].A;
             if (t > 0) {
                 state[t].A += gf[t].A * state[t-1].A;
-                gox[t].A += WOP.A * state[t].A;
+                int bs = state[t].cols();
+                for(int b=0;b<bs;b++)
+                    gox[t].col(b).A += WOP.A * state[t].col(b).A;
             }
             go[t] = nonlin<F>(gox[t]);
             outputs[t] = nonlin<H>(state[t]).A * go[t].A;
@@ -737,14 +768,18 @@ struct LSTM : Network {
         int N = inputs.size();
         d_inputs.resize(N);
         for (int t = N-1; t >= 0; t--) {
+            int bs = d_outputs[t].cols();
             outerr[t] = d_outputs[t];
-            if (t < N-1) outerr[t] += sourceerr[t+1].segment(1+ni, no);
+            if (t < N-1) outerr[t] += sourceerr[t+1].block(1+ni, 0, no, bs);
             goerr[t] = yprime<F>(go[t]).A * nonlin<H>(state[t]).A * outerr[t].A;
             stateerr[t] = xprime<H>(state[t]).A * go[t].A * outerr[t].A;
-            stateerr[t].A += goerr[t].A * WOP.A;
+            for (int b=0; b<bs; b++)
+                stateerr[t].col(b).A += goerr[t].col(b).A * WOP.A;
             if (t < N-1) {
-                stateerr[t].A += gferr[t+1].A * WFP.A;
-                stateerr[t].A += gierr[t+1].A * WIP.A;
+                for (int b=0; b<bs; b++) {
+                    stateerr[t].col(b).A += gferr[t+1].col(b).A * WFP.A;
+                    stateerr[t].col(b).A += gierr[t+1].col(b).A * WIP.A;
+                }
                 stateerr[t].A += stateerr[t+1].A * gf[t+1].A;
             }
             if (t > 0) gferr[t] = yprime<F>(gf[t]).A * stateerr[t].A * state[t-1].A;
@@ -754,7 +789,8 @@ struct LSTM : Network {
             if (t > 0) sourceerr[t] += WGF.transpose() * gferr[t];
             sourceerr[t] += WGO.transpose() * goerr[t];
             sourceerr[t] += WCI.transpose() * cierr[t];
-            d_inputs[t] = sourceerr[t].segment(1, ni);
+            d_inputs[t].resize(ni,bs);
+            d_inputs[t] = sourceerr[t].block(1, 0, ni, bs);
         }
         if (gradient_clipping > 0 || gradient_clipping < 999) {
             gradient_clip(gierr, gradient_clipping);
@@ -763,9 +799,12 @@ struct LSTM : Network {
             gradient_clip(cierr, gradient_clipping);
         }
         for (int t = 0; t < N; t++) {
-            if (t > 0) DWIP.A += gierr[t].A * state[t-1].A;
-            if (t > 0) DWFP.A += gferr[t].A * state[t-1].A;
-            DWOP.A += goerr[t].A * state[t].A;
+            int bs = state[t].cols();
+            for (int b = 0; b<bs; b++) {
+                if (t > 0) DWIP.A += gierr[t].col(b).A * state[t-1].col(b).A;
+                if (t > 0) DWFP.A += gferr[t].col(b).A * state[t-1].col(b).A;
+                DWOP.A += goerr[t].col(b).A * state[t].col(b).A;
+            }
             DWGI += gierr[t] * source[t].transpose();
             if (t > 0) DWGF += gferr[t] * source[t].transpose();
             DWGO += goerr[t] * source[t].transpose();
@@ -834,7 +873,7 @@ INetwork *make_LSTM() {
 }
 
 struct MLP : Network {
-    LogregLayer l1, l2;
+    SigmoidLayer l1, l2;
     MLP() {
         name = "mlp";
     }
@@ -888,13 +927,13 @@ struct LSTM1 : Stacked {
         attributes["kind"] = "lstm1";
     }
     void init(int no, int nh, int ni) {
-        shared_ptr<INetwork> fwd, logreg;
+        shared_ptr<INetwork> fwd, softmax;
         fwd = make_shared<LSTM>();
         fwd->init(nh, ni);
         add(fwd);
-        logreg = make_shared<SoftmaxLayer>();
-        logreg->init(no, nh);
-        add(logreg);
+        softmax = make_shared<SoftmaxLayer>();
+        softmax->init(no, nh);
+        add(softmax);
     }
 };
 
@@ -907,15 +946,15 @@ struct REVLSTM1 : Stacked {
         name = "revlstm1";
     }
     void init(int no, int nh, int ni) {
-        shared_ptr<INetwork> fwd, rev, logreg;
+        shared_ptr<INetwork> fwd, rev, softmax;
         fwd = make_shared<LSTM>();
         fwd->init(nh, ni);
         rev = make_shared<Reversed>();
         rev->add(fwd);
         add(rev);
-        logreg = make_shared<SoftmaxLayer>();
-        logreg->init(no, nh);
-        add(logreg);
+        softmax = make_shared<SoftmaxLayer>();
+        softmax->init(no, nh);
+        add(softmax);
     }
 };
 
@@ -925,6 +964,33 @@ INetwork *make_REVLSTM1() {
 
 struct BIDILSTM : Stacked {
     BIDILSTM() {
+        name = "bidilstm";
+        attributes["kind"] = "bidi";
+    }
+    void init(int no, int nh, int ni) {
+        shared_ptr<INetwork> fwd, bwd, parallel, reversed, softmax;
+        fwd = make_shared<LSTM>();
+        fwd->init(nh, ni);
+        bwd = make_shared<LSTM>();
+        bwd->init(nh, ni);
+        reversed = make_shared<Reversed>();
+        reversed->add(bwd);
+        parallel = make_shared<Parallel>();
+        parallel->add(fwd);
+        parallel->add(reversed);
+        add(parallel);
+        softmax = make_shared<SoftmaxLayer>();
+        softmax->init(no, 2*nh);
+        add(softmax);
+    }
+};
+
+INetwork *make_BIDILSTM() {
+    return new BIDILSTM();
+}
+
+struct LRBIDILSTM : Stacked {
+    LRBIDILSTM() {
         name = "bidilstm";
         attributes["kind"] = "bidi";
     }
@@ -940,14 +1006,14 @@ struct BIDILSTM : Stacked {
         parallel->add(fwd);
         parallel->add(reversed);
         add(parallel);
-        logreg = make_shared<SoftmaxLayer>();
+        logreg = make_shared<SigmoidLayer>();
         logreg->init(no, 2*nh);
         add(logreg);
     }
 };
 
-INetwork *make_BIDILSTM() {
-    return new BIDILSTM();
+INetwork *make_LRBIDILSTM() {
+    return new LRBIDILSTM();
 }
 
 shared_ptr<INetwork> make_fwdbwd(int nh,int ni) {
@@ -1024,20 +1090,21 @@ void forwardbackward(Mat &both, Mat &lmatch) {
     both = lr + rl;
 }
 
-void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &targets) {
+void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
     double lo = 1e-5;
-    int n1 = outputs.size();
-    int n2 = targets.size();
-    int nc = targets[0].size();
+    int n1 = outputs.rows();
+    int n2 = targets.rows();
+    int nc = targets.cols();
 
     // compute log probability of state matches
     Mat lmatch;
     lmatch.resize(n1, n2);
     for (int t1 = 0; t1 < n1; t1++) {
-        Vec out = outputs[t1].cwiseMax(lo);
+        Vec out = outputs.row(t1);
+        out = out.cwiseMax(lo);
         out /= out.sum();
         for (int t2 = 0; t2 < n2; t2++) {
-            double value = out.transpose() * targets[t2];
+            double value = out.transpose() * targets.row(t2).transpose();
             lmatch(t1, t2) = log(value);
         }
     }
@@ -1060,7 +1127,7 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &target
         for (int j = 0; j < nc; j++) {
             double total = 0.0;
             for (int k = 0; k < n2; k++) {
-                double value = epath(i, k) * targets[k](j);
+                double value = epath(i, k) * targets(k,j);
                 total += value;
             }
             aligned(i, j) = total;
@@ -1070,12 +1137,26 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &target
         aligned.row(i) /= fmax(1e-9, aligned.row(i).sum());
     }
 
-    // assign to outputs
+    posteriors = aligned;
+}
+
+void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &targets) {
+    assert(outputs[0].cols()==1);
+    assert(targets[0].cols()==1);
+    int n1 = outputs.size();
+    int n2 = targets.size();
+    int nc = targets[0].size();
+    Mat moutputs(n1, nc);
+    Mat mtargets(n2, nc);
+    for(int i=0; i<n1; i++) moutputs.row(i) = outputs[i].col(0);
+    for(int i=0; i<n2; i++) mtargets.row(i) = targets[i].col(0);
+    Mat aligned;
+    ctc_align_targets(aligned, moutputs, mtargets);
     posteriors.resize(n1);
     for (int i = 0; i < n1; i++) {
-        posteriors[i] = aligned.row(i);
+        posteriors[i].resize(aligned.row(i).size(),1);
+        posteriors[i].col(0) = aligned.row(i);
     }
-    assert(posteriors[0].size() == nc);
 }
 
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets) {
@@ -1083,9 +1164,9 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets
     Sequence stargets;
     stargets.resize(targets.size());
     for (int t = 0; t < stargets.size(); t++) {
-        stargets[t].resize(nclasses);
+        stargets[t].resize(nclasses,1);
         stargets[t].fill(0);
-        stargets[t](targets[t]) = 1.0;
+        stargets[t](targets[t],0) = 1.0;
     }
     ctc_align_targets(posteriors, outputs, stargets);
 }
@@ -1093,7 +1174,7 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets
 void mktargets(Sequence &seq, Classes &transcript, int ndim) {
     seq.resize(2*transcript.size()+1);
     for (int t = 0; t < seq.size(); t++) {
-        seq[t].setZero(ndim);
+        seq[t].setZero(ndim,1);
         if (t%2 == 1) seq[t](transcript[(t-1)/2]) = 1;
         else seq[t](0) = 1;
     }
@@ -1102,17 +1183,69 @@ void mktargets(Sequence &seq, Classes &transcript, int ndim) {
 // Loading and saving networks; the logic of this is quite twisted and needs
 // to be cleaned up. However, for now it works.
 
+void save_codec(h5eigen::HDF5 *h5, const char *name, vector<int> &codec, int n) {
+    assert(codec.size()==0 || codec.size()==n);
+    Vec vcodec;
+    vcodec.resize(n);
+    if(codec.size()==0)
+        for(int i=0;i<n;i++) vcodec[i] = i;
+    else
+        for(int i=0;i<n;i++) vcodec[i] = codec[i];
+
+    h5->put(vcodec, name);
+}
+
+void load_codec(vector<int> &codec, h5eigen::HDF5 *h5, const char *name) {
+    codec.resize(0);
+    if(!h5->exists(name)) return;
+    Vec vcodec;
+    h5->get(vcodec, name);
+    codec.resize(vcodec.size());
+    for(int i=0; i<vcodec.size(); i++) codec[i] = vcodec[i];
+}
+
+void save_net_raw(const char *fname, INetwork *net) {
+    using namespace h5eigen;
+    unique_ptr<HDF5> h5(make_HDF5());
+    h5->open(fname, true);
+    net->attributes["clstm-version"] = "1";
+    for (auto &kv : net->attributes) {
+        h5->setAttr(kv.first, kv.second);
+    }
+    save_codec(h5.get(), "codec", net->codec, net->noutput());
+    save_codec(h5.get(), "icodec", net->icodec, net->ninput());
+
+    net->weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
+        if (a.mat) h5->put(*a.mat, prefix.c_str());
+        else if (a.vec) h5->put(*a.vec, prefix.c_str());
+        else throw "oops (save type)";
+    });
+}
+
+void load_net_raw(INetwork *net,const char *fname) {
+    using namespace h5eigen;
+    unique_ptr<HDF5> h5(make_HDF5());
+    h5->open(fname);
+    h5->getAttrs(net->attributes);
+    load_codec(net->icodec, h5.get(), "icodec");
+    load_codec(net->codec, h5.get(), "codec");
+    net->weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
+        if (a.mat) h5->get(*a.mat, prefix.c_str());
+        else if (a.vec) h5->get1d(*a.vec, prefix.c_str());
+        else throw "oops (load type)";
+    });
+   net->networks("", [] (string s, INetwork *net) {
+       net->postLoad();
+   });
+}
+
 shared_ptr<INetwork> make_net(const string &kind) {
     shared_ptr<INetwork> net;
-    if (kind=="bidi") {
-        net.reset(make_BIDILSTM());
-    } else if (kind=="bidi2") {
-        net.reset(make_BIDILSTM2());
-    } else if (kind=="uni") {
-        net.reset(make_LSTM1());
-    } else {
-        throw "unknown network type";
-    }
+    if (kind=="bidi") net.reset(make_BIDILSTM());
+    else if (kind=="lrbidi") net.reset(make_LRBIDILSTM());
+    else if (kind=="bidi2") net.reset(make_BIDILSTM2());
+    else if (kind=="uni") net.reset(make_LSTM1());
+    else throw "unknown network type";
     net->attributes["kind"] = kind;
     return net;
 }
@@ -1125,22 +1258,83 @@ void load_attributes(map<string, string> &attributes, const string &fname) {
 }
 
 shared_ptr<INetwork> load_net(const string &fname) {
+    bool verbose = (getenv("load_verbose") && atoi(getenv("load_verbose")));
     map<string, string> attributes;
     load_attributes(attributes, fname);
     string kind = attributes["kind"];
-    cout << "loading " << kind << endl;
+    if (verbose) {
+        cout << "loading " << fname << endl;
+        cout << endl;
+        cout << "attributes:" << endl;
+        for (auto kv : attributes)
+            cout << "   " << kv.first << " = " << kv.second << endl;
+        cout << endl;
+    }
     shared_ptr<INetwork> net;
     net = make_net(kind);
     if (kind=="bidi2") net->init(1,1,1,1); else net->init(1,1,1); // FIXME
-    net->load(fname.c_str());
-    net->info("");
+    load_net_raw(net.get(), fname.c_str());
+    if (verbose) {
+        cout << "network:" << endl;
+        net->info("");
+        cout << endl;
+    }
     return net;
 }
 
 void save_net(const string &fname, shared_ptr<INetwork> net) {
     rename(fname.c_str(), (fname+"~").c_str());
-    net->save(fname.c_str());
+    save_net_raw(fname.c_str(), net.get());
 }
+
+void trivial_decode(Classes &cs, Sequence &outputs, int batch) {
+    int N = outputs.size();
+    int t = 0;
+    float mv = 0;
+    int mc = -1;
+    while (t < N) {
+        int index;
+        float v = outputs[t].col(batch).maxCoeff(&index);
+        if (index == 0) {
+            // NB: there should be a 0 at the end anyway
+            if (mc != -1 && mc != 0) cs.push_back(mc);
+            mv = 0; mc = -1; t++;
+            continue;
+        }
+        if (v > mv) {
+            mv = v;
+            mc = index;
+        }
+        t++;
+    }
+}
+
+void ctc_train(INetwork *net,Sequence &xs, Sequence &targets) {
+    // untested
+    assert(xs[0].cols()==1);
+    assert(xs.size()<=targets.size());
+    assert(!anynan(xs));
+    net->inputs = xs;
+    net->forward();
+    if (anynan(net->outputs)) throw "got NaN";
+    Sequence aligned;
+    ctc_align_targets(aligned, net->outputs, targets);
+    if (anynan(aligned)) throw "got NaN";
+    set_targets(net, aligned);
+    net->backward();
+}
+
+void ctc_train(INetwork *net,Sequence &xs, Classes &targets) {
+    // untested
+    Sequence ys;
+    mktargets(ys, targets, net->noutput());
+    ctc_train(net, xs, ys);
+}
+
+void ctc_train(INetwork *net,Sequence &xs, BatchClasses &targets) {
+    throw "unimplemented";
+}
+
 
 }  // namespace ocropus
 

@@ -14,7 +14,10 @@ inline const char *hg_log() {
 
 prefix = ARGUMENTS.get('prefix', "/usr/local")
 env = Environment()
-env["CXX"]="g++ --std=c++11 -Wno-unused-result"
+if ARGUMENTS.get('omp',0) or os.environ.get('omp',0):
+    env["CXX"]="g++ --std=c++11 -Wno-unused-result -fopenmp"
+else:
+    env["CXX"]="g++ --std=c++11 -Wno-unused-result"
 if int(ARGUMENTS.get('debug',0)):
     env.Append(CXXFLAGS="-g -fno-inline".split())
     env.Append(CCFLAGS="-g".split())
@@ -44,4 +47,7 @@ env.Program("clstmseq",
             LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png"])
 env.Program("clstmtext",
             ["clstmtext.cc", "version.h"],
+            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png", "boost_locale"])
+env.Program("test-batch",
+            ["test-batch.cc", "version.h"],
             LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png", "boost_locale"])

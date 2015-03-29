@@ -1,5 +1,9 @@
 // -*- C++ -*-
 
+// A basic LSTM implementation in C++. All you should need is clstm.cc and
+// clstm.h. Library dependencies are limited to a small subset of STL and
+// Eigen/Dense
+
 #ifndef ocropus_lstm__
 #define ocropus_lstm__
 
@@ -16,6 +20,7 @@ using std::string;
 using std::vector;
 using std::map;
 using std::shared_ptr;
+using std::unique_ptr;
 using std::function;
 using Eigen::Ref;
 
@@ -31,13 +36,14 @@ typedef Eigen::VectorXf Vec;
 typedef Eigen::MatrixXf Mat;
 #endif
 
-typedef vector<Vec> Sequence;
+typedef vector<Mat> Sequence;
 typedef vector<int> Classes;
+typedef vector<Classes> BatchClasses;
 
-inline Vec timeslice(const Sequence &s, int i) {
+inline Vec timeslice(const Sequence &s, int i, int b=0) {
     Vec result(s.size());
     for (int t = 0; t < s.size(); t++)
-        result[t] = s[t][i];
+        result[t] = s[t](i,b);
     return result;
 }
 
@@ -79,10 +85,19 @@ struct INetwork {
         NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
     } normalization;
 
-    // Data used for loading and saving networks; these
-    // are generally only meaningful for the toplevel network.
+    // Data for encoding/decoding input/output strings.
     vector<int> codec;
     vector<int> icodec;
+    unique_ptr<map<int, int>> encoder;  // cached
+    unique_ptr<map<int, int>> iencoder; // cached
+    void makeEncoders();
+    std::wstring decode(Classes &cs);
+    std::wstring idecode(Classes &cs);
+    void encode(Classes &cs, std::wstring &s);
+    void iencode(Classes &cs, std::wstring &s);
+
+    // Data used for loading and saving networks; these
+    // are generally only meaningful for the toplevel network.
     map<string, string> attributes;
 
     // Parameters specific to softmax.
@@ -141,15 +156,6 @@ struct INetwork {
             sub[i]->setLearningRate(lr, momentum);
     }
 
-    // move the rest out of this class
-    void setInputs(Sequence &inputs);
-    void setTargets(Sequence &targets);
-    void setTargetsAccelerated(Sequence &targets);
-    void setClasses(Classes &classes);
-    void train(Sequence &xs, Sequence &targets);
-    void ctrain(Sequence &xs, Classes &cs);
-    void ctrain_accelerated(Sequence &xs, Classes &cs, Float lo=1e-5);
-    void cpred(Classes &preds, Sequence &xs);
     void info(string prefix);
     void weights(const string &prefix, WeightFun f);
     void states(const string &prefix, StateFun f);
@@ -159,6 +165,27 @@ struct INetwork {
     void load(const char *fname);
 };
 
+// setting inputs and outputs
+void set_inputs(INetwork *net,Sequence &inputs);
+void set_targets(INetwork *net,Sequence &targets);
+void set_targets_accelerated(INetwork *net,Sequence &targets);
+void set_classes(INetwork *net,Classes &classes);
+void set_classes(INetwork *net,BatchClasses &classes);
+
+// single sequence training functions
+void train(INetwork *net,Sequence &xs, Sequence &targets);
+void ctrain(INetwork *net,Sequence &xs, Classes &cs);
+void ctrain_accelerated(INetwork *net,Sequence &xs, Classes &cs, Float lo=1e-5);
+void cpred(INetwork *net,Classes &preds, Sequence &xs);
+void mktargets(Sequence &seq, Classes &targets, int ndim);
+
+// batch training functions
+void ctrain(INetwork *net,Sequence &xs, BatchClasses &cs);
+void ctrain_accelerated(INetwork *net,Sequence &xs, BatchClasses &cs, Float lo=1e-5);
+void cpred(INetwork *net,BatchClasses &preds, Sequence &xs);
+void mktargets(Sequence &seq, BatchClasses &targets, int ndim);
+
+// common network layers
 INetwork *make_LinearLayer();
 INetwork *make_LogregLayer();
 INetwork *make_SoftmaxLayer();
@@ -167,6 +194,8 @@ INetwork *make_ReluLayer();
 INetwork *make_Stacked();
 INetwork *make_Reversed();
 INetwork *make_Parallel();
+
+// prefab networks
 INetwork *make_MLP();
 INetwork *make_LSTM();
 INetwork *make_LSTM1();
@@ -174,22 +203,39 @@ INetwork *make_REVLSTM1();
 INetwork *make_BIDILSTM();
 INetwork *make_BIDILSTM2();
 
-void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5.0);
-void forwardbackward(Mat &both, Mat &lmatch);
-void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &targets);
-void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets);
-void mktargets(Sequence &seq, Classes &targets, int ndim);
-
 extern Mat debugmat;
 
+// loading and saving networks
 void load_attributes(map<string, string> &attrs, const string &file);
 shared_ptr<INetwork> make_net(const string &kind);
 shared_ptr<INetwork> load_net(const string &file);
 void save_net(const string &file, shared_ptr<INetwork> net);
 
+
+// training with CTC
+void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5.0);
+void forwardbackward(Mat &both, Mat &lmatch);
+void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &targets);
+void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets);
+void trivial_decode(Classes &cs, Sequence &outputs, int batch=0);
+void ctc_train(INetwork *net,Sequence &xs, Sequence &targets);
+void ctc_train(INetwork *net,Sequence &xs, Classes &targets);
+void ctc_train(INetwork *net,Sequence &xs, BatchClasses &targets);
+
 }
 
 namespace {
+bool anynan(ocropus::Sequence &a) {
+    for (int i = 0; i < a.size(); i++) {
+        for (int j = 0; j < a[i].rows(); j++) {
+            for (int k = 0; k < a[i].cols(); k++) {
+                if (isnan(a[i](j,k))) return true;
+            }
+        }
+    }
+    return false;
+}
+
 template <class A,class B>
 double levenshtein(A &a,B &b) {
     using std::vector;
@@ -213,7 +259,6 @@ double levenshtein(A &a,B &b) {
     }
     return current[n];
 }
-
 }
 
 

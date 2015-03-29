@@ -709,4 +709,18 @@ void write_png(const char *name,bytearray &image) {
     fclose(stream);
 }
 
+shared_ptr<INetwork> make_net_init(const string &kind, int nclasses, int dim, string prefix) {
+    shared_ptr<INetwork> net = make_net(kind);
+    int nhidden = getrenv((prefix+"hidden").c_str(), 100);
+    if (kind=="bidi2") {
+        int nhidden2 = getrenv((prefix+"hidden2").c_str(), -1);
+        net->init(nclasses, nhidden2, nhidden, dim);
+        print("init-bidi2", nclasses, nhidden2, nhidden, dim);
+    } else {
+        net->init(nclasses, nhidden, dim);
+        print("init", nclasses, nhidden, dim);
+    }
+    return net;
+}
+
 }

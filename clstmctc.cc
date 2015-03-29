@@ -25,109 +25,6 @@ using namespace Eigen;
 using namespace ocropus;
 using namespace pymulti;
 
-namespace {
-template <class S, class T>
-void assign(S &dest, T &src) {
-    dest.resize_(src.dims);
-    int n = dest.size();
-    for (int i = 0; i < n; i++) dest.data[i] = src.data[i];
-}
-
-template <class S, class T>
-void transpose(S &dest, T &src) {
-    dest.resize(src.dim(1), src.dim(0));
-    for (int i = 0; i < dest.dim(0); i++)
-        for (int j = 0; j < dest.dim(1); j++)
-            dest(i, j) = src(j, i);
-}
-
-template <class T>
-void transpose(T &a) {
-    T temp;
-    transpose(temp, a);
-    assign(a, temp);
-}
-
-template <class T>
-void assign(Sequence &seq, T &a) {
-    assert(a.rank() == 2);
-    seq.resize(a.dim(0));
-    for (int t = 0; t < a.dim(0); t++) {
-        seq[t].resize(a.dim(1));
-        for (int i = 0; i < a.dim(1); i++) seq[t](i) = a(t, i);
-    }
-}
-
-template <class T>
-void assign(T &a, Sequence &seq) {
-    a.resize(int(seq.size()), int(seq[0].size()));
-    for (int t = 0; t < a.dim(0); t++) {
-        for (int i = 0; i < a.dim(1); i++) a(t, i) = seq[t](i);
-    }
-}
-
-void assign(Classes &classes, mdarray<int> &transcript) {
-    classes.resize(transcript.size());
-    for (int i = 0; i < transcript.size(); i++)
-        classes[i] = transcript(i);
-}
-
-template <class A, class T>
-int indexof(A &a, const T &t) {
-    for (int i = 0; i < a.size(); i++)
-        if (a[i] == t) return i;
-    return -1;
-}
-
-}
-
-void debug_decode(Sequence &outputs, Sequence &aligned) {
-    for (int t = 0; t < outputs.size(); t++) {
-        int oindex, aindex;
-        outputs[t].maxCoeff(&oindex);
-        aligned[t].maxCoeff(&aindex);
-        print(t,
-              "outputs", outputs[t](0), outputs[t](1),
-              oindex, outputs[t](oindex),
-              "aligned", aligned[t](0), aligned[t](1),
-              aindex, aligned[t](aindex));
-    }
-}
-
-void trivial_decode(Classes &cs, Sequence &outputs) {
-    int N = outputs.size();
-    int t = 0;
-    float mv = 0;
-    int mc = -1;
-    while (t < N) {
-        int index;
-        float v = outputs[t].maxCoeff(&index);
-        if (index == 0) {
-            // NB: there should be a 0 at the end anyway
-            if (mc != -1) cs.push_back(mc);
-            mv = 0; mc = -1; t++;
-            continue;
-        }
-        if (v > mv) {
-            mv = v;
-            mc = index;
-        }
-        t++;
-    }
-}
-
-bool anynan(mdarray<float> &a) {
-    for (int i = 0; i < a.size(); i++)
-        if (isnan(a[i])) return true;
-    return false;
-}
-
-void encoder_of_codec(map<wchar_t,int> &encoder, mdarray<int> &codec) {
-    for (int i=0; i<codec.dim(0); i++) {
-        encoder.insert(make_pair(wchar_t(codec[i]), i));
-    }
-}
-
 double error_rate(shared_ptr<INetwork> net,const string &testset) {
     int maxeval = getienv("maxeval", 1000000000);
     shared_ptr<IOcrDataset> dataset(make_Dataset(testset));
@@ -249,7 +146,7 @@ int main_ocr(int argc, char **argv) {
     double start_time = now();
     double best_erate = 1e38;
 
-    int start = stoi(getdef(net->attributes, "trial", getsenv("start", "0")))+1;
+    int start = stoi(getdef(net->attributes, "trial", getsenv("start", "-1")))+1;
     if (start>0) print("start", start);
     for (int trial = start; trial < ntrain; trial++) {
         bool report = (report_every>0) && (trial % report_every == 0);
@@ -265,14 +162,14 @@ int main_ocr(int argc, char **argv) {
         }
         if (trial > 0 && test_every > 0 && trial%test_every == 0 && testset != "") {
             double erate = error_rate(net, testset);
+            net->attributes["trial"] = to_string(trial);
+            net->attributes["last_err"] = to_string(best_erate);
             print("TESTERR", now()-start_time, save_name, trial, erate,
                   "lrate", lrate, "hidden", nhidden, nhidden2,
                   "batch", batch, "momentum", momentum);
             if (save_every==0 && erate < best_erate) {
                 best_erate = erate;
                 print("saving", save_name, "at", erate);
-                net->attributes["trial"] = to_string(trial);
-                net->attributes["err"] = to_string(best_erate);
                 save_net(save_name, net);
                 if (after_save!="") system(after_save.c_str());
             }
@@ -340,7 +237,7 @@ int main_ocr(int argc, char **argv) {
             py->plot(v, "color='g'");
             int nclass = net->outputs[0].size();
             for (int t = 0; t < outputs.dim(0); t++)
-                v(t) = net->outputs[t].segment(2, nclass-2).maxCoeff();
+                v(t) = net->outputs[t].col(0).segment(2, nclass-2).maxCoeff();
             py->evalf("xlim(0,%d)", outputs.dim(0));
             py->plot(v, "color='r'");
             py->eval("ginput(1,1e-3)");
@@ -354,11 +251,9 @@ int main_eval(int argc, char **argv) {
     string mode = getsenv("mode","errs");
     string load_name = getsenv("load", "");
     shared_ptr<IOcrDataset> dataset(make_Dataset(h5file));
-    shared_ptr<INetwork> net(make_BIDILSTM());
-    int nhidden = 17;
-    net->init(dataset->classes(), nhidden, dataset->dim());
+    shared_ptr<INetwork> net;
     if(load_name=="") throw "must give load=";
-    net->load(load_name.c_str());
+    net = load_net(load_name);
 
     mdarray<float> image;
     mdarray<int> transcript;
@@ -393,7 +288,7 @@ int main_eval(int argc, char **argv) {
         }
         cout.flush();
     }
-    print("errs",errs,"total",total,"rate",errs*100.0/total);
+    print("errs",errs,"total",total,"rate",errs*100.0/total,"%");
     cout.flush();
     return 0;
 }
@@ -479,3 +374,5 @@ int main(int argc, char **argv) {
         print("UNKNOWN EXCEPTION");
     }
 }
+
+

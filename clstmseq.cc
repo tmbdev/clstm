@@ -18,53 +18,6 @@ using namespace ocropus;
 using namespace h5multi;
 using namespace pymulti;
 
-namespace {
-template <class S, class T>
-void assign(S &dest, T &src) {
-    dest.resize_(src.dims);
-    int n = dest.size();
-    for (int i = 0; i < n; i++) dest.data[i] = src.data[i];
-}
-
-template <class S, class T>
-void transpose(S &dest, T &src) {
-    dest.resize(src.dim(1), src.dim(0));
-    for (int i = 0; i < dest.dim(0); i++)
-        for (int j = 0; j < dest.dim(1); j++)
-            dest(i, j) = src(j, i);
-}
-
-template <class T>
-void transpose(T &a) {
-    T temp;
-    transpose(temp, a);
-    assign(a, temp);
-}
-
-template <class T>
-void assign(Sequence &seq, T &a) {
-    assert(a.rank() == 2);
-    seq.resize(a.dim(0));
-    for (int t = 0; t < a.dim(0); t++) {
-        seq[t].resize(a.dim(1));
-        for (int i = 0; i < a.dim(1); i++) seq[t](i) = a(t, i);
-    }
-}
-
-template <class T>
-void assign(T &a, Sequence &seq) {
-    a.resize(int(seq.size()), int(seq[0].size()));
-    for (int t = 0; t < a.dim(0); t++) {
-        for (int i = 0; i < a.dim(1); i++) a(t, i) = seq[t](i);
-    }
-}
-
-void assign(Classes &classes, mdarray<int> &transcript) {
-    classes.resize(transcript.size());
-    for (int i = 0; i < transcript.size(); i++)
-        classes[i] = transcript(i);
-}
-
 struct SeqDataset {
     string iname = "inputs";
     string oname = "outputs";
@@ -132,15 +85,14 @@ T amax(mdarray<T> &a) {
     for (int i = 1; i < a.size(); i++) if (a[i] > m) m = a[i];
     return m;
 }
-}
 
 mdarray<int> codec;
 
 void debug_decode(Sequence &outputs, Sequence &aligned) {
     for (int t = 0; t < outputs.size(); t++) {
         int oindex, aindex;
-        outputs[t].maxCoeff(&oindex);
-        aligned[t].maxCoeff(&aindex);
+        outputs[t].col(0).maxCoeff(&oindex);
+        aligned[t].col(0).maxCoeff(&aindex);
         print(t,
               "outputs", outputs[t](0), outputs[t](1),
               oindex, outputs[t](oindex),
@@ -156,7 +108,7 @@ void trivial_decode(Classes &cs, Sequence &outputs) {
     int mc = -1;
     while (t < N) {
         int index;
-        float v = outputs[t].maxCoeff(&index);
+        float v = outputs[t].col(0).maxCoeff(&index);
         if (index == 0) {
             // NB: there should be a 0 at the end anyway
             if (mc != -1) cs.push_back(mc);
@@ -171,9 +123,9 @@ void trivial_decode(Classes &cs, Sequence &outputs) {
     }
 }
 
-void getslice(mdarray<float> &a, Sequence &seq, int i) {
+inline void getslice(mdarray<float> &a, Sequence &seq, int i, int b=0) {
     a.resize(int(seq.size()));
-    for (int t = 0; t < seq.size(); t++) a(t) = seq[t][i];
+    for (int t = 0; t < seq.size(); t++) a(t) = seq[t](i,b);
 }
 
 struct ErrStats {
@@ -248,12 +200,12 @@ int main_seq(int argc, char **argv) {
         dataset.output(target, sample);
         Sequence input_;
         assign(input_, input);
-        net->setInputs(input_);
+        set_inputs(net.get(), input_);
         net->forward();
         Sequence target_;
         assign(target_, target);
-        if (accelerated) net->setTargetsAccelerated(target_);
-        else net->setTargets(target_);
+        if (accelerated) set_targets_accelerated(net.get(), target_);
+        else set_targets(net.get(), target_);
         stats.add(target_, net->outputs);
         net->backward();
         net->update();

@@ -1,3 +1,4 @@
+#include "pstring.h"
 #include "clstm.h"
 #include <assert.h>
 #include <iostream>
@@ -5,10 +6,7 @@
 #include <memory>
 #include <math.h>
 #include <Eigen/Dense>
-#include <string>
-#include <boost/locale.hpp>
 #include <sstream>
-#include <string>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -18,108 +16,26 @@
 #include "extras.h"
 #include "version.h"
 
-using std_string = std::string;
-#define string std_string
-using std::stoi;
-using std::to_string;
+using namespace Eigen;
+using namespace ocropus;
+using namespace pymulti;
 using std::vector;
 using std::map;
 using std::make_pair;
 using std::shared_ptr;
 using std::unique_ptr;
-using std::to_string;
 using std::cout;
-using std::wstring;
 using std::ifstream;
 using std::set;
-using boost::locale::conv::to_utf;
-using boost::locale::conv::from_utf;
-using boost::locale::conv::utf_to_utf;
-using namespace Eigen;
-using namespace ocropus;
-using namespace pymulti;
-
-namespace {
-template <class S, class T>
-void assign(S &dest, T &src) {
-    dest.resize_(src.dims);
-    int n = dest.size();
-    for (int i = 0; i < n; i++) dest.data[i] = src.data[i];
-}
-
-void assign(mdarray<int> &dest, vector<int> &src) {
-    int n = src.size();
-    dest.resize(n);
-    for (int i = 0; i < n; i++) dest[i] = src[i];
-}
-
-void assign(vector<int> &dest, mdarray<int> &src) {
-    int n = src.dim(0);
-    dest.resize(n);
-    for (int i = 0; i < n; i++) dest[i] = src[i];
-}
-
-template <class S, class T>
-void transpose(S &dest, T &src) {
-    dest.resize(src.dim(1), src.dim(0));
-    for (int i = 0; i < dest.dim(0); i++)
-        for (int j = 0; j < dest.dim(1); j++)
-            dest(i, j) = src(j, i);
-}
-
-template <class T>
-void transpose(T &a) {
-    T temp;
-    transpose(temp, a);
-    assign(a, temp);
-}
-
-template <class T>
-void assign(Sequence &seq, T &a) {
-    assert(a.rank() == 2);
-    seq.resize(a.dim(0));
-    for (int t = 0; t < a.dim(0); t++) {
-        seq[t].resize(a.dim(1));
-        for (int i = 0; i < a.dim(1); i++) seq[t](i) = a(t, i);
-    }
-}
-
-template <class T>
-void assign(T &a, Sequence &seq) {
-    a.resize(int(seq.size()), int(seq[0].size()));
-    for (int t = 0; t < a.dim(0); t++) {
-        for (int i = 0; i < a.dim(1); i++) a(t, i) = seq[t](i);
-    }
-}
-
-#if 0
-void assign(Classes &classes, mdarray<int> &transcript) {
-    classes.resize(transcript.size());
-    for (int i = 0; i < transcript.size(); i++)
-        classes[i] = transcript(i);
-}
-#endif
-
-template <class A, class T>
-int indexof(A &a, const T &t) {
-    for (int i = 0; i < a.size(); i++)
-        if (a[i] == t) return i;
-    return -1;
-}
-
-}
+using std::to_string;
+using std_string = std::string;
+using std_wstring = std::wstring;
+#define string std_string
+#define wstring std_wstring
 
 struct Sample {
     wstring in,out;
 };
-
-wstring utf32(string s) {
-    return to_utf<wchar_t>(s, "UTF-8");
-}
-
-string utf8(wstring s) {
-    return utf_to_utf<char>(s);
-}
 
 void read_samples(vector<Sample> &samples,const string &fname) {
     ifstream stream(fname);
@@ -129,38 +45,35 @@ void read_samples(vector<Sample> &samples,const string &fname) {
     while (getline(stream, line)) {
         int where = line.find("\t");
         if (where<0) throw "no tab found in input line";
-        in = utf32(line.substr(0,where));
-        out = utf32(line.substr(where+1));
+        in = utf8_to_utf32(line.substr(0,where));
+        out = utf8_to_utf32(line.substr(where+1));
         if (in.size()==0) continue;
         if (out.size()==0) continue;
         samples.push_back(Sample{in, out});
     }
+    for(auto c : out)
+        if (int(c)==0) throw "no nulls allowed in input";
 }
 
-void get_codec(mdarray<int> &codec, vector<Sample> &samples, wstring Sample::* p) {
+void get_codec(vector<int> &codec, vector<Sample> &samples, wstring Sample::* p) {
     set<int> codes;
     codes.insert(0);
     for (auto e : samples) {
         for (auto c : e.*p) codes.insert(int(c));
     }
-    int n = codes.size();
-    codec.resize(n);
-    int i = 0;
-    for (auto c : codes) codec[i++] = c;
-    assert(i==n);
+    for (auto c : codes) codec.push_back(c);
+    for (int i=1; i<codec.size(); i++) assert(codec[i] > codec[i-1]);
 }
 
-void encoder_of_codec(map<wchar_t,int> &encoder, mdarray<int> &codec) {
-    for (int i=0; i<codec.dim(0); i++) {
-        encoder.insert(make_pair(wchar_t(codec[i]), i));
-    }
-}
-
-void sequence_of_wstring(Sequence &seq, wstring &s, map<wchar_t,int> &encoder, int d, int neps) {
+void set_inputs_with_eps(INetwork *net, wstring &s, int neps) {
+    Classes cs;
+    net->iencode(cs, s);
+    Sequence &seq = net->inputs;
+    int d = net->ninput();
     seq.clear();
     for(int i=0;i<neps;i++) seq.push_back(Vec::Zero(d));
-    for(int pos=0; pos<s.size(); pos++) {
-        int c = encoder[s[pos]];
+    for(int pos=0; pos<cs.size(); pos++) {
+        int c =cs[pos];
         Vec v = Vec::Zero(d);
         v[c] = 1.0;
         seq.push_back(v);
@@ -168,85 +81,7 @@ void sequence_of_wstring(Sequence &seq, wstring &s, map<wchar_t,int> &encoder, i
     }
 }
 
-void classes_of_wstring(Classes &classes, wstring &s, map<wchar_t,int> &encoder) {
-    classes.clear();
-    for(int pos=0; pos<s.size(); pos++) {
-        int c = encoder[s[pos]];
-        classes.push_back(c);
-    }
-}
-
-wstring wstring_of_classes(Classes &classes, mdarray<int> &codec) {
-    wstring s;
-    for(int pos=0; pos<classes.size(); pos++) {
-        s.push_back(wchar_t(codec[classes[pos]]));
-    }
-    return s;
-}
-
-string utfdecode(Classes &classes, mdarray<int> &codec) {
-    // FIXME: not utf yet
-    string result;
-    for(int i=0; i<classes.size(); i++) {
-        int c = codec[classes[i]];
-        if (c==0) continue;
-        if (c>126) c = int('~');
-        result.push_back(char(c));
-    }
-    return result;
-}
-
-void debug_decode(Sequence &outputs, Sequence &aligned) {
-    for (int t = 0; t < outputs.size(); t++) {
-        int oindex, aindex;
-        outputs[t].maxCoeff(&oindex);
-        aligned[t].maxCoeff(&aindex);
-        print(t,
-              "outputs", outputs[t](0), outputs[t](1),
-              oindex, outputs[t](oindex),
-              "aligned", aligned[t](0), aligned[t](1),
-              aindex, aligned[t](aindex));
-    }
-}
-
-void trivial_decode(Classes &cs, Sequence &outputs) {
-    int N = outputs.size();
-    int t = 0;
-    float mv = 0;
-    int mc = -1;
-    while (t < N) {
-        int index;
-        float v = outputs[t].maxCoeff(&index);
-        if (index == 0) {
-            // NB: there should be a 0 at the end anyway
-            if (mc != -1) cs.push_back(mc);
-            mv = 0; mc = -1; t++;
-            continue;
-        }
-        if (v > mv) {
-            mv = v;
-            mc = index;
-        }
-        t++;
-    }
-}
-
-bool anynan(mdarray<float> &a) {
-    for (int i = 0; i < a.size(); i++)
-        if (isnan(a[i])) return true;
-    return false;
-}
-
-string string_of_wstring(const wstring &s) {
-    string result;
-    for (auto c : s) {
-        if (int(c)>=127) result.push_back('~');
-        else result.push_back(char(int(c)));
-    }
-    return result;
-}
-
-double error_rate(shared_ptr<INetwork> net,const string &testset, map<wchar_t,int> &iencoder, mdarray<int> &codec, int nclasses, int neps) {
+double error_rate(shared_ptr<INetwork> net,const string &testset, int nclasses, int neps) {
     int maxeval = getienv("maxeval", 1000000000);
     vector<Sample> samples;
     read_samples(samples, testset);
@@ -256,7 +91,8 @@ double error_rate(shared_ptr<INetwork> net,const string &testset, map<wchar_t,in
     double total = 0;
 
     for (int sample = 0; sample < N; sample++) {
-        sequence_of_wstring(net->inputs, samples[sample].in, iencoder, nclasses, neps);
+        Classes cs;
+        set_inputs_with_eps(net.get(), samples[sample].in, neps);
         mdarray<float> image;
         assign(image, net->inputs);
         net->forward();
@@ -264,10 +100,11 @@ double error_rate(shared_ptr<INetwork> net,const string &testset, map<wchar_t,in
         assign(outputs, net->outputs);
         Classes output_classes;
         trivial_decode(output_classes, net->outputs);
+        wstring out = net->decode(output_classes);
         wstring gt = samples[sample].out;
-        wstring out = wstring_of_classes(output_classes, codec);
         double err = levenshtein(gt, out);
         errs += err;
+        total += gt.size();
     }
     return errs/total;
 }
@@ -329,21 +166,18 @@ int main_train(int argc, char **argv) {
 
     shared_ptr<INetwork> net;
 
-    mdarray<int> codec, icodec;
     int nclasses = -1, iclasses = -1;
     if (load_name != "") {
         net = load_net(load_name);
-        assign(icodec, net->icodec);
-        assign(codec, net->codec);
-        nclasses = codec.dim(0);
-        iclasses = icodec.dim(0);
+        nclasses = net->codec.size();
+        iclasses = net->icodec.size();
         neps = stoi(net->attributes["neps"]);
     } else {
-        get_codec(icodec, samples, &Sample::in);
-        get_codec(codec, samples, &Sample::out);
-        nclasses = codec.dim(0);
-        iclasses = icodec.dim(0);
         net = make_net(lstm_type);
+        get_codec(net->icodec, samples, &Sample::in);
+        get_codec(net->codec, samples, &Sample::out);
+        nclasses = net->codec.size();
+        iclasses = net->icodec.size();
         if (lstm_type=="bidi2") {
             net->init(nclasses, nhidden2, nhidden, iclasses);
             print("init-bidi2", nclasses, nhidden2, nhidden, iclasses);
@@ -351,15 +185,11 @@ int main_train(int argc, char **argv) {
             net->init(nclasses, nhidden, iclasses);
             print("init", nclasses, nhidden, iclasses);
         }
-        assign(net->icodec, icodec);
-        assign(net->codec, codec);
         net->attributes["neps"] = to_string(int(neps));
     }
     net->setLearningRate(lrate, momentum);
-    map<wchar_t, int> encoder, iencoder;
-    encoder_of_codec(iencoder, icodec);
-    encoder_of_codec(encoder, codec);
-    print("codec", codec.dim(0), "icodec", icodec.dim(0));
+    net->makeEncoders();
+    print("codec", net->codec.size(), "icodec", net->icodec.size());
     INetwork::Normalization norm = INetwork::NORM_DFLT;
     if (lrnorm=="len") norm = INetwork::NORM_LEN;
     if (lrnorm=="none") norm = INetwork::NORM_NONE;
@@ -373,7 +203,7 @@ int main_train(int argc, char **argv) {
     double start_time = now();
     double best_erate = 1e38;
 
-    int start = stoi(getdef(net->attributes, "trial", getsenv("start", "0")))+1;
+    int start = stoi(getdef(net->attributes, "trial", getsenv("start", "-1")))+1;
     if (start>0) print("start", start);
     for (int trial = start; trial < ntrain; trial++) {
         bool report = (report_every>0) && (trial % report_every == 0);
@@ -388,7 +218,7 @@ int main_train(int argc, char **argv) {
             if (after_save!="") system(after_save.c_str());
         }
         if (trial > 0 && test_every > 0 && trial%test_every == 0 && testset != "") {
-            double erate = error_rate(net, testset, iencoder, codec, nclasses, neps);
+            double erate = error_rate(net, testset, nclasses, neps);
             print("TESTERR", now()-start_time, save_name, trial, erate,
                   "lrate", lrate, "hidden", nhidden, nhidden2,
                   "batch", batch, "momentum", momentum);
@@ -396,17 +226,17 @@ int main_train(int argc, char **argv) {
                 best_erate = erate;
                 print("saving", save_name, "at", erate);
                 net->attributes["trial"] = to_string(trial);
-                net->attributes["err"] = to_string(best_erate);
+                net->attributes["last_err"] = to_string(best_erate);
                 save_net(save_name, net);
                 if (after_save!="") system(after_save.c_str());
             }
             if (after_test!="") system(after_test.c_str());
         }
-        sequence_of_wstring(net->inputs, samples[sample].in, iencoder, iclasses, neps);
+        set_inputs_with_eps(net.get(), samples[sample].in, neps);
         mdarray<float> image;
         assign(image, net->inputs);
         Classes transcript;
-        classes_of_wstring(transcript, samples[sample].out, encoder);
+        net->encode(transcript, samples[sample].out);
         net->forward();
         classes = transcript;
         mdarray<float> outputs;
@@ -428,16 +258,16 @@ int main_train(int argc, char **argv) {
         Classes output_classes, aligned_classes;
         trivial_decode(output_classes, net->outputs);
         trivial_decode(aligned_classes, saligned);
-        wstring gt = wstring_of_classes(transcript, codec);
-        wstring out = wstring_of_classes(output_classes, codec);
-        wstring aln = wstring_of_classes(aligned_classes, codec);
+        wstring gt = net->decode(transcript);
+        wstring out = net->decode(output_classes);
+        wstring aln = net->decode(aligned_classes);
         if (report) {
             wstring s = samples[sample].in;
             print("trial", trial);
-            print("INP:", "'"+utf8(s)+"'");
-            print("TRU:", "'"+utf8(gt)+"'");
-            print("OUT:", "'"+utf8(out)+"'");
-            print("ALN:", "'"+utf8(aln)+"'");
+            print("INP:", "'"+utf32_to_utf8(s)+"'");
+            print("TRU:", "'"+utf32_to_utf8(gt)+"'");
+            print("OUT:", "'"+utf32_to_utf8(out)+"'");
+            print("ALN:", "'"+utf32_to_utf8(aln)+"'");
             print(levenshtein(gt,out));
         }
 
@@ -465,7 +295,7 @@ int main_train(int argc, char **argv) {
             py->plot(v, "color='g'");
             int nclass = net->outputs[0].size();
             for (int t = 0; t < outputs.dim(0); t++)
-                v(t) = net->outputs[t].segment(2, nclass-2).maxCoeff();
+                v(t) = net->outputs[t].col(0).segment(2, nclass-2).maxCoeff();
             py->evalf("xlim(0,%d)", outputs.dim(0));
             py->plot(v, "color='r'");
             py->eval("ginput(1,1e-3)");
@@ -482,27 +312,21 @@ int main_filter(int argc, char **argv) {
     shared_ptr<INetwork> net;
     net = load_net(load_name);
     int neps = stoi(net->attributes["neps"]);
-    mdarray<int> codec, icodec;
-    assign(icodec, net->icodec);
-    assign(codec, net->codec);
-    int nclasses = codec.dim(0), iclasses = icodec.dim(0);
-    map<wchar_t, int> encoder, iencoder;
-    encoder_of_codec(iencoder, icodec);
-    encoder_of_codec(encoder, codec);
-    dprint("codec", codec.dim(0), "icodec", icodec.dim(0));
+    dprint("codec", net->codec.size(), "icodec", net->icodec.size());
 
     string line;
     wstring in,out;;
     ifstream stream(fname);
     while (getline(stream, line)) {
-        in = utf32(line);
-        sequence_of_wstring(net->inputs, in, iencoder, iclasses, neps);
+        in = utf8_to_utf32(line);
+        set_inputs_with_eps(net.get(), in, neps);
         net->forward();
         Classes output_classes;
         trivial_decode(output_classes, net->outputs);
-        wstring out = wstring_of_classes(output_classes, codec);
-        print(utf8(out));
+        wstring out = net->decode(output_classes);
+        print(utf32_to_utf8(out));
     }
+    return 0;
 }
 
 const char *usage = /*program+*/ R"(training.txt
