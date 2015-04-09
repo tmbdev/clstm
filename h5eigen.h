@@ -43,9 +43,9 @@ struct HDF5 {
         try {
             DataSet dataset = h5->openDataSet(name);
             return true;
-        } catch (FileIException e) {
+        } catch(FileIException e) {
             return false;
-        } catch (GroupIException e) {
+        } catch(GroupIException e) {
             return false;
         }
     }
@@ -130,7 +130,7 @@ struct HDF5 {
         DataSpace attr_dataspace = DataSpace(H5S_SCALAR);
         H5std_string buffer(value);
         root.createAttribute(name, strdatatype, attr_dataspace)
-            .write(strdatatype, buffer);
+        .write(strdatatype, buffer);
     }
     string getAttr(string name) {
         Group root(h5->openGroup("/"));
@@ -138,7 +138,7 @@ struct HDF5 {
         DataSpace attr_dataspace = DataSpace(H5S_SCALAR);
         H5std_string buffer;
         root.createAttribute(name, strdatatype, attr_dataspace)
-            .read(strdatatype, buffer);
+        .read(strdatatype, buffer);
         return buffer;
     }
     void getAttrs(map<string, string> &result) {

@@ -14,16 +14,16 @@
 
 namespace ocropus {
 char exception_message[256];
-map<string,INetworkFactory> network_factories;
+map<string, INetworkFactory> network_factories;
 
 template <class T>
 int register_network(const char *name) {
     string s(name);
-    network_factories[s] = []() { return new T(); };
+    network_factories[s] = [] () { return new T(); };
     return 0;
 }
-#define C(X,Y) X##Y
-#define REGISTER(X) int C(status_,X) = register_network<X>(#X);
+#define C(X, Y) X ## Y
+#define REGISTER(X) int C(status_, X) = register_network<X>(# X);
 
 Mat debugmat;
 
@@ -33,37 +33,37 @@ using Eigen::Ref;
 bool no_update = false;
 bool verbose = false;
 
-void set_inputs(INetwork *net,Sequence &inputs) {
+void set_inputs(INetwork *net, Sequence &inputs) {
     net->inputs.resize(inputs.size());
     for (int t = 0; t < net->inputs.size(); t++)
         net->inputs[t] = inputs[t];
 }
-void set_targets(INetwork *net,Sequence &targets) {
+void set_targets(INetwork *net, Sequence &targets) {
     int N = net->outputs.size();
     assert(N == targets.size());
     net->d_outputs.resize(N);
     for (int t = 0; t < N; t++)
         net->d_outputs[t] = targets[t] - net->outputs[t];
 }
-void set_targets_accelerated(INetwork *net,Sequence &targets) {
+void set_targets_accelerated(INetwork *net, Sequence &targets) {
     Float lo = 1e-5;
     assert(net->outputs.size() == targets.size());
     int N = net->outputs.size();
     net->d_outputs.resize(N);
     for (int t = 0; t < N; t++) {
-        net->d_outputs[t] = - net->outputs[t];
+        net->d_outputs[t] = -net->outputs[t];
         for (int i = 0; i < targets[t].rows(); i++) {
-            for (int b=0; b < targets[t].cols(); b++) {
+            for (int b = 0; b < targets[t].cols(); b++) {
                 // only allow binary classification
-                assert(fabs(targets[t](i,b)-0)<1e-5 || fabs(targets[t](i,b)-1)<1e-5);
-                if (targets[t](i,b) > 0.5) {
-                    net->d_outputs[t](i,b) = 1.0/fmax(lo, net->outputs[t](i,b));
+                assert(fabs(targets[t](i, b)-0) < 1e-5 || fabs(targets[t](i, b)-1) < 1e-5);
+                if (targets[t](i, b) > 0.5) {
+                    net->d_outputs[t](i, b) = 1.0/fmax(lo, net->outputs[t](i, b));
                 }
             }
         }
     }
 }
-void set_classes(INetwork *net,Classes &classes) {
+void set_classes(INetwork *net, Classes &classes) {
     int N = net->outputs.size();
     assert(N == classes.size());
     net->d_outputs.resize(N);
@@ -72,7 +72,7 @@ void set_classes(INetwork *net,Classes &classes) {
         net->d_outputs[t](classes[t]) += 1;
     }
 }
-void train(INetwork *net,Sequence &xs, Sequence &targets) {
+void train(INetwork *net, Sequence &xs, Sequence &targets) {
     assert(xs.size() > 0);
     assert(xs.size() == targets.size());
     net->inputs = xs;
@@ -81,7 +81,7 @@ void train(INetwork *net,Sequence &xs, Sequence &targets) {
     net->backward();
     net->update();
 }
-void ctrain(INetwork *net,Sequence &xs, Classes &cs) {
+void ctrain(INetwork *net, Sequence &xs, Classes &cs) {
     net->inputs = xs;
     net->forward();
     int len = net->outputs.size();
@@ -104,7 +104,7 @@ void ctrain(INetwork *net,Sequence &xs, Classes &cs) {
     net->update();
 }
 
-void ctrain_accelerated(INetwork *net,Sequence &xs, Classes &cs, Float lo) {
+void ctrain_accelerated(INetwork *net, Sequence &xs, Classes &cs, Float lo) {
     net->inputs = xs;
     net->forward();
     int len = net->outputs.size();
@@ -130,13 +130,13 @@ void ctrain_accelerated(INetwork *net,Sequence &xs, Classes &cs, Float lo) {
     net->update();
 }
 
-void cpred(INetwork *net,Classes &preds, Sequence &xs) {
+void cpred(INetwork *net, Classes &preds, Sequence &xs) {
     int N = xs.size();
-    assert(xs[0].cols()==0);
+    assert(xs[0].cols() == 0);
     net->inputs = xs;
     preds.resize(N);
     net->forward();
-    assert(net->outputs.size()==N);
+    assert(net->outputs.size() == N);
     for (int t = 0; t < N; t++) {
         int index = -1;
         net->outputs[t].col(0).maxCoeff(&index);
@@ -145,12 +145,12 @@ void cpred(INetwork *net,Classes &preds, Sequence &xs) {
 }
 
 void INetwork::makeEncoders() {
-    encoder.reset(new map<int,int>());
-    for (int i=0; i<codec.size(); i++) {
+    encoder.reset(new map<int, int>());
+    for (int i = 0; i < codec.size(); i++) {
         encoder->insert(make_pair(codec[i], i));
     }
-    iencoder.reset(new map<int,int>());
-    for (int i=0; i<icodec.size(); i++) {
+    iencoder.reset(new map<int, int>());
+    for (int i = 0; i < icodec.size(); i++) {
         iencoder->insert(make_pair(icodec[i], i));
     }
 }
@@ -158,31 +158,31 @@ void INetwork::makeEncoders() {
 void INetwork::encode(Classes &classes, std::wstring &s) {
     if (!encoder) makeEncoders();
     classes.clear();
-    for(int pos=0; pos<s.size(); pos++) {
+    for (int pos = 0; pos < s.size(); pos++) {
         unsigned c = s[pos];
-        assert(encoder->count(c)>0);
+        assert(encoder->count(c) > 0);
         c = (*encoder)[c];
-        assert(c!=0);
+        assert(c != 0);
         classes.push_back(c);
     }
 }
 void INetwork::iencode(Classes &classes, std::wstring &s) {
     if (!iencoder) makeEncoders();
     classes.clear();
-    for(int pos=0; pos<s.size(); pos++) {
+    for (int pos = 0; pos < s.size(); pos++) {
         int c = (*iencoder)[int(s[pos])];
         classes.push_back(c);
     }
 }
 std::wstring INetwork::decode(Classes &classes) {
     std::wstring s;
-    for (int i=0; i<classes.size(); i++)
+    for (int i = 0; i < classes.size(); i++)
         s.push_back(wchar_t(codec[classes[i]]));
     return s;
 }
 std::wstring INetwork::idecode(Classes &classes) {
     std::wstring s;
-    for (int i=0; i<classes.size(); i++)
+    for (int i = 0; i < classes.size(); i++)
         s.push_back(wchar_t(icodec[classes[i]]));
     return s;
 }
@@ -295,7 +295,7 @@ struct Full : Network {
         for (int t = 0; t < inputs.size(); t++) {
             int bs = outputs[t].cols();
             outputs[t] = W * inputs[t];
-            for(int b = 0; b< bs; b++) outputs[t].col(b) += w;
+            for (int b = 0; b < bs; b++) outputs[t].col(b) += w;
             NONLIN::f(outputs[t]);
         }
     }
@@ -308,7 +308,7 @@ struct Full : Network {
         for (int t = 0; t < d_outputs.size(); t++) {
             int bs = outputs[t].cols();
             d_W += d_outputs[t] * inputs[t].transpose();
-            for (int b=0; b<bs; b++) d_w += d_outputs[t].col(b);
+            for (int b = 0; b < bs; b++) d_w += d_outputs[t].col(b);
         }
         nseq += 1;
         nsteps += d_outputs.size();
@@ -316,9 +316,9 @@ struct Full : Network {
     }
     void update() {
         float lr = learning_rate;
-        if (normalization==NORM_BATCH) lr /= nseq;
-        else if (normalization==NORM_LEN) lr /= nsteps;
-        else if (normalization==NORM_NONE) /* do nothing */;
+        if (normalization == NORM_BATCH) lr /= nseq;
+        else if (normalization == NORM_LEN) lr /= nsteps;
+        else if (normalization == NORM_NONE) /* do nothing */;
         else throw "unknown normalization";
         W += lr * d_W;
         w += lr * d_w;
@@ -377,10 +377,10 @@ typedef Full<TanhNonlin> TanhLayer;
 REGISTER(TanhLayer);
 
 inline Float relu_(Float x) {
-    return x<=0?0:x;
+    return x <= 0 ? 0 : x;
 }
 inline Float heavi_(Float x) {
-    return x<=0?0:1;
+    return x <= 0 ? 0 : 1;
 }
 struct ReluNonlin {
     static constexpr const char *kind = "relu";
@@ -447,8 +447,8 @@ struct SoftmaxLayer : Network {
         outputs.resize(inputs.size());
         int no = W.rows(), bs = inputs[0].cols();
         for (int t = 0; t < inputs.size(); t++) {
-            outputs[t].resize(no,bs);
-            for (int b=0; b < outputs[t].cols(); b++) {
+            outputs[t].resize(no, bs);
+            for (int b = 0; b < outputs[t].cols(); b++) {
                 outputs[t].col(b) = (W * inputs[t].col(b) + w).array().unaryExpr(ptr_fun(limexp));
                 Float total = fmax(outputs[t].col(b).sum(), 1e-9);
                 outputs[t].col(b) /= total;
@@ -463,16 +463,16 @@ struct SoftmaxLayer : Network {
         for (int t = 0; t < d_outputs.size(); t++) {
             d_W += d_outputs[t] * inputs[t].transpose();
             int bs = d_outputs[t].cols();
-            for (int b=0; b<bs; b++) d_w += d_outputs[t].col(b);
+            for (int b = 0; b < bs; b++) d_w += d_outputs[t].col(b);
         }
         nsteps += d_outputs.size();
         nseq += 1;
     }
     void update() {
         float lr = learning_rate;
-        if (normalization==NORM_BATCH) lr /= nseq;
-        else if (normalization==NORM_LEN) lr /= nsteps;
-        else if (normalization==NORM_NONE) /* do nothing */;
+        if (normalization == NORM_BATCH) lr /= nseq;
+        else if (normalization == NORM_LEN) lr /= nsteps;
+        else if (normalization == NORM_NONE) /* do nothing */;
         else throw "unknown normalization";
         W += lr * d_W;
         w += lr * d_w;
@@ -526,7 +526,7 @@ struct Stacked : Network {
         d_inputs = sub[0]->d_inputs;
     }
     void update() {
-        for (int i=0; i<sub.size(); i++)
+        for (int i = 0; i < sub.size(); i++)
             sub[i]->update();
     }
 };
@@ -605,9 +605,9 @@ struct Parallel : Network {
         int n2 = net2->outputs[0].rows();
         outputs.resize(N);
         int bs = net1->outputs[0].cols();
-        assert(bs==net2->outputs[0].cols());
+        assert(bs == net2->outputs[0].cols());
         for (int t = 0; t < N; t++) {
-            outputs[t].resize(n1+n2,bs);
+            outputs[t].resize(n1+n2, bs);
             outputs[t].block(0, 0, n1, bs) = net1->outputs[t];
             outputs[t].block(n1, 0, n2, bs) = net2->outputs[t];
         }
@@ -625,11 +625,11 @@ struct Parallel : Network {
         net1->d_outputs.resize(N);
         net2->d_outputs.resize(N);
         int bs = net1->outputs[0].cols();
-        assert(bs==net2->outputs[0].cols());
+        assert(bs == net2->outputs[0].cols());
         for (int t = 0; t < N; t++) {
-            net1->d_outputs[t].resize(n1,bs);
+            net1->d_outputs[t].resize(n1, bs);
             net1->d_outputs[t] = d_outputs[t].block(0, 0, n1, bs);
-            net2->d_outputs[t].resize(n2,bs);
+            net2->d_outputs[t].resize(n2, bs);
             net2->d_outputs[t] = d_outputs[t].block(n1, 0, n2, bs);
         }
         net1->backward();
@@ -641,7 +641,7 @@ struct Parallel : Network {
         }
     }
     void update() {
-        for (int i=0; i<sub.size(); i++) sub[i]->update();
+        for (int i = 0; i < sub.size(); i++) sub[i]->update();
     }
 };
 REGISTER(Parallel);
@@ -659,7 +659,7 @@ inline Mat nonlin(T &a) {
 }
 template <class NONLIN, class T>
 inline Mat yprime(T &a) {
-    Mat result = Mat::Ones(a.rows(),a.cols());
+    Mat result = Mat::Ones(a.rows(), a.cols());
     NONLIN::df(result, a);
     return result;
 }
@@ -682,7 +682,7 @@ void each(F f, T &a, Args&&... args) {
 }
 }
 
-template <class F, class G, class H, bool PEEP=true>
+template <class F, class G, class H, bool PEEP = true>
 struct GenericLSTM : Network {
     // NB: verified gradients against Python implementation; this
     // code yields identical numerical results
@@ -727,8 +727,8 @@ struct GenericLSTM : Network {
              }, WEIGHTS);
         if (PEEP) {
             each([no](Vec &w) {
-                w = Vec::Random(no) * 0.01;
-            }, PEEPS);
+                     w = Vec::Random(no) * 0.01;
+                 }, PEEPS);
         };
         clearUpdates();
     }
@@ -751,7 +751,7 @@ struct GenericLSTM : Network {
         resize(N);
         for (int t = 0; t < N; t++) {
             int bs = inputs[t].cols();
-            source[t].resize(nf,bs);
+            source[t].resize(nf, bs);
             source[t].block(0, 0, 1, bs).setConstant(1);
             source[t].block(1, 0, ni, bs) = inputs[t];
             if (t == 0) source[t].block(1+ni, 0, no, bs).setConstant(0);
@@ -762,7 +762,7 @@ struct GenericLSTM : Network {
             cix[t] = WCI * source[t];
             if (t > 0) {
                 int bs = state[t-1].cols();
-                for(int b=0;b<bs;b++) {
+                for (int b = 0; b < bs; b++) {
                     if (PEEP) gix[t].col(b).A += WIP.A * state[t-1].col(b).A;
                     if (PEEP) gfx[t].col(b).A += WFP.A * state[t-1].col(b).A;
                 }
@@ -775,7 +775,7 @@ struct GenericLSTM : Network {
                 state[t].A += gf[t].A * state[t-1].A;
                 if (PEEP) {
                     int bs = state[t].cols();
-                    for(int b=0;b<bs;b++)
+                    for (int b = 0; b < bs; b++)
                         gox[t].col(b).A += WOP.A * state[t].col(b).A;
                 }
             }
@@ -793,14 +793,14 @@ struct GenericLSTM : Network {
             goerr[t] = yprime<F>(go[t]).A * nonlin<H>(state[t]).A * outerr[t].A;
             stateerr[t] = xprime<H>(state[t]).A * go[t].A * outerr[t].A;
             if (PEEP) {
-                for (int b=0; b<bs; b++)
+                for (int b = 0; b < bs; b++)
                     stateerr[t].col(b).A += goerr[t].col(b).A * WOP.A;
             }
             if (t < N-1) {
-                if (PEEP) for (int b=0; b<bs; b++) {
-                    stateerr[t].col(b).A += gferr[t+1].col(b).A * WFP.A;
-                    stateerr[t].col(b).A += gierr[t+1].col(b).A * WIP.A;
-                }
+                if (PEEP) for (int b = 0; b < bs; b++) {
+                        stateerr[t].col(b).A += gferr[t+1].col(b).A * WFP.A;
+                        stateerr[t].col(b).A += gierr[t+1].col(b).A * WIP.A;
+                    }
                 stateerr[t].A += stateerr[t+1].A * gf[t+1].A;
             }
             if (t > 0) gferr[t] = yprime<F>(gf[t]).A * stateerr[t].A * state[t-1].A;
@@ -810,7 +810,7 @@ struct GenericLSTM : Network {
             if (t > 0) sourceerr[t] += WGF.transpose() * gferr[t];
             sourceerr[t] += WGO.transpose() * goerr[t];
             sourceerr[t] += WCI.transpose() * cierr[t];
-            d_inputs[t].resize(ni,bs);
+            d_inputs[t].resize(ni, bs);
             d_inputs[t] = sourceerr[t].block(1, 0, ni, bs);
         }
         if (gradient_clipping > 0 || gradient_clipping < 999) {
@@ -822,7 +822,7 @@ struct GenericLSTM : Network {
         for (int t = 0; t < N; t++) {
             int bs = state[t].cols();
             if (PEEP) {
-                for (int b = 0; b<bs; b++) {
+                for (int b = 0; b < bs; b++) {
                     if (t > 0) DWIP.A += gierr[t].col(b).A * state[t-1].col(b).A;
                     if (t > 0) DWFP.A += gferr[t].col(b).A * state[t-1].col(b).A;
                     DWOP.A += goerr[t].col(b).A * state[t].col(b).A;
@@ -845,9 +845,9 @@ struct GenericLSTM : Network {
     }
     void update() {
         float lr = learning_rate;
-        if (normalization==NORM_BATCH) lr /= nseq;
-        else if (normalization==NORM_LEN) lr /= nsteps;
-        else if (normalization==NORM_NONE) /* do nothing */;
+        if (normalization == NORM_BATCH) lr /= nseq;
+        else if (normalization == NORM_LEN) lr /= nsteps;
+        else if (normalization == NORM_NONE) /* do nothing */;
         else throw "unknown normalization";
         WGI += lr * DWGI;
         WGF += lr * DWGF;
@@ -897,17 +897,17 @@ struct GenericLSTM : Network {
     }
 };
 
-typedef GenericLSTM<SigmoidNonlin,TanhNonlin,TanhNonlin> LSTM;
+typedef GenericLSTM<SigmoidNonlin, TanhNonlin, TanhNonlin> LSTM;
 REGISTER(LSTM);
-typedef GenericLSTM<SigmoidNonlin,TanhNonlin,TanhNonlin,false> NPLSTM;
+typedef GenericLSTM<SigmoidNonlin, TanhNonlin, TanhNonlin, false> NPLSTM;
 REGISTER(NPLSTM);
-typedef GenericLSTM<SigmoidNonlin,TanhNonlin,NoNonlin> LINLSTM;
+typedef GenericLSTM<SigmoidNonlin, TanhNonlin, NoNonlin> LINLSTM;
 REGISTER(LINLSTM);
-typedef GenericLSTM<SigmoidNonlin,ReluNonlin,TanhNonlin> RELUTANHLSTM;
+typedef GenericLSTM<SigmoidNonlin, ReluNonlin, TanhNonlin> RELUTANHLSTM;
 REGISTER(RELUTANHLSTM);
-typedef GenericLSTM<SigmoidNonlin,ReluNonlin,NoNonlin> RELULSTM;
+typedef GenericLSTM<SigmoidNonlin, ReluNonlin, NoNonlin> RELULSTM;
 REGISTER(RELULSTM);
-typedef GenericLSTM<SigmoidNonlin,ReluNonlin,ReluNonlin> RELU2LSTM;
+typedef GenericLSTM<SigmoidNonlin, ReluNonlin, ReluNonlin> RELU2LSTM;
 REGISTER(RELU2LSTM);
 
 INetwork *make_LSTM() {
@@ -973,9 +973,9 @@ struct BIDILSTM : Stacked {
         int nh = irequire("nhidden");
         int no = irequire("noutput");
         shared_ptr<INetwork> fwd, bwd, parallel, reversed, softmax;
-        fwd = make_net(attr("lstm_type","LSTM"));
-        bwd = make_net(attr("lstm_type","LSTM"));
-        softmax = make_net(attr("output_type","SoftmaxLayer"));
+        fwd = make_net(attr("lstm_type", "LSTM"));
+        bwd = make_net(attr("lstm_type", "LSTM"));
+        softmax = make_net(attr("output_type", "SoftmaxLayer"));
         fwd->init(nh, ni);
         bwd->init(nh, ni);
         reversed = make_shared<Reversed>();
@@ -1022,7 +1022,7 @@ struct BidiLayer : Parallel {
 };
 REGISTER(BidiLayer);
 
-shared_ptr<INetwork> make_fwdbwd(int nh,int ni) {
+shared_ptr<INetwork> make_fwdbwd(int nh, int ni) {
     shared_ptr<INetwork> net;
     net.reset(new BidiLayer());
     net->init(nh, ni);
@@ -1132,7 +1132,7 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
         for (int j = 0; j < nc; j++) {
             double total = 0.0;
             for (int k = 0; k < n2; k++) {
-                double value = epath(i, k) * targets(k,j);
+                double value = epath(i, k) * targets(k, j);
                 total += value;
             }
             aligned(i, j) = total;
@@ -1146,20 +1146,20 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
 }
 
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &targets) {
-    assert(outputs[0].cols()==1);
-    assert(targets[0].cols()==1);
+    assert(outputs[0].cols() == 1);
+    assert(targets[0].cols() == 1);
     int n1 = outputs.size();
     int n2 = targets.size();
     int nc = targets[0].size();
     Mat moutputs(n1, nc);
     Mat mtargets(n2, nc);
-    for(int i=0; i<n1; i++) moutputs.row(i) = outputs[i].col(0);
-    for(int i=0; i<n2; i++) mtargets.row(i) = targets[i].col(0);
+    for (int i = 0; i < n1; i++) moutputs.row(i) = outputs[i].col(0);
+    for (int i = 0; i < n2; i++) mtargets.row(i) = targets[i].col(0);
     Mat aligned;
     ctc_align_targets(aligned, moutputs, mtargets);
     posteriors.resize(n1);
     for (int i = 0; i < n1; i++) {
-        posteriors[i].resize(aligned.row(i).size(),1);
+        posteriors[i].resize(aligned.row(i).size(), 1);
         posteriors[i].col(0) = aligned.row(i);
     }
 }
@@ -1169,9 +1169,9 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets
     Sequence stargets;
     stargets.resize(targets.size());
     for (int t = 0; t < stargets.size(); t++) {
-        stargets[t].resize(nclasses,1);
+        stargets[t].resize(nclasses, 1);
         stargets[t].fill(0);
-        stargets[t](targets[t],0) = 1.0;
+        stargets[t](targets[t], 0) = 1.0;
     }
     ctc_align_targets(posteriors, outputs, stargets);
 }
@@ -1179,7 +1179,7 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets
 void mktargets(Sequence &seq, Classes &transcript, int ndim) {
     seq.resize(2*transcript.size()+1);
     for (int t = 0; t < seq.size(); t++) {
-        seq[t].setZero(ndim,1);
+        seq[t].setZero(ndim, 1);
         if (t%2 == 1) seq[t](transcript[(t-1)/2]) = 1;
         else seq[t](0) = 1;
     }
@@ -1189,24 +1189,24 @@ void mktargets(Sequence &seq, Classes &transcript, int ndim) {
 // to be cleaned up. However, for now it works.
 
 void save_codec(h5eigen::HDF5 *h5, const char *name, vector<int> &codec, int n) {
-    assert(codec.size()==0 || codec.size()==n);
+    assert(codec.size() == 0 || codec.size() == n);
     Vec vcodec;
     vcodec.resize(n);
-    if(codec.size()==0)
-        for(int i=0;i<n;i++) vcodec[i] = i;
+    if (codec.size() == 0)
+        for (int i = 0; i < n; i++) vcodec[i] = i;
     else
-        for(int i=0;i<n;i++) vcodec[i] = codec[i];
+        for (int i = 0; i < n; i++) vcodec[i] = codec[i];
 
     h5->put(vcodec, name);
 }
 
 void load_codec(vector<int> &codec, h5eigen::HDF5 *h5, const char *name) {
     codec.resize(0);
-    if(!h5->exists(name)) return;
+    if (!h5->exists(name)) return;
     Vec vcodec;
     h5->get(vcodec, name);
     codec.resize(vcodec.size());
-    for(int i=0; i<vcodec.size(); i++) codec[i] = vcodec[i];
+    for (int i = 0; i < vcodec.size(); i++) codec[i] = vcodec[i];
 }
 
 void save_net_raw(const char *fname, INetwork *net) {
@@ -1215,19 +1215,19 @@ void save_net_raw(const char *fname, INetwork *net) {
     h5->open(fname, true);
     net->attributes["clstm-version"] = "1";
     for (auto &kv : net->attributes) {
-        h5->setAttr(kv.first, kv.second);
+    h5->setAttr(kv.first, kv.second);
     }
     save_codec(h5.get(), "codec", net->codec, net->noutput());
     save_codec(h5.get(), "icodec", net->icodec, net->ninput());
 
     net->weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
-        if (a.mat) h5->put(*a.mat, prefix.c_str());
-        else if (a.vec) h5->put(*a.vec, prefix.c_str());
-        else throw "oops (save type)";
-    });
+                     if (a.mat) h5->put(*a.mat, prefix.c_str());
+                     else if (a.vec) h5->put(*a.vec, prefix.c_str());
+                     else throw "oops (save type)";
+                 });
 }
 
-void load_net_raw(INetwork *net,const char *fname) {
+void load_net_raw(INetwork *net, const char *fname) {
     using namespace h5eigen;
     unique_ptr<HDF5> h5(make_HDF5());
     h5->open(fname);
@@ -1235,28 +1235,28 @@ void load_net_raw(INetwork *net,const char *fname) {
     load_codec(net->icodec, h5.get(), "icodec");
     load_codec(net->codec, h5.get(), "codec");
     net->weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
-        if (a.mat) h5->get(*a.mat, prefix.c_str());
-        else if (a.vec) h5->get1d(*a.vec, prefix.c_str());
-        else throw "oops (load type)";
-    });
-   net->networks("", [] (string s, INetwork *net) {
-       net->postLoad();
-   });
+                     if (a.mat) h5->get(*a.mat, prefix.c_str());
+                     else if (a.vec) h5->get1d(*a.vec, prefix.c_str());
+                     else throw "oops (load type)";
+                 });
+    net->networks("", [] (string s, INetwork *net) {
+                      net->postLoad();
+                  });
 }
 
 static string fixup_net_name(string kind) {
-    if (kind=="bidi") return "BIDILSTM";
-    if (kind=="lrbidi") return "LRBIDILSTM";
-    if (kind=="bidi2") return "BIDILSTM2";
-    if (kind=="lstm1") return "LSTM1";
-    if (kind=="uni") return "LSTM1";
+    if (kind == "bidi") return "BIDILSTM";
+    if (kind == "lrbidi") return "LRBIDILSTM";
+    if (kind == "bidi2") return "BIDILSTM2";
+    if (kind == "lstm1") return "LSTM1";
+    if (kind == "uni") return "LSTM1";
     return kind;
 }
 
 shared_ptr<INetwork> make_net(string kind) {
     kind = fixup_net_name(kind);
     auto it = network_factories.find(kind);
-    if (it==network_factories.end()) throw "unknown network type";
+    if (it == network_factories.end()) throw "unknown network type";
     shared_ptr<INetwork> net;
     net.reset(it->second());
     net->attributes["kind"] = kind;
@@ -1323,10 +1323,10 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch) {
     }
 }
 
-void ctc_train(INetwork *net,Sequence &xs, Sequence &targets) {
+void ctc_train(INetwork *net, Sequence &xs, Sequence &targets) {
     // untested
-    assert(xs[0].cols()==1);
-    assert(xs.size()<=targets.size());
+    assert(xs[0].cols() == 1);
+    assert(xs.size() <= targets.size());
     assert(!anynan(xs));
     net->inputs = xs;
     net->forward();
@@ -1338,18 +1338,16 @@ void ctc_train(INetwork *net,Sequence &xs, Sequence &targets) {
     net->backward();
 }
 
-void ctc_train(INetwork *net,Sequence &xs, Classes &targets) {
+void ctc_train(INetwork *net, Sequence &xs, Classes &targets) {
     // untested
     Sequence ys;
     mktargets(ys, targets, net->noutput());
     ctc_train(net, xs, ys);
 }
 
-void ctc_train(INetwork *net,Sequence &xs, BatchClasses &targets) {
+void ctc_train(INetwork *net, Sequence &xs, BatchClasses &targets) {
     throw "unimplemented";
 }
-
-
 }  // namespace ocropus
 
 #ifdef LSTM_TEST

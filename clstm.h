@@ -45,7 +45,7 @@ extern char exception_message[256];
 inline Vec timeslice(const Sequence &s, int i, int b=0) {
     Vec result(s.size());
     for (int t = 0; t < s.size(); t++)
-        result[t] = s[t](i,b);
+        result[t] = s[t](i, b);
     return result;
 }
 
@@ -63,7 +63,8 @@ struct VecMat {
 };
 
 struct ITrainable {
-    virtual ~ITrainable() {}
+    virtual ~ITrainable() {
+    }
     // Each network has a name that's used for loading
     // and saving.
     string name = "???";
@@ -81,17 +82,17 @@ struct ITrainable {
     map<string, string> attributes;
     string attr(string key, string dflt="") {
         auto it = attributes.find(key);
-        if (it==attributes.end()) return dflt;
+        if (it == attributes.end()) return dflt;
         return it->second;
     }
     int iattr(string key, int dflt=-1) {
         auto it = attributes.find(key);
-        if (it==attributes.end()) return dflt;
+        if (it == attributes.end()) return dflt;
         return std::stoi(it->second);
     }
     int irequire(string key) {
         auto it = attributes.find(key);
-        if (it==attributes.end()) {
+        if (it == attributes.end()) {
             sprintf(exception_message, "missing parameter: %s", key.c_str());
             throw exception_message;
         }
@@ -116,8 +117,12 @@ struct ITrainable {
     virtual void backward() = 0;
     virtual void update() = 0;
 
-    virtual int idepth() { return -9999; }
-    virtual int odepth() { return -9999; }
+    virtual int idepth() {
+        return -9999;
+    }
+    virtual int odepth() {
+        return -9999;
+    }
 
     virtual void initialize() {
         // this gets initialization parameters
@@ -162,8 +167,8 @@ struct INetwork : virtual ITrainable {
     // Data for encoding/decoding input/output strings.
     vector<int> codec;
     vector<int> icodec;
-    unique_ptr<map<int, int>> encoder;  // cached
-    unique_ptr<map<int, int>> iencoder; // cached
+    unique_ptr<map<int, int> > encoder;  // cached
+    unique_ptr<map<int, int> > iencoder;  // cached
     void makeEncoders();
     std::wstring decode(Classes &cs);
     std::wstring idecode(Classes &cs);
@@ -174,11 +179,16 @@ struct INetwork : virtual ITrainable {
     Float softmax_floor = 1e-5;
     bool softmax_accel = false;
 
-    virtual ~INetwork() { }
+    virtual ~INetwork() {
+    }
 
     // Expected number of input/output features.
-    virtual int ninput() { return -999999; }
-    virtual int noutput() { return -999999; }
+    virtual int ninput() {
+        return -999999;
+    }
+    virtual int noutput() {
+        return -999999;
+    }
 
     // Add a network as a subnetwork.
     virtual void add(shared_ptr<INetwork> net) {
@@ -188,16 +198,20 @@ struct INetwork : virtual ITrainable {
     // Hooks to iterate over the weights and states of this network.
     typedef function<void (const string &, VecMat, VecMat)> WeightFun;
     typedef function<void (const string &, Sequence *)> StateFun;
-    virtual void myweights(const string &prefix, WeightFun f) { }
-    virtual void mystates(const string &prefix, StateFun f) { }
+    virtual void myweights(const string &prefix, WeightFun f) {
+    }
+    virtual void mystates(const string &prefix, StateFun f) {
+    }
 
     // Hooks executed prior to saving and after loading.
     // Loading iterates over the weights with the `weights`
     // methods and restores only the weights. `postLoad`
     // allows classes to update other internal state that
     // depends on matrix size.
-    virtual void preSave() { }
-    virtual void postLoad() { }
+    virtual void preSave() {
+    }
+    virtual void postLoad() {
+    }
 
     // Set the learning rate for this network and all subnetworks.
     virtual void setLearningRate(Float lr, Float momentum) {
@@ -217,23 +231,23 @@ struct INetwork : virtual ITrainable {
 };
 
 // setting inputs and outputs
-void set_inputs(INetwork *net,Sequence &inputs);
-void set_targets(INetwork *net,Sequence &targets);
-void set_targets_accelerated(INetwork *net,Sequence &targets);
-void set_classes(INetwork *net,Classes &classes);
-void set_classes(INetwork *net,BatchClasses &classes);
+void set_inputs(INetwork *net, Sequence &inputs);
+void set_targets(INetwork *net, Sequence &targets);
+void set_targets_accelerated(INetwork *net, Sequence &targets);
+void set_classes(INetwork *net, Classes &classes);
+void set_classes(INetwork *net, BatchClasses &classes);
 
 // single sequence training functions
-void train(INetwork *net,Sequence &xs, Sequence &targets);
-void ctrain(INetwork *net,Sequence &xs, Classes &cs);
-void ctrain_accelerated(INetwork *net,Sequence &xs, Classes &cs, Float lo=1e-5);
-void cpred(INetwork *net,Classes &preds, Sequence &xs);
+void train(INetwork *net, Sequence &xs, Sequence &targets);
+void ctrain(INetwork *net, Sequence &xs, Classes &cs);
+void ctrain_accelerated(INetwork *net, Sequence &xs, Classes &cs, Float lo=1e-5);
+void cpred(INetwork *net, Classes &preds, Sequence &xs);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
 
 // batch training functions
-void ctrain(INetwork *net,Sequence &xs, BatchClasses &cs);
-void ctrain_accelerated(INetwork *net,Sequence &xs, BatchClasses &cs, Float lo=1e-5);
-void cpred(INetwork *net,BatchClasses &preds, Sequence &xs);
+void ctrain(INetwork *net, Sequence &xs, BatchClasses &cs);
+void ctrain_accelerated(INetwork *net, Sequence &xs, BatchClasses &cs, Float lo=1e-5);
+void cpred(INetwork *net, BatchClasses &preds, Sequence &xs);
 void mktargets(Sequence &seq, BatchClasses &targets, int ndim);
 
 // common network layers
@@ -256,7 +270,7 @@ INetwork *make_BIDILSTM2();
 INetwork *make_LRBIDILSTM();
 
 typedef std::function<INetwork*(void)> INetworkFactory;
-extern map<string,INetworkFactory> network_factories;
+extern map<string, INetworkFactory> network_factories;
 shared_ptr<INetwork> make_net(string kind);
 
 extern Mat debugmat;
@@ -266,17 +280,15 @@ void load_attributes(map<string, string> &attrs, const string &file);
 shared_ptr<INetwork> load_net(const string &file);
 void save_net(const string &file, shared_ptr<INetwork> net);
 
-
 // training with CTC
 void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5.0);
 void forwardbackward(Mat &both, Mat &lmatch);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &targets);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets);
 void trivial_decode(Classes &cs, Sequence &outputs, int batch=0);
-void ctc_train(INetwork *net,Sequence &xs, Sequence &targets);
-void ctc_train(INetwork *net,Sequence &xs, Classes &targets);
-void ctc_train(INetwork *net,Sequence &xs, BatchClasses &targets);
-
+void ctc_train(INetwork *net, Sequence &xs, Sequence &targets);
+void ctc_train(INetwork *net, Sequence &xs, Classes &targets);
+void ctc_train(INetwork *net, Sequence &xs, BatchClasses &targets);
 }
 
 namespace {
@@ -284,37 +296,36 @@ bool anynan(ocropus::Sequence &a) {
     for (int i = 0; i < a.size(); i++) {
         for (int j = 0; j < a[i].rows(); j++) {
             for (int k = 0; k < a[i].cols(); k++) {
-                if (isnan(a[i](j,k))) return true;
+                if (isnan(a[i](j, k))) return true;
             }
         }
     }
     return false;
 }
 
-template <class A,class B>
-double levenshtein(A &a,B &b) {
+template <class A, class B>
+double levenshtein(A &a, B &b) {
     using std::vector;
     int n = a.size();
     int m = b.size();
-    if(n>m) return levenshtein(b,a);
+    if (n > m) return levenshtein(b, a);
     vector<double> current(n+1);
     vector<double> previous(n+1);
-    for(int k=0;k<current.size();k++) current[k] = k;
-    for(int i=1;i<=m;i++) {
+    for (int k = 0; k < current.size(); k++) current[k] = k;
+    for (int i = 1; i <= m; i++) {
         previous = current;
-        for(int k=0;k<current.size();k++) current[k] = 0;
+        for (int k = 0; k < current.size(); k++) current[k] = 0;
         current[0] = i;
-        for(int j=1;j<=n;j++) {
+        for (int j = 1; j <= n; j++) {
             double add = previous[j]+1;
             double del = previous[j-1]+1;
             double change = previous[j-1];
-            if(a[j-1]!=b[i-1]) change = change+1;
-            current[j] = fmin(fmin(add,del),change);
+            if (a[j-1] != b[i-1]) change = change+1;
+            current[j] = fmin(fmin(add, del), change);
         }
     }
     return current[n];
 }
 }
-
 
 #endif

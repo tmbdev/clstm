@@ -12,7 +12,6 @@
 #include <stdlib.h>
 
 namespace multidim {
-
 template <class T>
 struct mdarray {
     static const int MAXRANK = 8;
@@ -23,12 +22,12 @@ struct mdarray {
     bool owned = false;
 
     void take(mdarray<T> &other) {
-        for(int i=0;i<MAXRANK+1;i++) dims[i] = other.dims[i];
+        for (int i = 0; i < MAXRANK+1; i++) dims[i] = other.dims[i];
         total = other.total;
         fill = other.fill;
         data = other.data;
         owned = other.owned;
-        for(int i=0;i<MAXRANK+1;i++) other.dims[i] = 0;
+        for (int i = 0; i < MAXRANK+1; i++) other.dims[i] = 0;
         other.total = 0;
         other.fill = 0;
         other.data = 0;
@@ -82,9 +81,9 @@ struct mdarray {
     void copy(mdarray<T> &other) {
         clear();
         allocate(other.total);
-        for(int i=0;i<MAXRANK+1;i++) dims[i] = other.dims[i];
+        for (int i = 0; i < MAXRANK+1; i++) dims[i] = other.dims[i];
         fill = other.fill;
-        for(int i=0;i<fill;i++) data[i] = other.data[i];
+        for (int i = 0; i < fill; i++) data[i] = other.data[i];
     }
 
     // get the extent of dimension i
@@ -242,41 +241,41 @@ struct mdarray {
 
     // assignment and arithmetic
     template <class O>
-    void operator= (mdarray<O> &other) {
+    void operator = (mdarray<O> &other) {
         copy(other);
     }
     template <class O>
-    void operator= (const mdarray<O> &other) {
+    void operator = (const mdarray<O> &other) {
         copy(other);
     }
 
     template <class O, class P>
     void clip(const O &lo, const P &hi) {
-        for (int i=0;i<fill; i++) {
+        for (int i = 0; i < fill; i++) {
             T value = data[i];
-            if (value<lo) data[i] = lo;
-            else if (value>hi) data[i] = hi;
+            if (value < lo) data[i] = lo;
+            else if (value > hi) data[i] = hi;
         }
     }
     T min() {
         T result = data[0];
-        for(int i=1; i<fill; i++) {
+        for (int i = 1; i < fill; i++) {
             T value = data[i];
-            if(value<result) result = value;
+            if (value < result) result = value;
         }
         return result;
     }
     T max() {
         T result = data[0];
-        for(int i=1; i<fill; i++) {
+        for (int i = 1; i < fill; i++) {
             T value = data[i];
-            if(value>result) result = value;
+            if (value > result) result = value;
         }
         return result;
     }
     double normsq() {
         double result = 0.0;
-        for(int i=0; i<fill; i++) {
+        for (int i = 0; i < fill; i++) {
             T value = data[i];
             result += value*value;
         }
@@ -286,49 +285,49 @@ struct mdarray {
         return sqrt(normsq());
     }
     void randomize() {
-        for(int i=0; i<fill; i++) data[i] = drand48();
+        for (int i = 0; i < fill; i++) data[i] = drand48();
     }
 
     template <class O>
-    void operator+=(const O &other) {
-        assert(fill==other.fill);
-        for(int i=0;i<fill;i++) data[i] += other.data[i];
+    void operator += (const O &other) {
+        assert(fill == other.fill);
+        for (int i = 0; i < fill; i++) data[i] += other.data[i];
     }
     template <class O>
-    void operator-=(const O &other) {
-        assert(fill==other.fill);
-        for(int i=0;i<fill;i++) data[i] += other.data[i];
+    void operator -= (const O &other) {
+        assert(fill == other.fill);
+        for (int i = 0; i < fill; i++) data[i] += other.data[i];
     }
     template <class O>
-    void operator*=(const O &other) {
-        assert(fill==other.fill);
-        for(int i=0;i<fill;i++) data[i] *= other.data[i];
+    void operator *= (const O &other) {
+        assert(fill == other.fill);
+        for (int i = 0; i < fill; i++) data[i] *= other.data[i];
     }
     template <class O>
-    void operator/=(const O &other) {
-        assert(fill==other.fill);
-        for(int i=0;i<fill;i++) data[i] /= other.data[i];
+    void operator /= (const O &other) {
+        assert(fill == other.fill);
+        for (int i = 0; i < fill; i++) data[i] /= other.data[i];
     }
 
     template <class O>
-    void operator+=(const mdarray<O> &other) {
-        assert(fill==other.fill);
-        for(int i=0;i<fill;i++) data[i] += other.data[i];
+    void operator += (const mdarray<O> &other) {
+        assert(fill == other.fill);
+        for (int i = 0; i < fill; i++) data[i] += other.data[i];
     }
     template <class O>
-    void operator-=(const mdarray<O> &other) {
-        assert(fill==other.fill);
-        for(int i=0;i<fill;i++) data[i] += other.data[i];
+    void operator -= (const mdarray<O> &other) {
+        assert(fill == other.fill);
+        for (int i = 0; i < fill; i++) data[i] += other.data[i];
     }
     template <class O>
-    void operator*=(const mdarray<O> &other) {
-        assert(fill==other.fill);
-        for(int i=0;i<fill;i++) data[i] *= other.data[i];
+    void operator *= (const mdarray<O> &other) {
+        assert(fill == other.fill);
+        for (int i = 0; i < fill; i++) data[i] *= other.data[i];
     }
     template <class O>
-    void operator/=(const mdarray<O> &other) {
-        assert(fill==other.fill);
-        for(int i=0;i<fill;i++) data[i] /= other.data[i];
+    void operator /= (const mdarray<O> &other) {
+        assert(fill == other.fill);
+        for (int i = 0; i < fill; i++) data[i] /= other.data[i];
     }
 };
 

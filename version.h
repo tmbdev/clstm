@@ -1,31 +1,31 @@
 
 inline const char *hg_version() {
-    return "e8845c8e6e6f+";
+    return "c1ebfed45bd6+";
 }
 inline const char *hg_log() {
-    return R"(changeset:   73:e8845c8e6e6f
+    return R"(changeset:   76:c1ebfed45bd6
 tag:         tip
-user:        Tom <tmb@google>
-date:        Sun Apr 05 16:58:26 2015 -0700
-files:       clstm.cc clstm.h clstmctc.cc clstmtext.cc
+user:        Tom <tmbdev@gmail.com>
+date:        Thu Apr 09 13:45:34 2015 -0700
+files:       .uncrustify.cfg LICENSE reformat-code
 description:
-bug fixes
+added license and reformatting
 
 
-changeset:   72:8e878ec34ccc
+changeset:   75:2886a50f449a
 user:        Tom <tmb@google>
-date:        Thu Apr 02 21:06:03 2015 -0700
-files:       extras.cc extras.h
+date:        Thu Apr 09 13:23:48 2015 -0700
+files:       test-misc.cc version.h
 description:
-bug fix in random number generator
+numerous updates and bug fixes
 
 
-changeset:   71:a8586bf81db6
+changeset:   74:f0ae4bb93c36
 user:        Tom <tmb@google>
-date:        Thu Apr 02 19:39:04 2015 -0700
-files:       clstmctc.cc clstmtext.cc test-batch.cc
+date:        Wed Apr 08 11:06:16 2015 -0700
+files:       clstm.cc clstmtext.cc
 description:
-replaced more rand48 functions with builtins
+bug fixes for text filters
 
 
 )";

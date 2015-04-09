@@ -25,7 +25,7 @@ using namespace Eigen;
 using namespace ocropus;
 using namespace pymulti;
 
-double error_rate(shared_ptr<INetwork> net,const string &testset) {
+double error_rate(shared_ptr<INetwork> net, const string &testset) {
     int maxeval = getienv("maxeval", 1000000000);
     shared_ptr<IOcrDataset> dataset(make_Dataset(testset));
 
@@ -56,19 +56,19 @@ double error_rate(shared_ptr<INetwork> net,const string &testset) {
 
 void batched_of_sequences(Sequence &batched, vector<Sequence> &sequences) {
     int bs = sequences.size();
-    assert(bs>0);
+    assert(bs > 0);
     int d = sequences[0][0].rows();
-    for (auto s : sequences) assert(s[0].cols()==1);
-    assert(sequences[0].size()>0);
+    for (auto s : sequences) assert(s[0].cols() == 1);
+    assert(sequences[0].size() > 0);
     int N = 0;
-    for (int b=0; b<bs; b++) { if (sequences[b].size()>N) N = sequences[b].size(); }
+    for (int b = 0; b < bs; b++) { if (sequences[b].size() > N) N = sequences[b].size(); }
     // print("---", bs, d, N, sequences[0].size());
-    assert(N>0);
+    assert(N > 0);
     batched.resize(N);
-    for (int i=0;i<N;i++) batched[i] = Mat::Zero(d, bs);
-    for (int b=0; b<bs; b++) {
+    for (int i = 0; i < N; i++) batched[i] = Mat::Zero(d, bs);
+    for (int b = 0; b < bs; b++) {
         Sequence &s = sequences[b];
-        for (int t=0; t<s.size(); t++) batched[t].col(b) = s[t].col(0);
+        for (int t = 0; t < s.size(); t++) batched[t].col(b) = s[t].col(0);
     }
 }
 
@@ -77,10 +77,10 @@ void sequences_of_batched(vector<Sequence> &sequences, Sequence &batched) {
     int d = batched[0].rows();
     int N = batched.size();
     sequences.resize(bs);
-    for (int b=0; b<bs; b++) {
+    for (int b = 0; b < bs; b++) {
         sequences[b].resize(N);
-        for (int t=0;t<N;t++) {
-            sequences[b][t].resize(d,1);
+        for (int t = 0; t < N; t++) {
+            sequences[b][t].resize(d, 1);
             sequences[b][t].col(0) = batched[t].col(b);
         }
     }
@@ -133,20 +133,20 @@ int main(int argc, char **argv) {
     dataset->getCodec(net->codec);
     // if (load_name != "") net->load(load_name.c_str());
     INetwork::Normalization norm = INetwork::NORM_DFLT;
-    if (lrnorm=="len") norm = INetwork::NORM_LEN;
-    if (lrnorm=="none") norm = INetwork::NORM_NONE;
-    if (norm!=INetwork::NORM_DFLT) print("nonstandard lrnorm: ", lrnorm);
-    net->networks("", [norm](string s, INetwork *net) {net->normalization = norm;});
+    if (lrnorm == "len") norm = INetwork::NORM_LEN;
+    if (lrnorm == "none") norm = INetwork::NORM_NONE;
+    if (norm != INetwork::NORM_DFLT) print("nonstandard lrnorm: ", lrnorm);
+    net->networks("", [norm](string s, INetwork *net) {net->normalization = norm; });
 
     //double start_time = now();
     //double best_erate = 1e38;
 
     int next_test = test_every;
     int start = stoi(getdef(net->attributes, "trial", getsenv("start", "-1")))+1;
-    if (start>0) print("start", start);
-    for (int trial = start; trial < ntrain; trial+=batchsize) {
+    if (start > 0) print("start", start);
+    for (int trial = start; trial < ntrain; trial += batchsize) {
         BatchBuilder batch;
-        for (int i=0;i<batchsize; i++) {
+        for (int i = 0; i < batchsize; i++) {
             int sample = irandom() % dataset->samples();
             mdarray<float> image;
             mdarray<int> transcript;
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
         net->forward();
         sequences_of_batched(batch.outputs, net->outputs);
         batch.aligned.resize(batch.outputs.size());
-        for (int b=0; b<batch.aligned.size(); b++) {
+        for (int b = 0; b < batch.aligned.size(); b++) {
             Sequence targets;
             mktargets(targets, batch.classes[b], net->noutput());
             ctc_align_targets(batch.aligned[b], batch.outputs[b], targets);
@@ -187,7 +187,7 @@ int main(int argc, char **argv) {
             print("TRU:", "'"+gt+"'");
             print("OUT:", "'"+out+"'");
             print("ALN:", "'"+aln+"'");
-            print(levenshtein(gt,out));
+            print(levenshtein(gt, out));
         }
         if (trial > next_test) {
             double erate = error_rate(net, testset);

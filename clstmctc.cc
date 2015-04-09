@@ -25,7 +25,7 @@ using namespace Eigen;
 using namespace ocropus;
 using namespace pymulti;
 
-double error_rate(shared_ptr<INetwork> net,const string &testset) {
+double error_rate(shared_ptr<INetwork> net, const string &testset) {
     int maxeval = getienv("maxeval", 1000000000);
     shared_ptr<IOcrDataset> dataset(make_Dataset(testset));
 
@@ -62,8 +62,8 @@ int main_ocr(int argc, char **argv) {
 
     int save_every = getienv("save_every", 0);
     string save_name = getsenv("save_name", "");
-    if (save_every>=0 && save_name=="") throw "must give save_name=";
-    if (save_every>0 && save_name.find('%')==string::npos)
+    if (save_every >= 0 && save_name == "") throw "must give save_name=";
+    if (save_every > 0 && save_name.find('%') == string::npos)
         save_name += "-%08d";
     else
         save_name += ".h5";
@@ -138,10 +138,10 @@ int main_ocr(int argc, char **argv) {
     dataset->getCodec(net->codec);
     // if (load_name != "") net->load(load_name.c_str());
     INetwork::Normalization norm = INetwork::NORM_DFLT;
-    if (lrnorm=="len") norm = INetwork::NORM_LEN;
-    if (lrnorm=="none") norm = INetwork::NORM_NONE;
-    if (norm!=INetwork::NORM_DFLT) print("nonstandard lrnorm: ", lrnorm);
-    net->networks("", [norm](string s, INetwork *net) {net->normalization = norm;});
+    if (lrnorm == "len") norm = INetwork::NORM_LEN;
+    if (lrnorm == "none") norm = INetwork::NORM_NONE;
+    if (norm != INetwork::NORM_DFLT) print("nonstandard lrnorm: ", lrnorm);
+    net->networks("", [norm](string s, INetwork *net) {net->normalization = norm; });
 
     mdarray<float> raw_image, image, outputs, aligned;
     mdarray<int> transcript;
@@ -153,10 +153,10 @@ int main_ocr(int argc, char **argv) {
     double best_erate = 1e38;
 
     int start = stoi(getdef(net->attributes, "trial", getsenv("start", "-1")))+1;
-    if (start>0) print("start", start);
-    if (after_start!="") system(after_start.c_str());
+    if (start > 0) print("start", start);
+    if (after_start != "") system(after_start.c_str());
     for (int trial = start; trial < ntrain; trial++) {
-        bool report = (report_every>0) && (trial % report_every == 0);
+        bool report = (report_every > 0) && (trial % report_every == 0);
         int sample = trial % dataset->samples();
         if (randomize) sample = irandom() % dataset->samples();
         if (trial > 0 && save_every > 0 && trial%save_every == 0) {
@@ -165,7 +165,7 @@ int main_ocr(int argc, char **argv) {
             print("saving", fname);
             net->attributes["trial"] = to_string(trial);
             save_net(fname, net);
-            if (after_save!="") system(after_save.c_str());
+            if (after_save != "") system(after_save.c_str());
         }
         if (trial > 0 && test_every > 0 && trial%test_every == 0 && testset != "") {
             double erate = error_rate(net, testset);
@@ -174,13 +174,13 @@ int main_ocr(int argc, char **argv) {
             print("TESTERR", now()-start_time, save_name, trial, erate,
                   "lrate", lrate, "hidden", nhidden, nhidden2,
                   "batch", batch, "momentum", momentum);
-            if (save_every==0 && erate < best_erate) {
+            if (save_every == 0 && erate < best_erate) {
                 best_erate = erate;
                 print("saving", save_name, "at", erate);
                 save_net(save_name, net);
-                if (after_save!="") system(after_save.c_str());
+                if (after_save != "") system(after_save.c_str());
             }
-            if (after_test!="") system(after_test.c_str());
+            if (after_test != "") system(after_test.c_str());
         }
         dataset->image(image, sample);
         dataset->transcript(transcript, sample);
@@ -202,7 +202,7 @@ int main_ocr(int argc, char **argv) {
         for (int t = 0; t < saligned.size(); t++)
             net->d_outputs[t] = saligned[t] - net->outputs[t];
         net->backward();
-        if (trial%batch==0) net->update();
+        if (trial%batch == 0) net->update();
         assign(aligned, saligned);
         if (anynan(outputs) || anynan(aligned)) {
             print("got nan");
@@ -217,7 +217,7 @@ int main_ocr(int argc, char **argv) {
         if (report) {
             print("OUT:", "'"+out+"'");
             print("ALN:", "'"+aln+"'");
-            print(levenshtein(gt,out));
+            print(levenshtein(gt, out));
         }
 
         if (display_every > 0 && trial%display_every == 0) {
@@ -255,11 +255,11 @@ int main_ocr(int argc, char **argv) {
 
 int main_eval(int argc, char **argv) {
     const char *h5file = argc > 1 ? argv[1] : "uw3-dew-test.h5";
-    string mode = getsenv("mode","errs");
+    string mode = getsenv("mode", "errs");
     string load_name = getsenv("load", "");
     shared_ptr<IOcrDataset> dataset(make_Dataset(h5file));
     shared_ptr<INetwork> net;
-    if(load_name=="") throw "must give load=";
+    if (load_name == "") throw "must give load=";
     net = load_net(load_name);
 
     mdarray<float> image;
@@ -279,15 +279,15 @@ int main_eval(int argc, char **argv) {
         string gt = dataset->to_string(transcript);;
         string out = dataset->to_string(output_classes);
         total += gt.size();
-        double err = levenshtein(gt,out);
+        double err = levenshtein(gt, out);
         errs += err;
-        if  (mode=="quiet") {
+        if  (mode == "quiet") {
             // do nothing
-        } else if(mode=="errs") {
+        } else if (mode == "errs") {
             print(to_string(int(err))+"\t"+out);
-        } else if(mode=="text") {
+        } else if (mode == "text") {
             print(to_string(sample)+"\t"+out);
-        } else if(mode=="full") {
+        } else if (mode == "full") {
             cout << int(err) << "\t";
             cout << int(sample) << "\t";
             cout << out << "\t";
@@ -295,7 +295,7 @@ int main_eval(int argc, char **argv) {
         }
         cout.flush();
     }
-    print("errs",errs,"total",total,"rate",errs*100.0/total,"%");
+    print("errs", errs, "total", total, "rate", errs*100.0/total, "%");
     cout.flush();
     return 0;
 }
@@ -315,24 +315,24 @@ int main_dump(int argc, char **argv) {
 
 int main_testdewarp(int argc, char **argv) {
     srandomize();
-    if (argc!=2) throw "usage: ... image.png";
+    if (argc != 2) throw "usage: ... image.png";
     mdarray<unsigned char> raw;
     mdarray<float> image, dewarped;
     read_png(raw, argv[1]);
-    print("raw",raw.dim(0), raw.dim(1));
-    image.resize(raw.dim(0),raw.dim(1));
-    for(int i=0;i<raw.dim(0);i++) {
-        for(int j=0;j<raw.dim(1);j++) {
+    print("raw", raw.dim(0), raw.dim(1));
+    image.resize(raw.dim(0), raw.dim(1));
+    for (int i = 0; i < raw.dim(0); i++) {
+        for (int j = 0; j < raw.dim(1); j++) {
             int jj = raw.dim(1)-j-1;
-            if(raw.rank()==2) image(i,jj) = 1.0-raw(i,j)/255.0;
-            else image(i,jj) = 1.0-raw(i,j,0)/255.0;
+            if (raw.rank() == 2) image(i, jj) = 1.0-raw(i, j)/255.0;
+            else image(i, jj) = 1.0-raw(i, j, 0)/255.0;
         }
     }
     PyServer *py = new PyServer();
     py->open();
     unique_ptr<INormalizer> normalizer;
     normalizer.reset(make_CenterNormalizer());
-    normalizer->target_height = int(getrenv("target_height",48));
+    normalizer->target_height = int(getrenv("target_height", 48));
     normalizer->getparams(true);
     // normalizer->setPyServer(py);
     py->eval("ion()");
@@ -346,14 +346,12 @@ int main_testdewarp(int argc, char **argv) {
     return 0;
 }
 
-const char *usage = /*program+*/ R"(data.h5
-
-data.h5 is an HDF5 file containing:
-
-float images(N,*): text line images (or sequences of vectors)
-int images_dims(N,2): shape of the images
-int transcripts(N,*): corresponding transcripts
-)";
+const char *usage =
+    "data.h5\n\n"
+    "data.h5 is an HDF5 file containing:\n"
+    "float images(N,*): text line images (or sequences of vectors)\n"
+    "int images_dims(N,2): shape of the images\n"
+    "int transcripts(N,*): corresponding transcripts\n";
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -362,14 +360,14 @@ int main(int argc, char **argv) {
     }
     try {
         string mode = getsenv("mode", "train");
-        if (getienv("eval", 0)) { // for old scripts
+        if (getienv("eval", 0)) {  // for old scripts
             return main_eval(argc, argv);
         }
-        if (mode=="dump") {
+        if (mode == "dump") {
             return main_dump(argc, argv);
-        } else if (mode=="train") {
+        } else if (mode == "train") {
             return main_ocr(argc, argv);
-        } else if (mode=="testdewarp") {
+        } else if (mode == "testdewarp") {
             return main_testdewarp(argc, argv);
         } else {
             return main_eval(argc, argv);
@@ -380,5 +378,4 @@ int main(int argc, char **argv) {
         print("UNKNOWN EXCEPTION");
     }
 }
-
 

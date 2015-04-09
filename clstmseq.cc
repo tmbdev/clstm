@@ -125,7 +125,7 @@ void trivial_decode(Classes &cs, Sequence &outputs) {
 
 inline void getslice(mdarray<float> &a, Sequence &seq, int i, int b=0) {
     a.resize(int(seq.size()));
-    for (int t = 0; t < seq.size(); t++) a(t) = seq[t](i,b);
+    for (int t = 0; t < seq.size(); t++) a(t) = seq[t](i, b);
 }
 
 struct ErrStats {
@@ -237,16 +237,13 @@ int main_seq(int argc, char **argv) {
     }
 }
 
-const char *usage =
-    /*program+*/ R"(data.h5
-
-data.h5 is an HDF5 file containing:
-
-float inputs(N,*): input sequences
-int inputs_dims(N,2): shape of input sequences
-float outputs(N,*): output sequences
-int outputs_dims(N,2): shape of output sequences
-)"                                                                                                                                                                                                                            ;
+const char *usage = /*program+*/
+    "data.h5\n\n"
+    "data.h5 is an HDF5 file containing:\n\n"
+    "float inputs(N,*): input sequences\n"
+    "int inputs_dims(N,2): shape of input sequences\n"
+    "float outputs(N,*): output sequences\n"
+    "int outputs_dims(N,2): shape of output sequences\n";
 
 int main(int argc, char **argv) {
     if (argc < 2) {

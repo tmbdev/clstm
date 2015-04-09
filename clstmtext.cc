@@ -34,25 +34,25 @@ using std_wstring = std::wstring;
 #define wstring std_wstring
 
 struct Sample {
-    wstring in,out;
+    wstring in, out;
 };
 
-void read_samples(vector<Sample> &samples,const string &fname) {
+void read_samples(vector<Sample> &samples, const string &fname) {
     ifstream stream(fname);
     string line;
-    wstring in,out;;
+    wstring in, out;;
     samples.clear();
     while (getline(stream, line)) {
         int where = line.find("\t");
-        if (where<0) throw "no tab found in input line";
-        in = utf8_to_utf32(line.substr(0,where));
+        if (where < 0) throw "no tab found in input line";
+        in = utf8_to_utf32(line.substr(0, where));
         out = utf8_to_utf32(line.substr(where+1));
-        if (in.size()==0) continue;
-        if (out.size()==0) continue;
-        samples.push_back(Sample{in, out});
+        if (in.size() == 0) continue;
+        if (out.size() == 0) continue;
+        samples.push_back(Sample {in, out});
     }
-    for(auto c : out)
-        if (int(c)==0) throw "no nulls allowed in input";
+    for (auto c : out)
+        if (int(c) == 0) throw "no nulls allowed in input";
 }
 
 void get_codec(vector<int> &codec, vector<Sample> &samples, wstring Sample::* p) {
@@ -62,7 +62,7 @@ void get_codec(vector<int> &codec, vector<Sample> &samples, wstring Sample::* p)
         for (auto c : e.*p) codes.insert(int(c));
     }
     for (auto c : codes) codec.push_back(c);
-    for (int i=1; i<codec.size(); i++) assert(codec[i] > codec[i-1]);
+    for (int i = 1; i < codec.size(); i++) assert(codec[i] > codec[i-1]);
 }
 
 void set_inputs_with_eps(INetwork *net, wstring &s, int neps) {
@@ -71,17 +71,17 @@ void set_inputs_with_eps(INetwork *net, wstring &s, int neps) {
     Sequence &seq = net->inputs;
     int d = net->ninput();
     seq.clear();
-    for(int i=0;i<neps;i++) seq.push_back(Vec::Zero(d));
-    for(int pos=0; pos<cs.size(); pos++) {
-        int c =cs[pos];
+    for (int i = 0; i < neps; i++) seq.push_back(Vec::Zero(d));
+    for (int pos = 0; pos < cs.size(); pos++) {
+        int c = cs[pos];
         Vec v = Vec::Zero(d);
         v[c] = 1.0;
         seq.push_back(v);
-        for(int i=0;i<neps;i++) seq.push_back(Vec::Zero(d));
+        for (int i = 0; i < neps; i++) seq.push_back(Vec::Zero(d));
     }
 }
 
-double error_rate(shared_ptr<INetwork> net,const string &testset, int nclasses, int neps) {
+double error_rate(shared_ptr<INetwork> net, const string &testset, int nclasses, int neps) {
     int maxeval = getienv("maxeval", 1000000000);
     vector<Sample> samples;
     read_samples(samples, testset);
@@ -121,8 +121,8 @@ int main_train(int argc, char **argv) {
     string load_name = getsenv("load", "");
     int save_every = getienv("save_every", 0);
     string save_name = getsenv("save_name", "");
-    if (save_every>=0 && save_name=="") throw "must give save_name=";
-    if (save_every>0 && save_name.find('%')==string::npos)
+    if (save_every >= 0 && save_name == "") throw "must give save_name=";
+    if (save_every > 0 && save_name.find('%') == string::npos)
         save_name += "-%08d.h5";
     else
         save_name += ".h5";
@@ -191,10 +191,10 @@ int main_train(int argc, char **argv) {
     net->makeEncoders();
     print("codec", net->codec.size(), "icodec", net->icodec.size());
     INetwork::Normalization norm = INetwork::NORM_DFLT;
-    if (lrnorm=="len") norm = INetwork::NORM_LEN;
-    if (lrnorm=="none") norm = INetwork::NORM_NONE;
-    if (norm!=INetwork::NORM_DFLT) print("nonstandard lrnorm: ", lrnorm);
-    net->networks("", [norm](string s, INetwork *net) {net->normalization = norm;});
+    if (lrnorm == "len") norm = INetwork::NORM_LEN;
+    if (lrnorm == "none") norm = INetwork::NORM_NONE;
+    if (norm != INetwork::NORM_DFLT) print("nonstandard lrnorm: ", lrnorm);
+    net->networks("", [norm](string s, INetwork *net) {net->normalization = norm; });
 
     Sequence targets;
     Sequence saligned;
@@ -204,9 +204,9 @@ int main_train(int argc, char **argv) {
     double best_erate = 1e38;
 
     int start = stoi(getdef(net->attributes, "trial", getsenv("start", "-1")))+1;
-    if (start>0) print("start", start);
+    if (start > 0) print("start", start);
     for (int trial = start; trial < ntrain; trial++) {
-        bool report = (report_every>0) && (trial % report_every == 0);
+        bool report = (report_every > 0) && (trial % report_every == 0);
         int sample = trial % nsamples;
         if (randomize) sample = irandom() % nsamples;
         if (trial > 0 && save_every > 0 && trial%save_every == 0) {
@@ -215,22 +215,22 @@ int main_train(int argc, char **argv) {
             print("saving", fname);
             net->attributes["trial"] = to_string(trial);
             save_net(fname, net);
-            if (after_save!="") system(after_save.c_str());
+            if (after_save != "") system(after_save.c_str());
         }
         if (trial > 0 && test_every > 0 && trial%test_every == 0 && testset != "") {
             double erate = error_rate(net, testset, nclasses, neps);
             print("TESTERR", now()-start_time, save_name, trial, erate,
                   "lrate", lrate, "hidden", nhidden, nhidden2,
                   "batch", batch, "momentum", momentum);
-            if (save_every==0 && erate < best_erate) {
+            if (save_every == 0 && erate < best_erate) {
                 best_erate = erate;
                 print("saving", save_name, "at", erate);
                 net->attributes["trial"] = to_string(trial);
                 net->attributes["last_err"] = to_string(best_erate);
                 save_net(save_name, net);
-                if (after_save!="") system(after_save.c_str());
+                if (after_save != "") system(after_save.c_str());
             }
-            if (after_test!="") system(after_test.c_str());
+            if (after_test != "") system(after_test.c_str());
         }
         set_inputs_with_eps(net.get(), samples[sample].in, neps);
         mdarray<float> image;
@@ -248,7 +248,7 @@ int main_train(int argc, char **argv) {
         for (int t = 0; t < saligned.size(); t++)
             net->d_outputs[t] = saligned[t] - net->outputs[t];
         net->backward();
-        if (trial%batch==0) net->update();
+        if (trial%batch == 0) net->update();
         mdarray<float> aligned;
         assign(aligned, saligned);
         if (anynan(outputs) || anynan(aligned)) {
@@ -268,7 +268,7 @@ int main_train(int argc, char **argv) {
             print("TRU:", "'"+utf32_to_utf8(gt)+"'");
             print("OUT:", "'"+utf32_to_utf8(out)+"'");
             print("ALN:", "'"+utf32_to_utf8(aln)+"'");
-            print(levenshtein(gt,out));
+            print(levenshtein(gt, out));
         }
 
         if (display_every > 0 && trial%display_every == 0) {
@@ -305,12 +305,12 @@ int main_train(int argc, char **argv) {
 }
 
 int main_filter(int argc, char **argv) {
-    if (argc!=2) throw "give text file as an argument";
+    if (argc != 2) throw "give text file as an argument";
     int display_every = getienv("display_every", -1);
     double display_delay = getdenv("display_delay", 1e-3);
     const char *fname = argv[1];
     string load_name = getsenv("load", "");
-    if (load_name=="") throw "must give load= parameter";
+    if (load_name == "") throw "must give load= parameter";
     shared_ptr<INetwork> net;
     net = load_net(load_name);
     int neps = stoi(net->attributes["neps"]);
@@ -327,12 +327,12 @@ int main_filter(int argc, char **argv) {
     }
 
     string line;
-    wstring in,out;;
+    wstring in, out;;
     ifstream stream(fname);
     int trial = 0;
     while (getline(stream, line)) {
         int where = line.find("\t");
-        if (where>=0) line= line.substr(0,where);
+        if (where >= 0) line = line.substr(0, where);
         in = utf8_to_utf32(line);
         set_inputs_with_eps(net.get(), in, neps);
         net->forward();
@@ -354,22 +354,18 @@ int main_filter(int argc, char **argv) {
             py->eval("set_aspect('auto')");
             py->evalf("title(unicode('%s','utf-8'))", out.c_str());
             py->imshowT(outputs, "cmap=cm.gray,interpolation='bilinear'");
-            py->evalf("ginput(1,%g)",display_delay);
+            py->evalf("ginput(1,%g)", display_delay);
         }
         trial++;
     }
     return 0;
 }
 
-const char *usage = /*program+*/ R"(training.txt
-
-training.txt is a text file consisting of lines of the form:
-
-input\toutput\n
-
-UTF-8 encoding is assumed.
-
-)";
+const char *usage = /*program+*/
+    "training.txt\n\n"
+    "training.txt is a text file consisting of lines of the form:\n\n"
+    "input\toutput\n\n"
+    "UTF-8 encoding is assumed.\n";
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -378,9 +374,9 @@ int main(int argc, char **argv) {
     }
     try {
         string mode = getsenv("mode", "train");
-        if (mode=="train") {
+        if (mode == "train") {
             return main_train(argc, argv);
-        } else if (mode=="filter") {
+        } else if (mode == "filter") {
             return main_filter(argc, argv);
         }
     } catch(const char *msg) {

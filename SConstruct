@@ -28,7 +28,9 @@ else:
 env.Append(CPPPATH=["/usr/include/eigen3"])
 env.Append(LIBS=["hdf5_cpp","hdf5"])
 env.Append(LIBS=["png"])
-if ARGUMENTS.get('oldzmqpp',0) or os.environ.get('oldzmqpp',0):
+if ARGUMENTS.get('newzmqpp',0) or os.environ.get('newzmqpp',0):
+    pass
+else:
     env.Append(CPPDEFINES={'add_raw' : 'add'})
 
 libclstm = env.StaticLibrary("clstm", source = ["clstm.cc", "extras.cc"])

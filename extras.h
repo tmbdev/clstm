@@ -25,7 +25,6 @@ using std::endl;
 using std::min;
 using namespace multidim;
 
-
 void srandomize();
 unsigned urandom();
 int irandom();
@@ -54,7 +53,7 @@ inline void print(T arg, Args ... args) {
 
 inline string getdef(std::map<string, string> &m, const string &key, const string &dflt) {
     auto it = m.find(key);
-    if (it==m.end()) return dflt;
+    if (it == m.end()) return dflt;
     return it->second;
 }
 
@@ -87,15 +86,15 @@ inline const char *getsenv(const char *name, const char *dflt) {
     return result;
 }
 
-inline int split(vector<string> &tokens,string s,char c=':') {
+inline int split(vector<string> &tokens, string s, char c=':') {
     int last = 0;
-    for(;;) {
-        size_t next = s.find(c,last);
-        if (next==string::npos) {
+    for (;; ) {
+        size_t next = s.find(c, last);
+        if (next == string::npos) {
             tokens.push_back(s.substr(last));
             break;
         }
-        tokens.push_back(s.substr(last,next-last));
+        tokens.push_back(s.substr(last, next-last));
         last = next+1;
     }
     return tokens.size();
@@ -132,12 +131,12 @@ inline double getdenv(const char *name, double dflt=0) {
 inline double getrenv(const char *name, double dflt=0, bool logscale=true) {
     const char *s = getenv(name);
     if (!s) return dflt;
-    float lo,hi;
-    if (sscanf(s, "%g,%g", &lo, &hi)==2) {
+    float lo, hi;
+    if (sscanf(s, "%g,%g", &lo, &hi) == 2) {
         double x = exp(log(lo)+drandom()*(log(hi)-log(lo)));
         report_params(name, x);
         return x;
-    } else if (sscanf(s, "%g", &lo)==1) {
+    } else if (sscanf(s, "%g", &lo) == 1) {
         report_params(name, lo);
         return lo;
     } else {
@@ -148,12 +147,12 @@ inline double getrenv(const char *name, double dflt=0, bool logscale=true) {
 inline double getuenv(const char *name, double dflt=0) {
     const char *s = getenv(name);
     if (!s) return dflt;
-    float lo,hi;
-    if (sscanf(s, "%g,%g", &lo, &hi)==2) {
+    float lo, hi;
+    if (sscanf(s, "%g,%g", &lo, &hi) == 2) {
         double x = lo+drandom()*(hi-lo);
         report_params(name, x);
         return x;
-    } else if (sscanf(s, "%g", &lo)==1) {
+    } else if (sscanf(s, "%g", &lo) == 1) {
         report_params(name, lo);
         return lo;
     } else {
@@ -185,11 +184,14 @@ struct INormalizer {
     float smooth1d = 0.3;
     float range = 4.0;
     float vscale = 1.0;
-    virtual ~INormalizer() {}
-    virtual void getparams(bool verbose=false) {}
+    virtual ~INormalizer() {
+    }
+    virtual void getparams(bool verbose=false) {
+    }
     virtual void measure(mdarray<float> &line) = 0;
     virtual void normalize(mdarray<float> &out, mdarray<float> &in) = 0;
-    virtual void setPyServer(void *p) {}
+    virtual void setPyServer(void *p) {
+    }
 };
 
 INormalizer *make_Normalizer(const string &);
@@ -201,7 +203,8 @@ INormalizer *make_CenterNormalizer();
 // on the fly
 
 struct IOcrDataset {
-    virtual ~IOcrDataset() {}
+    virtual ~IOcrDataset() {
+    }
     virtual void image(mdarray<float> &a, int index) = 0;
     virtual void transcript(mdarray<int> &a, int index) = 0;
     virtual string to_string(mdarray<int> &transcript) = 0;
@@ -217,15 +220,15 @@ IOcrDataset *make_NormalizedDataset(shared_ptr<IOcrDataset> &dataset,
                                     shared_ptr<INormalizer> &normalizer);
 IOcrDataset *make_Dataset(const string &fname);
 
-void read_png(mdarray<unsigned char> &image,FILE *fp,bool gray=false);
-void write_png(FILE *fp,mdarray<unsigned char> &image);
-void read_png(mdarray<unsigned char> &image,const char *name,bool gray=false);
-void write_png(const char *name,mdarray<unsigned char> &image);
+void read_png(mdarray<unsigned char> &image, FILE *fp, bool gray=false);
+void write_png(FILE *fp, mdarray<unsigned char> &image);
+void read_png(mdarray<unsigned char> &image, const char *name, bool gray=false);
+void write_png(const char *name, mdarray<unsigned char> &image);
 
-void read_png(mdarray<float> &image,FILE *fp,bool gray=false);
-void write_png(FILE *fp,mdarray<float> &image);
-void read_png(mdarray<float> &image,const char *name,bool gray=false);
-void write_png(const char *name,mdarray<float> &image);
+void read_png(mdarray<float> &image, FILE *fp, bool gray=false);
+void write_png(FILE *fp, mdarray<float> &image);
+void read_png(mdarray<float> &image, const char *name, bool gray=false);
+void write_png(const char *name, mdarray<float> &image);
 
 inline bool anynan(mdarray<float> &a) {
     for (int i = 0; i < a.size(); i++)
@@ -272,8 +275,8 @@ inline void assign(Sequence &seq, T &a) {
     assert(a.rank() == 2);
     seq.resize(a.dim(0));
     for (int t = 0; t < a.dim(0); t++) {
-        seq[t].resize(a.dim(1),1);
-        for (int i = 0; i < a.dim(1); i++) seq[t](i,0) = a(t, i);
+        seq[t].resize(a.dim(1), 1);
+        for (int i = 0; i < a.dim(1); i++) seq[t](i, 0) = a(t, i);
     }
 }
 
@@ -296,21 +299,20 @@ inline int indexof(A &a, const T &t) {
 shared_ptr<INetwork> make_net_init(const string &kind, int nclasses, int dim, string prefix="");
 
 // setting inputs and outputs
-void set_inputs(INetwork *net,mdarray<float> &inputs);
-void set_targets(INetwork *net,mdarray<float> &targets);
-void set_targets_accelerated(INetwork *net,mdarray<float> &targets);
-void set_classes(INetwork *net,mdarray<int> &targets);
+void set_inputs(INetwork *net, mdarray<float> &inputs);
+void set_targets(INetwork *net, mdarray<float> &targets);
+void set_targets_accelerated(INetwork *net, mdarray<float> &targets);
+void set_classes(INetwork *net, mdarray<int> &targets);
 
 // single sequence training functions
 void mktargets(mdarray<float> &seq, mdarray<int> &targets, int ndim);
-void train(INetwork *net,mdarray<float> &inputs, mdarray<float> &targets);
-void ctrain(INetwork *net,mdarray<float> &inputs, mdarray<int> &targets);
-void cpred(INetwork *net,mdarray<int> &preds, mdarray<float> &inputs);
-void ctc_train(INetwork *net,mdarray<float> &xs, mdarray<float> &targets);
-void ctc_train(INetwork *net,mdarray<float> &xs, mdarray<int> &targets);
-void ctc_train(INetwork *net,mdarray<float> &xs, string &targets);
-void ctc_train(INetwork *net,mdarray<float> &xs, wstring &targets);
-
+void train(INetwork *net, mdarray<float> &inputs, mdarray<float> &targets);
+void ctrain(INetwork *net, mdarray<float> &inputs, mdarray<int> &targets);
+void cpred(INetwork *net, mdarray<int> &preds, mdarray<float> &inputs);
+void ctc_train(INetwork *net, mdarray<float> &xs, mdarray<float> &targets);
+void ctc_train(INetwork *net, mdarray<float> &xs, mdarray<int> &targets);
+void ctc_train(INetwork *net, mdarray<float> &xs, string &targets);
+void ctc_train(INetwork *net, mdarray<float> &xs, wstring &targets);
 }
 
 #endif

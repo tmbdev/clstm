@@ -33,9 +33,7 @@ extern "C" {
 #include "pymulti.h"
 #include "extras.h"
 
-
 namespace ocropus {
-
 using namespace multidim;
 using namespace h5multi;
 using namespace std;
@@ -43,35 +41,34 @@ using namespace std;
 typedef mdarray<float> floatarray;
 typedef mdarray<unsigned char> bytearray;
 
-
-template<class T,class S>
-inline void getd0(mdarray<T> &image,mdarray<S> &slice,
+template<class T, class S>
+inline void getd0(mdarray<T> &image, mdarray<S> &slice,
                   int index) {
     slice.resize(image.dim(1));
-    for (int i=0; i<image.dim(1); i++)
-        slice.unsafe_at(i) = (S)image.unsafe_at(index,i);
+    for (int i = 0; i < image.dim(1); i++)
+        slice.unsafe_at(i) = (S)image.unsafe_at(index, i);
 }
 
-template<class T,class S>
-inline void getd1(mdarray<T> &image,mdarray<S> &slice,int index) {
+template<class T, class S>
+inline void getd1(mdarray<T> &image, mdarray<S> &slice, int index) {
     slice.resize(image.dim(0));
-    for (int i=0; i<image.dim(0); i++)
-        slice.unsafe_at(i) = (S)image.unsafe_at(i,index);
+    for (int i = 0; i < image.dim(0); i++)
+        slice.unsafe_at(i) = (S)image.unsafe_at(i, index);
 }
 
-template<class T,class S>
-inline void putd0(mdarray<T> &image,mdarray<S> &slice,int index) {
-    assert(slice.rank()==1 && slice.dim(0)==image.dim(1));
-    for (int i=0; i<image.dim(1); i++)
-        image.unsafe_at(index,i) = (T)slice.unsafe_at(i);
+template<class T, class S>
+inline void putd0(mdarray<T> &image, mdarray<S> &slice, int index) {
+    assert(slice.rank() == 1 && slice.dim(0) == image.dim(1));
+    for (int i = 0; i < image.dim(1); i++)
+        image.unsafe_at(index, i) = (T)slice.unsafe_at(i);
 }
 
-template<class T,class S>
-inline void putd1(mdarray<T> &image,mdarray<S> &slice,
+template<class T, class S>
+inline void putd1(mdarray<T> &image, mdarray<S> &slice,
                   int index) {
-    assert(slice.rank()==1 && slice.dim(0)==image.dim(0));
-    for (int i=0; i<image.dim(0); i++)
-        image.unsafe_at(i,index) = (T)slice.unsafe_at(i);
+    assert(slice.rank() == 1 && slice.dim(0) == image.dim(0));
+    for (int i = 0; i < image.dim(0); i++)
+        image.unsafe_at(i, index) = (T)slice.unsafe_at(i);
 }
 
 /// Perform 1D Gaussian convolutions using a FIR filter.
@@ -84,34 +81,34 @@ void gauss1d(mdarray<T> &out, mdarray<T> &in, float sigma) {
     // make a normalized mask
     int range = 1+int(3.0*sigma);
     floatarray mask(2*range+1);
-    for (int i=0; i<=range; i++) {
+    for (int i = 0; i <= range; i++) {
         double y = exp(-i*i/2.0/sigma/sigma);
         mask(range+i) = mask(range-i) = y;
     }
     float total = 0.0;
-    for (int i=0; i<mask.dim(0); i++)
+    for (int i = 0; i < mask.dim(0); i++)
         total += mask(i);
-    for (int i=0; i<mask.dim(0); i++)
+    for (int i = 0; i < mask.dim(0); i++)
         mask(i) /= total;
 
     // apply it
     int n = in.size();
-    for (int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
         double total = 0.0;
-        for (int j=0; j<mask.dim(0); j++) {
+        for (int j = 0; j < mask.dim(0); j++) {
             int index = i+j-range;
-            if (index<0)
+            if (index < 0)
                 index = 0;
-            if (index>=n)
+            if (index >= n)
                 index = n-1;
-            total += in(index) * mask(j); // it's symmetric
+            total += in(index) * mask(j);  // it's symmetric
         }
         out(i) = T(total);
     }
 }
 
-template     void gauss1d(bytearray &out, bytearray &in, float sigma);
-template     void gauss1d(floatarray &out, floatarray &in, float sigma);
+template void gauss1d(bytearray &out, bytearray &in, float sigma);
+template void gauss1d(floatarray &out, floatarray &in, float sigma);
 
 /// Perform 1D Gaussian convolutions using a FIR filter.
 ///
@@ -124,8 +121,8 @@ void gauss1d(mdarray<T> &v, float sigma) {
     v.take(temp);
 }
 
-template         void gauss1d(bytearray &v, float sigma);
-template         void gauss1d(floatarray &v, float sigma);
+template void gauss1d(bytearray &v, float sigma);
+template void gauss1d(floatarray &v, float sigma);
 
 /// Perform 2D Gaussian convolutions using a FIR filter.
 ///
@@ -134,27 +131,27 @@ template         void gauss1d(floatarray &v, float sigma);
 template<class T>
 void gauss2d(mdarray<T> &a, float sx, float sy) {
     floatarray r, s;
-    for (int i=0; i<a.dim(0); i++) {
+    for (int i = 0; i < a.dim(0); i++) {
         getd0(a, r, i);
         gauss1d(s, r, sy);
         putd0(a, s, i);
     }
-    for (int j=0; j<a.dim(1); j++) {
+    for (int j = 0; j < a.dim(1); j++) {
         getd1(a, r, j);
         gauss1d(s, r, sx);
         putd1(a, s, j);
     }
 }
 
-template         void gauss2d(bytearray &image, float sx, float sy);
-template         void gauss2d(floatarray &image, float sx, float sy);
+template void gauss2d(bytearray &image, float sx, float sy);
+template void gauss2d(floatarray &image, float sx, float sy);
 
 template<class T>
 inline T &xref(mdarray<T> &a, int x, int y) {
-    if(x<0) x = 0;
-    else if(x>=a.dim(0)) x = a.dim(0)-1;
-    if(y<0) y = 0;
-    else if(y>=a.dim(1)) y = a.dim(1)-1;
+    if (x < 0) x = 0;
+    else if (x >= a.dim(0)) x = a.dim(0)-1;
+    if (y < 0) y = 0;
+    else if (y >= a.dim(1)) y = a.dim(1)-1;
     return a.unsafe_at(x, y);
 }
 
@@ -164,10 +161,10 @@ inline T bilin(mdarray<T> &a, float x, float y) {
     int j = (int)floor(y);
     float l = x-i;
     float m = y-j;
-    float s00 = xref(a,i,j);
-    float s01 = xref(a,i,j+1);
-    float s10 = xref(a,i+1,j);
-    float s11 = xref(a,i+1,j+1);
+    float s00 = xref(a, i, j);
+    float s01 = xref(a, i, j+1);
+    float s10 = xref(a, i+1, j);
+    float s11 = xref(a, i+1, j+1);
     return (T)((1.0-l) * ((1.0-m) * s00 + m * s01) +
                l * ((1.0-m) * s10 + m * s11));
 }
@@ -176,11 +173,10 @@ struct NoNormalizer : INormalizer {
     void measure(mdarray<float> &line) {
     }
     void normalize(mdarray<float> &out, mdarray<float> &in) {
-        assert(in.dim(1)==target_height);
+        assert(in.dim(1) == target_height);
         out.copy(in);
     }
 };
-
 
 struct MeanNormalizer : INormalizer {
     double y_mean = -1;
@@ -188,25 +184,25 @@ struct MeanNormalizer : INormalizer {
     void getparams(bool verbose) {
         vscale = getrenv("norm_vscale", 1.0);
         range = getrenv("norm_range", 1.0);
-        if(verbose) print("mean_normalizer", range, vscale);
+        if (verbose) print("mean_normalizer", range, vscale);
     }
     void measure(mdarray<float> &line) {
         {
             double sy = 0, s1 = 0;
-            for(int i=0;i<line.dim(0); i++) {
-                for(int j=0; j<line.dim(1); j++) {
-                    sy += line(i,j) * j;
-                    s1 += line(i,j);
+            for (int i = 0; i < line.dim(0); i++) {
+                for (int j = 0; j < line.dim(1); j++) {
+                    sy += line(i, j) * j;
+                    s1 += line(i, j);
                 }
             }
             y_mean = sy / s1;
         }
         {
             double sy = 0, s1 = 0;
-            for(int i=0;i<line.dim(0); i++) {
-                for(int j=0; j<line.dim(1); j++) {
-                    sy += line(i,j) * fabs(j-y_mean);
-                    s1 += line(i,j);
+            for (int i = 0; i < line.dim(0); i++) {
+                for (int j = 0; j < line.dim(1); j++) {
+                    sy += line(i, j) * fabs(j-y_mean);
+                    s1 += line(i, j);
                 }
             }
             y_mad = sy/s1;
@@ -219,22 +215,22 @@ struct MeanNormalizer : INormalizer {
         int nw = int(in.dim(0) / scale);
         int nh = target_height;
         out.resize(nw, nh);
-        for(int i=0;i<nw;i++) {
-            for (int j=0;j<nh;j++) {
-                out(i,j) = bilin(in,scale*i,scale*(j-target_height/2)+y_mean);
+        for (int i = 0; i < nw; i++) {
+            for (int j = 0; j < nh; j++) {
+                out(i, j) = bilin(in, scale*i, scale*(j-target_height/2)+y_mean);
             }
         }
     }
 };
 
-void argmax1(mdarray<float> &m,mdarray<float> &a) {
+void argmax1(mdarray<float> &m, mdarray<float> &a) {
     m.resize(a.dim(0));
-    for(int i=0; i<a.dim(0); i++) {
-        float mv = a(i,0);
+    for (int i = 0; i < a.dim(0); i++) {
+        float mv = a(i, 0);
         float mj = 0;
-        for(int j=1; j<a.dim(1); j++) {
-            if (a(i,j)<mv) continue;
-            mv = a(i,j);
+        for (int j = 1; j < a.dim(1); j++) {
+            if (a(i, j) < mv) continue;
+            mv = a(i, j);
             mj = j;
         }
         m(i) = mj;
@@ -244,11 +240,11 @@ void argmax1(mdarray<float> &m,mdarray<float> &a) {
 inline void add_smear(mdarray<float> &smooth, mdarray<float> &line) {
     int w = line.dim(0);
     int h = line.dim(1);
-    for(int j=0; j<h; j++) {
+    for (int j = 0; j < h; j++) {
         double v = 0.0;
-        for(int i=0; i<w; i++) {
-            v = v*0.9 + line(i,j);
-            smooth(i,j) += fmin(1.0,v)*1e-3;
+        for (int i = 0; i < w; i++) {
+            v = v*0.9 + line(i, j);
+            smooth(i, j) += fmin(1.0, v)*1e-3;
         }
     }
 }
@@ -264,7 +260,7 @@ struct CenterNormalizer : INormalizer {
         range = getrenv("norm_range", 4.0);
         smooth2d = getrenv("norm_smooth2d", 1.0);
         smooth1d = getrenv("norm_smooth1d", 0.3);
-        if(verbose) print("center_normalizer", range, smooth2d, smooth1d);
+        if (verbose) print("center_normalizer", range, smooth2d, smooth1d);
     }
     void measure(mdarray<float> &line) {
         mdarray<float> smooth, smooth2;
@@ -272,21 +268,21 @@ struct CenterNormalizer : INormalizer {
         int h = line.dim(1);
         smooth.copy(line);
         gauss2d(smooth, h*smooth2d, h*0.5);
-        add_smear(smooth, line);        // just to avoid singularities
+        add_smear(smooth, line);  // just to avoid singularities
         mdarray<float> a(w);
         argmax1(a, smooth);
         gauss1d(center, a, h*smooth1d);
         float s1 = 0.0;
         float sy = 0.0;
-        for(int i=0; i<w; i++) {
-            for(int j=0; j<h; j++) {
-                s1 += line(i,j);
-                sy += line(i,j) * fabs(j-center(i));
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                s1 += line(i, j);
+                sy += line(i, j) * fabs(j-center(i));
             }
         }
         float mad = sy/s1;
         r = int(range*mad+1);
-        if(py) {
+        if (py) {
             print("r", r);
             py->eval("ion(); clf()");
             py->eval("subplot(211)");
@@ -299,15 +295,15 @@ struct CenterNormalizer : INormalizer {
     }
     void normalize(mdarray<float> &out, mdarray<float> &in) {
         int w = in.dim(0);
-        if (w!=center.dim(0)) throw "measure doesn't match normalize";
+        if (w != center.dim(0)) throw "measure doesn't match normalize";
         float scale = (2.0 * r) / target_height;
-        int target_width = max(int(w/scale),1);
-        out.resize(target_width,target_height);
-        for(int i=0;i<out.dim(0); i++) {
-            for(int j=0;j<out.dim(1); j++) {
+        int target_width = max(int(w/scale), 1);
+        out.resize(target_width, target_height);
+        for (int i = 0; i < out.dim(0); i++) {
+            for (int j = 0; j < out.dim(1); j++) {
                 float x = scale * i;
                 float y = scale * (j-target_height/2) + center(int(x));
-                out(i,j) = bilin(in, x,y);
+                out(i, j) = bilin(in, x, y);
             }
         }
     }
@@ -326,9 +322,9 @@ INormalizer *make_CenterNormalizer() {
 }
 
 INormalizer *make_Normalizer(const string &name) {
-    if (name=="none") return make_NoNormalizer();
-    if (name=="mean") return make_MeanNormalizer();
-    if (name=="center") return make_CenterNormalizer();
+    if (name == "none") return make_NoNormalizer();
+    if (name == "mean") return make_MeanNormalizer();
+    if (name == "center") return make_CenterNormalizer();
     throw "unknown normalizer name";
 }
 
@@ -345,16 +341,22 @@ public:
     bool varsize = false;
     bool normalize = true;
 
-    int samples() {return nsamples;}
-    int dim() {return ndims;}
-    int classes() {return nclasses;}
+    int samples() {
+        return nsamples;
+    }
+    int dim() {
+        return ndims;
+    }
+    int classes() {
+        return nclasses;
+    }
     void getCodec(vector<int> &result) {
         result.resize(codec.size());
-        for (int i=0; i<codec.size(); i++)
+        for (int i = 0; i < codec.size(); i++)
             result[i] = codec[i];
     }
 
-    HDF5Dataset(const char *h5file, bool varsize=false) {
+    HDF5Dataset(const char *h5file, bool varsize = false) {
         this->varsize = varsize;
         H5::Exception::dontPrint();
         h5.open(h5file);
@@ -408,9 +410,11 @@ public:
 struct NormalizedDataset : IOcrDataset {
     shared_ptr<IOcrDataset> dataset;
     shared_ptr<INormalizer> normalizer;
-    NormalizedDataset() {}
+    NormalizedDataset() {
+    }
     NormalizedDataset(shared_ptr<IOcrDataset> dataset, shared_ptr<INormalizer> normalizer)
-        : dataset(dataset), normalizer(normalizer) {}
+        : dataset(dataset), normalizer(normalizer) {
+    }
 
     int dim() {
         return normalizer->target_height;
@@ -452,7 +456,7 @@ IOcrDataset *make_NormalizedDataset(shared_ptr<IOcrDataset> &dataset,
 
 IOcrDataset *make_Dataset(const string &fname) {
     string normalizer_name = getsenv("dewarp", "none");
-    if (normalizer_name=="none") return make_HDF5Dataset(fname);
+    if (normalizer_name == "none") return make_HDF5Dataset(fname);
     shared_ptr<IOcrDataset> dataset(make_HDF5Dataset(fname, true));
     shared_ptr<INormalizer> normalizer(make_Normalizer(normalizer_name));
     normalizer->getparams(true);
@@ -469,10 +473,10 @@ typedef mdarray<unsigned char> bytearray;
 typedef mdarray<int> intarray;
 
 #define ERROR(X) throw X
-#define CHECK_CONDITION(X) do{if(!(X)) throw "CHECK: " #X;}while(0)
-#define CHECK_ARG(X) do{if(!(X)) throw "CHECK_ARG: " #X;}while(0)
+#define CHECK_CONDITION(X) do {if (!(X)) throw "CHECK: " # X; } while (0)
+#define CHECK_ARG(X) do {if (!(X)) throw "CHECK_ARG: " # X; } while (0)
 
-void read_png(bytearray &image,FILE *fp,bool gray) {
+void read_png(bytearray &image, FILE *fp, bool gray) {
     int d, spp;
     int png_transforms;
     int num_palette;
@@ -484,27 +488,27 @@ void read_png(bytearray &image,FILE *fp,bool gray) {
     png_infop info_ptr, end_info;
     png_colorp palette;
 
-    if(!fp)
+    if (!fp)
         ERROR("fp not defined");
 
     // Allocate the 3 data structures
-    if((png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                                         (png_voidp)NULL, NULL, NULL)) == NULL)
+    if ((png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+                                          (png_voidp)NULL, NULL, NULL)) == NULL)
         ERROR("png_ptr not made");
 
-    if((info_ptr = png_create_info_struct(png_ptr)) == NULL) {
+    if ((info_ptr = png_create_info_struct(png_ptr)) == NULL) {
         png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
         ERROR("info_ptr not made");
     }
 
-    if((end_info = png_create_info_struct(png_ptr)) == NULL) {
+    if ((end_info = png_create_info_struct(png_ptr)) == NULL) {
         png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
         ERROR("end_info not made");
     }
 
     // Set up png setjmp error handling
 
-    if(setjmp(png_jmpbuf(png_ptr))) {
+    if (setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         ERROR("internal png error");
     }
@@ -536,83 +540,83 @@ void read_png(bytearray &image,FILE *fp,bool gray) {
 
     spp = channels;
 
-    if(spp == 1)
+    if (spp == 1)
         d = bit_depth;
-    else if(spp == 2) {
+    else if (spp == 2) {
         d = 2 * bit_depth;
         ERROR("there shouldn't be 2 spp!");
     }
-    else if(spp == 3)
+    else if (spp == 3)
         d = 4 * bit_depth;
-    else { /* spp == 4 */
+    else {  /* spp == 4 */
         d = 4 * bit_depth;
         ERROR("there shouldn't be 4 spp!");
     }
 
     /* Remove if/when this is implemented for all bit_depths */
-    if(spp == 3 && bit_depth != 8) {
+    if (spp == 3 && bit_depth != 8) {
         fprintf(stderr, "Help: spp = 3 and depth = %d != 8\n!!", bit_depth);
         ERROR("not implemented for this depth");
     }
 
     intarray color_map;
 
-    if(color_type == PNG_COLOR_TYPE_PALETTE ||
-       color_type == PNG_COLOR_MASK_PALETTE) { /* generate a colormap */
+    if (color_type == PNG_COLOR_TYPE_PALETTE ||
+        color_type == PNG_COLOR_MASK_PALETTE) { /* generate a colormap */
         png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
-        color_map.resize(3,num_palette);
-        for(int cindex = 0; cindex < num_palette; cindex++) {
-            color_map(0,cindex) = palette[cindex].red;
-            color_map(1,cindex) = palette[cindex].green;
-            color_map(2,cindex) = palette[cindex].blue;
+        color_map.resize(3, num_palette);
+        for (int cindex = 0; cindex < num_palette; cindex++) {
+            color_map(0, cindex) = palette[cindex].red;
+            color_map(1, cindex) = palette[cindex].green;
+            color_map(2, cindex) = palette[cindex].blue;
         }
     }
 
-    if(gray) image.resize(w,h);
-    else image.resize(w,h,3);
+    if (gray) image.resize(w, h);
+    else image.resize(w, h, 3);
 
-    if(spp == 1) {
-        CHECK_CONDITION(color_type!=PNG_COLOR_TYPE_PALETTE && color_type!=PNG_COLOR_MASK_PALETTE);
-        CHECK_CONDITION(bit_depth==1 || bit_depth==8);
-        for(int i = 0; i < h; i++) {
+    if (spp == 1) {
+        CHECK_CONDITION(color_type != PNG_COLOR_TYPE_PALETTE && color_type != PNG_COLOR_MASK_PALETTE);
+        CHECK_CONDITION(bit_depth == 1 || bit_depth == 8);
+        for (int i = 0; i < h; i++) {
             rowptr = row_pointers[i];
-            for(int j = 0; j < w; j++) {
+            for (int j = 0; j < w; j++) {
                 int x = j;
                 int y = h-i-1;
                 int value;
-                if(bit_depth==1) {
+                if (bit_depth == 1) {
                     value = (rowptr[j/8] & (128>>(j%8))) ? 255 : 0;
                 } else {
                     value = rowptr[j];
                 }
-                if(gray) {
-                    image(x,y) = value;
+                if (gray) {
+                    image(x, y) = value;
                 } else {
-                    image(x,y,0) = value;
-                    image(x,y,1) = value;
-                    image(x,y,2) = value;
+                    image(x, y, 0) = value;
+                    image(x, y, 1) = value;
+                    image(x, y, 2) = value;
                 }
             }
         }
     }
     else {
-        CHECK_CONDITION(color_type!=PNG_COLOR_TYPE_PALETTE && color_type!=PNG_COLOR_MASK_PALETTE);
+        CHECK_CONDITION(color_type != PNG_COLOR_TYPE_PALETTE && color_type != PNG_COLOR_MASK_PALETTE);
         CHECK_CONDITION(bit_depth == 8);
-        for(int i = 0; i < h; i++) {
+        for (int i = 0; i < h; i++) {
             rowptr = row_pointers[i];
             int k = 0;
-            for(int j = 0; j < w; j++) {
+            for (int j = 0; j < w; j++) {
                 int x = j;
                 int y = h-i-1;
-                if(gray) {
+                if (gray) {
                     int value = rowptr[k++];
                     value += rowptr[k++];
                     value += rowptr[k++];
-                    image(x,y) = value/3;
+                    image(x, y) = value/3;
                 } else {
-                    image(x,y,0) = rowptr[k++];
-                    image(x,y,1) = rowptr[k++];
-                    image(x,y,2) = rowptr[k++];
+                    image(x, y, 0) = rowptr[k++];
+                    image(x, y, 1) = rowptr[k++];
+                    image(x, y, 2) = rowptr[k++];
                 }
             }
         }
@@ -621,8 +625,7 @@ void read_png(bytearray &image,FILE *fp,bool gray) {
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 }
 
-
-void write_png(FILE *fp,bytearray &image) {
+void write_png(FILE *fp, bytearray &image) {
     int d;
     png_byte bit_depth, color_type;
     int w, h;
@@ -632,23 +635,23 @@ void write_png(FILE *fp,bytearray &image) {
     unsigned int default_yres = 300;
 
     int rank = image.rank();
-    CHECK_ARG(image.rank()==2||(image.rank()==3 && image.dim(2)==3));
+    CHECK_ARG(image.rank() == 2||(image.rank() == 3 && image.dim(2) == 3));
 
-    if(!fp)
+    if (!fp)
         ERROR("stream not open");
 
     /* Allocate the 2 data structures */
-    if((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
-                                          (png_voidp)NULL, NULL, NULL)) == NULL)
+    if ((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
+                                           (png_voidp)NULL, NULL, NULL)) == NULL)
         ERROR("png_ptr not made");
 
-    if((info_ptr = png_create_info_struct(png_ptr)) == NULL) {
+    if ((info_ptr = png_create_info_struct(png_ptr)) == NULL) {
         png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
         ERROR("info_ptr not made");
     }
 
     /* Set up png setjmp error handling */
-    if(setjmp(png_jmpbuf(png_ptr))) {
+    if (setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_write_struct(&png_ptr, &info_ptr);
         ERROR("internal png error");
     }
@@ -670,20 +673,20 @@ void write_png(FILE *fp,bytearray &image) {
 
     bytearray rowbuffer;
     rowbuffer.resize(3*w);
-    for(int i = 0; i < h; i++) {
+    for (int i = 0; i < h; i++) {
         int k = 0;
-        for(int j = 0; j < w; j++) {
+        for (int j = 0; j < w; j++) {
             int x = j;
             int y = h - i - 1;
-            if(rank==2) {
-                int value = image(x,y);
+            if (rank == 2) {
+                int value = image(x, y);
                 rowbuffer(k++) = value;
                 rowbuffer(k++) = value;
                 rowbuffer(k++) = value;
             } else {
-                rowbuffer(k++) = image(x,y,0);
-                rowbuffer(k++) = image(x,y,1);
-                rowbuffer(k++) = image(x,y,2);
+                rowbuffer(k++) = image(x, y, 0);
+                rowbuffer(k++) = image(x, y, 1);
+                rowbuffer(k++) = image(x, y, 2);
             }
         }
 
@@ -696,14 +699,13 @@ void write_png(FILE *fp,bytearray &image) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
 }
 
-
-void read_png(bytearray &image,const char *name,bool gray) {
+void read_png(bytearray &image, const char *name, bool gray) {
     FILE *stream = fopen(name, "r");
     if (!stream) throw "error on open";
     read_png(image, stream, gray);
     fclose(stream);
 }
-void write_png(const char *name,bytearray &image) {
+void write_png(const char *name, bytearray &image) {
     FILE *stream = fopen(name, "w");
     if (!stream) throw "error on open";
     write_png(stream, image);
@@ -711,33 +713,33 @@ void write_png(const char *name,bytearray &image) {
 }
 
 template <class U, class T>
-inline void copy_scale(mdarray<U> &it,mdarray<T> &other,double scale) {
+inline void copy_scale(mdarray<U> &it, mdarray<T> &other, double scale) {
     it.clear();
     it.allocate(other.total);
-    for(int i=0;i<mdarray<T>::MAXRANK+1;i++) it.dims[i] = other.dims[i];
+    for (int i = 0; i < mdarray<T>::MAXRANK+1; i++) it.dims[i] = other.dims[i];
     it.fill = other.fill;
-    for(int i=0;i<it.fill;i++) it.data[i] = other.data[i] * scale;
+    for (int i = 0; i < it.fill; i++) it.data[i] = other.data[i] * scale;
 }
 
-void read_png(mdarray<float> &image,FILE *fp,bool gray) {
+void read_png(mdarray<float> &image, FILE *fp, bool gray) {
     mdarray<unsigned char> temp;
     read_png(temp, fp, gray);
     copy_scale(image, temp, 1.0/255.0);
 }
 
-void write_png(FILE *fp,mdarray<float> &image) {
+void write_png(FILE *fp, mdarray<float> &image) {
     mdarray<unsigned char> temp;
     copy_scale(temp, image, 255.0);
     write_png(fp, temp);
 }
 
-void read_png(mdarray<float> &image,const char *name,bool gray) {
+void read_png(mdarray<float> &image, const char *name, bool gray) {
     mdarray<unsigned char> temp;
     read_png(temp, name, gray);
     copy_scale(image, temp, 1.0/255.0);
 }
 
-void write_png(const char *name,mdarray<float> &image) {
+void write_png(const char *name, mdarray<float> &image) {
     mdarray<unsigned char> temp;
     copy_scale(temp, image, 255.0);
     write_png(name, temp);
@@ -746,7 +748,7 @@ void write_png(const char *name,mdarray<float> &image) {
 shared_ptr<INetwork> make_net_init(const string &kind, int nclasses, int dim, string prefix) {
     shared_ptr<INetwork> net = make_net(kind);
     int nhidden = getrenv((prefix+"hidden").c_str(), 100);
-    if (kind=="bidi2") {
+    if (kind == "bidi2") {
         int nhidden2 = getrenv((prefix+"hidden2").c_str(), -1);
         net->init(nclasses, nhidden2, nhidden, dim);
         print("init-bidi2", nclasses, nhidden2, nhidden, dim);
@@ -761,7 +763,7 @@ unsigned long random_state;
 
 void srandomize() {
     random_state = getienv("seed", 0);
-    if (random_state==0) {
+    if (random_state == 0) {
         random_state = (unsigned long)fmod(now()*1e6, 1e9);
         char **ep = environ;
         while (*ep) {
@@ -788,5 +790,4 @@ int irandom() {
 double drandom() {
     return double(irandom() % 999999733) / 999999733.0;
 }
-
 }

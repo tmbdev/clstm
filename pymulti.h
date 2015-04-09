@@ -31,8 +31,10 @@ inline string stringf(const char *format, ...) {
 
 #ifdef NODISPLAY
 struct PyServer {
-    void open(const char *where="tcp://127.0.0.1:9876"){}
-    void setMode(int mode) {}
+    void open(const char *where="tcp://127.0.0.1:9876"){
+    }
+    void setMode(int mode) {
+    }
     string eval(string s) {
         return "";
     }
