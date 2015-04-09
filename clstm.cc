@@ -13,6 +13,18 @@
 #endif
 
 namespace ocropus {
+char exception_message[256];
+map<string,INetworkFactory> network_factories;
+
+template <class T>
+int register_network(const char *name) {
+    string s(name);
+    network_factories[s] = []() { return new T(); };
+    return 0;
+}
+#define C(X,Y) X##Y
+#define REGISTER(X) int C(status_,X) = register_network<X>(#X);
+
 Mat debugmat;
 
 using namespace std;
@@ -270,7 +282,9 @@ struct Full : Network {
     int ninput() {
         return W.cols();
     }
-    void init(int no, int ni) {
+    void initialize() {
+        int no = irequire("noutput");
+        int ni = irequire("ninput");
         W = Mat::Random(no, ni) * 0.01;
         w = Vec::Random(no) * 0.01;
         d_W = Mat::Zero(no, ni);
@@ -328,6 +342,8 @@ struct NoNonlin {
     static void df(T &dx, U &y) {
     }
 };
+typedef Full<NoNonlin> LinearLayer;
+REGISTER(LinearLayer);
 
 struct SigmoidNonlin {
     static constexpr const char *kind = "sigmoid";
@@ -340,6 +356,8 @@ struct SigmoidNonlin {
         dx.array() *= y.array() * (1-y.array());
     }
 };
+typedef Full<SigmoidNonlin> SigmoidLayer;
+REGISTER(SigmoidLayer);
 
 Float tanh_(Float x) {
     return tanh(x);
@@ -355,36 +373,28 @@ struct TanhNonlin {
         dx.array() *= (1 - y.array().square());
     }
 };
+typedef Full<TanhNonlin> TanhLayer;
+REGISTER(TanhLayer);
 
+inline Float relu_(Float x) {
+    return x<=0?0:x;
+}
+inline Float heavi_(Float x) {
+    return x<=0?0:1;
+}
 struct ReluNonlin {
     static constexpr const char *kind = "relu";
     template <class T>
     static void f(T &x) {
-        x = x.unaryExpr([] (Float x) { return fmax(0, x); });
+        x = x.unaryExpr(ptr_fun(relu_));
     }
     template <class T, class U>
     static void df(T &dx, U &y) {
-        dx.array() *= (y.array() > 0);
+        dx.array() *= y.unaryExpr(ptr_fun(heavi_)).array();
     }
 };
-
-struct ReluDecNonlin {
-    static constexpr const char *kind = "reludec";
-    template <class T>
-    static void f(T &x) {
-        x = x.unaryExpr([] (Float x) { return x>0?x:0.1*x; });
-    }
-    template <class T, class U>
-    static void df(T &dx, U &y) {
-        dx.array() *= y.unaryExpr([] (Float x) { return x>0?1.0:0.1; }).array();
-    }
-};
-
-typedef Full<NoNonlin> LinearLayer;
-typedef Full<SigmoidNonlin> SigmoidLayer;
-typedef Full<TanhNonlin> TanhLayer;
 typedef Full<ReluNonlin> ReluLayer;
-typedef Full<ReluDecNonlin> ReluDecLayer;
+REGISTER(ReluLayer);
 
 INetwork *make_LinearLayer() {
     return new LinearLayer();
@@ -416,7 +426,9 @@ struct SoftmaxLayer : Network {
     int ninput() {
         return W.cols();
     }
-    void init(int no, int ni) {
+    void initialize() {
+        int no = irequire("noutput");
+        int ni = irequire("ninput");
         W = Mat::Random(no, ni) * 0.01;
         w = Vec::Random(no) * 0.01;
         clearUpdates();
@@ -445,7 +457,6 @@ struct SoftmaxLayer : Network {
     }
     void backward() {
         d_inputs.resize(d_outputs.size());
-        int no = W.rows(), ni = W.cols(), bs = d_outputs[0].cols();
         for (int t = d_outputs.size()-1; t >= 0; t--) {
             d_inputs[t] = W.transpose() * d_outputs[t];
         }
@@ -475,6 +486,7 @@ struct SoftmaxLayer : Network {
         f(prefix+".w", &w, &d_w);
     }
 };
+REGISTER(SoftmaxLayer);
 
 INetwork *make_SoftmaxLayer() {
     return new SoftmaxLayer();
@@ -518,6 +530,7 @@ struct Stacked : Network {
             sub[i]->update();
     }
 };
+REGISTER(Stacked);
 
 INetwork *make_Stacked() {
     return new Stacked();
@@ -561,6 +574,7 @@ struct Reversed : Network {
         sub[0]->update();
     }
 };
+REGISTER(Reversed);
 
 INetwork *make_Reversed() {
     return new Reversed();
@@ -630,6 +644,7 @@ struct Parallel : Network {
         for (int i=0; i<sub.size(); i++) sub[i]->update();
     }
 };
+REGISTER(Parallel);
 
 INetwork *make_Parallel() {
     return new Parallel();
@@ -667,7 +682,8 @@ void each(F f, T &a, Args&&... args) {
 }
 }
 
-struct LSTM : Network {
+template <class F, class G, class H, bool PEEP=true>
+struct GenericLSTM : Network {
     // NB: verified gradients against Python implementation; this
     // code yields identical numerical results
 #define SEQUENCES gix, gfx, gox, cix, gi, gf, go, ci, state
@@ -679,14 +695,11 @@ struct LSTM : Network {
     Sequence source, SEQUENCES, sourceerr, DSEQUENCES;
     Mat WEIGHTS, DWEIGHTS;
     Vec PEEPS, DPEEPS;
-    typedef SigmoidNonlin F;
-    typedef TanhNonlin G;
-    typedef TanhNonlin H;
     Float gradient_clipping = 10.0;
     int ni, no, nf;
     int nsteps = 0;
     int nseq = 0;
-    LSTM() {
+    GenericLSTM() {
         name = "lstm";
     }
     int noutput() {
@@ -702,7 +715,9 @@ struct LSTM : Network {
         ni = nf-no-1;
         clearUpdates();
     }
-    void init(int no, int ni) {
+    void initialize() {
+        int ni = irequire("ninput");
+        int no = irequire("noutput");
         int nf = 1+ni+no;
         this->ni = ni;
         this->no = no;
@@ -710,14 +725,16 @@ struct LSTM : Network {
         each([no, nf](Mat &w) {
                  w = Mat::Random(no, nf) * 0.01;
              }, WEIGHTS);
-        each([no](Vec &w) {
-                 w = Vec::Random(no) * 0.01;
-             }, PEEPS);
+        if (PEEP) {
+            each([no](Vec &w) {
+                w = Vec::Random(no) * 0.01;
+            }, PEEPS);
+        };
         clearUpdates();
     }
     void clearUpdates() {
         each([this](Mat &d) { d = Mat::Zero(no, nf); }, DWEIGHTS);
-        each([this](Vec &d) { d = Vec::Zero(no); }, DPEEPS);
+        if (PEEP) each([this](Vec &d) { d = Vec::Zero(no); }, DPEEPS);
     }
     void resize(int N) {
         each([N](Sequence &s) {
@@ -746,8 +763,8 @@ struct LSTM : Network {
             if (t > 0) {
                 int bs = state[t-1].cols();
                 for(int b=0;b<bs;b++) {
-                    gix[t].col(b).A += WIP.A * state[t-1].col(b).A;
-                    gfx[t].col(b).A += WFP.A * state[t-1].col(b).A;
+                    if (PEEP) gix[t].col(b).A += WIP.A * state[t-1].col(b).A;
+                    if (PEEP) gfx[t].col(b).A += WFP.A * state[t-1].col(b).A;
                 }
             }
             gi[t] = nonlin<F>(gix[t]);
@@ -756,9 +773,11 @@ struct LSTM : Network {
             state[t] = ci[t].A * gi[t].A;
             if (t > 0) {
                 state[t].A += gf[t].A * state[t-1].A;
-                int bs = state[t].cols();
-                for(int b=0;b<bs;b++)
-                    gox[t].col(b).A += WOP.A * state[t].col(b).A;
+                if (PEEP) {
+                    int bs = state[t].cols();
+                    for(int b=0;b<bs;b++)
+                        gox[t].col(b).A += WOP.A * state[t].col(b).A;
+                }
             }
             go[t] = nonlin<F>(gox[t]);
             outputs[t] = nonlin<H>(state[t]).A * go[t].A;
@@ -773,10 +792,12 @@ struct LSTM : Network {
             if (t < N-1) outerr[t] += sourceerr[t+1].block(1+ni, 0, no, bs);
             goerr[t] = yprime<F>(go[t]).A * nonlin<H>(state[t]).A * outerr[t].A;
             stateerr[t] = xprime<H>(state[t]).A * go[t].A * outerr[t].A;
-            for (int b=0; b<bs; b++)
-                stateerr[t].col(b).A += goerr[t].col(b).A * WOP.A;
+            if (PEEP) {
+                for (int b=0; b<bs; b++)
+                    stateerr[t].col(b).A += goerr[t].col(b).A * WOP.A;
+            }
             if (t < N-1) {
-                for (int b=0; b<bs; b++) {
+                if (PEEP) for (int b=0; b<bs; b++) {
                     stateerr[t].col(b).A += gferr[t+1].col(b).A * WFP.A;
                     stateerr[t].col(b).A += gierr[t+1].col(b).A * WIP.A;
                 }
@@ -800,10 +821,12 @@ struct LSTM : Network {
         }
         for (int t = 0; t < N; t++) {
             int bs = state[t].cols();
-            for (int b = 0; b<bs; b++) {
-                if (t > 0) DWIP.A += gierr[t].col(b).A * state[t-1].col(b).A;
-                if (t > 0) DWFP.A += gferr[t].col(b).A * state[t-1].col(b).A;
-                DWOP.A += goerr[t].col(b).A * state[t].col(b).A;
+            if (PEEP) {
+                for (int b = 0; b<bs; b++) {
+                    if (t > 0) DWIP.A += gierr[t].col(b).A * state[t-1].col(b).A;
+                    if (t > 0) DWFP.A += gferr[t].col(b).A * state[t-1].col(b).A;
+                    DWOP.A += goerr[t].col(b).A * state[t].col(b).A;
+                }
             }
             DWGI += gierr[t] * source[t].transpose();
             if (t > 0) DWGF += gferr[t] * source[t].transpose();
@@ -830,25 +853,31 @@ struct LSTM : Network {
         WGF += lr * DWGF;
         WGO += lr * DWGO;
         WCI += lr * DWCI;
-        WIP += lr * DWIP;
-        WFP += lr * DWFP;
-        WOP += lr * DWOP;
+        if (PEEP) {
+            WIP += lr * DWIP;
+            WFP += lr * DWFP;
+            WOP += lr * DWOP;
+        }
         DWGI *= momentum;
         DWGF *= momentum;
         DWGO *= momentum;
         DWCI *= momentum;
-        DWIP *= momentum;
-        DWFP *= momentum;
-        DWOP *= momentum;
+        if (PEEP) {
+            DWIP *= momentum;
+            DWFP *= momentum;
+            DWOP *= momentum;
+        }
     }
     void myweights(const string &prefix, WeightFun f) {
         f(prefix+".WGI", &WGI, &DWGI);
         f(prefix+".WGF", &WGF, &DWGF);
         f(prefix+".WGO", &WGO, &DWGO);
         f(prefix+".WCI", &WCI, &DWCI);
-        f(prefix+".WIP", &WIP, &DWIP);
-        f(prefix+".WFP", &WFP, &DWFP);
-        f(prefix+".WOP", &WOP, &DWOP);
+        if (PEEP) {
+            f(prefix+".WIP", &WIP, &DWIP);
+            f(prefix+".WFP", &WFP, &DWFP);
+            f(prefix+".WOP", &WOP, &DWOP);
+        }
     }
     virtual void mystates(const string &prefix, StateFun f) {
         f(prefix+".inputs", &inputs);
@@ -868,57 +897,21 @@ struct LSTM : Network {
     }
 };
 
+typedef GenericLSTM<SigmoidNonlin,TanhNonlin,TanhNonlin> LSTM;
+REGISTER(LSTM);
+typedef GenericLSTM<SigmoidNonlin,TanhNonlin,TanhNonlin,false> NPLSTM;
+REGISTER(NPLSTM);
+typedef GenericLSTM<SigmoidNonlin,TanhNonlin,NoNonlin> LINLSTM;
+REGISTER(LINLSTM);
+typedef GenericLSTM<SigmoidNonlin,ReluNonlin,TanhNonlin> RELUTANHLSTM;
+REGISTER(RELUTANHLSTM);
+typedef GenericLSTM<SigmoidNonlin,ReluNonlin,NoNonlin> RELULSTM;
+REGISTER(RELULSTM);
+typedef GenericLSTM<SigmoidNonlin,ReluNonlin,ReluNonlin> RELU2LSTM;
+REGISTER(RELU2LSTM);
+
 INetwork *make_LSTM() {
     return new LSTM();
-}
-
-struct MLP : Network {
-    SigmoidLayer l1, l2;
-    MLP() {
-        name = "mlp";
-    }
-    void init(int no, int nh, int ni) {
-        l1.init(nh, ni);
-        l2.init(no, nh);
-    }
-    void forward() {
-        l1.inputs = inputs;
-        l1.forward();
-        l2.inputs = l1.outputs;
-        l2.forward();
-        outputs = l2.outputs;
-    }
-    void setLearningRate(Float lr, Float momentum) {
-        l1.setLearningRate(lr, momentum);
-        l2.setLearningRate(lr, momentum);
-    }
-    void backward() {
-        l2.d_outputs = d_outputs;
-        l2.backward();
-        l1.d_outputs = l2.d_inputs;
-        l1.backward();
-        d_inputs = l1.d_inputs;
-    }
-    void update() {
-        l1.update();
-        l2.update();
-    }
-    void weights(const string &prefix, WeightFun f) {
-        l1.weights(prefix+".l1", f);
-        l2.weights(prefix+".l2", f);
-    }
-    virtual void states(string prefix, StateFun f) {
-        f(prefix+".inputs", &inputs);
-        f(prefix+".d_inputs", &d_inputs);
-        f(prefix+".outputs", &outputs);
-        f(prefix+".d_outputs", &d_outputs);
-        l1.states(prefix+".l1", f);
-        l2.states(prefix+".l2", f);
-    }
-};
-
-INetwork *make_MLP() {
-    return new MLP();
 }
 
 struct LSTM1 : Stacked {
@@ -926,7 +919,10 @@ struct LSTM1 : Stacked {
         name = "lstm1";
         attributes["kind"] = "lstm1";
     }
-    void init(int no, int nh, int ni) {
+    void initialize() {
+        int ni = irequire("ninput");
+        int nh = irequire("nhidden");
+        int no = irequire("noutput");
         shared_ptr<INetwork> fwd, softmax;
         fwd = make_shared<LSTM>();
         fwd->init(nh, ni);
@@ -936,6 +932,7 @@ struct LSTM1 : Stacked {
         add(softmax);
     }
 };
+REGISTER(LSTM1);
 
 INetwork *make_LSTM1() {
     return new LSTM1();
@@ -945,7 +942,10 @@ struct REVLSTM1 : Stacked {
     REVLSTM1() {
         name = "revlstm1";
     }
-    void init(int no, int nh, int ni) {
+    void initialize() {
+        int ni = irequire("ninput");
+        int nh = irequire("nhidden");
+        int no = irequire("noutput");
         shared_ptr<INetwork> fwd, rev, softmax;
         fwd = make_shared<LSTM>();
         fwd->init(nh, ni);
@@ -957,6 +957,7 @@ struct REVLSTM1 : Stacked {
         add(softmax);
     }
 };
+REGISTER(REVLSTM1);
 
 INetwork *make_REVLSTM1() {
     return new REVLSTM1();
@@ -967,11 +968,15 @@ struct BIDILSTM : Stacked {
         name = "bidilstm";
         attributes["kind"] = "bidi";
     }
-    void init(int no, int nh, int ni) {
+    void initialize() {
+        int ni = irequire("ninput");
+        int nh = irequire("nhidden");
+        int no = irequire("noutput");
         shared_ptr<INetwork> fwd, bwd, parallel, reversed, softmax;
-        fwd = make_shared<LSTM>();
+        fwd = make_net(attr("lstm_type","LSTM"));
+        bwd = make_net(attr("lstm_type","LSTM"));
+        softmax = make_net(attr("output_type","SoftmaxLayer"));
         fwd->init(nh, ni);
-        bwd = make_shared<LSTM>();
         bwd->init(nh, ni);
         reversed = make_shared<Reversed>();
         reversed->add(bwd);
@@ -979,55 +984,49 @@ struct BIDILSTM : Stacked {
         parallel->add(fwd);
         parallel->add(reversed);
         add(parallel);
-        softmax = make_shared<SoftmaxLayer>();
         softmax->init(no, 2*nh);
         add(softmax);
     }
 };
+REGISTER(BIDILSTM);
 
 INetwork *make_BIDILSTM() {
     return new BIDILSTM();
 }
 
-struct LRBIDILSTM : Stacked {
-    LRBIDILSTM() {
-        name = "bidilstm";
-        attributes["kind"] = "bidi";
+INetwork *make_LRBIDILSTM() {
+    INetwork *net = make_BIDILSTM();
+    net->set("output_type", "SigmoidLayer");
+    return net;
+}
+int status_LRBIDILSTM = ( network_factories["LRBIDILSTM"] = make_LRBIDILSTM, 0 );
+
+struct BidiLayer : Parallel {
+    BidiLayer() {
+        name = "bidilayer";
     }
-    void init(int no, int nh, int ni) {
-        shared_ptr<INetwork> fwd, bwd, parallel, reversed, logreg;
+    void initialize() {
+        int ni = irequire("ninput");
+        int nh = irequire("noutput");
+        INetwork *parallel = this;
+        shared_ptr<INetwork> fwd, bwd, reversed;
         fwd = make_shared<LSTM>();
         fwd->init(nh, ni);
         bwd = make_shared<LSTM>();
         bwd->init(nh, ni);
         reversed = make_shared<Reversed>();
         reversed->add(bwd);
-        parallel = make_shared<Parallel>();
         parallel->add(fwd);
         parallel->add(reversed);
-        add(parallel);
-        logreg = make_shared<SigmoidLayer>();
-        logreg->init(no, 2*nh);
-        add(logreg);
     }
 };
-
-INetwork *make_LRBIDILSTM() {
-    return new LRBIDILSTM();
-}
+REGISTER(BidiLayer);
 
 shared_ptr<INetwork> make_fwdbwd(int nh,int ni) {
-  shared_ptr<INetwork> fwd, bwd, parallel, reversed;
-  fwd = make_shared<LSTM>();
-  fwd->init(nh, ni);
-  bwd = make_shared<LSTM>();
-  bwd->init(nh, ni);
-  reversed = make_shared<Reversed>();
-  reversed->add(bwd);
-  parallel = make_shared<Parallel>();
-  parallel->add(fwd);
-  parallel->add(reversed);
-  return parallel;
+    shared_ptr<INetwork> net;
+    net.reset(new BidiLayer());
+    net->init(nh, ni);
+    return net;
 }
 
 struct BIDILSTM2 : Stacked {
@@ -1035,7 +1034,12 @@ struct BIDILSTM2 : Stacked {
         name = "bidilstm2";
         attributes["kind"] = "bidi2";
     }
-    void init(int no, int nh2, int nh, int ni) {
+    void initialize() {
+        int ni = irequire("ninput");
+        int nh = irequire("nhidden");
+        int nh2 = irequire("nhidden2");
+        int no = irequire("noutput");
+        // cerr << ">>> " << ni << " " << nh << " " << nh2 << " " << no << endl;
         shared_ptr<INetwork> parallel1, parallel2, logreg;
         parallel1 = make_fwdbwd(nh, ni);
         add(parallel1);
@@ -1046,6 +1050,7 @@ struct BIDILSTM2 : Stacked {
         add(logreg);
     }
 };
+REGISTER(BIDILSTM2);
 
 INetwork *make_BIDILSTM2() {
     return new BIDILSTM2();
@@ -1239,13 +1244,21 @@ void load_net_raw(INetwork *net,const char *fname) {
    });
 }
 
-shared_ptr<INetwork> make_net(const string &kind) {
+static string fixup_net_name(string kind) {
+    if (kind=="bidi") return "BIDILSTM";
+    if (kind=="lrbidi") return "LRBIDILSTM";
+    if (kind=="bidi2") return "BIDILSTM2";
+    if (kind=="lstm1") return "LSTM1";
+    if (kind=="uni") return "LSTM1";
+    return kind;
+}
+
+shared_ptr<INetwork> make_net(string kind) {
+    kind = fixup_net_name(kind);
+    auto it = network_factories.find(kind);
+    if (it==network_factories.end()) throw "unknown network type";
     shared_ptr<INetwork> net;
-    if (kind=="bidi") net.reset(make_BIDILSTM());
-    else if (kind=="lrbidi") net.reset(make_LRBIDILSTM());
-    else if (kind=="bidi2") net.reset(make_BIDILSTM2());
-    else if (kind=="uni") net.reset(make_LSTM1());
-    else throw "unknown network type";
+    net.reset(it->second());
     net->attributes["kind"] = kind;
     return net;
 }
@@ -1272,7 +1285,8 @@ shared_ptr<INetwork> load_net(const string &fname) {
     }
     shared_ptr<INetwork> net;
     net = make_net(kind);
-    if (kind=="bidi2") net->init(1,1,1,1); else net->init(1,1,1); // FIXME
+    net->attributes = attributes;
+    net->initialize();
     load_net_raw(net.get(), fname.c_str());
     if (verbose) {
         cout << "network:" << endl;

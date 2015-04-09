@@ -40,6 +40,8 @@ typedef vector<Mat> Sequence;
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 
+extern char exception_message[256];
+
 inline Vec timeslice(const Sequence &s, int i, int b=0) {
     Vec result(s.size());
     for (int t = 0; t < s.size(); t++)
@@ -60,11 +62,90 @@ struct VecMat {
     }
 };
 
-struct INetwork {
+struct ITrainable {
+    virtual ~ITrainable() {}
     // Each network has a name that's used for loading
     // and saving.
     string name = "???";
 
+    // Learning rate and momentum used for training.
+    Float learning_rate = 1e-4;
+    Float momentum = 0.9;
+    enum Normalization : int {
+        NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
+    } normalization;
+
+    // The attributes array contains parameters for constructing the
+    // network, as well as information necessary for loading and saving
+    // networks.
+    map<string, string> attributes;
+    string attr(string key, string dflt="") {
+        auto it = attributes.find(key);
+        if (it==attributes.end()) return dflt;
+        return it->second;
+    }
+    int iattr(string key, int dflt=-1) {
+        auto it = attributes.find(key);
+        if (it==attributes.end()) return dflt;
+        return std::stoi(it->second);
+    }
+    int irequire(string key) {
+        auto it = attributes.find(key);
+        if (it==attributes.end()) {
+            sprintf(exception_message, "missing parameter: %s", key.c_str());
+            throw exception_message;
+        }
+        return std::stoi(it->second);
+    }
+    void set(string key, string value) {
+        attributes[key] = value;
+    }
+    void set(string key, int value) {
+        attributes[key] = std::to_string(value);
+    }
+    void set(string key, double value) {
+        attributes[key] = std::to_string(value);
+    }
+
+    // Learning rates
+    virtual void setLearningRate(Float lr, Float momentum) = 0;
+
+    // Main methods for forward and backward propagation
+    // of activations.
+    virtual void forward() = 0;
+    virtual void backward() = 0;
+    virtual void update() = 0;
+
+    virtual int idepth() { return -9999; }
+    virtual int odepth() { return -9999; }
+
+    virtual void initialize() {
+        // this gets initialization parameters
+        // out of the attributes array
+    }
+
+    // These are convenience functions for initialization
+    virtual void init(int no, int ni) final {
+        set("ninput", ni);
+        set("noutput", no);
+        initialize();
+    }
+    virtual void init(int no, int nh, int ni) final {
+        set("ninput", ni);
+        set("nhidden", nh);
+        set("noutput", no);
+        initialize();
+    }
+    virtual void init(int no, int nh2, int nh, int ni) final {
+        set("ninput", ni);
+        set("nhidden", nh);
+        set("nhidden2", nh2);
+        set("noutput", no);
+        initialize();
+    }
+};
+
+struct INetwork : virtual ITrainable {
     // Networks have input and output "ports" for sequences
     // and derivatives. These are propagated in forward()
     // and backward() methods.
@@ -78,13 +159,6 @@ struct INetwork {
     // this forms a hierarchical namespace of networks.
     vector<shared_ptr<INetwork> > sub;
 
-    // Learning rate and momentum used for training.
-    Float learning_rate = 1e-4;
-    Float momentum = 0.9;
-    enum Normalization : int {
-        NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
-    } normalization;
-
     // Data for encoding/decoding input/output strings.
     vector<int> codec;
     vector<int> icodec;
@@ -96,34 +170,11 @@ struct INetwork {
     void encode(Classes &cs, std::wstring &s);
     void iencode(Classes &cs, std::wstring &s);
 
-    // Data used for loading and saving networks; these
-    // are generally only meaningful for the toplevel network.
-    map<string, string> attributes;
-
     // Parameters specific to softmax.
     Float softmax_floor = 1e-5;
     bool softmax_accel = false;
 
     virtual ~INetwork() { }
-
-    // There are several `init` methods depending on
-    // the network; override the one that has the right
-    // number of parameters.
-    virtual void init(int no, int ni) {
-        throw "unimplemented";
-    }
-    virtual void init(int no, int nh, int ni) {
-        throw "unimplemented";
-    }
-    virtual void init(int no, int nh2, int nh, int ni) {
-        throw "unimplemented";
-    }
-
-    // Main methods for forward and backward propagation
-    // of activations.
-    virtual void forward() = 0;
-    virtual void backward() = 0;
-    virtual void update() = 0;
 
     // Expected number of input/output features.
     virtual int ninput() { return -999999; }
@@ -202,12 +253,16 @@ INetwork *make_LSTM1();
 INetwork *make_REVLSTM1();
 INetwork *make_BIDILSTM();
 INetwork *make_BIDILSTM2();
+INetwork *make_LRBIDILSTM();
+
+typedef std::function<INetwork*(void)> INetworkFactory;
+extern map<string,INetworkFactory> network_factories;
+shared_ptr<INetwork> make_net(string kind);
 
 extern Mat debugmat;
 
 // loading and saving networks
 void load_attributes(map<string, string> &attrs, const string &file);
-shared_ptr<INetwork> make_net(const string &kind);
 shared_ptr<INetwork> load_net(const string &file);
 void save_net(const string &file, shared_ptr<INetwork> net);
 

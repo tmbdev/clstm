@@ -110,8 +110,7 @@ double error_rate(shared_ptr<INetwork> net,const string &testset, int nclasses, 
 }
 
 int main_train(int argc, char **argv) {
-    int randseed = getienv("seed", int(fmod(now()*1e6, 1e9)));
-    srand48(randseed);
+    srandomize();
 
     const char *textfile = argc > 1 ? argv[1] : "training.txt";
     vector<Sample> samples;
@@ -131,8 +130,8 @@ int main_train(int argc, char **argv) {
 
     int ntrain = getienv("ntrain", 1000000);
     double lrate = getrenv("lrate", 1e-4);
-    int nhidden = getrenv("hidden", 100);
-    int nhidden2 = getrenv("hidden2", -1);
+    int nhidden = getrenv("nhidden", getrenv("hidden", 100));
+    int nhidden2 = getrenv("nhidden2", getrenv("hidden2", -1));
     int batch = getrenv("batch", 1);
     double momentum = getuenv("momentum", 0.9);
     int display_every = getienv("display_every", 0);
@@ -140,7 +139,9 @@ int main_train(int argc, char **argv) {
     bool randomize = getienv("randomize", 1);
     string lrnorm = getsenv("lrnorm", "batch");
     int neps = int(getuenv("neps", 3));
-    string lstm_type = getsenv("lstm", "bidi");
+    string net_type = getsenv("lstm", "BIDILSTM");
+    string lstm_type = getsenv("lstm_type", "LSTM");
+    string output_type = getsenv("output_type", "SoftmaxLayer");
 
     string testset = getsenv("testset", "");
     int test_every = getienv("test_every", -1);
@@ -149,8 +150,8 @@ int main_train(int argc, char **argv) {
     print("params",
           "hg_version", hg_version(),
           "lrate", lrate,
-          "hidden", nhidden,
-          "hidden2", nhidden2,
+          "nhidden", nhidden,
+          "nhidden2", nhidden2,
           "batch", batch,
           "momentum", momentum);
 
@@ -165,7 +166,6 @@ int main_train(int argc, char **argv) {
     }
 
     shared_ptr<INetwork> net;
-
     int nclasses = -1, iclasses = -1;
     if (load_name != "") {
         net = load_net(load_name);
@@ -173,19 +173,19 @@ int main_train(int argc, char **argv) {
         iclasses = net->icodec.size();
         neps = stoi(net->attributes["neps"]);
     } else {
-        net = make_net(lstm_type);
+        net = make_net(net_type);
         get_codec(net->icodec, samples, &Sample::in);
         get_codec(net->codec, samples, &Sample::out);
-        nclasses = net->codec.size();
         iclasses = net->icodec.size();
-        if (lstm_type=="bidi2") {
-            net->init(nclasses, nhidden2, nhidden, iclasses);
-            print("init-bidi2", nclasses, nhidden2, nhidden, iclasses);
-        } else {
-            net->init(nclasses, nhidden, iclasses);
-            print("init", nclasses, nhidden, iclasses);
-        }
-        net->attributes["neps"] = to_string(int(neps));
+        nclasses = net->codec.size();
+        net->set("ninput", iclasses);
+        net->set("noutput", nclasses);
+        net->set("nhidden", nhidden);
+        net->set("nhidden2", nhidden2);
+        net->set("lstm_type", lstm_type);
+        net->set("output_type", output_type);
+        net->set("neps", neps);
+        net->initialize();
     }
     net->setLearningRate(lrate, momentum);
     net->makeEncoders();
@@ -208,7 +208,7 @@ int main_train(int argc, char **argv) {
     for (int trial = start; trial < ntrain; trial++) {
         bool report = (report_every>0) && (trial % report_every == 0);
         int sample = trial % nsamples;
-        if (randomize) sample = lrand48() % nsamples;
+        if (randomize) sample = irandom() % nsamples;
         if (trial > 0 && save_every > 0 && trial%save_every == 0) {
             char fname[4096];
             sprintf(fname, save_name.c_str(), trial);
@@ -306,25 +306,57 @@ int main_train(int argc, char **argv) {
 
 int main_filter(int argc, char **argv) {
     if (argc!=2) throw "give text file as an argument";
+    int display_every = getienv("display_every", -1);
+    double display_delay = getdenv("display_delay", 1e-3);
     const char *fname = argv[1];
     string load_name = getsenv("load", "");
     if (load_name=="") throw "must give load= parameter";
     shared_ptr<INetwork> net;
     net = load_net(load_name);
     int neps = stoi(net->attributes["neps"]);
-    dprint("codec", net->codec.size(), "icodec", net->icodec.size());
+    dprint("codec", net->codec.size(), "icodec", net->icodec.size(), "neps", neps);
+
+    unique_ptr<PyServer> py;
+    if (display_every > 0) {
+        py.reset(new PyServer());
+        if (display_every > 0) py->open();
+        py->eval("ion()");
+        py->eval("matplotlib.rc('xtick',labelsize=7)");
+        py->eval("matplotlib.rc('ytick',labelsize=7)");
+        py->eval("matplotlib.rcParams.update({'font.size':7})");
+    }
 
     string line;
     wstring in,out;;
     ifstream stream(fname);
+    int trial = 0;
     while (getline(stream, line)) {
+        int where = line.find("\t");
+        if (where>=0) line= line.substr(0,where);
         in = utf8_to_utf32(line);
         set_inputs_with_eps(net.get(), in, neps);
         net->forward();
         Classes output_classes;
         trivial_decode(output_classes, net->outputs);
         wstring out = net->decode(output_classes);
-        print(utf32_to_utf8(out));
+        string out8 = utf32_to_utf8(out);
+        print(out8);
+        if (display_every > 0 && trial%display_every == 0) {
+            mdarray<float> inputs, outputs;
+            assign(inputs, net->inputs);
+            assign(outputs, net->outputs);
+            py->eval("clf()");
+            py->subplot(2, 1, 1);
+            py->eval("set_aspect('auto')");
+            py->evalf("title(unicode('%s','utf-8'))", line.c_str());
+            py->imshowT(inputs, "cmap=cm.gray,interpolation='bilinear'");
+            py->subplot(2, 1, 2);
+            py->eval("set_aspect('auto')");
+            py->evalf("title(unicode('%s','utf-8'))", out.c_str());
+            py->imshowT(outputs, "cmap=cm.gray,interpolation='bilinear'");
+            py->evalf("ginput(1,%g)",display_delay);
+        }
+        trial++;
     }
     return 0;
 }

@@ -55,8 +55,7 @@ double error_rate(shared_ptr<INetwork> net,const string &testset) {
 }
 
 int main_ocr(int argc, char **argv) {
-    int randseed = getienv("seed", int(fmod(now()*1e6, 1e9)));
-    srand48(randseed);
+    srandomize();
 
     const char *h5file = argc > 1 ? argv[1] : "uw3-dew.h5";
     string load_name = getsenv("load", "");
@@ -69,19 +68,22 @@ int main_ocr(int argc, char **argv) {
     else
         save_name += ".h5";
     string after_save = getsenv("after_save", "");
+    string after_start = getsenv("after_start", "");
 
     int ntrain = getienv("ntrain", 1000000);
     double lrate = getrenv("lrate", 1e-4);
-    int nhidden = getrenv("hidden", 100);
-    int nhidden2 = getrenv("hidden2", -1);
+    int nhidden = getrenv("nhidden", getrenv("hidden", 100));
+    int nhidden2 = getrenv("nhidden2", getrenv("hidden2", -1));
     int batch = getrenv("batch", 1);
     double momentum = getuenv("momentum", 0.9);
     int display_every = getienv("display_every", 0);
     int report_every = getienv("report_every", 1);
     bool randomize = getienv("randomize", 1);
-    string lrnorm = getsenv("lrnorm", "batch");
-    string dewarp = getsenv("dewarp", "none");
-    string lstm_type = getsenv("lstm", "bidi");
+    string lrnorm = getoneof("lrnorm", "batch");
+    string dewarp = getoneof("dewarp", "none");
+    string net_type = getoneof("lstm", "BIDILSTM");
+    string lstm_type = getoneof("lstm_type", "LSTM");
+    string output_type = getoneof("output_type", "SoftmaxLayer");
 
     string testset = getsenv("testset", "");
     int test_every = getienv("test_every", -1);
@@ -90,10 +92,13 @@ int main_ocr(int argc, char **argv) {
     print("params",
           "hg_version", hg_version(),
           "lrate", lrate,
-          "hidden", nhidden,
-          "hidden2", nhidden2,
+          "nhidden", nhidden,
+          "nhidden2", nhidden2,
           "batch", batch,
-          "momentum", momentum);
+          "momentum", momentum,
+          "type", net_type, lstm_type, output_type);
+
+    if (getienv("params_only", 0)) return 0;
 
     unique_ptr<PyServer> py;
     if (display_every > 0) {
@@ -119,16 +124,17 @@ int main_ocr(int argc, char **argv) {
         vector<int> codec;
         dataset->getCodec(codec);
         nclasses = codec.size();
-        net = make_net(lstm_type);
-        if (lstm_type=="bidi2") {
-            net->init(nclasses, nhidden2, nhidden, dim);
-            print("init-bidi2", nclasses, nhidden2, nhidden, dim);
-        } else {
-            net->init(nclasses, nhidden, dim);
-            print("init", nclasses, nhidden, dim);
-        }
+        net = make_net(net_type);
+        net->set("ninput", dim);
+        net->set("noutput", nclasses);
+        net->set("nhidden", nhidden);
+        net->set("nhidden2", nhidden2);
+        net->set("lstm_type", lstm_type);
+        net->set("output_type", output_type);
+        net->initialize();
     }
     net->setLearningRate(lrate, momentum);
+    if (getienv("info", 0)) net->info("");
     dataset->getCodec(net->codec);
     // if (load_name != "") net->load(load_name.c_str());
     INetwork::Normalization norm = INetwork::NORM_DFLT;
@@ -148,10 +154,11 @@ int main_ocr(int argc, char **argv) {
 
     int start = stoi(getdef(net->attributes, "trial", getsenv("start", "-1")))+1;
     if (start>0) print("start", start);
+    if (after_start!="") system(after_start.c_str());
     for (int trial = start; trial < ntrain; trial++) {
         bool report = (report_every>0) && (trial % report_every == 0);
         int sample = trial % dataset->samples();
-        if (randomize) sample = lrand48() % dataset->samples();
+        if (randomize) sample = irandom() % dataset->samples();
         if (trial > 0 && save_every > 0 && trial%save_every == 0) {
             char fname[4096];
             sprintf(fname, save_name.c_str(), trial);
@@ -307,8 +314,7 @@ int main_dump(int argc, char **argv) {
 }
 
 int main_testdewarp(int argc, char **argv) {
-    int randseed = getienv("seed", int(fmod(now()*1e6, 1e9)));
-    srand48(randseed);
+    srandomize();
     if (argc!=2) throw "usage: ... image.png";
     mdarray<unsigned char> raw;
     mdarray<float> image, dewarped;

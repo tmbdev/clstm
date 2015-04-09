@@ -14,8 +14,6 @@
 #include <stdlib.h>
 #include <map>
 
-extern "C" { double drand48(); }
-
 namespace ocropus {
 using std::string;
 using std::wstring;
@@ -27,6 +25,11 @@ using std::endl;
 using std::min;
 using namespace multidim;
 
+
+void srandomize();
+unsigned urandom();
+int irandom();
+double drandom();
 
 // get current time down to usec precision as a double
 
@@ -84,6 +87,32 @@ inline const char *getsenv(const char *name, const char *dflt) {
     return result;
 }
 
+inline int split(vector<string> &tokens,string s,char c=':') {
+    int last = 0;
+    for(;;) {
+        size_t next = s.find(c,last);
+        if (next==string::npos) {
+            tokens.push_back(s.substr(last));
+            break;
+        }
+        tokens.push_back(s.substr(last,next-last));
+        last = next+1;
+    }
+    return tokens.size();
+}
+
+inline string getoneof(const char *name, const char *dflt) {
+    string s = dflt;
+    if (getenv(name)) s = getenv(name);
+    vector<string> tokens;
+    int n = split(tokens, s);
+    int k = (irandom()/1792)%n;
+    // cerr << "# getoneof " << name << " " << n << " " << k << endl;
+    string result = tokens[k];
+    report_params(name, result);
+    return result;
+}
+
 inline int getienv(const char *name, int dflt=0) {
     int result = dflt;
     if (getenv(name)) result = atoi(getenv(name));
@@ -105,7 +134,7 @@ inline double getrenv(const char *name, double dflt=0, bool logscale=true) {
     if (!s) return dflt;
     float lo,hi;
     if (sscanf(s, "%g,%g", &lo, &hi)==2) {
-        double x = exp(log(lo)+drand48()*(log(hi)-log(lo)));
+        double x = exp(log(lo)+drandom()*(log(hi)-log(lo)));
         report_params(name, x);
         return x;
     } else if (sscanf(s, "%g", &lo)==1) {
@@ -121,7 +150,7 @@ inline double getuenv(const char *name, double dflt=0) {
     if (!s) return dflt;
     float lo,hi;
     if (sscanf(s, "%g,%g", &lo, &hi)==2) {
-        double x = lo+drand48()*(hi-lo);
+        double x = lo+drandom()*(hi-lo);
         report_params(name, x);
         return x;
     } else if (sscanf(s, "%g", &lo)==1) {
@@ -192,6 +221,11 @@ void read_png(mdarray<unsigned char> &image,FILE *fp,bool gray=false);
 void write_png(FILE *fp,mdarray<unsigned char> &image);
 void read_png(mdarray<unsigned char> &image,const char *name,bool gray=false);
 void write_png(const char *name,mdarray<unsigned char> &image);
+
+void read_png(mdarray<float> &image,FILE *fp,bool gray=false);
+void write_png(FILE *fp,mdarray<float> &image);
+void read_png(mdarray<float> &image,const char *name,bool gray=false);
+void write_png(const char *name,mdarray<float> &image);
 
 inline bool anynan(mdarray<float> &a) {
     for (int i = 0; i < a.size(); i++)
@@ -276,6 +310,7 @@ void ctc_train(INetwork *net,mdarray<float> &xs, mdarray<float> &targets);
 void ctc_train(INetwork *net,mdarray<float> &xs, mdarray<int> &targets);
 void ctc_train(INetwork *net,mdarray<float> &xs, string &targets);
 void ctc_train(INetwork *net,mdarray<float> &xs, wstring &targets);
+
 }
 
 #endif

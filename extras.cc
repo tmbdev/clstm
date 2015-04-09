@@ -20,6 +20,7 @@
 extern "C" {
 #include <assert.h>
 #include <math.h>
+#include <unistd.h>
 }
 
 #include <string>
@@ -709,6 +710,39 @@ void write_png(const char *name,bytearray &image) {
     fclose(stream);
 }
 
+template <class U, class T>
+inline void copy_scale(mdarray<U> &it,mdarray<T> &other,double scale) {
+    it.clear();
+    it.allocate(other.total);
+    for(int i=0;i<mdarray<T>::MAXRANK+1;i++) it.dims[i] = other.dims[i];
+    it.fill = other.fill;
+    for(int i=0;i<it.fill;i++) it.data[i] = other.data[i] * scale;
+}
+
+void read_png(mdarray<float> &image,FILE *fp,bool gray) {
+    mdarray<unsigned char> temp;
+    read_png(temp, fp, gray);
+    copy_scale(image, temp, 1.0/255.0);
+}
+
+void write_png(FILE *fp,mdarray<float> &image) {
+    mdarray<unsigned char> temp;
+    copy_scale(temp, image, 255.0);
+    write_png(fp, temp);
+}
+
+void read_png(mdarray<float> &image,const char *name,bool gray) {
+    mdarray<unsigned char> temp;
+    read_png(temp, name, gray);
+    copy_scale(image, temp, 1.0/255.0);
+}
+
+void write_png(const char *name,mdarray<float> &image) {
+    mdarray<unsigned char> temp;
+    copy_scale(temp, image, 255.0);
+    write_png(name, temp);
+}
+
 shared_ptr<INetwork> make_net_init(const string &kind, int nclasses, int dim, string prefix) {
     shared_ptr<INetwork> net = make_net(kind);
     int nhidden = getrenv((prefix+"hidden").c_str(), 100);
@@ -721,6 +755,38 @@ shared_ptr<INetwork> make_net_init(const string &kind, int nclasses, int dim, st
         print("init", nclasses, nhidden, dim);
     }
     return net;
+}
+
+unsigned long random_state;
+
+void srandomize() {
+    random_state = getienv("seed", 0);
+    if (random_state==0) {
+        random_state = (unsigned long)fmod(now()*1e6, 1e9);
+        char **ep = environ;
+        while (*ep) {
+            char *p = *ep++;
+            while (*p) random_state = 17 * random_state + *p++;
+        }
+    }
+    // cerr << "# srandomize " << random_state << endl;
+}
+
+void randstep() {
+    random_state = (random_state * 1664525 + 1013904223) % (1ul<<32);
+}
+
+unsigned urandom() {
+    randstep();
+    return random_state;
+}
+
+int irandom() {
+    randstep();
+    return abs(int(random_state));
+}
+double drandom() {
+    return double(irandom() % 999999733) / 999999733.0;
 }
 
 }

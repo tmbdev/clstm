@@ -94,8 +94,7 @@ struct BatchBuilder {
 };
 
 int main(int argc, char **argv) {
-    int randseed = getienv("seed", int(fmod(now()*1e6, 1e9)));
-    srand48(randseed);
+    srandomize();
 
     const char *h5file = argc > 1 ? argv[1] : "mnist_seq.h5";
     string load_name = getsenv("load", "");
@@ -148,7 +147,7 @@ int main(int argc, char **argv) {
     for (int trial = start; trial < ntrain; trial+=batchsize) {
         BatchBuilder batch;
         for (int i=0;i<batchsize; i++) {
-            int sample = lrand48() % dataset->samples();
+            int sample = irandom() % dataset->samples();
             mdarray<float> image;
             mdarray<int> transcript;
             dataset->image(image, sample);
@@ -160,7 +159,7 @@ int main(int argc, char **argv) {
             assign(classes, transcript);
             batch.classes.push_back(classes);
         }
-        
+
         batched_of_sequences(net->inputs, batch.inputs);
         net->forward();
         sequences_of_batched(batch.outputs, net->outputs);

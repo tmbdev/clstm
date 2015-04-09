@@ -1,31 +1,31 @@
 
 inline const char *hg_version() {
-    return "476982314e0d";
+    return "e8845c8e6e6f+";
 }
 inline const char *hg_log() {
-    return R"(changeset:   59:476982314e0d
+    return R"(changeset:   73:e8845c8e6e6f
 tag:         tip
 user:        Tom <tmb@google>
-date:        Tue Mar 24 14:16:25 2015 -0700
-files:       test-batch.cc
+date:        Sun Apr 05 16:58:26 2015 -0700
+files:       clstm.cc clstm.h clstmctc.cc clstmtext.cc
 description:
-commented out unused variables
+bug fixes
 
 
-changeset:   58:55bd0afe1713
-user:        Tom <tmbdev@gmail.com>
-date:        Tue Mar 24 14:03:48 2015 -0700
-files:       extras.h
+changeset:   72:8e878ec34ccc
+user:        Tom <tmb@google>
+date:        Thu Apr 02 21:06:03 2015 -0700
+files:       extras.cc extras.h
 description:
-added parameter reporting
+bug fix in random number generator
 
 
-changeset:   57:fe84c8e731e1
-user:        Tom <tmb@google.com>
-date:        Mon Mar 23 15:08:41 2015 -0700
-files:       test-batch.cc
+changeset:   71:a8586bf81db6
+user:        Tom <tmb@google>
+date:        Thu Apr 02 19:39:04 2015 -0700
+files:       clstmctc.cc clstmtext.cc test-batch.cc
 description:
-added testing to test-batch
+replaced more rand48 functions with builtins
 
 
 )";
