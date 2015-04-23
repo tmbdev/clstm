@@ -13,10 +13,6 @@ To build a standalone C library, run
     scons
     sudo scons install
 
-If you have an older ZMQPP library, you need to compile with:
-
-    scons oldzmqpp=1
-
 For debugging, you can compile with `debug=1`
 
 To build the Python extension, run
@@ -39,7 +35,8 @@ The `INetwork` interface contains:
         Sequence inputs, d_inputs;      // input sequence, input deltas
         Sequence outputs, d_outputs;    // output sequence, output deltas
         void forward();                 // propagate inputs to outputs
-        void backward();                // propagage d_outputs to d_inputs
+        void backward();                // propagate d_outputs to d_inputs
+        void update();                  // update weights from the last backward() step
         void setLearningRate(Float,Float); // set learning rates
         ...
     };
@@ -91,10 +88,11 @@ implementation from ocropy.
 
 # Comand Line Drivers
 
-There are two command line drivers:
+There are several command line drivers:
 
   - clstmseq learns sequence-to-sequence mappings
   - clstmctc learns sequence-to-string mappings using CTC alignment
+  - clstmtext learns string-to-string transformations
 
 Note that most parameters are passed through the environment:
 
@@ -155,9 +153,8 @@ For debugging and testing, there are equivalent Python implementations
 The `rnntests.py` script will generate a number of simple sequence
 recognition tasks for testing.
 
-# TODO
+# TODO / UPCOMING
 
-  - consistently provide a separate `update()` method
-  - canned support for multilayer, logistic outputs, linear outputs
+  - the HDF5 network save format will probably change
+  - Lua and Torch bindings
   - 2D LSTM support
-  - more testing
