@@ -13,10 +13,6 @@ To build a standalone C library, run
     scons
     sudo scons install
 
-If you have an older ZMQPP library, you need to compile with:
-
-    scons oldzmqpp=1
-
 For debugging, you can compile with `debug=1`
 
 To build the Python extension, run
@@ -39,7 +35,8 @@ The `INetwork` interface contains:
         Sequence inputs, d_inputs;      // input sequence, input deltas
         Sequence outputs, d_outputs;    // output sequence, output deltas
         void forward();                 // propagate inputs to outputs
-        void backward();                // propagage d_outputs to d_inputs
+        void backward();                // propagate d_outputs to d_inputs
+        void update();                  // update weights from the last backward() step
         void setLearningRate(Float,Float); // set learning rates
         ...
     };
@@ -91,73 +88,22 @@ implementation from ocropy.
 
 # Comand Line Drivers
 
-There are two command line drivers:
+There are several command line drivers:
 
   - clstmseq learns sequence-to-sequence mappings
   - clstmctc learns sequence-to-string mappings using CTC alignment
+  - clstmtext learns string-to-string transformations
 
 Note that most parameters are passed through the environment:
 
     lrate=3e-5 clstmctc uw3-dew.h5
-
-Parameters are:
-
-    clstmctc:
-
-        Learns image->text transformations, modeling sequences of
-        vertical slices through the input image.
-
-        maxeval= max # evaluation samples
-        randseed= random seed
-        load= model to preload
-        save_every= how often to save (0: save only improved models)
-        after_save= shell command to execute after saving
-        ntrain= number of training samples
-        lrate= learning rate
-        nhidden= #hidden units
-        nhidden2= #hidden units second lstm layer
-        batch= batching for updates
-        momentum= momentum
-        display_every= how often to display results
-        report_every= how often to report progress
-        randomize= shuffle training examples
-        lrnorm= learning rate normalization
-        dewarp= image dewarping method
-        lstm= kind of LSTM to be used
-        testset= test set file
-        test_every= how often to compute test error rate
-        after_test= shell command to run after testing
-        start= start sample for training
-        mode= command line mode (training, errors, etc.)
-
-    clstmseq:
-
-        lrate= learning rate
-        display_every= how often to display recognition output (0=never)
-        report= how often to report progress
-        ntrain= total number of training steps
-        kind= bidi, bidi2, lstm1
-        state= number of internal state variables (2 by default)
-
-    clstmtext:
-
-        Training files contain lines of the form: "input\toutput\n"
-        With mode=filter, the input file is transformed using the
-        trained filter.
-
-        (similar to clstmctc)
+    
+See the notebooks in the `misc/` subdirectory for documentation on the parameters and examples of usage.
 
 (You can find all parameters via `grep 'get.env' *.cc`.)
 
-For debugging and testing, there are equivalent Python implementations
-(`pylstmseq` and `pylstmctc`) that should work the same way in Python.
+# TODO / UPCOMING
 
-The `rnntests.py` script will generate a number of simple sequence
-recognition tasks for testing.
-
-# TODO
-
-  - consistently provide a separate `update()` method
-  - canned support for multilayer, logistic outputs, linear outputs
+  - the HDF5 network save format will probably change
+  - Lua and Torch bindings
   - 2D LSTM support
-  - more testing
