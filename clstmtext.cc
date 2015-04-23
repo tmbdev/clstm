@@ -43,6 +43,9 @@ void read_samples(vector<Sample> &samples, const string &fname) {
     wstring in, out;;
     samples.clear();
     while (getline(stream, line)) {
+        // skip blank lines and lines starting with a comment
+        if (line.substr(0, 2) == "# ") continue;
+        if (line.size() == 0) continue;
         int where = line.find("\t");
         if (where < 0) throw "no tab found in input line";
         in = utf8_to_utf32(line.substr(0, where));
@@ -51,8 +54,39 @@ void read_samples(vector<Sample> &samples, const string &fname) {
         if (out.size() == 0) continue;
         samples.push_back(Sample {in, out});
     }
-    for (auto c : out)
-        if (int(c) == 0) throw "no nulls allowed in input";
+}
+
+void read_samples2(vector<Sample> &samples, const string &fname, const string &fname2) {
+    string line;
+    samples.clear();
+    wstring empty;
+    {
+        ifstream stream(fname);
+        while (getline(stream, line)) {
+            // skip blank lines and lines starting with a comment
+            if (line.substr(0, 2) == "# ") continue;
+            if (line.size() == 0) continue;
+            wstring in = utf8_to_utf32(line);
+            samples.push_back(Sample {in, empty});
+        }
+    }
+
+    {
+        ifstream stream(fname);
+        int n = 0;
+        while (getline(stream, line)) {
+            // skip blank lines and lines starting with a comment
+            if (line.substr(0, 2) == "# ") continue;
+            if (line.size() == 0) continue;
+            if (n >= samples.size())
+                throw "too many lines in output file";
+            wstring out = utf8_to_utf32(line);
+            samples[n].out = out;
+            n++;
+        }
+        if (n < samples.size())
+            throw "too few lines in output file";
+    }
 }
 
 void get_codec(vector<int> &codec, vector<Sample> &samples, wstring Sample::* p) {
@@ -112,9 +146,14 @@ double error_rate(shared_ptr<INetwork> net, const string &testset, int nclasses,
 int main_train(int argc, char **argv) {
     srandomize();
 
-    const char *textfile = argc > 1 ? argv[1] : "training.txt";
     vector<Sample> samples;
-    read_samples(samples, textfile);
+    if (argc == 2) {
+        read_samples(samples, argv[1]);
+    } else if (argc == 3) {
+        read_samples2(samples, argv[1], argv[2]);
+    } else {
+        throw "args: training.txt [output.txt]";
+    }
     print("got", samples.size(), "lines");
     int nsamples = samples.size();
 
@@ -216,6 +255,7 @@ int main_train(int argc, char **argv) {
             net->attributes["trial"] = to_string(trial);
             save_net(fname, net);
             if (after_save != "") system(after_save.c_str());
+            cout.flush();
         }
         if (trial > 0 && test_every > 0 && trial%test_every == 0 && testset != "") {
             double erate = error_rate(net, testset, nclasses, neps);
@@ -231,6 +271,7 @@ int main_train(int argc, char **argv) {
                 if (after_save != "") system(after_save.c_str());
             }
             if (after_test != "") system(after_test.c_str());
+            cout.flush();
         }
         set_inputs_with_eps(net.get(), samples[sample].in, neps);
         mdarray<float> image;
@@ -269,6 +310,7 @@ int main_train(int argc, char **argv) {
             print("OUT:", "'"+utf32_to_utf8(out)+"'");
             print("ALN:", "'"+utf32_to_utf8(aln)+"'");
             print(levenshtein(gt, out));
+            cout.flush();
         }
 
         if (display_every > 0 && trial%display_every == 0) {
@@ -299,6 +341,7 @@ int main_train(int argc, char **argv) {
             py->evalf("xlim(0,%d)", outputs.dim(0));
             py->plot(v, "color='r'");
             py->eval("ginput(1,1e-3)");
+            cout.flush();
         }
     }
     return 0;
@@ -361,7 +404,7 @@ int main_filter(int argc, char **argv) {
     return 0;
 }
 
-const char *usage = /*program+*/
+const char *usage =  /*program+*/
     "training.txt\n\n"
     "training.txt is a text file consisting of lines of the form:\n\n"
     "input\toutput\n\n"

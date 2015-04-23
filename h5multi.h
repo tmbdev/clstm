@@ -19,9 +19,13 @@ using namespace multidim;
 
 struct HDF5 {
     shared_ptr<H5File> h5;
-    void open(const string &name, bool rw=false) {
+    void open(const string &name, bool rw=false, bool erase=false) {
         if (rw) {
-            h5.reset(new H5File(name, H5F_ACC_TRUNC));
+            if (erase) {
+                h5.reset(new H5File(name, H5F_ACC_TRUNC));
+            } else {
+                h5.reset(new H5File(name, H5F_ACC_RDWR));
+            }
         } else {
             h5.reset(new H5File(name, H5F_ACC_RDONLY));
         }
@@ -140,6 +144,7 @@ struct HDF5 {
         mdarray<int> dims;
         shape(dims, name);
         if (dims.size() == 1) {
+            // variable-shape row; take shape from _dims array
             getvlrow(a, index, name);
             try {
                 string sname(name);
@@ -154,6 +159,7 @@ struct HDF5 {
                 // skip resizing if we can't get _dims, assume it's 1D
             }
         } else {
+            // fixed-shape row; take shape from array shape
             getrow(a, index, name);
         }
     }

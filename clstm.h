@@ -74,7 +74,7 @@ struct ITrainable {
     Float momentum = 0.9;
     enum Normalization : int {
         NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
-    } normalization;
+    } normalization = NORM_DFLT;
 
     // The attributes array contains parameters for constructing the
     // network, as well as information necessary for loading and saving
@@ -226,6 +226,11 @@ struct INetwork : virtual ITrainable {
     void states(const string &prefix, StateFun f);
     void networks(const string &prefix, function<void (string, INetwork*)>);
     Sequence *getState(string name);
+    // special method for LSTM and similar networks, returning the
+    // primary internal state sequence
+    Sequence *getState() {
+        throw "unimplemented";
+    };
     void save(const char *fname);
     void load(const char *fname);
 };
@@ -292,7 +297,7 @@ void ctc_train(INetwork *net, Sequence &xs, BatchClasses &targets);
 }
 
 namespace {
-bool anynan(ocropus::Sequence &a) {
+inline bool anynan(ocropus::Sequence &a) {
     for (int i = 0; i < a.size(); i++) {
         for (int j = 0; j < a[i].rows(); j++) {
             for (int k = 0; k < a[i].cols(); k++) {
@@ -318,7 +323,7 @@ double levenshtein(A &a, B &b) {
         current[0] = i;
         for (int j = 1; j <= n; j++) {
             double add = previous[j]+1;
-            double del = previous[j-1]+1;
+            double del = current[j-1]+1;
             double change = previous[j-1];
             if (a[j-1] != b[i-1]) change = change+1;
             current[j] = fmin(fmin(add, del), change);

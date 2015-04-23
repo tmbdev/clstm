@@ -3,13 +3,18 @@
 %{
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 %}
 
 %module(docstring="C-version of the ocropy LSTM implementation") clstm;
 %feature("autodoc",1);
 %include "typemaps.i"
 %include "std_string.i"
+%include "std_wstring.i"
 %include "std_shared_ptr.i"
+%include "std_vector.i"
+%shared_ptr(ITrainable)
 %shared_ptr(INetwork)
 #ifdef SWIGPYTHON
 %include "cstring.i"
@@ -17,6 +22,7 @@
 
 %{
 #include <memory>
+#include <iostream>
 #include "clstm.h"
 using namespace ocropus;
 using namespace std;
@@ -43,6 +49,7 @@ using std::string;
 
 %{
 #include "numpy/arrayobject.h"
+
 %}
 
 %init %{
@@ -90,62 +97,15 @@ struct Mat {
     void setValue(int i,int j,float value) {
         (*$self)(i,j) = value;
     }
-    void set(PyObject *object_) {
-        Mat *a = $self;
-        if(!object_) throw "null pointer";
-        if(!PyArray_Check(object_)) throw "expectd a numpy array";
-        PyArrayObject *obj = (PyArrayObject *)object_;
-        if((obj->flags&NPY_CONTIGUOUS)==0) {
-            obj = (PyArrayObject*)PyArray_ContiguousFromObject(object_,obj->descr->type_num,1,4);
-            if(!obj) throw "contiguous conversion failed";
-        }
-        int rank = PyArray_NDIM(obj);
-        if(rank!=2) throw "rank must be 2";
-        int N = PyArray_DIM(obj,0);
-        int d = PyArray_DIM(obj,1);
-        a->resize(N,d);
-        int t = obj->descr->type_num;
-        if(t==PyArray_FLOAT) {
-            float *data = (float*)PyArray_DATA(obj);
-            for(int t=0;t<N;t++) {
-                for(int i=0;i<d;i++) (*a)(t,i) = data[t*d+i];
-            }
-        } else {
-            throw "numpy array must be float32 type";
-        }
-        if((PyObject*)obj!=object_) Py_DECREF(obj);
-    }
-    void get(PyObject *object_) {
-        Mat *a = $self;
-        if(!object_) throw "null pointer";
-        if(!PyArray_Check(object_)) throw "expected a numpy array";
-        PyArrayObject *obj = (PyArrayObject *)object_;
-        int rank = PyArray_NDIM(obj);
-        if(rank!=2) throw "rank must be 2";
-        int N = PyArray_DIM(obj,0);
-        if(N!=a->rows()) throw "size mismatch (N)";
-        int d = PyArray_DIM(obj,1);
-        if(d!=a->cols()) throw "size mismatch (d)";
-        if((obj->flags&NPY_CONTIGUOUS)==0)
-            throw "output array is not contiguous";
-        int t = obj->descr->type_num;
-        if(t==PyArray_FLOAT) {
-            float *data = (float*)PyArray_DATA(obj);
-            for(int t=0;t<N;t++) {
-                for(int i=0;i<d;i++) data[t*d+i] = (*a)(t,i);
-            }
-        } else {
-            throw "numpy array must be float32 type";
-        }
-    }
 }
+
 
 struct Sequence {
     Sequence();
     ~Sequence();
     int size();
     %rename(__getitem__) operator[];
-    Vec &operator[](int i);
+    Mat &operator[](int i);
 };
 %extend Sequence {
     int length() {
@@ -153,261 +113,338 @@ struct Sequence {
     }
     int depth() {
         if($self->size()==0) return -1;
-        return (*$self)[0].size();
+        return (*$self)[0].rows();
+    }
+    int batchsize() {
+        if($self->size()==0) return -1;
+        return (*$self)[0].cols();
     }
     void assign(Sequence &other) {
         $self->resize(other.size());
         for(int t=0;t<$self->size();t++)
             (*$self)[t] = other[t];
     }
-    void set(PyObject *object_) {
-        Sequence *a = $self;
-        if(!object_) throw "null pointer";
-        if(!PyArray_Check(object_)) throw "expectd a numpy array";
-        PyArrayObject *obj = (PyArrayObject *)object_;
-        if((obj->flags&NPY_CONTIGUOUS)==0) {
-            obj = (PyArrayObject*)PyArray_ContiguousFromObject(object_,obj->descr->type_num,1,4);
-            if(!obj) throw "contiguous conversion failed";
-        }
-        int rank = PyArray_NDIM(obj);
-        if(rank!=2) throw "rank must be 2";
-        int N = PyArray_DIM(obj,0);
-        int d = PyArray_DIM(obj,1);
-        a->resize(N);
-        int t = obj->descr->type_num;
-        if(t==PyArray_FLOAT) {
-            float *data = (float*)PyArray_DATA(obj);
-            for(int t=0;t<N;t++) {
-                (*a)[t].resize(d);
-                for(int i=0;i<d;i++) (*a)[t][i] = data[t*d+i];
-            }
-        } else {
-            throw "numpy array must be float32 type";
-        }
-        if((PyObject*)obj!=object_) Py_DECREF(obj);
-    }
-    void get(PyObject *object_) {
-        Sequence *a = $self;
-        if(!object_) throw "null pointer";
-        if(!PyArray_Check(object_)) throw "expected a numpy array";
-        PyArrayObject *obj = (PyArrayObject *)object_;
-        int rank = PyArray_NDIM(obj);
-        if(rank!=2) throw "rank must be 2";
-        int N = PyArray_DIM(obj,0);
-        if(N!=a->size()) throw "size mismatch (N)";
-        int d = PyArray_DIM(obj,1);
-        for(int t=0;t<N;t++) if((*a)[t].size()!=d) throw "size mismatch (d)";
-        if((obj->flags&NPY_CONTIGUOUS)==0)
-            throw "output array is not contiguous";
-        int t = obj->descr->type_num;
-        if(t==PyArray_FLOAT) {
-            float *data = (float*)PyArray_DATA(obj);
-            for(int t=0;t<N;t++) {
-                for(int i=0;i<d;i++) data[t*d+i] = (*a)[t][i];
-            }
-        } else {
-            throw "numpy array must be float32 type";
-        }
+    void resize(int len, int depth, int batchsize) {
+        throw "unimplemented";
     }
 }
 
-struct INetwork {
-    virtual ~INetwork() = 0;
+struct ITrainable {
+    virtual ~ITrainable();
+    string name = "???";
+    Float learning_rate = 1e-4;
+    Float momentum = 0.9;
+    enum Normalization : int {
+        NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
+    } normalization = NORM_DFLT;
+    map<string, string> attributes;
+    string attr(string key, string dflt="");
+    int iattr(string key, int dflt=-1);
+    int irequire(string key);
+    void set(string key, string value);
+    void set(string key, int value);
+    void set(string key, double value);
+    virtual void setLearningRate(Float lr, Float momentum) = 0;
+    virtual void forward() = 0;
+    virtual void backward() = 0;
+    virtual void update() = 0;
+    virtual int idepth();
+    virtual int odepth();
+    virtual void initialize();
+    virtual void init(int no, int ni) final;
+    virtual void init(int no, int nh, int ni) final;
+    virtual void init(int no, int nh2, int nh, int ni) final;
+};
+
+struct INetwork;
+%template(vectornet) std::vector<std::shared_ptr<INetwork> >;
+
+struct INetwork : virtual ITrainable {
+    virtual ~INetwork();
+    Sequence inputs, d_inputs;
+    Sequence outputs, d_outputs;
+    std::vector<std::shared_ptr<INetwork> > sub;
+    std::vector<int> codec;
+    std::vector<int> icodec;
+    //unique_ptr<map<int, int> > encoder;  // cached
+    //unique_ptr<map<int, int> > iencoder;  // cached
+    //void makeEncoders();
+    std::wstring decode(Classes &cs);
+    std::wstring idecode(Classes &cs);
+    void encode(Classes &cs, std::wstring &s);
+    void iencode(Classes &cs, std::wstring &s);
     Float softmax_floor = 1e-5;
     bool softmax_accel = false;
-    // Float lr = 1e-4;
-    // Float momentum = 0.9;
-    Sequence inputs,d_inputs;
-    Sequence outputs,d_outputs;
+    virtual ~INetwork();
     virtual int ninput();
     virtual int noutput();
-    virtual void init(int no,int ni);
-    virtual void init(int no,int nh,int ni);
-    virtual void init(int no,int nh2,int nh,int ni);
-    virtual void forward();
-    virtual void backward();
+    virtual void add(std::shared_ptr<INetwork> net);
+    virtual void setLearningRate(Float lr, Float momentum);
     void info(string prefix);
-    void train(Sequence &xs,Sequence &targets);
-    void ctrain(Sequence &xs,Classes &cs);
-    void ctrain_accelerated(Sequence &xs,Classes &cs,Float lo=1e-5);
-    void cpred(Classes &preds,Sequence &xs);
-    void setLearningRate(Float, Float);
-    void setInputs(Sequence &inputs);
-    void setTargets(Sequence &targets);
-    void setClasses(Classes &classes);
-    // typedef function<void (const string &,Eigen::Ref<Mat>,Eigen::Ref<Mat>)> WeightFun;
-    // typedef function<void (const string &,Sequence *)> StateFun;
-    // void weights(const string &prefix,WeightFun f);
-    // void states(const string &prefix,StateFun f);
     Sequence *getState(string name);
-    void add(shared_ptr<INetwork> net);
-    void save(const char *fname);
-    void load(const char *fname);
-};
-%extend INetwork {
-    void add(INetwork *net) {
-        $self->add(shared_ptr<INetwork>(net));
-    }
-    void setAttr(string key,string value) {
-        $self->attributes[key] = value;
-    }
-    string getAttr(string key) {
-        return $self->attributes[key];
-    }
 };
 
-%newobject make_LinearLayer;
-%newobject make_Logreglayer;
-%newobject make_SoftmaxLayer;
-%newobject make_TanhLayer;
-%newobject make_ReluLayer;
-%newobject make_Stacked;
-%newobject make_Reversed;
-%newobject make_Parallel;
-%newobject make_MLP;
-%newobject make_LSTM;
-%newobject make_LSTM1;
-%newobject make_BIDILSTM;
+void set_inputs(INetwork *net, Sequence &inputs);
+void set_targets(INetwork *net, Sequence &targets);
+void set_targets_accelerated(INetwork *net, Sequence &targets);
+void set_classes(INetwork *net, Classes &classes);
+/*void set_classes(INetwork *net, BatchClasses &classes);*/
+void train(INetwork *net, Sequence &xs, Sequence &targets);
+void ctrain(INetwork *net, Sequence &xs, Classes &cs);
+void ctrain_accelerated(INetwork *net, Sequence &xs, Classes &cs, Float lo=1e-5);
+void cpred(INetwork *net, Classes &preds, Sequence &xs);
+void mktargets(Sequence &seq, Classes &targets, int ndim);
 
-INetwork *make_LinearLayer();
-INetwork *make_LogregLayer();
-INetwork *make_SoftmaxLayer();
-INetwork *make_TanhLayer();
-INetwork *make_ReluLayer();
-INetwork *make_Stacked();
-INetwork *make_Reversed();
-INetwork *make_Parallel();
-INetwork *make_MLP();
-INetwork *make_LSTM();
-INetwork *make_LSTM1();
-INetwork *make_BIDILSTM();
-
+%rename(seq_forward) forward_algorithm;
 void forward_algorithm(Mat &lr,Mat &lmatch,double skip=-5.0);
+%rename(seq_forwardbackward) forwardbackward;
 void forwardbackward(Mat &both,Mat &lmatch);
+%rename(seq_ctc_align) ctc_align_targets;
 void ctc_align_targets(Sequence &posteriors,Sequence &outputs,Sequence &targets);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
 
+std::shared_ptr<INetwork> make_net(string kind);
+
 %inline %{
-    Mat &getdebugmat() { return debugmat; }
-    %}
+Mat &getdebugmat() {
+    return debugmat;
+}
+
+int string_edit_distance(string a, string b) {
+    return levenshtein(a, b);
+}
+
+string network_info(std::shared_ptr<INetwork> net) {
+    string result = "";
+    net->networks("", [&result] (string s, INetwork *net) {
+        result += s + ": " + to_string(net->learning_rate);
+        result += string(" ") + to_string(net->momentum);
+        result += string(" ") + to_string(net->ninput());
+        result += string(" ") + to_string(net->noutput());
+        result += "\n";
+    });
+    return result;
+}
+
+string sequence_info(Sequence &seq) {
+    string result = "";
+    result += to_string(seq.size());
+    result += string(":") + (seq.size()>0?to_string(seq[0].rows()):"*");
+    result += string(":") + (seq.size()>0?to_string(seq[0].cols()):"*");
+    double lo = 1e99, hi = -1e99;
+    for (int t=0;t<seq.size(); t++) {
+        lo = fmin(lo, seq[t].minCoeff());
+        hi = fmax(hi, seq[t].maxCoeff());
+    }
+    result += "[" + to_string(lo) + "," + to_string(hi) + "]";
+    return result;
+}
+
+%}
+
+#ifdef SWIGPYTHON
+%{
+template <class T, int TYPENUM>
+struct NumPyArray {
+    PyArrayObject *obj = 0;
+    NumPyArray() {}
+    NumPyArray(PyObject *object_) {
+        if(!object_) throw "null pointer";
+        if(!PyArray_Check(object_))
+            throw "expected a numpy array";
+        obj = (PyArrayObject *)object_;
+        Py_INCREF(obj);
+        valid();
+    }
+    NumPyArray(NumPyArray<T,TYPENUM> &other) {
+        Py_INCREF(other.obj);
+        Py_DECREF(obj);
+        obj = other.obj;
+    }
+    NumPyArray(int d0, int d1=0, int d2=0, int d3=0) {
+        npy_intp ndims[] = {d0, d1, d2, d3, 0};
+        int rank = 0;
+        while (ndims[rank]) rank++;
+        obj = PyArray_SimpleNew(rank, ndims, TYPENUM);
+        valid();
+    }
+    ~NumPyArray() {
+        Py_DECREF(obj);
+        obj = 0;
+    }
+    void operator=(NumPyArray<T,TYPENUM> &other) {
+        Py_INCREF(other.obj);
+        Py_DECREF(obj);
+        obj = other.obj;
+    }
+    void valid() {
+        if (!obj)
+            throw "no array set";
+        if(PyArray_TYPE(obj)!=TYPENUM)
+            throw "wrong numpy array type";
+        if((PyArray_FLAGS(obj)&NPY_ARRAY_C_CONTIGUOUS)==0)
+            throw "expected contiguous array";
+    }
+    int rank() {
+        valid();
+        return PyArray_NDIM(obj);
+    }
+    int dim(int i) {
+        valid();
+        return PyArray_DIM(obj,i);
+    }
+    int size() {
+        valid();
+        return PyArray_SIZE(obj);
+    }
+    void resize(int d0, int d1=0, int d2=0, int d3=0) {
+        npy_intp ndims[] = {d0, d1, d2, d3, 0};
+        int rank = 0;
+        while (ndims[rank]) rank++;
+        PyArray_Dims dims = { ndims, rank };
+        if (PyArray_Resize(obj, &dims, 0, NPY_CORDER)==nullptr)
+            throw "resize failed";
+    }
+    T &operator()(int i) {
+        assert(rank()==1);
+        assert(unsigned(i)<unsigned(dim(0)));
+        T *data = (T*)PyArray_DATA(obj);
+        return data[i];
+    }
+    T &operator()(int i,int j) {
+        assert(rank()==2);
+        assert(unsigned(i)<unsigned(dim(0)));
+        assert(unsigned(j)<unsigned(dim(1)));
+        T *data = (T*)PyArray_DATA(obj);
+        return data[i*dim(1)+j];
+    }
+    T &operator()(int i,int j,int k) {
+        assert(rank()==3);
+        assert(unsigned(i)<unsigned(dim(0)));
+        assert(unsigned(j)<unsigned(dim(1)));
+        assert(unsigned(k)<unsigned(dim(2)));
+        T *data = (T*)PyArray_DATA(obj);
+        return data[(i*dim(1)+j)*dim(2)+k];
+    }
+    T &operator()(int i,int j,int k,int l) {
+        assert(rank()==4);
+        assert(unsigned(i)<unsigned(dim(0)));
+        assert(unsigned(j)<unsigned(dim(1)));
+        assert(unsigned(k)<unsigned(dim(2)));
+        assert(unsigned(l)<unsigned(dim(3)));
+        T *data = (T*)PyArray_DATA(obj);
+        return data[((i*dim(1)+j)*dim(2)+k)*dim(3)+l];
+    }
+    T *data() {
+        valid();
+        return (T*)PyArray_DATA(obj);
+    }
+    void copyTo(T *dest) {
+        valid();
+        T *data = (T*)PyArray_DATA(obj);
+        int N = size();
+        for(int i=0; i<N; i++) dest[i] = data[i];
+    }
+};
+
+typedef NumPyArray<float, NPY_FLOAT> npa_float;
+%}
+
+%inline %{
+void mat_of_array(Mat &a,PyObject *object_) {
+    npa_float np(object_);
+    if(np.rank()!=2) throw "rank must be 2";
+    int N = np.dim(0);
+    int d = np.dim(1);
+    a.resize(N,d);
+    for(int t=0;t<N;t++)
+        for(int i=0;i<d;i++)
+            a(t,i) = np(d,i);
+}
+
+void array_of_mat(PyObject *object_,Mat &a) {
+    npa_float np(object_);
+    if(np.rank()!=2) throw "rank must be 2";
+    int N = a.rows();
+    int d = a.cols();
+    np.resize(N,d);
+    for(int t=0;t<N;t++)
+        for(int i=0;i<d;i++)
+            np(t,i) = a(t,i);
+}
+
+void sequence_of_array(Sequence &a,PyObject *object_) {
+    npa_float np(object_);
+    if(np.rank()!=3) throw "rank must be 3";
+    int N = np.dim(0);
+    int d = np.dim(1);
+    int bs = np.dim(2);
+    a.resize(N);
+    for(int t=0;t<N;t++) {
+        a[t].resize(d,bs);
+        for(int i=0; i<d; i++)
+            for(int b=0; b<bs; b++)
+                a[t](i,b) = np(t,i,b);
+    }
+}
+
+void array_of_sequence(PyObject *object_,Sequence &a) {
+    npa_float np(object_);
+    int N = a.size();
+    if (N==0) throw "empty sequence";
+    int d = a[0].rows();
+    if (d==0) throw "empty feature vector";
+    int bs = a[0].cols();
+    if (bs==0) throw "empty batch";
+    np.resize(N,d,bs);
+    for(int t=0; t<N; t++) {
+        for(int i=0; i<d; i++)
+            for(int b=0; b<bs; b++)
+                np(t,i,b) = a[t](i,b);
+    }
+}
+%}
 
 %pythoncode %{
-from numpy import *
-class CNetwork:
-    def __init__(self,net):
-        self.net = net
-    def init(self,*args):
-        self.net.init(*args)
-    def save(self,fname):
-        self.net.save(fname)
-    def load(self,fname):
-        self.net.load(fname)
-    def ninput(self):
-        return self.net.input()
-    def noutput(self):
-        return self.net.noutput()
-    def forward(self,xs):
-        self.net.inputs.set(xs.astype(float32))
-        self.net.forward()
-        N = self.net.outputs.size()
-        d = self.net.outputs[0].size()
-        ys = zeros((N,d),'f')
-        self.net.outputs.get(ys)
-        return ys
-    def backward(self,deltas):
-        self.net.d_outputs.set(deltas.astype(float32))
-        self.net.backward()
-    def predict(self,xs):
-        return self.forward()
-    def train(self,xs,ys,debug=0):
-        xs = array(xs)
-        ys = array(ys)
-        pred = self.forward(xs)
-        deltas = ys - pred
-        self.net.d_outputs.set(deltas)
-        self.net.backward()
-        return pred
-    def ctrain(self,xs,cs,debug=0,lo=1e-5,accelerated=1):
-        assert len(cs.shape)==1
-        assert (cs==array(cs,'i')).all()
-        xs = array(xs)
-        pred = array(self.forward(xs))
-        deltas = zeros(pred.shape)
-        assert len(deltas)==len(cs)
-        # NB: these deltas are such that they can be used
-        # directly to update the gradient; some other libraries
-        # use the negative value.
-        if accelerated:
-            # ATTENTION: These deltas use an "accelerated" error signal.
-            if deltas.shape[1]==1:
-                # Binary class case uses just one output variable.
-                for i,c in enumerate(cs):
-                    if c==0:
-                        deltas[i,0] = -1.0/max(lo,1.0-pred[i,0])
-                    else:
-                        deltas[i,0] = 1.0/max(lo,pred[i,0])
-            else:
-                # For the multi-class case, we use all output variables.
-                deltas[:,:] = -pred[:,:]
-                for i,c in enumerate(cs):
-                    deltas[i,c] = 1.0/max(lo,pred[i,c])
-        else:
-            # These are the deltas from least-square error
-            # updates. They are slower than `accelerated`,
-            # but may give more accurate probability estimates.
-            if deltas.shape[1]==1:
-                # Binary class case uses just one output variable.
-                for i,c in enumerate(cs):
-                    if c==0:
-                        deltas[i,0] = -pred[i,0]
-                    else:
-                        deltas[i,0] = 1.0-pred[i,0]
-            else:
-                # For the multi-class case, we use all output variables.
-                deltas[:,:] = -pred[:,:]
-                for i,c in enumerate(cs):
-                    deltas[i,c] = 1.0-pred[i,c]
-        self.backward(deltas)
-        self.update()
-        return pred
-    def setLearningRate(self,r,momentum=0.9):
-        """Set the learning rate and momentum for weight updates."""
-        self.net.lr = r
-        self.net.momentum = momentum
-    def getState(self,name):
-        seq = self.net.getState(name)
-        a = zeros((seq.size(),seq[0].size()),'f')
-        seq.get(a)
-        return a
-    def update(self):
-        pass
+import numpy
 
-def py_forward_algorithm(lmatch_):
+def Sequence_array(self):
+    a = numpy.zeros(1,'f')
+    array_of_sequence(a, self)
+    return a
+Sequence.array = Sequence_array
+
+def Sequence_aset(self, a):
+    sequence_of_array(self, a)
+Sequence.aset = Sequence_aset
+
+def forward(lmatch_):
     lmatch = Mat()
-    lmatch.set(lmatch_.astype(float32))
+    seq_of_array(lmatch,lmatch_.astype(float32))
     lr = Mat()
-    forward_algorithm(lr,lmatch)
-    result = zeros((lr.rows(),lr.cols()),'f')
-    lr.get(result)
+    seq_forward(lr,lmatch)
+    result = numpy.zeros((lr.rows(),lr.cols(),1),'f')
+    array_of_seq(result, lr)
     return result
 
-def py_forwardbackward(lmatch_):
+def forwardbackward(lmatch_):
     lmatch = Mat()
-    lmatch.set(lmatch_.astype(float32))
+    seq_of_array(lmatch, lmatch_.astype(float32))
     both = Mat()
-    forwardbackward(both,lmatch)
-    result = zeros((both.rows(),both.cols()),'f')
-    both.get(result)
+    seq_forwardbackward(both,lmatch)
+    result = numpy.zeros((both.rows(),both.cols(),1),'f')
+    array_of_seq(result, both)
     return result
 
-def py_ctc_align_targets(outputs_,targets_):
+def ctcalign(outputs_,targets_):
     outputs = Sequence()
-    outputs.set(outputs_)
     targets = Sequence()
-    targets.set(targets_)
+    seq_of_array(outputs, outputs_)
+    seq_of_array(targets, targets_)
     posteriors = Sequence()
-    ctc_align_targets(posteriors,outputs,targets)
-    result = zeros((posteriors.size(),posteriors[0].size()),'f')
-    posteriors.get(result)
+    seq_ctc_align(posteriors,outputs,targets)
+    result = numpy.zeros((posteriors.size(),posteriors[0].size()),'f')
+    array_of_seq(result, posteriors)
     return result
 %}
+#endif

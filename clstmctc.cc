@@ -74,7 +74,7 @@ int main_ocr(int argc, char **argv) {
     double lrate = getrenv("lrate", 1e-4);
     int nhidden = getrenv("nhidden", getrenv("hidden", 100));
     int nhidden2 = getrenv("nhidden2", getrenv("hidden2", -1));
-    int batch = getrenv("batch", 1);
+    int pseudo_batch = getrenv("pseudo_batch", 1);
     double momentum = getuenv("momentum", 0.9);
     int display_every = getienv("display_every", 0);
     int report_every = getienv("report_every", 1);
@@ -84,6 +84,7 @@ int main_ocr(int argc, char **argv) {
     string net_type = getoneof("lstm", "BIDILSTM");
     string lstm_type = getoneof("lstm_type", "LSTM");
     string output_type = getoneof("output_type", "SoftmaxLayer");
+    string target_name = getoneof("target_name", "ctc");
 
     string testset = getsenv("testset", "");
     int test_every = getienv("test_every", -1);
@@ -94,7 +95,7 @@ int main_ocr(int argc, char **argv) {
           "lrate", lrate,
           "nhidden", nhidden,
           "nhidden2", nhidden2,
-          "batch", batch,
+          "pseudo_batch", pseudo_batch,
           "momentum", momentum,
           "type", net_type, lstm_type, output_type);
 
@@ -173,7 +174,7 @@ int main_ocr(int argc, char **argv) {
             net->attributes["last_err"] = to_string(best_erate);
             print("TESTERR", now()-start_time, save_name, trial, erate,
                   "lrate", lrate, "hidden", nhidden, nhidden2,
-                  "batch", batch, "momentum", momentum);
+                  "pseudo_batch", pseudo_batch, "momentum", momentum);
             if (save_every == 0 && erate < best_erate) {
                 best_erate = erate;
                 print("saving", save_name, "at", erate);
@@ -193,21 +194,29 @@ int main_ocr(int argc, char **argv) {
         }
         assign(net->inputs, image);
         net->forward();
-        assign(classes, transcript);
         assign(outputs, net->outputs);
-        mktargets(targets, classes, dataset->classes());
-        ctc_align_targets(saligned, net->outputs, targets);
+        if (target_name == "ctc") {
+            assign(classes, transcript);
+            mktargets(targets, classes, dataset->classes());
+            ctc_align_targets(saligned, net->outputs, targets);
+            assign(aligned, saligned);
+        } else {
+            // Use a pre-aligned sequence; this is intended for testing
+            // CTC vs non-CTC performance. For general sequence training,
+            // use clstmseq
+            dataset->seq(aligned, sample, target_name);
+            assign(saligned, aligned);
+        }
+        if (anynan(outputs) || anynan(aligned)) {
+            print("got nan");
+            break;
+        }
         assert(saligned.size() == net->outputs.size());
         net->d_outputs.resize(net->outputs.size());
         for (int t = 0; t < saligned.size(); t++)
             net->d_outputs[t] = saligned[t] - net->outputs[t];
         net->backward();
-        if (trial%batch == 0) net->update();
-        assign(aligned, saligned);
-        if (anynan(outputs) || anynan(aligned)) {
-            print("got nan");
-            break;
-        }
+        if (trial%pseudo_batch == 0) net->update();
         Classes output_classes, aligned_classes;
         trivial_decode(output_classes, net->outputs);
         trivial_decode(aligned_classes, saligned);

@@ -42,7 +42,6 @@ struct SeqDataset {
         h5.getdrow(a, 0, oname);
         assert(a.rank() == 2);
         nout = a.dim(1);
-        if (nout == 1) nout = 2;
     }
     void input(mdarray<float> &a, int index) {
         h5.getdrow(a, index, iname);
@@ -51,15 +50,6 @@ struct SeqDataset {
     }
     void output(mdarray<float> &a, int index) {
         h5.getdrow(a, index, oname);
-        if (a.dim(1) == 1) {
-            mdarray<float> temp;
-            assign(temp, a);
-            a.resize(temp.dim(0), 2);
-            for (int t = 0; t < a.dim(0); t++) {
-                a(t, 0) = 1-temp(t, 0);
-                a(t, 1) = temp(t, 0);
-            }
-        }
         assert(a.rank() == 2);
         assert(a.dim(1) == nout);
     }
@@ -87,9 +77,7 @@ inline void getslice(mdarray<float> &a, mdarray<float> &seq, int i, int b=0) {
 
 void run_eval(INetwork *net, SeqDataset *dataset, int testmod, int at=-1, int ntest=1000000) {
     mdarray<float> inputs, outputs, targets;
-    double total_bin = 0.0;
     double total_mse = 0.0;
-    double total_bin0 = 0.0;
     double total_mse0 = 0.0;
     double count = 0;
     for (int i = 0; i < dataset->nsamples; i += testmod) {
@@ -104,21 +92,8 @@ void run_eval(INetwork *net, SeqDataset *dataset, int testmod, int at=-1, int nt
             double err = 0.0, err0 = 0.0;
             for (int i = 0; i < outputs.dim(0); i++) {
                 for (int j = 0; j < outputs.dim(1); j++) {
-                    err += ((outputs(i, j) > 0.5) != (targets(i, j) > 0.5));
-                    err0 += ((targets(i, j) > 0.5) != (j == 0));
-                }
-            }
-            err /= outputs.dim(0);
-            err0 /= outputs.dim(0);
-            total_bin += err;
-            total_bin0 += err0;
-        }
-        {
-            double err = 0.0, err0 = 0.0;
-            for (int i = 0; i < outputs.dim(0); i++) {
-                for (int j = 0; j < outputs.dim(1); j++) {
                     err += pow(outputs(i, j)-targets(i, j), 2);
-                    err0 += pow((j == 0)-targets(i, j), 2);
+                    err0 += pow(targets(i, j), 2);
                 }
             }
             err /= outputs.dim(0);
@@ -128,14 +103,16 @@ void run_eval(INetwork *net, SeqDataset *dataset, int testmod, int at=-1, int nt
         }
     }
     print("TESTERR", total_mse/count, total_mse/total_mse0,
-          "CERR", total_bin/count, total_bin/total_bin0,
           "N", count, "at", at);
 }
 
-void printseq(string prefix, mdarray<float> &a, int which=0, const char *one="@") {
-    cout << prefix << " ";
-    for (int i = 0; i < a.dim(0); i++) cout << (a(i, which) > 0.5 ? one : "_");
-    cout << endl;
+double mse(mdarray<float> &a, mdarray<float> &b) {
+    assert(a.size() == b.size());
+    double total = 0.0;
+    for (int i = 0; i < a.size(); i++)
+        total += pow(a[i]-b[i], 2);
+    total /= a.size();
+    return total;
 }
 
 int main_seq(int argc, char **argv) {
@@ -157,7 +134,7 @@ int main_seq(int argc, char **argv) {
     shared_ptr<INetwork> net;
     string net_type = getoneof("lstm", "BIDILSTM");
     string lstm_type = getoneof("lstm_type", "LSTM");
-    string output_type = getoneof("output_type", "SoftmaxLayer");
+    string output_type = getoneof("output_type", "LinearLayer");
     int nhidden = getrenv("nhidden", getrenv("hidden", 100));
     int nhidden2 = getrenv("nhidden2", getrenv("hidden2", -1));
     net = make_net(net_type);
@@ -201,17 +178,12 @@ int main_seq(int argc, char **argv) {
         dataset.output(target, sample);
         set_inputs(net.get(), input);
         net->forward();
-        set_targets(net.get(), target);
         assign(output, net->outputs);
+        set_targets(net.get(), target);
         net->backward();
         net->update();
         if (report_every > 0 && trial%report_every == 0) {
-            print();
-            print(trial);
-            printseq("INP", input, 0, "!");
-            printseq("OUT", output, 1);
-            printseq("TRU", target, 1);
-            print();
+            print(trial, mse(output, target));
         }
         if (display_every > 0 && trial%display_every == 0) {
             py.eval("clf()");

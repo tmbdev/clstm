@@ -17,6 +17,8 @@
 // limitations under the License.
 //
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 extern "C" {
 #include <assert.h>
 #include <math.h>
@@ -377,9 +379,12 @@ public:
         h5.getarow(a, 0, oname.c_str());
         assert(a.rank() == 1);
     }
-    void image(mdarray<float> &a, int index) {
-        h5.getdrow(a, index, iname.c_str());
+    void seq(mdarray<float> &a, int index, string name) {
+        h5.getdrow(a, index, name.c_str());
         assert(a.rank() == 2);
+    }
+    void image(mdarray<float> &a, int index) {
+        seq(a, index, iname);
         if (!varsize) assert(a.dim(1) == ndims);
         if (normalize) {
             float m = amax(a);
@@ -463,6 +468,44 @@ IOcrDataset *make_Dataset(const string &fname) {
     return make_NormalizedDataset(dataset, normalizer);
 }
 
+// Setting inputs/outputs using mdarray
+
+inline void assign(Sequence &seq, mdarray<float> &a) {
+    if (a.rank() == 2) {
+        seq.resize(a.dim(0));
+        for (int t = 0; t < seq.size(); t++) {
+            seq[t].resize(a.dim(1), 1);
+            for (int i = 0; i < a.dim(1); i++)
+                seq[t](i, 0) = a(t, i);
+        }
+    } else if (a.rank() == 3) {
+        seq.resize(a.dim(0));
+        for (int t = 0; t < seq.size(); t++) {
+            seq[t].resize(a.dim(1), a.dim(2));
+            for (int i = 0; i < a.dim(1); i++)
+                for (int j = 0; j < a.dim(2); j++)
+                    seq[t](i, j) = a(t, i, j);
+        }
+    } else {
+        throw "bad rank";
+    }
+}
+
+void set_inputs(INetwork *net, mdarray<float> &inputs) {
+    assign(net->inputs, inputs);
+}
+void set_targets(INetwork *net, mdarray<float> &targets) {
+    assign(net->d_outputs, targets);
+    for (int t = 0; t < net->outputs.size(); t++)
+        net->d_outputs[t] -= net->outputs[t];
+}
+void set_targets_accelerated(INetwork *net, mdarray<float> &targets) {
+    throw "unimplemented";
+}
+void set_classes(INetwork *net, mdarray<int> &targets) {
+    throw "unimplemented";
+}
+
 // PNG I/O (taken from iulib)
 
 #define __sigsetjmp __sigsetjump0
@@ -477,7 +520,8 @@ typedef mdarray<int> intarray;
 #define CHECK_ARG(X) do {if (!(X)) throw "CHECK_ARG: " # X; } while (0)
 
 void read_png(bytearray &image, FILE *fp, bool gray) {
-    int d, spp;
+    int d;
+    int spp;
     int png_transforms;
     int num_palette;
     png_byte bit_depth, color_type, channels;
@@ -540,15 +584,14 @@ void read_png(bytearray &image, FILE *fp, bool gray) {
 
     spp = channels;
 
-    if (spp == 1)
+    if (spp == 1) {
         d = bit_depth;
-    else if (spp == 2) {
+    } else if (spp == 2) {
         d = 2 * bit_depth;
         ERROR("there shouldn't be 2 spp!");
-    }
-    else if (spp == 3)
+    } else if (spp == 3) {
         d = 4 * bit_depth;
-    else {  /* spp == 4 */
+    } else {  /* spp == 4 */
         d = 4 * bit_depth;
         ERROR("there shouldn't be 4 spp!");
     }
@@ -562,7 +605,7 @@ void read_png(bytearray &image, FILE *fp, bool gray) {
     intarray color_map;
 
     if (color_type == PNG_COLOR_TYPE_PALETTE ||
-        color_type == PNG_COLOR_MASK_PALETTE) { /* generate a colormap */
+        color_type == PNG_COLOR_MASK_PALETTE) {  /* generate a colormap */
         png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
         color_map.resize(3, num_palette);
         for (int cindex = 0; cindex < num_palette; cindex++) {
@@ -626,7 +669,7 @@ void read_png(bytearray &image, FILE *fp, bool gray) {
 }
 
 void write_png(FILE *fp, bytearray &image) {
-    int d;
+    // int d;
     png_byte bit_depth, color_type;
     int w, h;
     png_structp png_ptr;
@@ -660,7 +703,7 @@ void write_png(FILE *fp, bytearray &image) {
 
     w = image.dim(0);
     h = image.dim(1);
-    d = image.dim(2);
+    // d = image.dim(2);
     bit_depth = 8;
     color_type = PNG_COLOR_TYPE_RGB;
 

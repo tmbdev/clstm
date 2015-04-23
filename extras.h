@@ -14,6 +14,30 @@
 #include <stdlib.h>
 #include <map>
 
+#include <iostream>
+
+template <class T>
+inline std::ostream &operator<<(std::ostream &stream, multidim::mdarray<T> &a) {
+    if (a.rank() == 1) {
+        stream << "[mdarray1d";
+        for (int i = 0; i < a.dim(0); i++)
+            stream << " " << a(i);
+        stream << "]" << std::endl;
+    } else if (a.rank() == 2) {
+        stream << "[mdarray2d" << std::endl;
+        for (int i = 0; i < a.dim(0); i++) {
+            for (int j = 0; j < a.dim(1); j++) {
+                stream << " " << a(i);
+            }
+            stream << std::endl;
+        }
+        stream << "]" << std::endl;
+    } else {
+        stream << "[mdarray of rank > 2]" << std::endl;
+    }
+    return stream;
+}
+
 namespace ocropus {
 using std::string;
 using std::wstring;
@@ -40,6 +64,10 @@ inline double now() {
 
 // print the arguments to cout
 
+inline void print() {
+    cout << endl;
+}
+
 template <class T>
 inline void print(const T &arg) {
     cout << arg << endl;
@@ -58,6 +86,10 @@ inline string getdef(std::map<string, string> &m, const string &key, const strin
 }
 
 // print the arguments to cerr
+
+inline void dprint() {
+    cerr << endl;
+}
 
 template <class T>
 inline void dprint(const T &arg) {
@@ -207,6 +239,9 @@ struct IOcrDataset {
     }
     virtual void image(mdarray<float> &a, int index) = 0;
     virtual void transcript(mdarray<int> &a, int index) = 0;
+    virtual void seq(mdarray<float> &a, int index, string name) {
+        throw "unimplemented";
+    }
     virtual string to_string(mdarray<int> &transcript) = 0;
     virtual string to_string(vector<int> &transcript) = 0;
     virtual void getCodec(vector<int> &codec) = 0;

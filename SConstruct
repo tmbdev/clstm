@@ -47,12 +47,15 @@ env.Program("clstmctc",
 env.Program("clstmseq",
             ["clstmseq.cc", "version.h"],
             LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png"])
+env.Program("clstmconv",
+            ["clstmconv.cc", "version.h"],
+            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png"])
 env.Program("clstmtext",
             ["clstmtext.cc", "version.h"],
-            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png", "boost_locale"])
+            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png"])
 env.Program("clstmimg",
             ["clstmimg.cc", "version.h"],
-            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png", "boost_locale"])
+            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png"])
 env.Program("test-batch",
             ["test-batch.cc", "version.h"],
-            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png", "boost_locale"])
+            LIBS=[libclstm,"hdf5_cpp","hdf5","zmqpp","zmq","png"])

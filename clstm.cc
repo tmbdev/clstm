@@ -429,6 +429,7 @@ struct SoftmaxLayer : Network {
     void initialize() {
         int no = irequire("noutput");
         int ni = irequire("ninput");
+        if (no < 2) throw "Softmax requires no>=2";
         W = Mat::Random(no, ni) * 0.01;
         w = Vec::Random(no) * 0.01;
         clearUpdates();
@@ -895,6 +896,9 @@ struct GenericLSTM : Network {
         f(prefix+".ci", &ci);
         f(prefix+".cierr", &cierr);
     }
+    Sequence *getState() {
+        return &state;
+    }
 };
 
 typedef GenericLSTM<SigmoidNonlin, TanhNonlin, TanhNonlin> LSTM;
@@ -1000,6 +1004,13 @@ INetwork *make_LRBIDILSTM() {
     return net;
 }
 int status_LRBIDILSTM = ( network_factories["LRBIDILSTM"] = make_LRBIDILSTM, 0 );
+
+INetwork *make_LINBIDILSTM() {
+    INetwork *net = make_BIDILSTM();
+    net->set("output_type", "LinearLayer");
+    return net;
+}
+int status_LINBIDILSTM = ( network_factories["LINBIDILSTM"] = make_LINBIDILSTM, 0 );
 
 struct BidiLayer : Parallel {
     BidiLayer() {
