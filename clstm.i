@@ -134,7 +134,7 @@ struct ITrainable {
     string name = "???";
     Float learning_rate = 1e-4;
     Float momentum = 0.9;
-    enum Normalization : int {
+    enum Normalization {
         NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
     } normalization = NORM_DFLT;
     map<string, string> attributes;
@@ -151,9 +151,9 @@ struct ITrainable {
     virtual int idepth();
     virtual int odepth();
     virtual void initialize();
-    virtual void init(int no, int ni) final;
-    virtual void init(int no, int nh, int ni) final;
-    virtual void init(int no, int nh2, int nh, int ni) final;
+    virtual void init(int no, int ni);
+    virtual void init(int no, int nh, int ni);
+    virtual void init(int no, int nh2, int nh, int ni);
 };
 
 struct INetwork;
@@ -418,33 +418,13 @@ def Sequence_aset(self, a):
     sequence_of_array(self, a)
 Sequence.aset = Sequence_aset
 
-def forward(lmatch_):
-    lmatch = Mat()
-    seq_of_array(lmatch,lmatch_.astype(float32))
-    lr = Mat()
-    seq_forward(lr,lmatch)
-    result = numpy.zeros((lr.rows(),lr.cols(),1),'f')
-    array_of_seq(result, lr)
-    return result
-
-def forwardbackward(lmatch_):
-    lmatch = Mat()
-    seq_of_array(lmatch, lmatch_.astype(float32))
-    both = Mat()
-    seq_forwardbackward(both,lmatch)
-    result = numpy.zeros((both.rows(),both.cols(),1),'f')
-    array_of_seq(result, both)
-    return result
-
 def ctcalign(outputs_,targets_):
     outputs = Sequence()
     targets = Sequence()
-    seq_of_array(outputs, outputs_)
-    seq_of_array(targets, targets_)
+    outputs.aset(outputs_)
+    targets.aset(targets_)
     posteriors = Sequence()
     seq_ctc_align(posteriors,outputs,targets)
-    result = numpy.zeros((posteriors.size(),posteriors[0].size()),'f')
-    array_of_seq(result, posteriors)
-    return result
+    return posteriors.array()
 %}
 #endif

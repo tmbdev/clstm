@@ -19,13 +19,19 @@ To build the Python extension, run
 
     python setup.py build
     sudo python setup.py install
-    
+
+or
+
+    scons
+    sudo scons pyinstall
+
 # Documentation / Examples
 
 You can find some documentation and examples in the form of iPython notebooks in the `misc` directory
 (these are version 3 notebooks and won't open in older versions).
 
-You can view these notebooks online here: http://nbviewer.ipython.org/github/tmbdev/clstm/tree/master/misc/
+You can view these notebooks online here:
+http://nbviewer.ipython.org/github/tmbdev/clstm/tree/master/misc/
 
 # C++ API
 
