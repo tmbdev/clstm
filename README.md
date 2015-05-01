@@ -119,4 +119,6 @@ See the notebooks in the `misc/` subdirectory for documentation on the parameter
 
   - the HDF5 network save format will probably change
   - Lua and Torch bindings
+  - more recurrent network types
+  - replacement of mdarray with Eigen Tensors
   - 2D LSTM support
