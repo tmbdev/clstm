@@ -10,7 +10,6 @@
 #include "multidim.h"
 #include "pymulti.h"
 #include "extras.h"
-#include "version.h"
 
 using std_string = std::string;
 #define string std_string
@@ -25,7 +24,7 @@ using namespace Eigen;
 using namespace ocropus;
 using namespace pymulti;
 
-double error_rate(shared_ptr<INetwork> net, const string &testset) {
+double error_rate(Network net, const string &testset) {
     int maxeval = getienv("maxeval", 1000000000);
     shared_ptr<IOcrDataset> dataset(make_Dataset(testset));
 
@@ -57,8 +56,8 @@ double error_rate(shared_ptr<INetwork> net, const string &testset) {
 void batched_of_sequences(Sequence &batched, vector<Sequence> &sequences) {
     int bs = sequences.size();
     assert(bs > 0);
-    int d = sequences[0][0].rows();
-    for (auto s : sequences) assert(s[0].cols() == 1);
+    int d = ROWS(sequences[0][0]);
+    for (auto s : sequences) assert(COLS(s[0]) == 1);
     assert(sequences[0].size() > 0);
     int N = 0;
     for (int b = 0; b < bs; b++) { if (sequences[b].size() > N) N = sequences[b].size(); }
@@ -73,8 +72,8 @@ void batched_of_sequences(Sequence &batched, vector<Sequence> &sequences) {
 }
 
 void sequences_of_batched(vector<Sequence> &sequences, Sequence &batched) {
-    int bs = batched[0].cols();
-    int d = batched[0].rows();
+    int bs = COLS(batched[0]);
+    int d = ROWS(batched[0]);
     int N = batched.size();
     sequences.resize(bs);
     for (int b = 0; b < bs; b++) {
@@ -117,7 +116,7 @@ int main(int argc, char **argv) {
     dataset.reset(make_Dataset(h5file));
     print("dataset", dataset->samples(), dataset->dim(), dewarp);
 
-    shared_ptr<INetwork> net;
+    Network net;
     int nclasses = -1;
     int dim = dataset->dim();
     if (load_name != "") {
@@ -127,7 +126,10 @@ int main(int argc, char **argv) {
         vector<int> codec;
         dataset->getCodec(codec);
         nclasses = codec.size();
-        net = make_net_init(lstm_type, nclasses, dim);
+        net = make_net(lstm_type, {
+                           {"ninput", dim},
+                           {"noutput", nclasses}
+                       });
     }
     net->setLearningRate(lrate, momentum);
     dataset->getCodec(net->codec);
