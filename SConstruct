@@ -2,30 +2,45 @@
 import os
 import distutils.sysconfig
 
+hgversion = os.popen("hg -q id").read().strip()
+
+# A bunch of utility functions to make the rest of the SConstruct file a little simpler.
+
 def die(msg):
     sys.stderr.write("ERROR "+msg+"\n")
     Exit(1)
 
-version = os.popen("hg -q id").read()[:-1]
-hglog = os.popen("hg log --limit 3").read()
-open("version.h","w").write("""
-inline const char *hg_version() {
-    return "%s";
-}
-inline const char *hg_log() {
-    return R"(%s)";
-}
-""" % (version,hglog))
+def option(name,dflt):
+    return (ARGUMENTS.get(name) or os.environ.get(name,dflt))
 
-prefix = ARGUMENTS.get('prefix', "/usr/local")
+def findonpath(fname,path):
+    for dir in path:
+        if os.path.exists(os.path.join(dir,fname)):
+            return dir
+    raise die("%s: not found" % fname)
+
+def protoc(target, source, env):
+    os.system("protoc %s --cpp_out=." % source[0])
+protoc_builder = Builder(action=protoc, src_suffix=".proto", suffix=".pb.cc")
+
+# CLSTM requires C++11, and installes in /usr/local by default
+
+prefix = option('prefix', "/usr/local")
 
 env = Environment()
-if ARGUMENTS.get('omp',0) or os.environ.get('omp',0):
+env.Append(CPPDEFINES={"HGVERSION" : '\\"'+hgversion+'\\"'})
+env["BUILDERS"]["Protoc"] = protoc_builder
+
+# With omp=1 support, Eigen and other parts of the code may use multi-threading.
+
+if option("omp",0):
     env["CXX"]="g++ --std=c++11 -Wno-unused-result -fopenmp"
 else:
     env["CXX"]="g++ --std=c++11 -Wno-unused-result"
 
-if int(ARGUMENTS.get('debug',0)):
+# With debug=1, the code will be compiled suitable for debugging.
+
+if option("debug",0):
     env.Append(CXXFLAGS="-g -fno-inline".split())
     env.Append(CCFLAGS="-g".split())
     env.Append(LINKFLAGS="-g".split())
@@ -33,82 +48,83 @@ else:
     env.Append(CXXFLAGS="-g -O3 -finline".split())
     env.Append(CCFLAGS="-g".split())
 
-eigeninc = ARGUMENTS.get("eigeninc","???")
-if not os.path.isdir(eigeninc): eigeninc = "/usr/local/include/eigen3"
-if not os.path.isdir(eigeninc): eigeninc = "/usr/include/eigen3"
-if not os.path.isdir(eigeninc): die("cannot find eigen include files")
+# Try to locate the Eigen include files (they are in different locations
+# on different systems); you can specify an include path for Eigen with
+# `eigen=/mypath/include`
 
-hdf5inc = ARGUMENTS.get("hdf5inc","???")
-if not os.path.isdir(hdf5inc): hdf5inc = "/usr/local/include/hdf5/serial"
-if not os.path.isdir(hdf5inc): hdf5inc = "/usr/local/include/hdf5"
-if not os.path.isdir(hdf5inc): hdf5inc = "/usr/include/hdf5/serial"
-if not os.path.isdir(hdf5inc): hdf5inc = "/usr/include/hdf5"
-if not os.path.isdir(hdf5inc): die("cannot find hdf5 include files")
+if option("eigen","")=="":
+    inc = findonpath("Eigen/Eigen","""
+        /usr/include
+        /usr/local/include/eigen3
+        /usr/include/eigen3""".split())
+else:
+    inc = findonpath("Eigen/Eigen",[option("eigen")])
+env.Append(CPPPATH=[inc])
 
-env.Append(CPPPATH=[eigeninc,hdf5inc])
-env.Append(LIBS=["hdf5_cpp","zmqpp","zmq","png"])
+# You can enable display debugging with `zmq=1`
 
-zmqtest = """
-#include <zmqpp/zmqpp.hpp>
-zmqpp::message message;
-void test() { message.add_raw(0, 0); }
-"""
-def ZmqTest(context):
-    print "Checking for message::add_raw in zmqpp...",
-    result = context.TryLink(zmqtest, ".cc")
-    context.Result(result)
-    return result
+if option("zmq",0):
+    env.Append(LIBS=["zmqpp","zmq"])
+else:
+    env.Append(CPPDEFINES={'NODISPLAY' : 1})
 
-custom_tests = dict( ZmqTest = ZmqTest )
+env.Append(LIBS=["png","protobuf"])
+env.Append(CPPDEFINES={'add_raw' : option("add_raw",'add')})
 
-conf = Configure(env, custom_tests = custom_tests)
+# We need to compile the protocol buffer definition as part of the build.
 
-conf.CheckLib("hdf5_cpp") or die("no libhdf5_cpp")
-conf.CheckLib("zmqpp") or die("no libzmqpp")
-conf.CheckLib("zmq") or die("no libzmq")
-conf.CheckLib("png") or die("no libpng")
+env.Protoc("clstm.proto")
 
-if conf.CheckLib("hdf5_serial"): conf.env.Append(LIBS=["hdf5_serial"])
-elif conf.CheckLib("hdf5"): conf.env.Append(LIBS=["hdf5"])
-else: die("did not find -lhdf5_serial or -lhdf5")
-
-if not conf.ZmqTest(): conf.env.Append(CPPDEFINES={'add_raw' : 'add'})
-
-env = conf.Finish()
+# Build the CLSTM library.
 
 libs = env["LIBS"]
+libsrc = ["clstm.cc", "clstm_proto.cc", "clstm_prefab.cc",
+          "extras.cc", "clstm.pb.cc"]
+libclstm = env.StaticLibrary("clstm", source = libsrc)
 
-libclstm = env.StaticLibrary("clstm", source = ["clstm.cc", "extras.cc"])
+programs = """clstmtext clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".split()
+for program in programs:
+    env.Program(program,[program+".cc"],LIBS=[libclstm]+libs)
 
-Alias('install-lib', Install(os.path.join(prefix,"lib"), libclstm))
-Alias('install-include', Install(os.path.join(prefix,"include"), ["clstm.h"]))
-Alias('install',['install-lib', 'install-include'])
+Alias('install-lib',
+      Install(os.path.join(prefix,"lib"), libclstm))
+Alias('install-include',
+      Install(os.path.join(prefix,"include"), ["clstm.h"]))
+Alias('install',
+      ['install-lib', 'install-include'])
 
-env.Program("clstmctc",
-            ["clstmctc.cc", "version.h"],
-            LIBS=[libclstm]+libs)
-env.Program("clstmseq",
-            ["clstmseq.cc", "version.h"],
-            LIBS=[libclstm]+libs)
-env.Program("clstmconv",
-            ["clstmconv.cc", "version.h"],
-            LIBS=[libclstm]+libs)
-env.Program("clstmtext",
-            ["clstmtext.cc", "version.h"],
-            LIBS=[libclstm]+libs)
-env.Program("clstmimg",
-            ["clstmimg.cc", "version.h"],
-            LIBS=[libclstm]+libs)
-env.Program("test-batch",
-            ["test-batch.cc", "version.h"],
-            LIBS=[libclstm]+libs)
+# If you have HDF5 installed, set hdf5lib=hdf5_serial (or something like that)
+# and you will get a bunch of command line programs that can be trained from
+# HDF5 data files. This code is messy and may get deprecated eventually.
+
+if option("hdf5lib", "")!="":
+    h5env = env.Clone()
+    inc = findonpath("hdf5.h","""
+        /usr/include
+        /usr/local/include/hdf5/serial
+        /usr/local/include/hdf5
+        /usr/include/hdf5/serial
+        /usr/include/hdf5""".split())
+    h5env.Append(CPPPATH=[inc])
+    h5env.Append(LIBS=["hdf5_cpp"])
+    h5env.Append(LIBS=[option("hdf5lib", "hdf5_serial")])
+    h5env.Prepend(LIBS=[libclstm])
+    for program in "clstmctc clstmseq clstmconv".split():
+        h5env.Program(program,[program+".cc"])
 
 
-swigenv = env.Clone( SWIGFLAGS=["-python","-c++"], SHLIBPREFIX="")
-swigenv.Append(CPPPATH=[distutils.sysconfig.get_python_inc()])
-swigenv.SharedLibrary("_clstm.so",
-                      ["clstm.i", "clstm.cc", "extras.cc"],
-                      LIBS=libs)
+# You can construct the Python extension from scons using `pyswig=1`; however,
+# the recommended way of compiling it is with "python setup.py build"
+
+if option("pyswig", 0):
+    swigenv = env.Clone( SWIGFLAGS=["-python","-c++"], SHLIBPREFIX="")
+    swigenv.Append(CPPPATH=[distutils.sysconfig.get_python_inc()])
+    swigenv.SharedLibrary("_clstm.so",
+                          ["clstm.i", "clstm.cc", "extras.cc", "clstm.pb.cc"],
+                          LIBS=libs)
+
 
 destlib = distutils.sysconfig.get_config_var("DESTLIB")
-Alias('pyinstall', Install(os.path.join(destlib, "site-packages"), ["_clstm.so", "clstm.py"]))
+Alias('pyinstall',
+      Install(os.path.join(destlib, "site-packages"),
+              ["_clstm.so", "clstm.py"]))

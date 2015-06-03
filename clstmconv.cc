@@ -131,20 +131,18 @@ int main_seq(int argc, char **argv) {
     assert(argc > 1);
     SeqDataset dataset(argv[1]);
     print("ninput", dataset.nin, "noutput", dataset.nout);
-    shared_ptr<INetwork> net;
+    Network net;
     string net_type = getoneof("lstm", "BIDILSTM");
     string lstm_type = getoneof("lstm_type", "LSTM");
     string output_type = getoneof("output_type", "LinearLayer");
     int nhidden = getrenv("nhidden", getrenv("hidden", 100));
     int nhidden2 = getrenv("nhidden2", getrenv("hidden2", -1));
-    net = make_net(net_type);
-    net->set("ninput", dataset.nin);
-    net->set("noutput", dataset.nout);
-    net->set("nhidden", nhidden);
-    net->set("nhidden2", nhidden2);
-    net->set("lstm_type", lstm_type);
-    net->set("output_type", output_type);
-    net->initialize();
+    net = make_net(net_type, {
+                       {"ninput", dataset.nin},
+                       {"noutput", dataset.nout},
+                       {"nhidden", nhidden},
+                       {"nhidden2", nhidden2},
+                   });
 
     double lrate = getdenv("lrate", 1e-4);
     net->setLearningRate(lrate, 0.9);

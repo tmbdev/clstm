@@ -4,8 +4,8 @@
 // clstm.h. Library dependencies are limited to a small subset of STL and
 // Eigen/Dense
 
-#ifndef ocropus_lstm__
-#define ocropus_lstm__
+#ifndef ocropus_lstm_
+#define ocropus_lstm_
 
 #include <vector>
 #include <string>
@@ -22,7 +22,6 @@ using std::map;
 using std::shared_ptr;
 using std::unique_ptr;
 using std::function;
-using Eigen::Ref;
 
 #ifdef LSTM_DOUBLE
 typedef double Float;
@@ -36,10 +35,50 @@ typedef Eigen::VectorXf Vec;
 typedef Eigen::MatrixXf Mat;
 #endif
 
+#define DOT(M,V) ((M) * (V))
+#define MATMUL(A,B) ((A) * (B))
+#define MATMUL_TR(A, B) ((A).transpose() * (B))
+#define MATMUL_RT(A, B) ((A) * (B).transpose())
+#define EMUL(U,V) ((U).array() * (V).array()).matrix()
+#define EMULV(U,V) ((U).array() * (V).array()).matrix()
+#define TRANPOSE(U) ((U).transpose())
+#define ROWS(A) (A).rows()
+#define COLS(A) (A).cols()
+#define COL(A, b) (A).col(b)
+#define MAPFUN(M, F) ((M).unaryExpr(ptr_fun(F)))
+#define MAPFUNC(M, F) ((M).unaryExpr(F))
+#define SUMREDUCE(M) float(M.sum())
+#define BLOCK(A, i, j, n, m) (A).block(i, j, n, m)
+
+inline void ADDCOLS(Mat &m, Vec &v) {
+    for(int i=0; i<COLS(m); i++)
+        for(int j=0; j<ROWS(m); j++)
+            m(i,j) += v(j);
+}
+inline void randinit(Mat &m, int no, int ni, float s) {
+    m.resize(no, ni);
+    m.setRandom();
+    m *= s;
+}
+inline void randinit(Vec &m, int no, float s) {
+    m.resize(no);
+    m.setRandom();
+    m *= s;
+}
+inline void zeroinit(Mat &m, int no, int ni) {
+    m.resize(no, ni);
+    m.setZero();
+}
+inline void zeroinit(Vec &m, int no) {
+    m.resize(no);
+    m.setZero();
+}
+
 typedef vector<Mat> Sequence;
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 
+void throwf(const char *format, ...);
 extern char exception_message[256];
 
 inline Vec timeslice(const Sequence &s, int i, int b=0) {
@@ -65,9 +104,8 @@ struct VecMat {
 struct ITrainable {
     virtual ~ITrainable() {
     }
-    // Each network has a name that's used for loading
-    // and saving.
-    string name = "???";
+    string name = "";
+    virtual const char *kind() = 0;
 
     // Learning rate and momentum used for training.
     Float learning_rate = 1e-4;
@@ -150,6 +188,9 @@ struct ITrainable {
     }
 };
 
+struct INetwork;
+typedef shared_ptr<INetwork> Network;
+
 struct INetwork : virtual ITrainable {
     // Networks have input and output "ports" for sequences
     // and derivatives. These are propagated in forward()
@@ -162,7 +203,7 @@ struct INetwork : virtual ITrainable {
     // like `save` can automatically traverse the tree
     // of networks. Together with the `name` field,
     // this forms a hierarchical namespace of networks.
-    vector<shared_ptr<INetwork> > sub;
+    vector<Network > sub;
 
     // Data for encoding/decoding input/output strings.
     vector<int> codec;
@@ -172,14 +213,21 @@ struct INetwork : virtual ITrainable {
     void makeEncoders();
     std::wstring decode(Classes &cs);
     std::wstring idecode(Classes &cs);
-    void encode(Classes &cs, std::wstring &s);
-    void iencode(Classes &cs, std::wstring &s);
+    void encode(Classes &cs, const std::wstring &s);
+    void iencode(Classes &cs, const std::wstring &s);
 
     // Parameters specific to softmax.
     Float softmax_floor = 1e-5;
     bool softmax_accel = false;
 
     virtual ~INetwork() {
+    }
+
+    std::function<void(INetwork*)> initializer = [] (INetwork*){};
+    virtual void initialize() {
+        // this gets initialization parameters
+        // out of the attributes array
+        initializer(this);
     }
 
     // Expected number of input/output features.
@@ -191,7 +239,7 @@ struct INetwork : virtual ITrainable {
     }
 
     // Add a network as a subnetwork.
-    virtual void add(shared_ptr<INetwork> net) {
+    virtual void add(Network net) {
         sub.push_back(net);
     }
 
@@ -235,6 +283,17 @@ struct INetwork : virtual ITrainable {
     void load(const char *fname);
 };
 
+// standard layer types
+INetwork *make_SigmoidLayer();
+INetwork *make_SoftmaxLayer();
+INetwork *make_ReluLayer();
+INetwork *make_Stacked();
+INetwork *make_Reversed();
+INetwork *make_Parallel();
+INetwork *make_LSTM();
+INetwork *make_NPLSTM();
+INetwork *make_BidiLayer();
+
 // setting inputs and outputs
 void set_inputs(INetwork *net, Sequence &inputs);
 void set_targets(INetwork *net, Sequence &targets);
@@ -255,35 +314,65 @@ void ctrain_accelerated(INetwork *net, Sequence &xs, BatchClasses &cs, Float lo=
 void cpred(INetwork *net, BatchClasses &preds, Sequence &xs);
 void mktargets(Sequence &seq, BatchClasses &targets, int ndim);
 
-// common network layers
-INetwork *make_LinearLayer();
-INetwork *make_LogregLayer();
-INetwork *make_SoftmaxLayer();
-INetwork *make_TanhLayer();
-INetwork *make_ReluLayer();
-INetwork *make_Stacked();
-INetwork *make_Reversed();
-INetwork *make_Parallel();
+// instantiating layers and networks
 
-// prefab networks
-INetwork *make_MLP();
-INetwork *make_LSTM();
-INetwork *make_LSTM1();
-INetwork *make_REVLSTM1();
-INetwork *make_BIDILSTM();
-INetwork *make_BIDILSTM2();
-INetwork *make_LRBIDILSTM();
+typedef std::function<INetwork*(void)> ILayerFactory;
+extern map<string, ILayerFactory> layer_factories;
+Network make_layer(const string &kind);
 
-typedef std::function<INetwork*(void)> INetworkFactory;
+struct String : public std::string {
+    String() {}
+    String(const char *s) : std::string(s) {
+    }
+    String(const std::string &s) : std::string(s) {
+    }
+    String(int x) : std::string(std::to_string(x)) {
+    }
+    String(double x) : std::string(std::to_string(x)) {
+    }
+    double operator+() { return atof(this->c_str()); }
+    operator int() {
+        return atoi(this->c_str());
+    }
+    operator double() {
+        return atof(this->c_str());
+    }
+};
+struct Assoc : std::map<std::string, String> {
+    using std::map<std::string, String>::map;
+    Assoc(const string &s);
+    String at(const std::string &key) const {
+        auto it = this->find(key);
+        if (it == this->end()) throwf("%s: key not found", key.c_str());
+        return it->second;
+    }
+};
+typedef std::vector<Network> Networks;
+Network layer(
+    const string &kind,
+    int ninput, int noutput,
+    const Assoc &args,
+    const Networks &subs
+    );
+
+typedef std::function<Network(const Assoc &)> INetworkFactory;
 extern map<string, INetworkFactory> network_factories;
-shared_ptr<INetwork> make_net(string kind);
+Network make_net(const string &kind, const Assoc &params);
+Network make_net_init(const string &kind, const std::string &params);
 
-extern Mat debugmat;
+// new, proto-based I/O
+Network proto_clone_net(INetwork *net);
+void debug_as_proto(INetwork *net, bool do_weights=false);
+void write_as_proto(std::ostream &output, INetwork *net);
+void save_as_proto(const string &fname, INetwork *net);
+Network load_as_proto(const string &fname);
 
-// loading and saving networks
-void load_attributes(map<string, string> &attrs, const string &file);
-shared_ptr<INetwork> load_net(const string &file);
-void save_net(const string &file, shared_ptr<INetwork> net);
+inline void save_net(const string &file, Network net) {
+    save_as_proto(file, net.get());
+}
+inline Network load_net(const string &file) {
+    return load_as_proto(file);
+}
 
 // training with CTC
 void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5.0);
@@ -294,13 +383,21 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch=0);
 void ctc_train(INetwork *net, Sequence &xs, Sequence &targets);
 void ctc_train(INetwork *net, Sequence &xs, Classes &targets);
 void ctc_train(INetwork *net, Sequence &xs, BatchClasses &targets);
+
+// DEPRECATED
+
+extern Mat debugmat;
+
+// loading and saving networks (using HDF5)
+void load_attributes(map<string, string> &attrs, const string &file);
+
 }
 
 namespace {
 inline bool anynan(ocropus::Sequence &a) {
     for (int i = 0; i < a.size(); i++) {
-        for (int j = 0; j < a[i].rows(); j++) {
-            for (int k = 0; k < a[i].cols(); k++) {
+        for (int j = 0; j < ROWS(a[i]); j++) {
+            for (int k = 0; k < COLS(a[i]); k++) {
                 if (isnan(a[i](j, k))) return true;
             }
         }

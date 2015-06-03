@@ -14,7 +14,6 @@
 #include "multidim.h"
 #include "pymulti.h"
 #include "extras.h"
-#include "version.h"
 
 using namespace Eigen;
 using namespace ocropus;
@@ -115,7 +114,7 @@ void set_inputs_with_eps(INetwork *net, wstring &s, int neps) {
     }
 }
 
-double error_rate(shared_ptr<INetwork> net, const string &testset, int nclasses, int neps) {
+double error_rate(Network net, const string &testset, int nclasses, int neps) {
     int maxeval = getienv("maxeval", 1000000000);
     vector<Sample> samples;
     read_samples(samples, testset);
@@ -178,7 +177,7 @@ int main_train(int argc, char **argv) {
     bool randomize = getienv("randomize", 1);
     string lrnorm = getsenv("lrnorm", "batch");
     int neps = int(getuenv("neps", 3));
-    string net_type = getsenv("lstm", "BIDILSTM");
+    string net_type = getsenv("lstm", "bidi");
     string lstm_type = getsenv("lstm_type", "LSTM");
     string output_type = getsenv("output_type", "SoftmaxLayer");
 
@@ -187,7 +186,7 @@ int main_train(int argc, char **argv) {
     string after_test = getsenv("after_test", "");
 
     print("params",
-          "hg_version", hg_version(),
+          "hg_version", HGVERSION,
           "lrate", lrate,
           "nhidden", nhidden,
           "nhidden2", nhidden2,
@@ -204,7 +203,7 @@ int main_train(int argc, char **argv) {
         py->eval("matplotlib.rcParams.update({'font.size':7})");
     }
 
-    shared_ptr<INetwork> net;
+    Network net;
     int nclasses = -1, iclasses = -1;
     if (load_name != "") {
         net = load_net(load_name);
@@ -212,22 +211,26 @@ int main_train(int argc, char **argv) {
         iclasses = net->icodec.size();
         neps = stoi(net->attributes["neps"]);
     } else {
-        net = make_net(net_type);
-        get_codec(net->icodec, samples, &Sample::in);
-        get_codec(net->codec, samples, &Sample::out);
-        iclasses = net->icodec.size();
-        nclasses = net->codec.size();
-        net->set("ninput", iclasses);
-        net->set("noutput", nclasses);
-        net->set("nhidden", nhidden);
-        net->set("nhidden2", nhidden2);
-        net->set("lstm_type", lstm_type);
-        net->set("output_type", output_type);
-        net->set("neps", neps);
-        net->initialize();
+        vector<int> icodec, codec;
+        get_codec(icodec, samples, &Sample::in);
+        get_codec(codec, samples, &Sample::out);
+        iclasses = icodec.size();
+        nclasses = codec.size();
+        net = make_net(net_type, {
+                           {"ninput", iclasses},
+                           {"noutput", nclasses},
+                           {"nhidden", nhidden},
+                           {"nhidden2", nhidden2},
+                           {"lstm_type", lstm_type},
+                           {"output_type", output_type},
+                           {"neps", neps}
+                       });
+        net->icodec = icodec;
+        net->codec = codec;
     }
     net->setLearningRate(lrate, momentum);
     net->makeEncoders();
+    net->info("");
     print("codec", net->codec.size(), "icodec", net->icodec.size());
     INetwork::Normalization norm = INetwork::NORM_DFLT;
     if (lrnorm == "len") norm = INetwork::NORM_LEN;
@@ -354,7 +357,7 @@ int main_filter(int argc, char **argv) {
     const char *fname = argv[1];
     string load_name = getsenv("load", "");
     if (load_name == "") throw "must give load= parameter";
-    shared_ptr<INetwork> net;
+    Network net;
     net = load_net(load_name);
     int neps = stoi(net->attributes["neps"]);
     dprint("codec", net->codec.size(), "icodec", net->icodec.size(), "neps", neps);

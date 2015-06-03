@@ -2,8 +2,8 @@
 
 // A simple and sane multidimensional array class.
 
-#ifndef multidim__
-#define multidim__
+#ifndef multidim_
+#define multidim_
 
 #define MDSTR(X) # X
 #define MDSTR1(X) MDSTR(X)
@@ -350,9 +350,9 @@ inline void to_eigen_vector(T result, mdarray<S> &a) {
 
 template <class T, class S>
 inline void from_eigen_matrix(mdarray<S> &result, T a) {
-    result.resize(a.rows(), a.cols());
-    for (int i = 0; i < a.rows(); i++)
-        for (int j = 0; j < a.cols(); j++)
+    result.resize(ROWS(a), COLS(a));
+    for (int i = 0; i < ROWS(a); i++)
+        for (int j = 0; j < COLS(a); j++)
             result(i, j) = a(i, j);
 }
 }

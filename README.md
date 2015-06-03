@@ -37,9 +37,11 @@ http://nbviewer.ipython.org/github/tmbdev/clstm/tree/master/misc/
 
 The `clstm` library operates on the Sequence type as its fundamental
 data type, representing variable length sequences of fixed length vectors.
-Internally, this is represented as an STL vector of Eigen dynamic vectors.
+Internally, this is represented as an STL vector of Eigen dynamic vectors
 
     typedef stl::vector<Eigen::VectorXf> Sequence;
+
+NB: This will be changed to an Eigen::Tensor
 
 Networks are built from objects implementing the `INetwork` interface.
 The `INetwork` interface contains:
@@ -69,9 +71,9 @@ The most important of these is the `Stacked` network, which simply
 stacks the given set of networks on top of each other, using the ouput
 from each network as the input to the next. 
 
-There are a few utility functions for walking through the subnetworks, states,
-and weights of a network, together with two hooks (`preSave`, `postLoad`) to
-facilitate loading.
+There are a few utility functions for walking through the subnetworks,
+states, and weights of a network, together with two hooks (`preSave`,
+`postLoad`) to facilitate loading.
 
 The implementations of the various networks are not exposed; instead of
 `new Stacked()` use `make_Stacked()`.
@@ -79,19 +81,50 @@ The implementations of the various networks are not exposed; instead of
 In addition to these basic functions, there is also a small implementation
 of CTC alignment.
 
-The C++ code roughly follows the lstm.py implementation from the Python version
-of OCRopus. Gradients have been verified for the core LSTM implementation,
-although there may be still be bugs in other parts of the code.
+The C++ code roughly follows the lstm.py implementation from the Python
+version of OCRopus. Gradients have been verified for the core LSTM
+implementation, although there may be still be bugs in other parts of
+the code.
 
-There is also a small multidimensional array class in `multidim.h`; that isn't
-used in the core LSTM implementation, but it is used in debugging and testing
-code, for plotting, and for HDF5 input/output. Unlike Eigen, it uses standard
-C/C++ row major element order, as libraries like HDF5 expect.
+There is also a small multidimensional array class in `multidim.h`; that
+isn't used in the core LSTM implementation, but it is used in debugging
+and testing code, for plotting, and for HDF5 input/output. Unlike Eigen,
+it uses standard C/C++ row major element order, as libraries like
+HDF5 expect. (NB: This will be replaced with Eigen::Tensor.)
 
-LSTM models are stored by default in HDF5 models, using the `weights`
-method to walk through all the weights of a network as arrays and storing
-them in HDF5 arrays. If HDF5 doesn't suit your needs, you can write
-similar functions for other forms of loading/saving LSTM networks.
+LSTM models are stored in protocol buffer format (`clstm.proto`), 
+although adding new formats is easy. There is an older HDF5-based 
+storage format.
+
+# Layer and Network Instatiation
+
+At its lowest level, layers are created by:
+
+ - create an instance of the layer with `make_layer`
+ - set any parameters (including `ninput` and `noutput`) as
+   attributes
+ - add any sublayers to the `sub` vector
+ - call `initialize()`
+
+The `layer(kind,ninput,noutput,args,sub)` function will perform 
+these steps in sequence.
+
+This can be used to construct network architectures in C++ pretty
+easily. For example, the following creates a network that stacks
+a softmax output layer on top of a standard LSTM layer:
+
+    Network net = layer("Stacked", ninput, noutput, {}, {
+        layer("LSTM", ninput, nhidden,{},{}),
+        layer("SoftmaxLayer", nhidden, noutput,{},{})
+    });
+
+Note that you need to make sure that the number of input and
+output units are correct.
+
+The `make_net(kind,args)` function constructs
+prefabricated networks (it also instantiates individual
+layers, but does not have an option to add sublayers, since
+that wouldn't make any sense).
 
 # Python API
 

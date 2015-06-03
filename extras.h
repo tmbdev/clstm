@@ -3,8 +3,8 @@
 // Additional functions and utilities for CLSTM networks.
 // These may use the array classes from "multidim.h"
 
-#ifndef clstm_extras_
-#define clstm_extras_
+#ifndef ocropus_clstm_extras_
+#define ocropus_clstm_extras_
 
 #include "clstm.h"
 #include "multidim.h"
@@ -13,6 +13,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <map>
+#include <stdarg.h>
+#include <glob.h>
+#include "pstring.h"
 
 #include <iostream>
 
@@ -44,15 +47,29 @@ using std::wstring;
 using std::shared_ptr;
 using std::vector;
 using std::cout;
+using std::ostream;
 using std::cerr;
 using std::endl;
 using std::min;
 using namespace multidim;
 
+void glob(vector<string> &result, const string &arg);
+
 void srandomize();
 unsigned urandom();
 int irandom();
 double drandom();
+
+// simplistic sprintf for strings
+
+inline string stringf(const char *format, ...) {
+    static char buf[4096];
+    va_list v;
+    va_start(v, format);
+    vsnprintf(buf, sizeof (buf), format, v);
+    va_end(v);
+    return string(buf);
+}
 
 // get current time down to usec precision as a double
 
@@ -71,6 +88,11 @@ inline void print() {
 template <class T>
 inline void print(const T &arg) {
     cout << arg << endl;
+}
+
+inline ostream &operator<<(ostream &stream, const std::wstring &arg) {
+    cout << utf32_to_utf8(arg);
+    return stream;
 }
 
 template <class T, typename ... Args>
@@ -231,30 +253,6 @@ INormalizer *make_NoNormalizer();
 INormalizer *make_MeanNormalizer();
 INormalizer *make_CenterNormalizer();
 
-// OCR dataset access, including datasets that are normalized
-// on the fly
-
-struct IOcrDataset {
-    virtual ~IOcrDataset() {
-    }
-    virtual void image(mdarray<float> &a, int index) = 0;
-    virtual void transcript(mdarray<int> &a, int index) = 0;
-    virtual void seq(mdarray<float> &a, int index, string name) {
-        throw "unimplemented";
-    }
-    virtual string to_string(mdarray<int> &transcript) = 0;
-    virtual string to_string(vector<int> &transcript) = 0;
-    virtual void getCodec(vector<int> &codec) = 0;
-    virtual int samples() = 0;
-    virtual int dim() = 0;
-    virtual int classes() = 0;
-};
-
-IOcrDataset *make_HDF5Dataset(const string &fname, bool varsize=false);
-IOcrDataset *make_NormalizedDataset(shared_ptr<IOcrDataset> &dataset,
-                                    shared_ptr<INormalizer> &normalizer);
-IOcrDataset *make_Dataset(const string &fname);
-
 void read_png(mdarray<unsigned char> &image, FILE *fp, bool gray=false);
 void write_png(FILE *fp, mdarray<unsigned char> &image);
 void read_png(mdarray<unsigned char> &image, const char *name, bool gray=false);
@@ -331,7 +329,7 @@ inline int indexof(A &a, const T &t) {
 }
 
 // simple network creation; this takes parameters from the environment
-shared_ptr<INetwork> make_net_init(const string &kind, int nclasses, int dim, string prefix="");
+Network make_net_init(const string &kind, int nclasses, int dim, string prefix="");
 
 // setting inputs and outputs
 void set_inputs(INetwork *net, mdarray<float> &inputs);

@@ -330,144 +330,6 @@ INormalizer *make_Normalizer(const string &name) {
     throw "unknown normalizer name";
 }
 
-struct HDF5Dataset : IOcrDataset {
-    string iname = "images";
-    string oname = "transcripts";
-    HDF5 h5;
-    mdarray<int> codec;
-protected:
-    int nsamples = -1;
-    int ndims = -1;
-    int nclasses = -1;
-public:
-    bool varsize = false;
-    bool normalize = true;
-
-    int samples() {
-        return nsamples;
-    }
-    int dim() {
-        return ndims;
-    }
-    int classes() {
-        return nclasses;
-    }
-    void getCodec(vector<int> &result) {
-        result.resize(codec.size());
-        for (int i = 0; i < codec.size(); i++)
-            result[i] = codec[i];
-    }
-
-    HDF5Dataset(const char *h5file, bool varsize = false) {
-        this->varsize = varsize;
-        H5::Exception::dontPrint();
-        h5.open(h5file);
-        mdarray<int> idims, odims;
-        h5.shape(idims, iname.c_str());
-        h5.shape(odims, oname.c_str());
-        assert(idims(0) == odims(0));
-        nsamples = idims(0);
-        bool verbose = getienv("verbose", 0);
-        if (verbose) cerr << "# lines " << nsamples << endl;
-        h5.get(codec, "codec");
-        if (verbose) cerr << "# codec " << codec.size() << endl;
-        nclasses = codec.size();
-        mdarray<float> a;
-        h5.getdrow(a, 0, iname.c_str());
-        assert(a.rank() == 2);
-        if (!varsize) ndims = a.dim(1);
-        h5.getarow(a, 0, oname.c_str());
-        assert(a.rank() == 1);
-    }
-    void seq(mdarray<float> &a, int index, string name) {
-        h5.getdrow(a, index, name.c_str());
-        assert(a.rank() == 2);
-    }
-    void image(mdarray<float> &a, int index) {
-        seq(a, index, iname);
-        if (!varsize) assert(a.dim(1) == ndims);
-        if (normalize) {
-            float m = amax(a);
-            for (int i = 0; i < a.size(); i++) a[i] /= m;
-        }
-    }
-    void transcript(mdarray<int> &a, int index) {
-        h5.getarow(a, index, oname.c_str());
-        assert(a.rank() == 1);
-    }
-    string to_string(mdarray<int> &transcript) {
-        string result;
-        for (int i = 0; i < transcript.size(); i++) {
-            int label = transcript(i);
-            int codepoint = codec(label);
-            char chr = char(min(255, codepoint));
-            result.push_back(chr);
-        }
-        return result;
-    }
-    string to_string(vector<int> &transcript) {
-        mdarray<int> transcript_(int(transcript.size()));
-        for (int i = 0; i < transcript.size(); i++) transcript_[i] = transcript[i];
-        return to_string(transcript_);
-    }
-};
-
-struct NormalizedDataset : IOcrDataset {
-    shared_ptr<IOcrDataset> dataset;
-    shared_ptr<INormalizer> normalizer;
-    NormalizedDataset() {
-    }
-    NormalizedDataset(shared_ptr<IOcrDataset> dataset, shared_ptr<INormalizer> normalizer)
-        : dataset(dataset), normalizer(normalizer) {
-    }
-
-    int dim() {
-        return normalizer->target_height;
-    }
-    int samples() {
-        return dataset->samples();
-    }
-    int classes() {
-        return dataset->classes();
-    }
-    void image(mdarray<float> &a, int index) {
-        mdarray<float> temp;
-        dataset->image(temp, index);
-        normalizer->measure(temp);
-        normalizer->normalize(a, temp);
-    }
-    void transcript(mdarray<int> &a, int index) {
-        dataset->transcript(a, index);
-    }
-    string to_string(mdarray<int> &transcript) {
-        return dataset->to_string(transcript);
-    }
-    string to_string(vector<int> &transcript) {
-        return dataset->to_string(transcript);
-    }
-    void getCodec(vector<int> &result) {
-        dataset->getCodec(result);
-    }
-};
-
-IOcrDataset *make_HDF5Dataset(const string &fname, bool varsize) {
-    return new HDF5Dataset(fname.c_str(), varsize);
-}
-
-IOcrDataset *make_NormalizedDataset(shared_ptr<IOcrDataset> &dataset,
-                                    shared_ptr<INormalizer> &normalizer) {
-    return new NormalizedDataset(dataset, normalizer);
-}
-
-IOcrDataset *make_Dataset(const string &fname) {
-    string normalizer_name = getsenv("dewarp", "none");
-    if (normalizer_name == "none") return make_HDF5Dataset(fname);
-    shared_ptr<IOcrDataset> dataset(make_HDF5Dataset(fname, true));
-    shared_ptr<INormalizer> normalizer(make_Normalizer(normalizer_name));
-    normalizer->getparams(true);
-    return make_NormalizedDataset(dataset, normalizer);
-}
-
 // Setting inputs/outputs using mdarray
 
 inline void assign(Sequence &seq, mdarray<float> &a) {
@@ -518,6 +380,8 @@ typedef mdarray<int> intarray;
 #define ERROR(X) throw X
 #define CHECK_CONDITION(X) do {if (!(X)) throw "CHECK: " # X; } while (0)
 #define CHECK_ARG(X) do {if (!(X)) throw "CHECK_ARG: " # X; } while (0)
+
+bool png_flip = false;
 
 void read_png(bytearray &image, FILE *fp, bool gray) {
     int d;
@@ -625,7 +489,7 @@ void read_png(bytearray &image, FILE *fp, bool gray) {
             rowptr = row_pointers[i];
             for (int j = 0; j < w; j++) {
                 int x = j;
-                int y = h-i-1;
+                int y = png_flip ? (h-i-1) : i;
                 int value;
                 if (bit_depth == 1) {
                     value = (rowptr[j/8] & (128>>(j%8))) ? 255 : 0;
@@ -650,7 +514,7 @@ void read_png(bytearray &image, FILE *fp, bool gray) {
             int k = 0;
             for (int j = 0; j < w; j++) {
                 int x = j;
-                int y = h-i-1;
+                int y = png_flip ? (h-i-1) : i;
                 if (gray) {
                     int value = rowptr[k++];
                     value += rowptr[k++];
@@ -720,7 +584,7 @@ void write_png(FILE *fp, bytearray &image) {
         int k = 0;
         for (int j = 0; j < w; j++) {
             int x = j;
-            int y = h - i - 1;
+            int y = png_flip ? (h - i - 1) : i;
             if (rank == 2) {
                 int value = image(x, y);
                 rowbuffer(k++) = value;
@@ -788,8 +652,8 @@ void write_png(const char *name, mdarray<float> &image) {
     write_png(name, temp);
 }
 
-shared_ptr<INetwork> make_net_init(const string &kind, int nclasses, int dim, string prefix) {
-    shared_ptr<INetwork> net = make_net(kind);
+#if 0
+Network make_net_init(const string &kind, int nclasses, int dim, string prefix) {
     int nhidden = getrenv((prefix+"hidden").c_str(), 100);
     if (kind == "bidi2") {
         int nhidden2 = getrenv((prefix+"hidden2").c_str(), -1);
@@ -800,6 +664,17 @@ shared_ptr<INetwork> make_net_init(const string &kind, int nclasses, int dim, st
         print("init", nclasses, nhidden, dim);
     }
     return net;
+}
+#endif
+
+void glob(vector<string> &result, const string &arg) {
+    result.clear();
+    glob_t buf;
+    glob(arg.c_str(), GLOB_TILDE, nullptr, &buf);
+    for (int i=0; i<buf.gl_pathc; i++) {
+        result.push_back(buf.gl_pathv[i]);
+    }
+    if (buf.gl_pathc>0) globfree(&buf);
 }
 
 unsigned long random_state;

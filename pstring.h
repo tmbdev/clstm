@@ -1,3 +1,8 @@
+// -*- C++ -*-
+
+#ifndef ocropus_clstm_pstring_
+#define ocropus_clstm_pstring_
+
 #include <wchar.h>
 #include <string>
 #include <iostream>
@@ -65,3 +70,5 @@ std::string utf32_to_utf8(std::wstring s) {
     return result;
 }
 }
+
+#endif

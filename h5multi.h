@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
-#ifndef h5multi__
-#define h5multi__
+#ifndef h5multi_
+#define h5multi_
 
 #include <type_traits>
 #include <memory>

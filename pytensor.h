@@ -9,16 +9,33 @@
 #include <string>
 #include <stdarg.h>
 #include <iostream>
-#include "multidim.h"
+#include <unsupported/Eigen/CXX11/Tensor>
 
-namespace pymulti {
+namespace pytensor {
 using std::string;
 using std::unique_ptr;
 using std::shared_ptr;
 using std::cout;
 using std::cerr;
 using std::endl;
-using namespace multidim;
+
+template <class T, size_t n>
+using Tensor = Eigen::Tensor<T, n>;
+template <class T, size_t n>
+using TensorRM = Eigen::Tensor<T, n, Eigen::RowMajor>;
+
+template <class T, size_t n>
+void assign(Tensor<T, n> &dest, TensorRM<T, n> &src) {
+    Eigen::array<int, n> rev;
+    for (int i = 0; i < n; i++) rev[i] = n-i-1;
+    dest = src.swap_layout().shuffle(rev);
+}
+template <class T, size_t n>
+void assign(TensorRM<T, n> &dest, Tensor<T, n> &src) {
+    Eigen::array<int, n> rev;
+    for (int i = 0; i < n; i++) rev[i] = n-i-1;
+    dest = src.swap_layout().shuffle(rev);
+}
 
 inline string stringf(const char *format, ...) {
     static char buf[4096];
@@ -93,25 +110,33 @@ struct PyServer {
         message >> result;
         return result;
     }
-    string eval(string s, const float *a, int na) {
+    template <class T, size_t n>
+    void add(zmqpp::message &message, Tensor<T, n> &a) {
+        TensorRM<T, n> temp;
+        assign(temp, a);
+        message.add_raw((const char *)temp.data(), temp.size()*sizeof (T));
+    }
+    template <class T, size_t n>
+    string eval(string s, Tensor<T, n> &a) {
         if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
         string cmd;
         zmqpp::message message;
         message << cmd + s;
-        message.add_raw((const char *)a, na*sizeof (float));
+        add(message, a);
         socket->send(message);
         socket->receive(message);
         string response;
         message >> response;
         return response;
     }
-    string eval(string s, const float *a, int na, const float *b, int nb) {
+    template <class T, size_t n, class S, size_t m>
+    string eval(string s, Tensor<T, n> &a, Tensor<S, m> &b) {
         if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
         string cmd;
         zmqpp::message message;
         message << cmd + s;
-        message.add_raw((const char *)a, na*sizeof (float));
-        message.add_raw((const char *)b, nb*sizeof (float));
+        add(message, a);
+        add(message, b);
         socket->send(message);
         socket->receive(message);
         string response;
@@ -132,29 +157,32 @@ struct PyServer {
     void subplot(int rows, int cols, int n) {
         eval(stringf("subplot(%d,%d,%d)", rows, cols, n));
     }
-    void plot(mdarray<float> &v, string extra="") {
+    void plot(Tensor<float, 1> &v, string extra="") {
         if (extra != "") extra = string(",")+extra;
         if (v.rank() != 1) throw "bad rank";
-        eval(stringf("plot(farg(1)%s)", extra.c_str()), v.data, v.size());
+        eval(stringf("plot(farg(1)%s)", extra.c_str()), v);
     }
-    void plot2(mdarray<float> &u, mdarray<float> &v, string extra="") {
+    void plot2(Tensor<float, 1> &u, Tensor<float, 1> &v, string extra="") {
         if (extra != "") extra = string(",")+extra;
         if (u.rank() != 1) throw "bad rank";
         if (v.rank() != 1) throw "bad rank";
-        eval(stringf("plot(farg(1),farg(2)%s)", extra.c_str()),
-             u.data, u.size(), v.data, v.size());
+        eval(stringf("plot(farg(1),farg(2)%s)", extra.c_str()), u, v);
     }
-    void imshow(mdarray<float> &a, string extra="") {
+    void imshow(Tensor<float, 2> &a, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        if (a.rank() != 2) throw "bad rank";
-        eval(stringf("imshow(farg2(1,%d,%d)%s)", a.dim(0), a.dim(1), extra.c_str()),
-             a.data, a.dim(0)*a.dim(1));
+        eval(stringf("imshow(farg2(1,%d,%d)%s)",
+                     a.dimension(0),
+                     a.dimension(1),
+                     extra.c_str()),
+             a);
     }
-    void imshowT(mdarray<float> &a, string extra="") {
+    void imshowT(Tensor<float, 2> &a, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        if (a.rank() != 2) throw "bad rank";
-        eval(stringf("imshow(farg2(1,%d,%d).T%s)", a.dim(0), a.dim(1), extra.c_str()),
-             a.data, a.dim(0)*a.dim(1));
+        eval(stringf("imshow(farg2(1,%d,%d).T%s)",
+                     a.dimension(0),
+                     a.dimension(1),
+                     extra.c_str()),
+             a);
     }
 };
 #endif

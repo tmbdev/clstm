@@ -31,6 +31,10 @@ using namespace std;
 typedef float Float;
 using std::string;
 
+%inline %{
+const char *hgversion = HGVERSION;
+%}
+
 #ifdef SWIGPYTHON
 %exception {
     try {
@@ -131,7 +135,7 @@ struct Sequence {
 
 struct ITrainable {
     virtual ~ITrainable();
-    string name = "???";
+    string name;
     Float learning_rate = 1e-4;
     Float momentum = 0.9;
     enum Normalization {
@@ -175,7 +179,6 @@ struct INetwork : virtual ITrainable {
     void iencode(Classes &cs, std::wstring &s);
     Float softmax_floor = 1e-5;
     bool softmax_accel = false;
-    virtual ~INetwork();
     virtual int ninput();
     virtual int noutput();
     virtual void add(std::shared_ptr<INetwork> net);
@@ -195,6 +198,9 @@ void ctrain_accelerated(INetwork *net, Sequence &xs, Classes &cs, Float lo=1e-5)
 void cpred(INetwork *net, Classes &preds, Sequence &xs);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
 
+std::shared_ptr<INetwork> make_layer(string);
+std::shared_ptr<INetwork> make_net_init(string,string);
+
 %rename(seq_forward) forward_algorithm;
 void forward_algorithm(Mat &lr,Mat &lmatch,double skip=-5.0);
 %rename(seq_forwardbackward) forwardbackward;
@@ -202,8 +208,6 @@ void forwardbackward(Mat &both,Mat &lmatch);
 %rename(seq_ctc_align) ctc_align_targets;
 void ctc_align_targets(Sequence &posteriors,Sequence &outputs,Sequence &targets);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
-
-std::shared_ptr<INetwork> make_net(string kind);
 
 %inline %{
 Mat &getdebugmat() {

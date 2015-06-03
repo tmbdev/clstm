@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
-#ifndef h5eigen__
-#define h5eigen__
+#ifndef h5eigen_
+#define h5eigen_
 
 #include <type_traits>
 #include <Eigen/Dense>
@@ -87,8 +87,8 @@ struct HDF5 {
     void put(T &a, const char *name, int rank=2) {
         Matrix<float, Dynamic, Dynamic, RowMajor> temp = a;
         DSetCreatPropList plist;  // setFillValue, etc.
-        hsize_t rows = temp.rows();
-        hsize_t cols = temp.cols();
+        hsize_t rows = ROWS(temp);
+        hsize_t cols = COLS(temp);
         hsize_t dim[] = {rows, cols, 0, 0, 0, 0};
         DataSpace fspace(rank, dim);
         DataSet dataset = h5->createDataSet(name, pred_type(temp(0, 0)), fspace, plist);

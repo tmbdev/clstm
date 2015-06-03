@@ -8,9 +8,9 @@
 #include <string>
 
 #include "multidim.h"
+#include "h5multi.h"
 #include "pymulti.h"
 #include "extras.h"
-#include "version.h"
 
 using std_string = std::string;
 #define string std_string
@@ -25,7 +25,172 @@ using namespace Eigen;
 using namespace ocropus;
 using namespace pymulti;
 
-double error_rate(shared_ptr<INetwork> net, const string &testset) {
+// OCR dataset access, including datasets that are normalized
+// on the fly
+
+using namespace h5multi;
+
+struct IOcrDataset {
+    virtual ~IOcrDataset() {
+    }
+    virtual void image(mdarray<float> &a, int index) = 0;
+    virtual void transcript(mdarray<int> &a, int index) = 0;
+    virtual void seq(mdarray<float> &a, int index, string name) {
+        throw "unimplemented";
+    }
+    virtual string to_string(mdarray<int> &transcript) = 0;
+    virtual string to_string(vector<int> &transcript) = 0;
+    virtual void getCodec(vector<int> &codec) = 0;
+    virtual int samples() = 0;
+    virtual int dim() = 0;
+    virtual int classes() = 0;
+};
+
+IOcrDataset *make_HDF5Dataset(const string &fname, bool varsize=false);
+IOcrDataset *make_NormalizedDataset(shared_ptr<IOcrDataset> &dataset,
+                                    shared_ptr<INormalizer> &normalizer);
+IOcrDataset *make_Dataset(const string &fname);
+
+
+struct HDF5Dataset : IOcrDataset {
+    string iname = "images";
+    string oname = "transcripts";
+    HDF5 h5;
+    mdarray<int> codec;
+protected:
+    int nsamples = -1;
+    int ndims = -1;
+    int nclasses = -1;
+public:
+    bool varsize = false;
+    bool normalize = true;
+
+    int samples() {
+        return nsamples;
+    }
+    int dim() {
+        return ndims;
+    }
+    int classes() {
+        return nclasses;
+    }
+    void getCodec(vector<int> &result) {
+        result.resize(codec.size());
+        for (int i = 0; i < codec.size(); i++)
+            result[i] = codec[i];
+    }
+
+    HDF5Dataset(const char *h5file, bool varsize = false) {
+        this->varsize = varsize;
+        H5::Exception::dontPrint();
+        h5.open(h5file);
+        mdarray<int> idims, odims;
+        h5.shape(idims, iname.c_str());
+        h5.shape(odims, oname.c_str());
+        assert(idims(0) == odims(0));
+        nsamples = idims(0);
+        bool verbose = getienv("verbose", 0);
+        if (verbose) cerr << "# lines " << nsamples << endl;
+        h5.get(codec, "codec");
+        if (verbose) cerr << "# codec " << codec.size() << endl;
+        nclasses = codec.size();
+        mdarray<float> a;
+        h5.getdrow(a, 0, iname.c_str());
+        assert(a.rank() == 2);
+        if (!varsize) ndims = a.dim(1);
+        h5.getarow(a, 0, oname.c_str());
+        assert(a.rank() == 1);
+    }
+    void seq(mdarray<float> &a, int index, string name) {
+        h5.getdrow(a, index, name.c_str());
+        assert(a.rank() == 2);
+    }
+    void image(mdarray<float> &a, int index) {
+        seq(a, index, iname);
+        if (!varsize) assert(a.dim(1) == ndims);
+        if (normalize) {
+            float m = amax(a);
+            for (int i = 0; i < a.size(); i++) a[i] /= m;
+        }
+    }
+    void transcript(mdarray<int> &a, int index) {
+        h5.getarow(a, index, oname.c_str());
+        assert(a.rank() == 1);
+    }
+    string to_string(mdarray<int> &transcript) {
+        string result;
+        for (int i = 0; i < transcript.size(); i++) {
+            int label = transcript(i);
+            int codepoint = codec(label);
+            char chr = char(min(255, codepoint));
+            result.push_back(chr);
+        }
+        return result;
+    }
+    string to_string(vector<int> &transcript) {
+        mdarray<int> transcript_(int(transcript.size()));
+        for (int i = 0; i < transcript.size(); i++) transcript_[i] = transcript[i];
+        return to_string(transcript_);
+    }
+};
+
+struct NormalizedDataset : IOcrDataset {
+    shared_ptr<IOcrDataset> dataset;
+    shared_ptr<INormalizer> normalizer;
+    NormalizedDataset() {
+    }
+    NormalizedDataset(shared_ptr<IOcrDataset> dataset, shared_ptr<INormalizer> normalizer)
+        : dataset(dataset), normalizer(normalizer) {
+    }
+
+    int dim() {
+        return normalizer->target_height;
+    }
+    int samples() {
+        return dataset->samples();
+    }
+    int classes() {
+        return dataset->classes();
+    }
+    void image(mdarray<float> &a, int index) {
+        mdarray<float> temp;
+        dataset->image(temp, index);
+        normalizer->measure(temp);
+        normalizer->normalize(a, temp);
+    }
+    void transcript(mdarray<int> &a, int index) {
+        dataset->transcript(a, index);
+    }
+    string to_string(mdarray<int> &transcript) {
+        return dataset->to_string(transcript);
+    }
+    string to_string(vector<int> &transcript) {
+        return dataset->to_string(transcript);
+    }
+    void getCodec(vector<int> &result) {
+        dataset->getCodec(result);
+    }
+};
+
+IOcrDataset *make_HDF5Dataset(const string &fname, bool varsize) {
+    return new HDF5Dataset(fname.c_str(), varsize);
+}
+
+IOcrDataset *make_NormalizedDataset(shared_ptr<IOcrDataset> &dataset,
+                                    shared_ptr<INormalizer> &normalizer) {
+    return new NormalizedDataset(dataset, normalizer);
+}
+
+IOcrDataset *make_Dataset(const string &fname) {
+    string normalizer_name = getsenv("dewarp", "none");
+    if (normalizer_name == "none") return make_HDF5Dataset(fname);
+    shared_ptr<IOcrDataset> dataset(make_HDF5Dataset(fname, true));
+    shared_ptr<INormalizer> normalizer(make_Normalizer(normalizer_name));
+    normalizer->getparams(true);
+    return make_NormalizedDataset(dataset, normalizer);
+}
+
+double error_rate(Network net, const string &testset) {
     int maxeval = getienv("maxeval", 1000000000);
     shared_ptr<IOcrDataset> dataset(make_Dataset(testset));
 
@@ -91,7 +256,7 @@ int main_ocr(int argc, char **argv) {
     string after_test = getsenv("after_test", "");
 
     print("params",
-          "hg_version", hg_version(),
+          "hg_version", HGVERSION,
           "lrate", lrate,
           "nhidden", nhidden,
           "nhidden2", nhidden2,
@@ -115,7 +280,7 @@ int main_ocr(int argc, char **argv) {
     dataset.reset(make_Dataset(h5file));
     print("dataset", dataset->samples(), dataset->dim(), dewarp);
 
-    shared_ptr<INetwork> net;
+    Network net;
     int nclasses = -1;
     int dim = dataset->dim();
     if (load_name != "") {
@@ -125,13 +290,12 @@ int main_ocr(int argc, char **argv) {
         vector<int> codec;
         dataset->getCodec(codec);
         nclasses = codec.size();
-        net = make_net(net_type);
-        net->set("ninput", dim);
-        net->set("noutput", nclasses);
-        net->set("nhidden", nhidden);
-        net->set("nhidden2", nhidden2);
-        net->set("lstm_type", lstm_type);
-        net->set("output_type", output_type);
+        net = make_net(net_type, {
+                           {"ninput", dim},
+                           {"noutput", nclasses},
+                           {"nhidden", nhidden},
+                           {"nhidden2", nhidden2}
+                       });
         net->initialize();
     }
     net->setLearningRate(lrate, momentum);
@@ -267,7 +431,7 @@ int main_eval(int argc, char **argv) {
     string mode = getsenv("mode", "errs");
     string load_name = getsenv("load", "");
     shared_ptr<IOcrDataset> dataset(make_Dataset(h5file));
-    shared_ptr<INetwork> net;
+    Network net;
     if (load_name == "") throw "must give load=";
     net = load_net(load_name);
 
@@ -319,6 +483,16 @@ int main_dump(int argc, char **argv) {
         print(to_string(sample)+"\t"+gt);
         cout.flush();
     }
+    return 0;
+}
+
+int main_proto(int argc, char **argv) {
+    Network net;
+    net = load_net(argv[1]);
+    bool weights = getienv("weights", 0);
+    Network net2 = proto_clone_net(net.get());
+    if (getienv("n", 0) == 0) debug_as_proto(net.get(), weights);
+    else debug_as_proto(net2.get(), weights);
     return 0;
 }
 
@@ -374,6 +548,8 @@ int main(int argc, char **argv) {
         }
         if (mode == "dump") {
             return main_dump(argc, argv);
+        } else if (mode == "proto") {
+            return main_proto(argc, argv);
         } else if (mode == "train") {
             return main_ocr(argc, argv);
         } else if (mode == "testdewarp") {
@@ -387,4 +563,3 @@ int main(int argc, char **argv) {
         print("UNKNOWN EXCEPTION");
     }
 }
-

@@ -1,0 +1,105 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import string,re,sys,codecs
+
+arpabet = u"""
+AO,ɔ
+AA,ɑ
+IY,i
+UW,u
+EH,ɛ
+IH,ɪ
+UH,ʊ
+AH1,ʌ
+AH0,ə
+AH2,ə
+AX0,ə
+AE,æ
+EY,eɪ
+AY,aɪ
+OW,oʊ
+AW,aʊ
+OY,ɔɪ
+ER,ɝ
+AXR,ɚ
+EH R,ɛr
+UH R,ʊr
+AO R,ɔr
+AA R,ɑr
+IH R,ɪr
+IY R,ɪr
+AW R,aʊr
+P,p
+B,b
+T,t
+D,d
+K,k
+G,ɡ
+CH,tʃ
+JH,dʒ
+F,f
+V,v
+TH,θ
+DH,ð
+S,s
+Z,z
+SH,ʃ
+ZH,ʒ
+HH,h
+M,m
+EM,m̩
+N,n
+EN,n̩
+NG,ŋ
+ENG,ŋ̍
+L,ɫ
+EL,ɫ̩
+R,ɹ
+DX,ɾ
+NX,ɾ̃
+Y,j
+W,w
+Q,ʔ
+"""
+
+As = {}
+Rs = {}
+for line in arpabet.split('\n'):
+    if line=="": continue
+    x,y = line.split(',')
+    x = x.split()
+    if len(x)==2: Rs[x[0]] = y
+    else: As[x[0]] = y
+
+sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+# sys.stdin = codecs.getreader('utf8')(sys.stdin)
+
+for line in sys.stdin.readlines():
+    if line.startswith(";;;"): continue
+    if line.startswith("#"): continue
+    F = line.split()
+    word = F[0]
+    if not re.search(r"^[A-Z']*$",word): continue
+    ab = F[1:]
+    out = []
+    i = 0
+    while i<len(ab):
+        p = ab[i]
+        px = re.sub(r'[0-9]*$','',p)
+        if i<len(ab)-1 and ab[i+1]=="R":
+            q = Rs.get(p,Rs.get(px))
+            if q is not None:
+                out += [q]
+                i += 2
+            else:
+                out += [As.get(p,As.get(px,'?'))]
+                i += 1
+        else:
+            out += [As.get(p,As.get(px,'?'))]
+            i += 1
+    out = "".join(out)
+    print "%s\t%s"%(word,out)
+    # print word, out, ab
+
+

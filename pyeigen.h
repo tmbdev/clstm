@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
-#ifndef pyeigen__
-#define pyeigen__
+#ifndef pyeigen_
+#define pyeigen_
 
 #include <zmqpp/zmqpp.hpp>
 #include <string>
@@ -104,8 +104,8 @@ struct PyServer {
     }
     void imshow(const Eigen::MatrixXf &a, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        eval(stringf("imshow(farg2(1,%d,%d)%s)", a.cols(), a.rows(), extra.c_str()),
-             &a(0, 0), a.rows()*a.cols());
+        eval(stringf("imshow(farg2(1,%d,%d)%s)", COLS(a), ROWS(a), extra.c_str()),
+             &a(0, 0), ROWS(a)*COLS(a));
     }
 };
 
