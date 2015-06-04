@@ -16,24 +16,28 @@ string get(const Assoc &params, const string &key, const string &dflt) {
     return it->second;
 }
 
+// A 1D unidirectional LSTM with Softmax output layer.
+
 Network make_lstm1(const Assoc &params) {
     int ninput = params.at("ninput");
     int nhidden = params.at("nhidden");
     int noutput = params.at("noutput");
     string lstm_type = get(params, "lstm_type", "LSTM");
-    string output_type = get(params, "lstm_type", "SoftmaxLayer");
+    string output_type = get(params, "output_type", "SoftmaxLayer");
     return layer("Stacked", ninput, noutput, {}, {
                      layer(lstm_type, ninput, nhidden, {}, {}),
                      layer(output_type, nhidden, noutput, {}, {})
                  });
 }
 
+// A 1D unidirectional reversed LSTM with Softmax output layer.
+
 Network make_revlstm1(const Assoc &params) {
     int ninput = params.at("ninput");
     int nhidden = params.at("nhidden");
     int noutput = params.at("noutput");
     string lstm_type = get(params, "lstm_type", "LSTM");
-    string output_type = get(params, "lstm_type", "SoftmaxLayer");
+    string output_type = get(params, "output_type", "SoftmaxLayer");
     return layer("Stacked", ninput, noutput, {}, {
                      layer("Reversed", ninput, nhidden, {}, {
                                layer(lstm_type, ninput, nhidden, {}, {})
@@ -42,12 +46,14 @@ Network make_revlstm1(const Assoc &params) {
                  });
 }
 
+// A 1D bidirectional LSTM with Softmax output layer.
+
 Network make_bidi(const Assoc &params) {
     int ninput = params.at("ninput");
     int nhidden = params.at("nhidden");
     int noutput = params.at("noutput");
     string lstm_type = get(params, "lstm_type", "LSTM");
-    string output_type = get(params, "lstm_type", "SoftmaxLayer");
+    string output_type = get(params, "output_type", "SoftmaxLayer");
     return layer("Stacked", ninput, noutput, {}, {
                      layer("Parallel", ninput, 2*nhidden, {}, {
                                layer(lstm_type, ninput, nhidden, {}, {}),
@@ -59,13 +65,15 @@ Network make_bidi(const Assoc &params) {
                  });
 }
 
+// Two stacked 1D bidirectional LSTM with Softmax output layer.
+
 Network make_bidi2(const Assoc &params) {
     int ninput = params.at("ninput");
     int nhidden = params.at("nhidden");
     int nhidden2 = params.at("nhidden2");
     int noutput = params.at("noutput");
     string lstm_type = get(params, "lstm_type", "LSTM");
-    string output_type = get(params, "lstm_type", "SoftmaxLayer");
+    string output_type = get(params, "output_type", "SoftmaxLayer");
     return layer("Stacked", ninput, noutput, {}, {
                      layer("Parallel", ninput, 2*nhidden, {}, {
                                layer(lstm_type, ninput, nhidden, {}, {}),
@@ -103,6 +111,9 @@ Network make_net(const string &kind, const Assoc &args) {
     result->attributes["kind"] = kind;
     return result;
 }
+
+// Make a network, using parameter specifications of the
+// form "ninput=28:noutput=10:nhidden=50:output_type=SoftmaxLayer"
 
 Network make_net_init(const string &kind, const string &params) {
     using std::cerr;

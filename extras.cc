@@ -31,13 +31,11 @@ extern "C" {
 #include <iostream>
 #include <map>
 #include "multidim.h"
-#include "h5multi.h"
 #include "pymulti.h"
 #include "extras.h"
 
 namespace ocropus {
 using namespace multidim;
-using namespace h5multi;
 using namespace std;
 
 typedef mdarray<float> floatarray;

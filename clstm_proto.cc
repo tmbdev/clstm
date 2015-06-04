@@ -2,7 +2,6 @@
 // See clstm.proto for the protocol buffer definitions used here.
 
 #include "clstm.h"
-#include "h5eigen.h"
 #include <assert.h>
 #include <iostream>
 #include <vector>
@@ -12,8 +11,12 @@
 #include <iostream>
 #include <fstream>
 #include <Eigen/Dense>
-#include "clstm.pb.h"
 #include <stdarg.h>
+#ifdef GOOGLE
+#include "third_party/clstm/clstm.pb.h"
+#else
+#include "clstm.pb.h"
+#endif
 
 namespace {
 inline void throwf(const char *format, ...) {

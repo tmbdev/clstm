@@ -69,7 +69,6 @@ void get_codec(vector<int> &codec, vector<Sample> &samples, wstring Sample::* p)
 
 int main(int argc, char **argv) {
     if (argc < 2 || argc > 3) throw "... training [testing]";
-    const char *fname = argv[1];
     vector<Sample> samples, test_samples;
     read_samples(samples, argv[1]);
     if (argc > 2) read_samples(test_samples, argv[2]);

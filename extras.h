@@ -85,14 +85,15 @@ inline void print() {
     cout << endl;
 }
 
-template <class T>
-inline void print(const T &arg) {
-    cout << arg << endl;
-}
-
 inline ostream &operator<<(ostream &stream, const std::wstring &arg) {
     cout << utf32_to_utf8(arg);
     return stream;
+}
+
+template <class T>
+inline void print(const T &arg) {
+    using namespace std;
+    cout << arg << endl;
 }
 
 template <class T, typename ... Args>

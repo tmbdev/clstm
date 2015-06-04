@@ -358,7 +358,6 @@ struct Full : NetworkBase {
     void forward() {
         outputs.resize(inputs.size());
         for (int t = 0; t < inputs.size(); t++) {
-            int bs = COLS(outputs[t]);
             outputs[t] = MATMUL(W, inputs[t]);
             ADDCOLS(outputs[t], w);
             NONLIN::f(outputs[t]);

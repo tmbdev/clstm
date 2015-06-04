@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
 
     string line;
     ifstream stream(fname);
-    int trial = 0;
     int output = getienv("output", 0);
     while (getline(stream, line)) {
         string orig = line+"";
