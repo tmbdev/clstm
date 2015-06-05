@@ -1,0 +1,12 @@
+#!/bin/sh -ax
+ntrain=3000000
+hidden=50
+test_every=50000
+testset=misc/cmu-test.txt
+lrate=3e-4
+report_every=100
+save_every=10000
+save_name=cmu
+neps=3
+# gdb --ex 'catch throw' --ex run --args \
+./clstmfiltertrain misc/cmu-train.txt misc/cmu-test.txt
