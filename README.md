@@ -29,6 +29,11 @@ There are a bunch of options:
  - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
  - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line programs
 
+After building the executables, you can run two simple test runs as follows:
+
+ - `run-cmu` will train an English-to-IPA LSTM
+ - `run-uw3-500` will download a small OCR training/test set and train an OCR LSTM
+
 To build the Python extension, run
 
     python setup.py build
