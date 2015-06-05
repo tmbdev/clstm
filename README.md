@@ -52,8 +52,6 @@ Internally, this is represented as an STL vector of Eigen dynamic vectors
 
 NB: This will be changed to an Eigen::Tensor
 
-# C++ API
-
 Networks are built from objects implementing the `INetwork` interface.
 The `INetwork` interface contains:
 
