@@ -6,7 +6,7 @@ A small C++ implementation of LSTM networks, focused on OCR.
 The only essential external dependencies are Eigen and STL.
 
 For I/O, having HDF5 is useful. For plotting, you need Python and the
-ZMQ library.
+ZMQ library. For building is useful to have scons and swig installed.
 
 To build a standalone C library, run
 
