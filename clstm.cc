@@ -369,8 +369,8 @@ struct Full : NetworkBase {
             NONLIN::df(d_outputs[t], outputs[t]);
             d_inputs[t] = MATMUL_TR(W, d_outputs[t]);
         }
+        int bs = COLS(inputs[0]);
         for (int t = 0; t < d_outputs.size(); t++) {
-            int bs = COLS(outputs[t]);
             d_W += MATMUL_RT(d_outputs[t], inputs[t]);
             for (int b = 0; b < bs; b++) d_w += COL(d_outputs[t], b);
         }
@@ -512,9 +512,9 @@ struct SoftmaxLayer : NetworkBase {
         for (int t = d_outputs.size()-1; t >= 0; t--) {
             d_inputs[t] = MATMUL_TR(W, d_outputs[t]);
         }
+        int bs = COLS(inputs[0]);
         for (int t = 0; t < d_outputs.size(); t++) {
             d_W += MATMUL_RT(d_outputs[t], inputs[t]);
-            int bs = COLS(d_outputs[t]);
             for (int b = 0; b < bs; b++) d_w += COL(d_outputs[t], b);
         }
         nsteps += d_outputs.size();

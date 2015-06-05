@@ -1,8 +1,14 @@
 # -*- Python -*-
-import os
+import os,sys,os.path
 import distutils.sysconfig
 
-hgversion = os.popen("hg -q id").read().strip()
+if os.path.isdir(".hg"):
+    hgversion = os.popen("hg -q id").read().strip()
+elif os.path.isdir(".git"):
+    hgversion = os.popen("git rev-list HEAD | sed 1q").read().strip()
+else:
+    hgversion = os.popen("date").read().strip()
+print "version",hgversion
 
 # A bunch of utility functions to make the rest of the SConstruct file a little simpler.
 
@@ -61,15 +67,15 @@ else:
     inc = findonpath("Eigen/Eigen",[option("eigen")])
 env.Append(CPPPATH=[inc])
 
-# You can enable display debugging with `zmq=1`
+# You can enable display debugging with `display=1`
 
-if option("zmq",0):
+if option("display",0):
     env.Append(LIBS=["zmqpp","zmq"])
+    env.Append(CPPDEFINES={'add_raw' : option("add_raw",'add')})
 else:
     env.Append(CPPDEFINES={'NODISPLAY' : 1})
 
 env.Append(LIBS=["png","protobuf"])
-env.Append(CPPDEFINES={'add_raw' : option("add_raw",'add')})
 
 # We need to compile the protocol buffer definition as part of the build.
 

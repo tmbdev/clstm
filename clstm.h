@@ -35,6 +35,10 @@ typedef Eigen::VectorXf Vec;
 typedef Eigen::MatrixXf Mat;
 #endif
 
+// These macros define the major matrix operations used
+// in CLSTM. They are here for eventually converting the
+// inner loops of CLSTM from Eigen::Matrix to Eigen::Tensor
+// (which uses different and incompatible notation)
 #define DOT(M,V) ((M) * (V))
 #define MATMUL(A,B) ((A) * (B))
 #define MATMUL_TR(A, B) ((A).transpose() * (B))
