@@ -2,28 +2,37 @@
 
 [![Join the chat at https://gitter.im/tmbdev/clstm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tmbdev/clstm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-A small C++ implementation of LSTM networks, focused on OCR.
-The only essential external dependencies are Eigen and STL.
-
-For I/O, having HDF5 is useful. For plotting, you need Python and the
-ZMQ library. For building is useful to have scons and swig installed.
-
 To build a standalone C library, run
 
     scons
     sudo scons install
+    
+Prerequisites:
 
-For debugging, you can compile with `debug=1`
+ - scons, Eigen
+ - protocol buffer library and compiler
+ - HDF5 libraries and C++, Python bindings (optional, for HDF5 I/O)
+ - ZMQ libraries and C++, Python bindings (optional, for display)
+
+On Ubuntu, this means:
+
+    scons libeigen3-dev
+    hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py                    
+    libprotobuf-dev libprotobuf9 protobuf-compiler                                  
+    libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3     
+    
+There are a bunch of options:
+
+ - `debug=1` build with debugging options, no optimization
+ - `display=1` build with display support for debugging (requires ZMQ, Python)
+ - `prefix=...` install under a different prefix (untested)
+ - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
+ - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line programs
 
 To build the Python extension, run
 
     python setup.py build
     sudo python setup.py install
-
-or
-
-    scons
-    sudo scons pyinstall
 
 # Documentation / Examples
 
@@ -42,6 +51,8 @@ Internally, this is represented as an STL vector of Eigen dynamic vectors
     typedef stl::vector<Eigen::VectorXf> Sequence;
 
 NB: This will be changed to an Eigen::Tensor
+
+# C++ API
 
 Networks are built from objects implementing the `INetwork` interface.
 The `INetwork` interface contains:
@@ -67,16 +78,38 @@ complex structures.
         ...
     };
 
-The most important of these is the `Stacked` network, which simply
-stacks the given set of networks on top of each other, using the ouput
-from each network as the input to the next. 
+At its lowest level, layers are created by:
 
-There are a few utility functions for walking through the subnetworks,
-states, and weights of a network, together with two hooks (`preSave`,
-`postLoad`) to facilitate loading.
+ - create an instance of the layer with `make_layer`
+ - set any parameters (including `ninput` and `noutput`) as
+   attributes
+ - add any sublayers to the `sub` vector
+ - call `initialize()`
 
-The implementations of the various networks are not exposed; instead of
-`new Stacked()` use `make_Stacked()`.
+There are three different functions for constructing layers and networks:
+
+ - `make_layer(kind)` looks up the constructor and gives you an uninitialized layer
+ - `layer(kind,ninput,noutput,args,sub)` performs all initialization steps in sequence
+ - `make_net(kind,args)` initializes a whole collection of layers at once
+ - `make_net_init(kind,params)` is like `make_net`, but parameters are given in string form
+
+The `layer(kind,ninput,noutput,args,sub)` function will perform 
+these steps in sequence.
+
+Layers and networks are usually passed around as `shared_ptr<INetwork>`;
+there is a typedef of this calling it `Network`.
+
+This can be used to construct network architectures in C++ pretty
+easily. For example, the following creates a network that stacks
+a softmax output layer on top of a standard LSTM layer:
+
+    Network net = layer("Stacked", ninput, noutput, {}, {
+        layer("LSTM", ninput, nhidden,{},{}),
+        layer("SoftmaxLayer", nhidden, noutput,{},{})
+    });
+
+Note that you need to make sure that the number of input and
+output units are consistent between layers.
 
 In addition to these basic functions, there is also a small implementation
 of CTC alignment.
@@ -96,36 +129,6 @@ LSTM models are stored in protocol buffer format (`clstm.proto`),
 although adding new formats is easy. There is an older HDF5-based 
 storage format.
 
-# Layer and Network Instatiation
-
-At its lowest level, layers are created by:
-
- - create an instance of the layer with `make_layer`
- - set any parameters (including `ninput` and `noutput`) as
-   attributes
- - add any sublayers to the `sub` vector
- - call `initialize()`
-
-The `layer(kind,ninput,noutput,args,sub)` function will perform 
-these steps in sequence.
-
-This can be used to construct network architectures in C++ pretty
-easily. For example, the following creates a network that stacks
-a softmax output layer on top of a standard LSTM layer:
-
-    Network net = layer("Stacked", ninput, noutput, {}, {
-        layer("LSTM", ninput, nhidden,{},{}),
-        layer("SoftmaxLayer", nhidden, noutput,{},{})
-    });
-
-Note that you need to make sure that the number of input and
-output units are correct.
-
-The `make_net(kind,args)` function constructs
-prefabricated networks (it also instantiates individual
-layers, but does not have an option to add sublayers, since
-that wouldn't make any sense).
-
 # Python API
 
 The `clstm.i` file implements a simple Python interface to clstm, plus
@@ -135,6 +138,15 @@ implementation from ocropy.
 # Comand Line Drivers
 
 There are several command line drivers:
+
+  - `clstmfiltertrain training-data test-data` learns text filters;
+    - input files consiste of lines of the form "input<tab>output<nl>"
+  - `clstmfilter` applies learned text filters
+  - `clstmocrtrain training-images test-images` learns OCR (or image-to-text) transformations;
+    - input files are lists of text line images; the corresponding UTF-8 ground truth is expected in the corresponding `.gt.txt` file
+  - `clstmocr` applies learned OCR models
+ 
+ In addition, you get the following HDF5-based commands:
 
   - clstmseq learns sequence-to-sequence mappings
   - clstmctc learns sequence-to-string mappings using CTC alignment
@@ -150,7 +162,6 @@ See the notebooks in the `misc/` subdirectory for documentation on the parameter
 
 # TODO / UPCOMING
 
-  - the HDF5 network save format will probably change
   - Lua and Torch bindings
   - more recurrent network types
   - replacement of mdarray with Eigen Tensors
