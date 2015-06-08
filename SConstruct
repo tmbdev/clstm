@@ -54,6 +54,11 @@ else:
     env.Append(CXXFLAGS="-g -O3 -finline".split())
     env.Append(CCFLAGS="-g".split())
 
+# Extra layers (old layers or testing)
+
+if option("extras",0):
+    env.Append(CPPDEFINES={'CLSTM_EXTRAS' : 1})
+
 # Try to locate the Eigen include files (they are in different locations
 # on different systems); you can specify an include path for Eigen with
 # `eigen=/mypath/include`

@@ -14,6 +14,7 @@
 #include <memory>
 #include <map>
 #include <Eigen/Dense>
+#include <random>
 
 namespace ocropus {
 using std::string;
@@ -59,15 +60,52 @@ inline void ADDCOLS(Mat &m, Vec &v) {
         for(int j=0; j<ROWS(m); j++)
             m(i,j) += v(j);
 }
-inline void randinit(Mat &m, int no, int ni, float s) {
-    m.resize(no, ni);
-    m.setRandom();
-    m *= s;
+inline void randgauss(Mat &m) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<double> randn;
+    for (int i=0; i<ROWS(m); i++)
+        for (int j=0; j<COLS(m); j++)
+            m(i,j) = randn(gen);
 }
-inline void randinit(Vec &m, int no, float s) {
+inline void randgauss(Vec &v) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<double> randn;
+    for (int i=0; i<ROWS(v); i++)
+        v(i) = randn(gen);
+}
+inline void randinit(Mat &m, float s, const string mode = "unif") {
+    if (mode=="unif") {
+        m.setRandom();
+        m = (2*s*m).array()-s;
+    } else if (mode=="pos") {
+        m.setRandom();
+        m = m*s;
+    } else if (mode=="normal") {
+        randgauss(m);
+        m = m*s;
+    }
+}
+inline void randinit(Vec &m, float s, const string mode = "unif") {
+    if (mode=="unif") {
+        m.setRandom();
+        m = (2*s*m).array()-s;
+    } else if (mode=="pos") {
+        m.setRandom();
+        m = m*s;
+    } else if (mode=="normal") {
+        randgauss(m);
+        m = m*s;
+    }
+}
+inline void randinit(Mat &m, int no, int ni, float s, const string mode = "unif") {
+    m.resize(no, ni);
+    randinit(m, s, mode);
+}
+inline void randinit(Vec &m, int no, float s, const string mode = "unif") {
     m.resize(no);
-    m.setRandom();
-    m *= s;
+    randinit(m, s, mode);
 }
 inline void zeroinit(Mat &m, int no, int ni) {
     m.resize(no, ni);
@@ -131,6 +169,11 @@ struct ITrainable {
         auto it = attributes.find(key);
         if (it == attributes.end()) return dflt;
         return std::stoi(it->second);
+    }
+    double dattr(string key, double dflt=0.0) {
+        auto it = attributes.find(key);
+        if (it == attributes.end()) return dflt;
+        return std::stof(it->second);
     }
     int irequire(string key) {
         auto it = attributes.find(key);

@@ -22,11 +22,11 @@ Network make_lstm1(const Assoc &params) {
     int ninput = params.at("ninput");
     int nhidden = params.at("nhidden");
     int noutput = params.at("noutput");
-    string lstm_type = get(params, "lstm_type", "LSTM");
+    string lstm_type = get(params, "lstm_type", "NPLSTM");
     string output_type = get(params, "output_type", "SoftmaxLayer");
     return layer("Stacked", ninput, noutput, {}, {
-                     layer(lstm_type, ninput, nhidden, {}, {}),
-                     layer(output_type, nhidden, noutput, {}, {})
+                     layer(lstm_type, ninput, nhidden, params, {}),
+                     layer(output_type, nhidden, noutput, params, {})
                  });
 }
 
@@ -36,13 +36,13 @@ Network make_revlstm1(const Assoc &params) {
     int ninput = params.at("ninput");
     int nhidden = params.at("nhidden");
     int noutput = params.at("noutput");
-    string lstm_type = get(params, "lstm_type", "LSTM");
+    string lstm_type = get(params, "lstm_type", "NPLSTM");
     string output_type = get(params, "output_type", "SoftmaxLayer");
     return layer("Stacked", ninput, noutput, {}, {
                      layer("Reversed", ninput, nhidden, {}, {
-                               layer(lstm_type, ninput, nhidden, {}, {})
+                               layer(lstm_type, ninput, nhidden, params, {})
                            }),
-                     layer(output_type, nhidden, noutput, {}, {})
+                     layer(output_type, nhidden, noutput, params, {})
                  });
 }
 
@@ -52,16 +52,16 @@ Network make_bidi(const Assoc &params) {
     int ninput = params.at("ninput");
     int nhidden = params.at("nhidden");
     int noutput = params.at("noutput");
-    string lstm_type = get(params, "lstm_type", "LSTM");
+    string lstm_type = get(params, "lstm_type", "NPLSTM");
     string output_type = get(params, "output_type", "SoftmaxLayer");
     return layer("Stacked", ninput, noutput, {}, {
                      layer("Parallel", ninput, 2*nhidden, {}, {
-                               layer(lstm_type, ninput, nhidden, {}, {}),
+                               layer(lstm_type, ninput, nhidden, params, {}),
                                layer("Reversed", ninput, ninput, {}, {
-                                         layer(lstm_type, ninput, nhidden, {}, {})
+                                         layer(lstm_type, ninput, nhidden, params, {})
                                      }),
                            }),
-                     layer(output_type, 2*nhidden, noutput, {}, {})
+                     layer(output_type, 2*nhidden, noutput, params, {})
                  });
 }
 
@@ -72,22 +72,22 @@ Network make_bidi2(const Assoc &params) {
     int nhidden = params.at("nhidden");
     int nhidden2 = params.at("nhidden2");
     int noutput = params.at("noutput");
-    string lstm_type = get(params, "lstm_type", "LSTM");
+    string lstm_type = get(params, "lstm_type", "NPLSTM");
     string output_type = get(params, "output_type", "SoftmaxLayer");
     return layer("Stacked", ninput, noutput, {}, {
                      layer("Parallel", ninput, 2*nhidden, {}, {
-                               layer(lstm_type, ninput, nhidden, {}, {}),
+                               layer(lstm_type, ninput, nhidden, params, {}),
                                layer("Reversed", ninput, ninput, {}, {
-                                         layer(lstm_type, ninput, nhidden, {}, {})
+                                         layer(lstm_type, ninput, nhidden, params, {})
                                      }),
                            }),
                      layer("Parallel", 2*nhidden, 2*nhidden2, {}, {
-                               layer(lstm_type, 2*nhidden, nhidden2, {}, {}),
+                               layer(lstm_type, 2*nhidden, nhidden2, params, {}),
                                layer("Reversed", 2*nhidden, 2*nhidden, {}, {
-                                         layer(lstm_type, 2*nhidden, nhidden2, {}, {})
+                                         layer(lstm_type, 2*nhidden, nhidden2, params, {})
                                      }),
                            }),
-                     layer(output_type, 2*nhidden2, noutput, {}, {})
+                     layer(output_type, 2*nhidden2, noutput, params, {})
                  });
 }
 
