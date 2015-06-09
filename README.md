@@ -27,7 +27,7 @@ There are a bunch of options:
  - `display=1` build with display support for debugging (requires ZMQ, Python)
  - `prefix=...` install under a different prefix (untested)
  - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
- - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line programs
+ - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line programs (may need `hdf5_serial` in some environments)
 
 After building the executables, you can run two simple test runs as follows:
 
