@@ -65,10 +65,13 @@ struct PyServer {
     int mode = 0;  // -1=ignore, 0=uninit, 1=output
     zmqpp::context context;
     unique_ptr<zmqpp::socket> socket;
-    void open(const char *where="tcp://127.0.0.1:9876") {
+    void open(const char *where="default") {
         if (string(where) == "none") {
             mode = -1;
             return;
+        }
+        if (string(where) == "default") {
+            where = "tcp://127.0.0.1:9876";
         }
         socket.reset(new zmqpp::socket(context, zmqpp::socket_type::req));
         string addr = getenv("PYSERVER") ? getenv("PYSERVER") : where;

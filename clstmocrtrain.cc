@@ -111,12 +111,12 @@ int main(int argc, char **argv) {
     int save_every = getienv("save_every", 10000);
     string save_name = getsenv("save_name", "_ocr");
     int report_every = getienv("report_every", 100);
-    int display = getienv("display", 0);
+    int display_every = getienv("display_every", 0);
     int test_every = getienv("test_every", 10000);
     double test_error = 9999.0;
 
     PyServer py;
-    if (display) py.open();
+    if (display_every>0) py.open();
     for (int trial = 0; trial < maxtrain; trial++) {
         if (trial > 0 && test_fnames.size() > 0 && test_every > 0 && trial%test_every == 0) {
             double errors = 0.0;
@@ -147,14 +147,15 @@ int main(int argc, char **argv) {
         read_png(raw, fname.c_str(), true);
         for (int i = 0; i < raw.size(); i++) raw[i] = 1-raw[i];
         string pred = clstm.train_utf8(raw, gt);
+        if (trial%display_every == 0) {
+            py.evalf("clf");
+            show(py, clstm.net->inputs, 411);
+            show(py, clstm.net->outputs, 412);
+            show(py, clstm.targets, 413);
+            show(py, clstm.aligned, 414);
+        }
         if (trial%report_every == 0) {
             mdarray<float> temp;
-            if (display) {
-              show(py, clstm.net->inputs, 411);
-              show(py, clstm.net->outputs, 412);
-              show(py, clstm.targets, 413);
-              show(py, clstm.aligned, 414);
-            }
             print(trial);
             print("TRU", gt);
             print("ALN", clstm.aligned_utf8());
