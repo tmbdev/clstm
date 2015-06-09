@@ -102,7 +102,7 @@ void Vec_of_proto(Vec &a, const clstm::Array *array) {
 
 void proto_of_net(clstm::NetworkProto *proto, INetwork *net, bool weights=true) {
     net->preSave();
-    assert(net->kind() != "");
+    assert(string("") != net->kind());
     proto->set_kind(net->kind());
     proto->set_name(net->name);
     proto->set_ninput(net->ninput());

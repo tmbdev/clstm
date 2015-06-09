@@ -844,7 +844,6 @@ struct GenericNPLSTM : NetworkBase {
             gradient_clip(cierr, gradient_clipping);
         }
         for (int t = 0; t < N; t++) {
-            int bs = COLS(state[t]);
             DWGI += MATMUL_RT(gierr[t], source[t]);
             if (t > 0) DWGF += MATMUL_RT(gferr[t], source[t]);
             DWGO += MATMUL_RT(goerr[t], source[t]);
