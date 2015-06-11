@@ -101,7 +101,7 @@ struct PyServer {
         this->mode = mode;
     }
     string eval(string s) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         zmqpp::message message;
         message << s;
         socket->send(message);
@@ -118,7 +118,7 @@ struct PyServer {
     }
     template <class T, size_t n>
     string eval(string s, Tensor<T, n> &a) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         string cmd;
         zmqpp::message message;
         message << cmd + s;
@@ -131,7 +131,7 @@ struct PyServer {
     }
     template <class T, size_t n, class S, size_t m>
     string eval(string s, Tensor<T, n> &a, Tensor<S, m> &b) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         string cmd;
         zmqpp::message message;
         message << cmd + s;
@@ -159,13 +159,13 @@ struct PyServer {
     }
     void plot(Tensor<float, 1> &v, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        if (v.rank() != 1) throw "bad rank";
+        if (v.rank() != 1) THROW("bad rank");
         eval(stringf("plot(farg(1)%s)", extra.c_str()), v);
     }
     void plot2(Tensor<float, 1> &u, Tensor<float, 1> &v, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        if (u.rank() != 1) throw "bad rank";
-        if (v.rank() != 1) throw "bad rank";
+        if (u.rank() != 1) THROW("bad rank");
+        if (v.rank() != 1) THROW("bad rank");
         eval(stringf("plot(farg(1),farg(2)%s)", extra.c_str()), u, v);
     }
     void imshow(Tensor<float, 2> &a, string extra="") {

@@ -124,5 +124,4 @@ Network make_net_init(const string &kind, const string &params) {
     }
     return make_net(kind, args);
 }
-
 }

@@ -195,7 +195,7 @@ inline double getrenv(const char *name, double dflt=0, bool logscale=true) {
         report_params(name, lo);
         return lo;
     } else {
-        throw "bad format for getrenv";
+        THROW("bad format for getrenv");
     }
 }
 
@@ -211,7 +211,7 @@ inline double getuenv(const char *name, double dflt=0) {
         report_params(name, lo);
         return lo;
     } else {
-        throw "bad format for getuenv";
+        THROW("bad format for getuenv");
     }
 }
 

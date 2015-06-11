@@ -35,6 +35,7 @@ prefix = option('prefix', "/usr/local")
 
 env = Environment()
 env.Append(CPPDEFINES={"HGVERSION" : '\\"'+hgversion+'\\"'})
+env.Append(CPPDEFINES={'THROW' : 'throw'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
 # With omp=1 support, Eigen and other parts of the code may use multi-threading.

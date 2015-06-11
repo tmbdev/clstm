@@ -59,7 +59,7 @@ struct HDF5 {
         Matrix<float, Dynamic, Dynamic, RowMajor> temp;
         if (rank == 1) temp.resize(count[0], 1);
         else if (rank == 2) temp.resize(count[0], count[1]);
-        else throw "unsupported rank";
+        else THROW("unsupported rank");
         space.selectHyperslab(H5S_SELECT_SET, count, offset);
         DataSpace mem(rank, count);
         mem.selectHyperslab(H5S_SELECT_SET, count, offset);
@@ -77,7 +77,7 @@ struct HDF5 {
         else if (rank == 2) a.resize(count[0]*count[1]);
         else if (rank == 3) a.resize(count[0]*count[1]*count[2]);
         else if (rank == 4) a.resize(count[0]*count[1]*count[2]*count[3]);
-        else throw "unsupported rank";
+        else THROW("unsupported rank");
         space.selectHyperslab(H5S_SELECT_SET, count, offset);
         DataSpace mem(rank, count);
         mem.selectHyperslab(H5S_SELECT_SET, count, offset);
@@ -106,7 +106,7 @@ struct HDF5 {
         DataSpace space = dataset.getSpace();
         hsize_t dims[] = {0, 0, 0, 0};
         int rank = space.getSimpleExtentDims(dims);
-        if (rank != 1) throw "wrong rank";
+        if (rank != 1) THROW("wrong rank");
         hsize_t start0[] = {0, 0};
         hsize_t start[] = {hsize_t(index), 0};
         hsize_t count[] = {1, 0};

@@ -19,25 +19,25 @@ std::wstring utf8_to_utf32(std::string s) {
             w = c;
             i += 1;
         } else if ((c&0xe0) == 0xc0) {
-            if (i+1 >= s.size()) throw "bad encoding";
+            if (i+1 >= s.size()) THROW("bad encoding");
             unsigned c1 = unsigned(s[i+1]);
             w = (((c&0x1f)<<6) | (c1&0x3f));
             i += 2;
         } else if ((c&0xf0) == 0xe0) {
-            if (i+2 >= s.size()) throw "bad encoding";
+            if (i+2 >= s.size()) THROW("bad encoding");
             unsigned c1 = unsigned(s[i+1]);
             unsigned c2 = unsigned(s[i+2]);
             w = (((c&0x0f)<<12) | ((c1&0x3f)<<6) | (c2&0x3f));
             i += 3;
         } else if ((c&0xf8) == 0xf0) {
-            if (i+3 >= s.size()) throw "bad encoding";
+            if (i+3 >= s.size()) THROW("bad encoding");
             unsigned c1 = unsigned(s[i+1]);
             unsigned c2 = unsigned(s[i+2]);
             unsigned c3 = unsigned(s[i+3]);
             w = (((c&0x0f)<<18) | ((c1&0x3f)<<12) | ((c2&0x3f)<<6) | (c3&0x3f));
             i += 4;
         } else {
-            throw "unicode character out of range";
+            THROW("unicode character out of range");
         }
         assert(w != 0);
         result.push_back(wchar_t(w));
@@ -64,7 +64,7 @@ std::string utf32_to_utf8(std::wstring s) {
             result.push_back(char(((c>>6)&0x3f)|0x80));
             result.push_back(char((c&0x3f)|0x80));
         } else {
-            throw "unicode character out of range";
+            THROW("unicode character out of range");
         }
     }
     return result;

@@ -47,7 +47,7 @@ void read_samples(vector<Sample> &samples, const string &fname) {
         if (line.substr(0, 1) == "#") continue;
         if (line.size() == 0) continue;
         int where = line.find("\t");
-        if (where < 0) throw "no tab found in input line";
+        if (where < 0) THROW("no tab found in input line");
         in = utf8_to_utf32(line.substr(0, where));
         out = utf8_to_utf32(line.substr(where+1));
         if (in.size() == 0) continue;
@@ -66,9 +66,8 @@ void get_codec(vector<int> &codec, vector<Sample> &samples, wstring Sample::* p)
     for (int i = 1; i < codec.size(); i++) assert(codec[i] > codec[i-1]);
 }
 
-
 int main(int argc, char **argv) {
-    if (argc < 2 || argc > 3) throw "... training [testing]";
+    if (argc < 2 || argc > 3) THROW("... training [testing]");
     vector<Sample> samples, test_samples;
     read_samples(samples, argv[1]);
     if (argc > 2) read_samples(test_samples, argv[2]);
@@ -95,7 +94,7 @@ int main(int argc, char **argv) {
         if (trial > 0 && test_samples.size() > 0 && test_every > 0 && trial%test_every == 0) {
             double errors = 0.0;
             double count = 0.0;
-            for (int test=0; test < test_samples.size(); test++) {
+            for (int test = 0; test < test_samples.size(); test++) {
                 wstring gt = test_samples[test].out;
                 wstring pred = clstm.predict(test_samples[test].in);
                 count += gt.size();
