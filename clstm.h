@@ -24,6 +24,9 @@ using std::shared_ptr;
 using std::unique_ptr;
 using std::function;
 
+void throwf(const char *format, ...);
+extern char exception_message[256];
+
 #ifdef LSTM_DOUBLE
 typedef double Float;
 typedef Eigen::VectorXi iVec;
@@ -117,11 +120,20 @@ inline void zeroinit(Vec &m, int no) {
 }
 
 typedef vector<Mat> Sequence;
+
+inline void resize(Sequence &seq, int nsteps, int dims, int bs) {
+    seq.resize(nsteps);
+    for (int i=0; i<nsteps; i++) seq[i].resize(dims,bs);
+}
+inline int size(Sequence &seq, int dim) {
+    if (dim==0) return seq.size();
+    if (dim==1) return seq[0].rows();
+    if (dim==2) return seq[0].cols();
+    throw "bad dim ins size";
+}
+
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
-
-void throwf(const char *format, ...);
-extern char exception_message[256];
 
 inline Vec timeslice(const Sequence &s, int i, int b=0) {
     Vec result(s.size());
