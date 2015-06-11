@@ -87,7 +87,7 @@ struct PyServer {
         this->mode = mode;
     }
     string eval(string s) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         zmqpp::message message;
         message << s;
         socket->send(message);
@@ -97,7 +97,7 @@ struct PyServer {
         return result;
     }
     string eval(string s, const float *a, int na) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         string cmd;
         zmqpp::message message;
         message << cmd + s;
@@ -109,7 +109,7 @@ struct PyServer {
         return response;
     }
     string eval(string s, const float *a, int na, const float *b, int nb) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         string cmd;
         zmqpp::message message;
         message << cmd + s;
@@ -137,25 +137,25 @@ struct PyServer {
     }
     void plot(mdarray<float> &v, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        if (v.rank() != 1) throw "bad rank";
+        if (v.rank() != 1) THROW("bad rank");
         eval(stringf("plot(farg(1)%s)", extra.c_str()), v.data, v.size());
     }
     void plot2(mdarray<float> &u, mdarray<float> &v, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        if (u.rank() != 1) throw "bad rank";
-        if (v.rank() != 1) throw "bad rank";
+        if (u.rank() != 1) THROW("bad rank");
+        if (v.rank() != 1) THROW("bad rank");
         eval(stringf("plot(farg(1),farg(2)%s)", extra.c_str()),
              u.data, u.size(), v.data, v.size());
     }
     void imshow(mdarray<float> &a, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        if (a.rank() != 2) throw "bad rank";
+        if (a.rank() != 2) THROW("bad rank");
         eval(stringf("imshow(farg2(1,%d,%d)%s)", a.dim(0), a.dim(1), extra.c_str()),
              a.data, a.dim(0)*a.dim(1));
     }
     void imshowT(mdarray<float> &a, string extra="") {
         if (extra != "") extra = string(",")+extra;
-        if (a.rank() != 2) throw "bad rank";
+        if (a.rank() != 2) THROW("bad rank");
         eval(stringf("imshow(farg2(1,%d,%d).T%s)", a.dim(0), a.dim(1), extra.c_str()),
              a.data, a.dim(0)*a.dim(1));
     }

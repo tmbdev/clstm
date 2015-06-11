@@ -37,15 +37,15 @@ using std::regex_replace;
 #define wstring std_wstring
 
 string basename(string s) {
-  int start = 0;
-  for (;;) {
-    auto pos = s.find("/", start);
-    if (pos==string::npos) break;
-    start = pos+1;
-  }
-  auto pos = s.find(".", start);
-  if (pos==string::npos) return s;
-  else return s.substr(0,pos);
+    int start = 0;
+    for (;; ) {
+        auto pos = s.find("/", start);
+        if (pos == string::npos) break;
+        start = pos+1;
+    }
+    auto pos = s.find(".", start);
+    if (pos == string::npos) return s;
+    else return s.substr(0, pos);
 }
 
 string read_text(string fname, int maxsize=65536) {
@@ -53,14 +53,14 @@ string read_text(string fname, int maxsize=65536) {
     buf[maxsize-1] = 0;
     ifstream stream(fname);
     int n = stream.readsome(buf, maxsize-1);
-    while (n>0 && buf[n-1]=='\n') n--;
+    while (n > 0 && buf[n-1] == '\n') n--;
     return string(buf, n);
 }
 
-void get_codec(vector<int> &codec,const vector<string> &fnames) {
+void get_codec(vector<int> &codec, const vector<string> &fnames) {
     set<int> codes;
     codes.insert(0);
-    for (int i=0; i<fnames.size(); i++) {
+    for (int i = 0; i < fnames.size(); i++) {
         string fname = fnames[i];
         string base = basename(fname);
         string text = read_text(base+".gt.txt");
@@ -80,19 +80,19 @@ void show(PyServer &py, Sequence &s, int subplot=0) {
     py.imshowT(temp, "cmap=cm.hot");
 }
 
-void read_lines(vector<string> &lines,string fname) {
+void read_lines(vector<string> &lines, string fname) {
     ifstream stream(fname);
     string line;
     lines.clear();
     while (getline(stream, line)) {
-      lines.push_back(line);
+        lines.push_back(line);
     }
 }
 
 int main(int argc, char **argv) {
     srandomize();
 
-    if (argc < 2 || argc > 3) throw "... training [testing]";
+    if (argc < 2 || argc > 3) THROW("... training [testing]");
     vector<string> fnames, test_fnames;
     read_lines(fnames, argv[1]);
     if (argc > 2) read_lines(test_fnames, argv[2]);
@@ -116,12 +116,12 @@ int main(int argc, char **argv) {
     double test_error = 9999.0;
 
     PyServer py;
-    if (display_every>0) py.open();
+    if (display_every > 0) py.open();
     for (int trial = 0; trial < maxtrain; trial++) {
         if (trial > 0 && test_fnames.size() > 0 && test_every > 0 && trial%test_every == 0) {
             double errors = 0.0;
             double count = 0.0;
-            for (int test=0; test < test_fnames.size(); test++) {
+            for (int test = 0; test < test_fnames.size(); test++) {
                 string fname = test_fnames[test];
                 string base = basename(fname);
                 string gt = read_text(base+".gt.txt");

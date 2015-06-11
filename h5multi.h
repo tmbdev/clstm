@@ -114,7 +114,7 @@ struct HDF5 {
         DataSpace space = dataset.getSpace();
         hsize_t dims[] = {0, 0, 0, 0};
         int rank = space.getSimpleExtentDims(dims);
-        if (rank != 1) throw "wrong rank";
+        if (rank != 1) THROW("wrong rank");
         hsize_t start0[] = {0, 0};
         hsize_t start[] = {hsize_t(index), 0};
         hsize_t count[] = {1, 0};

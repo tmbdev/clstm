@@ -36,7 +36,7 @@ struct IOcrDataset {
     virtual void image(mdarray<float> &a, int index) = 0;
     virtual void transcript(mdarray<int> &a, int index) = 0;
     virtual void seq(mdarray<float> &a, int index, string name) {
-        throw "unimplemented";
+        THROW("unimplemented");
     }
     virtual string to_string(mdarray<int> &transcript) = 0;
     virtual string to_string(vector<int> &transcript) = 0;
@@ -50,7 +50,6 @@ IOcrDataset *make_HDF5Dataset(const string &fname, bool varsize=false);
 IOcrDataset *make_NormalizedDataset(shared_ptr<IOcrDataset> &dataset,
                                     shared_ptr<INormalizer> &normalizer);
 IOcrDataset *make_Dataset(const string &fname);
-
 
 struct HDF5Dataset : IOcrDataset {
     string iname = "images";
@@ -227,7 +226,7 @@ int main_ocr(int argc, char **argv) {
 
     int save_every = getienv("save_every", 0);
     string save_name = getsenv("save_name", "");
-    if (save_every >= 0 && save_name == "") throw "must give save_name=";
+    if (save_every >= 0 && save_name == "") THROW("must give save_name=");
     if (save_every > 0 && save_name.find('%') == string::npos)
         save_name += "-%08d";
     else
@@ -432,7 +431,7 @@ int main_eval(int argc, char **argv) {
     string load_name = getsenv("load", "");
     shared_ptr<IOcrDataset> dataset(make_Dataset(h5file));
     Network net;
-    if (load_name == "") throw "must give load=";
+    if (load_name == "") THROW("must give load=");
     net = load_net(load_name);
 
     mdarray<float> image;
@@ -498,7 +497,7 @@ int main_proto(int argc, char **argv) {
 
 int main_testdewarp(int argc, char **argv) {
     srandomize();
-    if (argc != 2) throw "usage: ... image.png";
+    if (argc != 2) THROW("usage: ... image.png");
     mdarray<unsigned char> raw;
     mdarray<float> image, dewarped;
     read_png(raw, argv[1]);

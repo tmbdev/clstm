@@ -20,27 +20,27 @@ void throwf(const char *format, ...) {
     va_start(arglist, format);
     vsprintf(exception_message, format, arglist);
     va_end(arglist);
-    throw exception_message;
+    THROW(exception_message);
 }
 
 Assoc::Assoc(const string &s) {
     int start = 0;
-    for(;;) {
-        int pos = s.find(":",start);
+    for (;; ) {
+        int pos = s.find(":", start);
         string kvp;
-        if (pos==string::npos) {
+        if (pos == string::npos) {
             kvp = s.substr(start);
             start = s.size();
         } else {
-            kvp = s.substr(start,pos-start);
+            kvp = s.substr(start, pos-start);
             start = pos+1;
         }
         int q = kvp.find("=");
-        if (q==string::npos) throw "no '=' in Assoc";
-        string key = kvp.substr(0,q);
+        if (q == string::npos) THROW("no '=' in Assoc");
+        string key = kvp.substr(0, q);
         string value = kvp.substr(q+1);
         (*this)[key] = value;
-        if (start>=s.size()) break;
+        if (start >= s.size()) break;
     }
 }
 
@@ -376,14 +376,14 @@ struct Full : NetworkBase {
         }
         nseq += 1;
         nsteps += d_outputs.size();
-        d_outputs[0](0, 0) = NAN;       // invalidate it, since we have changed it
+        d_outputs[0](0, 0) = NAN;  // invalidate it, since we have changed it
     }
     void update() {
         float lr = learning_rate;
         if (normalization == NORM_BATCH) lr /= nseq;
         else if (normalization == NORM_LEN) lr /= nsteps;
         else if (normalization == NORM_NONE) /* do nothing */;
-        else throw "unknown normalization";
+        else THROW("unknown normalization");
         W += lr * d_W;
         w += lr * d_w;
         nsteps = 0;
@@ -480,7 +480,7 @@ struct SoftmaxLayer : NetworkBase {
     void initialize() {
         int no = irequire("noutput");
         int ni = irequire("ninput");
-        if (no < 2) throw "Softmax requires no>=2";
+        if (no < 2) THROW("Softmax requires no>=2");
         randinit(W, no, ni, 0.01);
         randinit(w, no, 0.01);
         clearUpdates();
@@ -525,7 +525,7 @@ struct SoftmaxLayer : NetworkBase {
         if (normalization == NORM_BATCH) lr /= nseq;
         else if (normalization == NORM_LEN) lr /= nsteps;
         else if (normalization == NORM_NONE) /* do nothing */;
-        else throw "unknown normalization";
+        else THROW("unknown normalization");
         W += lr * d_W;
         w += lr * d_w;
         nsteps = 0;
@@ -727,9 +727,9 @@ void each(F f, T &a, Args&&... args) {
 }
 }
 
-template <class F=SigmoidNonlin, class G=TanhNonlin, class H=TanhNonlin>
+template <class F = SigmoidNonlin, class G = TanhNonlin, class H = TanhNonlin>
 struct GenericNPLSTM : NetworkBase {
-#define SEQUENCES gix, gfx, gox, cix, gi, gf, go, ci, state
+#define SEQUENCES gi, gf, go, ci, state
 #define DSEQUENCES gierr, gferr, goerr, cierr, stateerr, outerr
 #define WEIGHTS WGI, WGF, WGO, WCI
 #define DWEIGHTS DWGI, DWGF, DWGO, DWCI
@@ -769,8 +769,8 @@ struct GenericNPLSTM : NetworkBase {
         this->no = no;
         this->nf = nf;
         each([weight_dev, mode, no, nf](Mat &w) {
-            randinit(w, no, nf, weight_dev, mode);
-        }, WEIGHTS);
+                 randinit(w, no, nf, weight_dev, mode);
+             }, WEIGHTS);
 #if 0
         float gf_mean = dattr("gf_mean", 0.0);
         float gf_dev = dattr("gf_dev", 0.01);
@@ -790,7 +790,7 @@ struct GenericNPLSTM : NetworkBase {
                  for (int t = 0; t < N; t++) s[t].setConstant(NAN);
              }, source, sourceerr, outputs, SEQUENCES, DSEQUENCES);
         assert(source.size() == N);
-        assert(gix.size() == N);
+        assert(gi.size() == N);
         assert(goerr.size() == N);
     }
 #define A array()
@@ -804,16 +804,12 @@ struct GenericNPLSTM : NetworkBase {
             BLOCK(source[t], 1, 0, ni, bs) = inputs[t];
             if (t == 0) BLOCK(source[t], 1+ni, 0, no, bs).setConstant(0);
             else BLOCK(source[t], 1+ni, 0, no, bs) = outputs[t-1];
-            gix[t] = MATMUL(WGI, source[t]);
-            gfx[t] = MATMUL(WGF, source[t]);
-            gox[t] = MATMUL(WGO, source[t]);
-            cix[t] = MATMUL(WCI, source[t]);
-            gi[t] = nonlin<F>(gix[t]);
-            gf[t] = nonlin<F>(gfx[t]);
-            ci[t] = nonlin<G>(cix[t]);
+            gi[t] = nonlin<F>(MATMUL(WGI, source[t]));
+            gf[t] = nonlin<F>(MATMUL(WGF, source[t]));
+            go[t] = nonlin<F>(MATMUL(WGO, source[t]));
+            ci[t] = nonlin<G>(MATMUL(WCI, source[t]));
             state[t] = ci[t].A * gi[t].A;
             if (t > 0) state[t] += EMUL(gf[t], state[t-1]);
-            go[t] = nonlin<F>(gox[t]);
             outputs[t] = nonlin<H>(state[t]).A * go[t].A;
         }
     }
@@ -825,7 +821,7 @@ struct GenericNPLSTM : NetworkBase {
             outerr[t] = d_outputs[t];
             if (t < N-1) outerr[t] += BLOCK(sourceerr[t+1], 1+ni, 0, no, bs);
             goerr[t] = EMUL(EMUL(yprime<F>(go[t]), nonlin<H>(state[t])), outerr[t]);
-            stateerr[t] = EMUL(EMUL(xprime<H>(state[t]),  go[t].A), outerr[t]);
+            stateerr[t] = EMUL(EMUL(xprime<H>(state[t]), go[t].A), outerr[t]);
             if (t < N-1) stateerr[t] += EMUL(stateerr[t+1], gf[t+1]);
             if (t > 0) gferr[t] = EMUL(EMUL(yprime<F>(gf[t]), stateerr[t]), state[t-1]);
             gierr[t] = EMUL(EMUL(yprime<F>(gi[t]), stateerr[t]), ci[t]);
@@ -866,7 +862,7 @@ struct GenericNPLSTM : NetworkBase {
         if (normalization == NORM_BATCH) lr /= nseq;
         else if (normalization == NORM_LEN) lr /= nsteps;
         else if (normalization == NORM_NONE) /* do nothing */;
-        else throw "unknown normalization";
+        else THROW("unknown normalization");
         WGI += lr * DWGI;
         WGF += lr * DWGF;
         WGO += lr * DWGO;
@@ -1088,10 +1084,10 @@ void ctc_train(INetwork *net, Sequence &xs, Sequence &targets) {
     assert(!anynan(xs));
     net->inputs = xs;
     net->forward();
-    if (anynan(net->outputs)) throw "got NaN";
+    if (anynan(net->outputs)) THROW("got NaN");
     Sequence aligned;
     ctc_align_targets(aligned, net->outputs, targets);
-    if (anynan(aligned)) throw "got NaN";
+    if (anynan(aligned)) THROW("got NaN");
     set_targets(net, aligned);
     net->backward();
 }
@@ -1104,9 +1100,8 @@ void ctc_train(INetwork *net, Sequence &xs, Classes &targets) {
 }
 
 void ctc_train(INetwork *net, Sequence &xs, BatchClasses &targets) {
-    throw "unimplemented";
+    THROW("unimplemented");
 }
-
 }  // namespace ocropus
 
 #ifdef CLSTM_EXTRAS
