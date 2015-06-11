@@ -129,7 +129,7 @@ inline int size(Sequence &seq, int dim) {
     if (dim==0) return seq.size();
     if (dim==1) return seq[0].rows();
     if (dim==2) return seq[0].cols();
-    throw "bad dim ins size";
+    THROW("bad dim ins size");
 }
 
 typedef vector<int> Classes;

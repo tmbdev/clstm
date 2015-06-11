@@ -375,7 +375,7 @@ void set_classes(INetwork *net, mdarray<int> &targets) {
 typedef mdarray<unsigned char> bytearray;
 typedef mdarray<int> intarray;
 
-#define ERROR(X) throw X
+#define ERROR(X) THROW(X)
 #define CHECK_CONDITION(X) do {if (!(X)) THROW("CHECK: " # X); } while (0)
 #define CHECK_ARG(X) do {if (!(X)) THROW("CHECK_ARG: " # X); } while (0)
 
