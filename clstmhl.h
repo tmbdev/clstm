@@ -25,7 +25,7 @@ struct CLSTMText {
         net = load_net(fname);
         nclasses = net->codec.size();
         iclasses = net->icodec.size();
-        if (net->attributes["neps"]=="") {
+        if (net->attributes["neps"] == "") {
             cerr << "WARNING: no neps";
         } else {
             neps = stoi(net->attributes["neps"]);

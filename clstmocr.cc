@@ -34,11 +34,11 @@ using std_wstring = std::wstring;
 #define wstring std_wstring
 
 int main(int argc, char **argv) {
-    if (argc != 2) throw "give text file as an argument";
+    if (argc != 2) THROW("give text file as an argument");
     const char *fname = argv[1];
 
     string load_name = getsenv("load", "");
-    if (load_name == "") throw "must give load= parameter";
+    if (load_name == "") THROW("must give load= parameter");
     CLSTMOCR clstm;
     clstm.load(load_name);
 

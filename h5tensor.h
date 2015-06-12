@@ -76,7 +76,7 @@ void get(TensorRM<T, n> &a, const string &name) {
     hsize_t offset[] = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t count[] = {0, 0, 0, 0, 0, 0, 0, 0};
     int rank = space.getSimpleExtentDims(count);
-    if (rank != a.rank()) throw "wrong rank";
+    if (rank != a.rank()) THROW("wrong rank");
     resize(a, (hsize_t*)count);
     space.selectHyperslab(H5S_SELECT_SET, count, offset);
     DataSpace mem(rank, count);
@@ -124,7 +124,7 @@ struct HDF5 {
         hsize_t offset[] = {0, 0, 0, 0, 0, 0, 0, 0};
         hsize_t count[] = {0, 0, 0, 0, 0, 0, 0, 0};
         int rank = space.getSimpleExtentDims(count);
-        if (rank != a.rank()) throw "wrong rank";
+        if (rank != a.rank()) THROW("wrong rank");
         resize(a, (hsize_t*)count);
         space.selectHyperslab(H5S_SELECT_SET, count, offset);
         DataSpace mem(rank, count);
@@ -138,7 +138,7 @@ struct HDF5 {
         hsize_t start0[] = {0, 0, 0, 0, 0, 0, 0, 0};
         hsize_t dims[] = {0, 0, 0, 0, 0, 0, 0, 0};
         int rank = fspace.getSimpleExtentDims(dims);
-        if (rank != a.rank()+1) throw "wrong rank";
+        if (rank != a.rank()+1) THROW("wrong rank");
         resize(a, dims+1);
         hsize_t count[8];
         for (int i = 0; i < 8; i++) count[i] = dims[i];
@@ -164,7 +164,7 @@ struct HDF5 {
         DataSpace space = dataset.getSpace();
         hsize_t dims[] = {0, 0, 0, 0};
         int rank = space.getSimpleExtentDims(dims);
-        if (rank != 1) throw "wrong rank";
+        if (rank != 1) THROW("wrong rank");
         hsize_t start0[] = {0, 0};
         hsize_t start[] = {hsize_t(index), 0};
         hsize_t count[] = {1, 0};
@@ -178,7 +178,7 @@ struct HDF5 {
         dataset.read(vl, dtype, mspace, fspace);
         T *data = (T*)vl[0].p;
         int N = vl[0].len;
-        if (N > n) throw "row too large";
+        if (N > n) THROW("row too large");
         for (int i = 0; i < N; i++) dest[i] = data[i];
         dataset.vlenReclaim(dtype, mspace, DSetMemXferPropList::DEFAULT, vl);
         return N;
@@ -189,7 +189,7 @@ struct HDF5 {
         DataSpace space = dataset.getSpace();
         hsize_t dims[] = {0, 0, 0, 0};
         int rank = space.getSimpleExtentDims(dims);
-        if (rank != 1) throw "wrong rank";
+        if (rank != 1) THROW("wrong rank");
         hsize_t start0[] = {0, 0};
         hsize_t start[] = {hsize_t(index), 0};
         hsize_t count[] = {1, 0};
@@ -223,7 +223,7 @@ struct HDF5 {
             sname += "_dims";
             TensorRM<int, 1> ndims;
             getrow(ndims, index, sname.c_str());
-            if (ndims.size() != a.rank()) throw "wrong rank (getdrow)";
+            if (ndims.size() != a.rank()) THROW("wrong rank (getdrow)");
             hsize_t dims[8];
             for (int i = 0; i < ndims.size(); i++) dims[i] = ndims[i];
             resize(a, dims);
@@ -231,7 +231,7 @@ struct HDF5 {
             for (int i = 0; i < ndims.size(); i++) total *= ndims[i];
             // variable-shape row; take shape from _dims array
             int got = getvlrow(a.data(), total, index, name);
-            if (got != total) throw "got wrong # elements";
+            if (got != total) THROW("got wrong # elements");
         } else {
             // fixed-shape row; take shape from array shape
             getrow(a, index, name);

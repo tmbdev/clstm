@@ -46,7 +46,7 @@ void read_samples(vector<Sample> &samples, const string &fname) {
         if (line.substr(0, 2) == "# ") continue;
         if (line.size() == 0) continue;
         int where = line.find("\t");
-        if (where < 0) throw "no tab found in input line";
+        if (where < 0) THROW("no tab found in input line");
         in = utf8_to_utf32(line.substr(0, where));
         out = utf8_to_utf32(line.substr(where+1));
         if (in.size() == 0) continue;
@@ -78,13 +78,13 @@ void read_samples2(vector<Sample> &samples, const string &fname, const string &f
             if (line.substr(0, 2) == "# ") continue;
             if (line.size() == 0) continue;
             if (n >= samples.size())
-                throw "too many lines in output file";
+                THROW("too many lines in output file");
             wstring out = utf8_to_utf32(line);
             samples[n].out = out;
             n++;
         }
         if (n < samples.size())
-            throw "too few lines in output file";
+            THROW("too few lines in output file");
     }
 }
 
@@ -151,7 +151,7 @@ int main_train(int argc, char **argv) {
     } else if (argc == 3) {
         read_samples2(samples, argv[1], argv[2]);
     } else {
-        throw "args: training.txt [output.txt]";
+        THROW("args: training.txt [output.txt]");
     }
     print("got", samples.size(), "lines");
     int nsamples = samples.size();
@@ -159,7 +159,7 @@ int main_train(int argc, char **argv) {
     string load_name = getsenv("load", "");
     int save_every = getienv("save_every", 0);
     string save_name = getsenv("save_name", "");
-    if (save_every >= 0 && save_name == "") throw "must give save_name=";
+    if (save_every >= 0 && save_name == "") THROW("must give save_name=");
     if (save_every > 0 && save_name.find('%') == string::npos)
         save_name += "-%08d.h5";
     else
@@ -351,12 +351,12 @@ int main_train(int argc, char **argv) {
 }
 
 int main_filter(int argc, char **argv) {
-    if (argc != 2) throw "give text file as an argument";
+    if (argc != 2) THROW("give text file as an argument");
     int display_every = getienv("display_every", -1);
     double display_delay = getdenv("display_delay", 1e-3);
     const char *fname = argv[1];
     string load_name = getsenv("load", "");
-    if (load_name == "") throw "must give load= parameter";
+    if (load_name == "") THROW("must give load= parameter");
     Network net;
     net = load_net(load_name);
     int neps = stoi(net->attributes["neps"]);

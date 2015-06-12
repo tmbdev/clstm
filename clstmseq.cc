@@ -81,7 +81,7 @@ inline void getslice(mdarray<float> &a, mdarray<float> &seq, int i, int b=0) {
         for (int t = 0; t < seq.size(); t++)
             a(t) = seq(t, i, b);
     } else {
-        throw "bad rank";
+        THROW("bad rank");
     }
 }
 

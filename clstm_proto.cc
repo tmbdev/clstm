@@ -25,7 +25,7 @@ inline void throwf(const char *format, ...) {
     va_start(arglist, format);
     vsprintf(buf, format, arglist);
     va_end(arglist);
-    throw buf;
+    THROW(buf);
 }
 
 inline void print() {
@@ -80,7 +80,7 @@ void Mat_of_proto(Mat &a, const clstm::Array *array) {
     a.resize(array->dim(0), array->dim(1));
     a.setZero();
     if (array->value_size() > 0) {
-        if (array->value_size() != a.size()) throw "bad size (Mat)";
+        if (array->value_size() != a.size()) THROW("bad size (Mat)");
         int k = 0;
         for (int i = 0; i < a.rows(); i++)
             for (int j = 0; j < a.cols(); j++)
@@ -89,11 +89,11 @@ void Mat_of_proto(Mat &a, const clstm::Array *array) {
 }
 
 void Vec_of_proto(Vec &a, const clstm::Array *array) {
-    if (array->dim_size() != 1) throw "bad format (Vec)";
+    if (array->dim_size() != 1) THROW("bad format (Vec)");
     a.resize(array->dim(0));
     a.setZero();
     if (array->value_size() > 0) {
-        if (array->value_size() != a.size()) throw "bad size (Vec)";
+        if (array->value_size() != a.size()) THROW("bad size (Vec)");
         int k = 0;
         for (int i = 0; i < a.size(); i++)
             a(i) = array->value(k++);
@@ -102,7 +102,7 @@ void Vec_of_proto(Vec &a, const clstm::Array *array) {
 
 void proto_of_net(clstm::NetworkProto *proto, INetwork *net, bool weights=true) {
     net->preSave();
-    assert(net->kind() != "");
+    assert(string("") != net->kind());
     proto->set_kind(net->kind());
     proto->set_name(net->name);
     proto->set_ninput(net->ninput());
@@ -131,7 +131,7 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net, bool weights=true) 
             array->set_name(prefix);
             if (a.mat) proto_of_Mat(array, *a.mat, weights);
             else if (a.vec) proto_of_Vec(array, *a.vec, weights);
-            else throw "oops (save type)";
+            else THROW("oops (save type)");
         });
     for (int i = 0; i < net->sub.size(); i++) {
         clstm::NetworkProto *subproto = proto->add_sub();

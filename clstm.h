@@ -24,6 +24,9 @@ using std::shared_ptr;
 using std::unique_ptr;
 using std::function;
 
+void throwf(const char *format, ...);
+extern char exception_message[256];
+
 #ifdef LSTM_DOUBLE
 typedef double Float;
 typedef Eigen::VectorXi iVec;
@@ -40,12 +43,12 @@ typedef Eigen::MatrixXf Mat;
 // in CLSTM. They are here for eventually converting the
 // inner loops of CLSTM from Eigen::Matrix to Eigen::Tensor
 // (which uses different and incompatible notation)
-#define DOT(M,V) ((M) * (V))
-#define MATMUL(A,B) ((A) * (B))
+#define DOT(M, V) ((M) *(V))
+#define MATMUL(A, B) ((A) *(B))
 #define MATMUL_TR(A, B) ((A).transpose() * (B))
-#define MATMUL_RT(A, B) ((A) * (B).transpose())
-#define EMUL(U,V) ((U).array() * (V).array()).matrix()
-#define EMULV(U,V) ((U).array() * (V).array()).matrix()
+#define MATMUL_RT(A, B) ((A) *(B).transpose())
+#define EMUL(U, V) ((U).array() * (V).array()).matrix()
+#define EMULV(U, V) ((U).array() * (V).array()).matrix()
 #define TRANPOSE(U) ((U).transpose())
 #define ROWS(A) (A).rows()
 #define COLS(A) (A).cols()
@@ -56,54 +59,54 @@ typedef Eigen::MatrixXf Mat;
 #define BLOCK(A, i, j, n, m) (A).block(i, j, n, m)
 
 inline void ADDCOLS(Mat &m, Vec &v) {
-    for(int i=0; i<COLS(m); i++)
-        for(int j=0; j<ROWS(m); j++)
-            m(i,j) += v(j);
+    for (int i = 0; i < COLS(m); i++)
+        for (int j = 0; j < ROWS(m); j++)
+            m(i, j) += v(j);
 }
 inline void randgauss(Mat &m) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::normal_distribution<double> randn;
-    for (int i=0; i<ROWS(m); i++)
-        for (int j=0; j<COLS(m); j++)
-            m(i,j) = randn(gen);
+    for (int i = 0; i < ROWS(m); i++)
+        for (int j = 0; j < COLS(m); j++)
+            m(i, j) = randn(gen);
 }
 inline void randgauss(Vec &v) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::normal_distribution<double> randn;
-    for (int i=0; i<ROWS(v); i++)
+    for (int i = 0; i < ROWS(v); i++)
         v(i) = randn(gen);
 }
-inline void randinit(Mat &m, float s, const string mode = "unif") {
-    if (mode=="unif") {
+inline void randinit(Mat &m, float s, const string mode="unif") {
+    if (mode == "unif") {
         m.setRandom();
         m = (2*s*m).array()-s;
-    } else if (mode=="pos") {
+    } else if (mode == "pos") {
         m.setRandom();
         m = m*s;
-    } else if (mode=="normal") {
+    } else if (mode == "normal") {
         randgauss(m);
         m = m*s;
     }
 }
-inline void randinit(Vec &m, float s, const string mode = "unif") {
-    if (mode=="unif") {
+inline void randinit(Vec &m, float s, const string mode="unif") {
+    if (mode == "unif") {
         m.setRandom();
         m = (2*s*m).array()-s;
-    } else if (mode=="pos") {
+    } else if (mode == "pos") {
         m.setRandom();
         m = m*s;
-    } else if (mode=="normal") {
+    } else if (mode == "normal") {
         randgauss(m);
         m = m*s;
     }
 }
-inline void randinit(Mat &m, int no, int ni, float s, const string mode = "unif") {
+inline void randinit(Mat &m, int no, int ni, float s, const string mode="unif") {
     m.resize(no, ni);
     randinit(m, s, mode);
 }
-inline void randinit(Vec &m, int no, float s, const string mode = "unif") {
+inline void randinit(Vec &m, int no, float s, const string mode="unif") {
     m.resize(no);
     randinit(m, s, mode);
 }
@@ -117,11 +120,20 @@ inline void zeroinit(Vec &m, int no) {
 }
 
 typedef vector<Mat> Sequence;
+
+inline void resize(Sequence &seq, int nsteps, int dims, int bs) {
+    seq.resize(nsteps);
+    for (int i=0; i<nsteps; i++) seq[i].resize(dims,bs);
+}
+inline int size(Sequence &seq, int dim) {
+    if (dim==0) return seq.size();
+    if (dim==1) return seq[0].rows();
+    if (dim==2) return seq[0].cols();
+    THROW("bad dim ins size");
+}
+
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
-
-void throwf(const char *format, ...);
-extern char exception_message[256];
 
 inline Vec timeslice(const Sequence &s, int i, int b=0) {
     Vec result(s.size());
@@ -179,7 +191,7 @@ struct ITrainable {
         auto it = attributes.find(key);
         if (it == attributes.end()) {
             sprintf(exception_message, "missing parameter: %s", key.c_str());
-            throw exception_message;
+            THROW(exception_message);
         }
         return std::stoi(it->second);
     }
@@ -324,7 +336,7 @@ struct INetwork : virtual ITrainable {
     // special method for LSTM and similar networks, returning the
     // primary internal state sequence
     Sequence *getState() {
-        throw "unimplemented";
+        THROW("unimplemented");
     };
     void save(const char *fname);
     void load(const char *fname);
@@ -368,7 +380,8 @@ extern map<string, ILayerFactory> layer_factories;
 Network make_layer(const string &kind);
 
 struct String : public std::string {
-    String() {}
+    String() {
+    }
     String(const char *s) : std::string(s) {
     }
     String(const std::string &s) : std::string(s) {
@@ -437,7 +450,6 @@ extern Mat debugmat;
 
 // loading and saving networks (using HDF5)
 void load_attributes(map<string, string> &attrs, const string &file);
-
 }
 
 namespace {

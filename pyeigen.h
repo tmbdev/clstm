@@ -44,7 +44,7 @@ struct PyServer {
         this->mode = mode;
     }
     string eval(string s) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         zmqpp::message message;
         message << s;
         socket->send(message);
@@ -54,7 +54,7 @@ struct PyServer {
         return result;
     }
     string eval(string s, const float *a, int na) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         string cmd;
         zmqpp::message message;
         message << cmd + s;
@@ -66,7 +66,7 @@ struct PyServer {
         return response;
     }
     string eval(string s, const float *a, int na, const float *b, int nb) {
-        if (mode < 0) return ""; else if (mode < 1) throw "uninitialized";
+        if (mode < 0) return ""; else if (mode < 1) THROW("uninitialized");
         string cmd;
         zmqpp::message message;
         message << cmd + s;

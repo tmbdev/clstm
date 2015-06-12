@@ -295,7 +295,7 @@ struct CenterNormalizer : INormalizer {
     }
     void normalize(mdarray<float> &out, mdarray<float> &in) {
         int w = in.dim(0);
-        if (w != center.dim(0)) throw "measure doesn't match normalize";
+        if (w != center.dim(0)) THROW("measure doesn't match normalize");
         float scale = (2.0 * r) / target_height;
         int target_width = max(int(w/scale), 1);
         out.resize(target_width, target_height);
@@ -325,7 +325,7 @@ INormalizer *make_Normalizer(const string &name) {
     if (name == "none") return make_NoNormalizer();
     if (name == "mean") return make_MeanNormalizer();
     if (name == "center") return make_CenterNormalizer();
-    throw "unknown normalizer name";
+    THROW("unknown normalizer name");
 }
 
 // Setting inputs/outputs using mdarray
@@ -347,7 +347,7 @@ inline void assign(Sequence &seq, mdarray<float> &a) {
                     seq[t](i, j) = a(t, i, j);
         }
     } else {
-        throw "bad rank";
+        THROW("bad rank");
     }
 }
 
@@ -360,10 +360,10 @@ void set_targets(INetwork *net, mdarray<float> &targets) {
         net->d_outputs[t] -= net->outputs[t];
 }
 void set_targets_accelerated(INetwork *net, mdarray<float> &targets) {
-    throw "unimplemented";
+    THROW("unimplemented");
 }
 void set_classes(INetwork *net, mdarray<int> &targets) {
-    throw "unimplemented";
+    THROW("unimplemented");
 }
 
 // PNG I/O (taken from iulib)
@@ -375,9 +375,9 @@ void set_classes(INetwork *net, mdarray<int> &targets) {
 typedef mdarray<unsigned char> bytearray;
 typedef mdarray<int> intarray;
 
-#define ERROR(X) throw X
-#define CHECK_CONDITION(X) do {if (!(X)) throw "CHECK: " # X; } while (0)
-#define CHECK_ARG(X) do {if (!(X)) throw "CHECK_ARG: " # X; } while (0)
+#define ERROR(X) THROW(X)
+#define CHECK_CONDITION(X) do {if (!(X)) THROW("CHECK: " # X); } while (0)
+#define CHECK_ARG(X) do {if (!(X)) THROW("CHECK_ARG: " # X); } while (0)
 
 bool png_flip = false;
 
@@ -606,13 +606,13 @@ void write_png(FILE *fp, bytearray &image) {
 
 void read_png(bytearray &image, const char *name, bool gray) {
     FILE *stream = fopen(name, "r");
-    if (!stream) throw "error on open";
+    if (!stream) THROW("error on open");
     read_png(image, stream, gray);
     fclose(stream);
 }
 void write_png(const char *name, bytearray &image) {
     FILE *stream = fopen(name, "w");
-    if (!stream) throw "error on open";
+    if (!stream) THROW("error on open");
     write_png(stream, image);
     fclose(stream);
 }
@@ -669,10 +669,10 @@ void glob(vector<string> &result, const string &arg) {
     result.clear();
     glob_t buf;
     glob(arg.c_str(), GLOB_TILDE, nullptr, &buf);
-    for (int i=0; i<buf.gl_pathc; i++) {
+    for (int i = 0; i < buf.gl_pathc; i++) {
         result.push_back(buf.gl_pathv[i]);
     }
-    if (buf.gl_pathc>0) globfree(&buf);
+    if (buf.gl_pathc > 0) globfree(&buf);
 }
 
 unsigned long random_state;
