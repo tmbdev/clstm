@@ -278,7 +278,7 @@ void INetwork::states(const string &prefix, StateFun f) {
 }
 
 void INetwork::networks(const string &prefix, function<void (string, INetwork*)> f) {
-    string nprefix = prefix+"."+name;
+    string nprefix = prefix+"."+kind();
     f(nprefix, this);
     for (int i = 0; i < sub.size(); i++) {
         sub[i]->networks(nprefix, f);
@@ -334,9 +334,9 @@ struct Full : NetworkBase {
     Vec w, d_w;
     int nseq = 0;
     int nsteps = 0;
-    string mykind = string("full_") + NONLIN::kind;
+    string mykind = string("Full_") + NONLIN::kind;
     Full() {
-        name = mykind;
+        name = string("full_") + NONLIN::name;
     }
     const char *kind() {
         return mykind.c_str();
@@ -398,7 +398,8 @@ struct Full : NetworkBase {
 };
 
 struct NoNonlin {
-    static constexpr const char *kind = "linear";
+    static constexpr const char *kind = "Linear";
+    static constexpr const char *name = "linear";
     template <class T>
     static void f(T &x) {
     }
@@ -410,7 +411,8 @@ typedef Full<NoNonlin> LinearLayer;
 REGISTER(LinearLayer);
 
 struct SigmoidNonlin {
-    static constexpr const char *kind = "sigmoid";
+    static constexpr const char *kind = "Sigmoid";
+    static constexpr const char *name = "sigmoid";
     template <class T>
     static void f(T &x) {
         x = MAPFUN(x, sigmoid);
@@ -427,7 +429,8 @@ Float tanh_(Float x) {
     return tanh(x);
 }
 struct TanhNonlin {
-    static constexpr const char *kind = "tanh";
+    static constexpr const char *kind = "Tanh";
+    static constexpr const char *name = "tanh";
     template <class T>
     static void f(T &x) {
         x = MAPFUN(x, tanh_);
@@ -447,7 +450,8 @@ inline Float heavi_(Float x) {
     return x <= 0 ? 0 : 1;
 }
 struct ReluNonlin {
-    static constexpr const char *kind = "relu";
+    static constexpr const char *kind = "Relu";
+    static constexpr const char *name = "relu";
     template <class T>
     static void f(T &x) {
         x = MAPFUN(x, relu_);
@@ -1103,7 +1107,6 @@ void ctc_train(INetwork *net, Sequence &xs, BatchClasses &targets) {
     THROW("unimplemented");
 }
 }  // namespace ocropus
-
 #ifdef CLSTM_EXTRAS
 // Extra layers; this uses internal function and class definitions from this
 // file, so it's included rather than linked. It's mostly a way of slowly deprecating
