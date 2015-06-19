@@ -905,6 +905,18 @@ struct GenericNPLSTM : NetworkBase {
 typedef GenericNPLSTM<> NPLSTM;
 REGISTER(NPLSTM);
 
+typedef GenericNPLSTM<SigmoidNonlin, TanhNonlin, NoNonlin> LINNPLSTM;
+REGISTER(LINNPLSTM);
+
+typedef GenericNPLSTM<SigmoidNonlin, ReluNonlin, TanhNonlin> RELUTANHNPLSTM;
+REGISTER(RELUTANHNPLSTM);
+
+typedef GenericNPLSTM<SigmoidNonlin, ReluNonlin, NoNonlin> RELUNPLSTM;
+REGISTER(RELUNPLSTM);
+
+typedef GenericNPLSTM<SigmoidNonlin, ReluNonlin, ReluNonlin> RELU2NPLSTM;
+REGISTER(RELU2NPLSTM);
+
 INetwork *make_SigmoidLayer() {
     return new SigmoidLayer();
 }
