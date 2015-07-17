@@ -8,6 +8,7 @@ addons:
     - libprotobuf-dev
     - protobuf-compiler
 install:
-  - echo nothing
+  - uname -a
+  - g++ -version
 script:
   - scons
