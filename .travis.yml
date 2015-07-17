@@ -2,9 +2,11 @@ sudo: false
 language: c++
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
     - scons
-    - gcc-4.7
+    - gcc-4.8
     - libeigen3-dev
     - libprotobuf-dev
     - protobuf-compiler
