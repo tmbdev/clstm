@@ -130,6 +130,7 @@ inline int size(Sequence &seq, int dim) {
     if (dim==1) return seq[0].rows();
     if (dim==2) return seq[0].cols();
     THROW("bad dim ins size");
+    return -1;
 }
 
 typedef vector<int> Classes;
@@ -337,6 +338,7 @@ struct INetwork : virtual ITrainable {
     // primary internal state sequence
     Sequence *getState() {
         THROW("unimplemented");
+        return 0;
     };
     void save(const char *fname);
     void load(const char *fname);
@@ -437,12 +439,10 @@ inline Network load_net(const string &file) {
 // training with CTC
 void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5.0);
 void forwardbackward(Mat &both, Mat &lmatch);
+void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &targets);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets);
 void trivial_decode(Classes &cs, Sequence &outputs, int batch=0);
-void ctc_train(INetwork *net, Sequence &xs, Sequence &targets);
-void ctc_train(INetwork *net, Sequence &xs, Classes &targets);
-void ctc_train(INetwork *net, Sequence &xs, BatchClasses &targets);
 
 // DEPRECATED
 

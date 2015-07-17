@@ -90,7 +90,7 @@ env.Protoc("clstm.proto")
 # Build the CLSTM library.
 
 libs = env["LIBS"]
-libsrc = ["clstm.cc", "clstm_proto.cc", "clstm_prefab.cc",
+libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
           "extras.cc", "clstm.pb.cc"]
 libclstm = env.StaticLibrary("clstm", source = libsrc)
 
