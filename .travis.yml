@@ -3,7 +3,8 @@ language: c++
 addons:
   apt:
     packages:
-    - scons 
+    - scons
+    - gcc-4.8
     - libeigen3-dev
     - libprotobuf-dev
     - protobuf-compiler
