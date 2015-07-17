@@ -10,6 +10,6 @@ addons:
     - protobuf-compiler
 install:
   - uname -a
-  - g++ -version
+  - g++ --version
 script:
   - scons
