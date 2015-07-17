@@ -4,7 +4,7 @@ addons:
   apt:
     packages:
     - scons
-    - gcc-4.8
+    - gcc-4.7
     - libeigen3-dev
     - libprotobuf-dev
     - protobuf-compiler
