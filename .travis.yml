@@ -11,5 +11,6 @@ addons:
 install:
   - uname -a
   - g++ --version
+  - ls /usr/bin/g++*
 script:
   - scons
