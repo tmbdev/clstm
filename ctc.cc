@@ -157,25 +157,36 @@ void mktargets(Sequence &seq, Classes &transcript, int ndim) {
     }
 }
 
-void trivial_decode(Classes &cs, Sequence &outputs, int batch) {
+void trivial_decode(Classes &cs, Sequence &outputs, int batch, vector<int> *locs) {
+    cs.clear();
+    if (locs) locs->clear();
     int N = outputs.size();
     int t = 0;
     float mv = 0;
     int mc = -1;
+    int mt = -1;
     while (t < N) {
         int index;
         float v = outputs[t].col(batch).maxCoeff(&index);
         if (index == 0) {
             // NB: there should be a 0 at the end anyway
-            if (mc != -1 && mc != 0) cs.push_back(mc);
-            mv = 0; mc = -1; t++;
+            if (mc != -1 && mc != 0) {
+                cs.push_back(mc);
+                if (locs) locs->push_back(mt);
+            }
+            mv = 0; mc = -1; mt = -1; t++;
             continue;
         }
         if (v > mv) {
             mv = v;
             mc = index;
+            mt = t;
         }
         t++;
     }
+}
+
+void trivial_decode(Classes &cs, Sequence &outputs, int batch) {
+  trivial_decode(cs, outputs, batch, nullptr);
 }
 }  // ocropus

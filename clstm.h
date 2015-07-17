@@ -61,7 +61,7 @@ typedef Eigen::MatrixXf Mat;
 inline void ADDCOLS(Mat &m, Vec &v) {
     for (int i = 0; i < COLS(m); i++)
         for (int j = 0; j < ROWS(m); j++)
-            m(i, j) += v(j);
+            m(j, i) += v(j);
 }
 inline void randgauss(Mat &m) {
     std::random_device rd;
@@ -443,6 +443,7 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Sequence &targets);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs, Classes &targets);
 void trivial_decode(Classes &cs, Sequence &outputs, int batch=0);
+void trivial_decode(Classes &cs, Sequence &outputs, int batch, vector<int> *locs);
 
 // DEPRECATED
 

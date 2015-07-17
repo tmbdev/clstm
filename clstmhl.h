@@ -161,13 +161,13 @@ struct CLSTMOCR {
     std::string train_utf8(mdarray<float> &raw, const std::string &target) {
         return utf32_to_utf8(train(raw, utf8_to_utf32(target)));
     }
-    std::wstring predict(mdarray<float> &raw) {
+    std::wstring predict(mdarray<float> &raw, vector<int> *where=0) {
         normalizer->measure(raw);
         normalizer->normalize(image, raw);
         assign(net->inputs, image);
         net->forward();
         Classes outputs;
-        trivial_decode(outputs, net->outputs);
+        trivial_decode(outputs, net->outputs, 0, where);
         return net->decode(outputs);
     }
     std::string predict_utf8(mdarray<float> &raw) {
