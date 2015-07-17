@@ -41,9 +41,9 @@ env["BUILDERS"]["Protoc"] = protoc_builder
 # With omp=1 support, Eigen and other parts of the code may use multi-threading.
 
 if option("omp",0):
-    env["CXX"]="g++ --std=c++11 -Wno-unused-result -fopenmp"
+    env["CXX"] = option("CXX", "g++") + " --std=c++11 -Wno-unused-result -fopenmp"
 else:
-    env["CXX"]="g++ --std=c++11 -Wno-unused-result"
+    env["CXX"] = option("CXX", "g++") + " --std=c++11 -Wno-unused-result"
 
 # With debug=1, the code will be compiled suitable for debugging.
 

@@ -16,4 +16,4 @@ install:
   - g++ --version
   - ls /usr/bin/g++*
 script:
-  - scons
+  - scons CXX=g++-4.8
