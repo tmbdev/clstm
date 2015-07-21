@@ -236,6 +236,12 @@ void INetwork::iencode(Classes &classes, const std::wstring &s) {
         classes.push_back(c);
     }
 }
+wchar_t INetwork::decode(int cls) {
+    return wchar_t(codec[cls]);
+}
+wchar_t INetwork::idecode(int cls) {
+    return wchar_t(icodec[cls]);
+}
 std::wstring INetwork::decode(Classes &classes) {
     std::wstring s;
     for (int i = 0; i < classes.size(); i++)

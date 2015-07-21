@@ -66,7 +66,7 @@ void get_codec(vector<int> &codec, vector<Sample> &samples, wstring Sample::* p)
     for (int i = 1; i < codec.size(); i++) assert(codec[i] > codec[i-1]);
 }
 
-int main(int argc, char **argv) {
+int main1(int argc, char **argv) {
     if (argc < 2 || argc > 3) THROW("... training [testing]");
     vector<Sample> samples, test_samples;
     read_samples(samples, argv[1]);
@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
             print("ERROR", trial, test_error, "   ", errors, count);
         }
         if (trial > 0 && save_every > 0 && trial%save_every == 0) {
-            string fname = save_name+"-"+to_string(trial)+".h5";
+            string fname = save_name+"-"+to_string(trial)+".model.proto";
             clstm.save(fname);
         }
         wstring pred = clstm.train(samples[sample].in, samples[sample].out);
@@ -118,4 +118,12 @@ int main(int argc, char **argv) {
     }
 
     return 0;
+}
+
+int main(int argc, char **argv) {
+    try {
+        return main1(argc, argv);
+    } catch (const char *message) {
+        cerr << "FATAL: " << message << endl;
+    }
 }

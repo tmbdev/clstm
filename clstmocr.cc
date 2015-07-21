@@ -33,7 +33,7 @@ using std_wstring = std::wstring;
 #define string std_string
 #define wstring std_wstring
 
-int main(int argc, char **argv) {
+int main1(int argc, char **argv) {
     if (argc != 2) THROW("give text file as an argument");
     const char *fname = argv[1];
 
@@ -42,14 +42,35 @@ int main(int argc, char **argv) {
     CLSTMOCR clstm;
     clstm.load(load_name);
 
+    bool conf = getienv("conf", 0);
+
     ifstream stream(fname);
     string line;
     while (getline(stream, line)) {
         mdarray<float> raw;
         read_png(raw, line.c_str(), true);
         for (int i = 0; i < raw.size(); i++) raw[i] = 1-raw[i];
-        string out = clstm.predict_utf8(raw);
-        cout << line << "\t" << out << endl;
+        if (!conf) {
+          string out = clstm.predict_utf8(raw);
+          cout << line << "\t" << out << endl;
+        } else {
+          cout << "file " << line << endl;
+          vector<CharPrediction> preds;
+          clstm.predict(preds, raw);
+          for (int i=0; i<preds.size(); i++) {
+            CharPrediction p = preds[i];
+            const char *sep = "\t";
+            cout << p.i << sep << p.x << sep << p.c << sep << p.p << endl;
+          }
+        }
     }
     return 0;
+}
+
+int main(int argc, char **argv) {
+    try {
+        return main1(argc, argv);
+    } catch (const char *message) {
+        cerr << "FATAL: " << message << endl;
+    }
 }

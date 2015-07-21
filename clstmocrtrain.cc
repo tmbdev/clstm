@@ -89,7 +89,7 @@ void read_lines(vector<string> &lines, string fname) {
     }
 }
 
-int main(int argc, char **argv) {
+int main1(int argc, char **argv) {
     srandomize();
 
     if (argc < 2 || argc > 3) THROW("... training [testing]");
@@ -103,6 +103,7 @@ int main(int argc, char **argv) {
     print("got", codec.size(), "classes");
 
     CLSTMOCR clstm;
+    clstm.target_height = int(getrenv("target_height", 48));
     clstm.createBidi(codec, getienv("nhidden", 100));
     clstm.setLearningRate(getdenv("rate", 1e-4), getdenv("momentum", 0.9));
     clstm.net->info("");
@@ -136,8 +137,8 @@ int main(int argc, char **argv) {
             print("ERROR", trial, test_error, "   ", errors, count);
         }
         int sample = irandom() % fnames.size();
-        if (trial > 0 && save_every > 0&&trial%save_every == 0) {
-            string fname = save_name+"-"+to_string(trial)+".h5";
+        if (trial > 0 && save_every > 0 && trial%save_every == 0) {
+            string fname = save_name+"-"+to_string(trial)+".model.proto";
             clstm.save(fname);
         }
         string fname = fnames[sample];
@@ -164,4 +165,12 @@ int main(int argc, char **argv) {
     }
 
     return 0;
+}
+
+int main(int argc, char **argv) {
+    try {
+        return main1(argc, argv);
+    } catch (const char *message) {
+        cerr << "FATAL: " << message << endl;
+    }
 }

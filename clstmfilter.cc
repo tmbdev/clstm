@@ -33,7 +33,7 @@ using std_wstring = std::wstring;
 #define string std_string
 #define wstring std_wstring
 
-int main(int argc, char **argv) {
+int main1(int argc, char **argv) {
     if (argc != 2) THROW("give text file as an argument");
     const char *fname = argv[1];
 
@@ -55,4 +55,12 @@ int main(int argc, char **argv) {
         else if (output == 2) cout << orig << "\t" << out << endl;
     }
     return 0;
+}
+
+int main(int argc, char **argv) {
+    try {
+        return main1(argc, argv);
+    } catch (const char *message) {
+        cerr << "FATAL: " << message << endl;
+    }
 }

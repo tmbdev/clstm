@@ -11,6 +11,14 @@
 #include <vector>
 
 namespace ocropus {
+
+struct CharPrediction {
+    int i;
+    int x;
+    wchar_t c;
+    float p;
+};
+
 struct CLSTMText {
     Network net;
     int nclasses = -1;
@@ -169,6 +177,24 @@ struct CLSTMOCR {
         Classes outputs;
         trivial_decode(outputs, net->outputs, 0, where);
         return net->decode(outputs);
+    }
+    void predict(vector<CharPrediction> &preds, mdarray<float> &raw) {
+        normalizer->measure(raw);
+        normalizer->normalize(image, raw);
+        assign(net->inputs, image);
+        net->forward();
+        Classes outputs;
+        vector<int> where;
+        trivial_decode(outputs, net->outputs, 0, &where);
+        preds.clear();
+        for (int i=0; i<outputs.size(); i++) {
+            int t = where[i];
+            int cls = outputs[i];
+            wchar_t c = net->decode(outputs[i]);
+            float p = net->outputs[t](cls, 0);
+            CharPrediction pred{i, t, c, p};
+            preds.push_back(pred);
+        }
     }
     std::string predict_utf8(mdarray<float> &raw) {
         return utf32_to_utf8(predict(raw));

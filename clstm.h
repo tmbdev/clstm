@@ -271,6 +271,8 @@ struct INetwork : virtual ITrainable {
     unique_ptr<map<int, int> > encoder;  // cached
     unique_ptr<map<int, int> > iencoder;  // cached
     void makeEncoders();
+    wchar_t decode(int cls);
+    wchar_t idecode(int cls);
     std::wstring decode(Classes &cs);
     std::wstring idecode(Classes &cs);
     void encode(Classes &cs, const std::wstring &s);
