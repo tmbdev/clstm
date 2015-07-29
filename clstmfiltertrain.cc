@@ -71,7 +71,7 @@ int main1(int argc, char **argv) {
     vector<Sample> samples, test_samples;
     read_samples(samples, argv[1]);
     if (argc > 2) read_samples(test_samples, argv[2]);
-    print("got", samples.size(), "files,", test_samples.size(), "tests");
+    print("got", samples.size(), "inputs,", test_samples.size(), "tests");
 
     vector<int> icodec, codec;
     get_codec(icodec, samples, &Sample::in);
@@ -88,6 +88,10 @@ int main1(int argc, char **argv) {
     int report_every = getienv("report_every", 100);
     int test_every = getienv("test_every", 10000);
 
+    // Command to execute after testing the networks performance.
+    string after_test = getsenv("after_test", "");
+
+    double best_error = 1e38;
     double test_error = 9999.0;
     for (int trial = 0; trial < maxtrain; trial++) {
         int sample = irandom() % samples.size();
@@ -102,14 +106,22 @@ int main1(int argc, char **argv) {
             }
             test_error = errors/count;
             print("ERROR", trial, test_error, "   ", errors, count);
+            if (save_every == 0 && test_error < best_error) {
+                best_error = test_error;
+                print("saving best performing network so far", save_name,
+                      "error rate: ", best_error);
+                string fname = save_name + ".h5";
+                clstm.save(fname);
+            }
+            if (after_test != "") system(after_test.c_str());
         }
         if (trial > 0 && save_every > 0 && trial%save_every == 0) {
-            string fname = save_name+"-"+to_string(trial)+".model.proto";
+            string fname = save_name + "-" + to_string(trial) + ".h5";
             clstm.save(fname);
         }
         wstring pred = clstm.train(samples[sample].in, samples[sample].out);
         if (trial%report_every == 0) {
-            print(trial);
+            print("trial", trial);
             print("INP", samples[sample].in);
             print("TRU", samples[sample].out);
             print("ALN", clstm.aligned_utf8());

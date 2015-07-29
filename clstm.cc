@@ -61,8 +61,18 @@ Network layer(const string &kind,
               const Networks &subs) {
     Network net;
     auto it = layer_factories.find(kind);
-    if (it != layer_factories.end())
-        net.reset(it->second());
+    if (it != layer_factories.end()) {
+       net.reset(it->second());
+    } else {
+        string accepted_layer_kinds = "";
+        for (auto val : layer_factories) {
+            accepted_layer_kinds += val.first;
+            accepted_layer_kinds += ",";
+       }
+        THROW("unknown layer type:" + kind +
+              ". Accepted layer kinds:" + accepted_layer_kinds);
+    }
+
     for (auto it : args) {
         net->attributes[it.first] = it.second;
     }

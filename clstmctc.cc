@@ -556,8 +556,10 @@ int main(int argc, char **argv) {
         } else {
             return main_eval(argc, argv);
         }
+#ifndef NOEXCEPTION
     } catch(const char *msg) {
         print("EXCEPTION", msg);
+#endif
     } catch(...) {
         print("UNKNOWN EXCEPTION");
     }

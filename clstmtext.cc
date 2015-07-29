@@ -425,8 +425,10 @@ int main(int argc, char **argv) {
         } else if (mode == "filter") {
             return main_filter(argc, argv);
         }
+#ifndef NOEXCEPTION
     } catch(const char *msg) {
         print("EXCEPTION", msg);
+#endif
     } catch(...) {
         print("UNKNOWN EXCEPTION");
     }
