@@ -129,7 +129,7 @@ inline int size(Sequence &seq, int dim) {
     if (dim==0) return seq.size();
     if (dim==1) return seq[0].rows();
     if (dim==2) return seq[0].cols();
-    THROW("bad dim ins size");
+    throwf("bad dim ins size");
     return -1;
 }
 
@@ -192,7 +192,7 @@ struct ITrainable {
         auto it = attributes.find(key);
         if (it == attributes.end()) {
             sprintf(exception_message, "missing parameter: %s", key.c_str());
-            THROW(exception_message);
+            throwf(exception_message);
         }
         return std::stoi(it->second);
     }
@@ -339,7 +339,7 @@ struct INetwork : virtual ITrainable {
     // special method for LSTM and similar networks, returning the
     // primary internal state sequence
     Sequence *getState() {
-        THROW("unimplemented");
+        throwf("unimplemented");
         return 0;
     };
     void save(const char *fname);
