@@ -196,6 +196,7 @@ inline double getrenv(const char *name, double dflt=0, bool logscale=true) {
         return lo;
     } else {
         throwf("bad format for getrenv");
+        return 0;
     }
 }
 
@@ -212,6 +213,7 @@ inline double getuenv(const char *name, double dflt=0) {
         return lo;
     } else {
         throwf("bad format for getuenv");
+        return 0;
     }
 }
 

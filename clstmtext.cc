@@ -178,7 +178,7 @@ int main_train(int argc, char **argv) {
     string lrnorm = getsenv("lrnorm", "batch");
     int neps = int(getuenv("neps", 3));
     string net_type = getsenv("lstm", "bidi");
-    string lstm_type = getsenv("lstm_type", "LSTM");
+    string lstm_type = getsenv("lstm_type", "NPLSTM");
     string output_type = getsenv("output_type", "SoftmaxLayer");
 
     string testset = getsenv("testset", "");
