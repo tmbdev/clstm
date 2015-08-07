@@ -3,34 +3,49 @@
  * Version 3.0.2
  *
  * This file is not intended to be easily readable and contains a number of
- * coding conventions designed to improve portability and efficiency. Do not make
+ * coding conventions designed to improve portability and efficiency. Do not
+ * make
  * changes to this file unless you know what you are doing--modify the SWIG
  * interface file instead.
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 #define SWIGPYTHON
 #define SWIG_PYTHON_DIRECTOR_NO_VTABLE
 
-
 #ifdef __cplusplus
 /* SwigValueWrapper is described in swig.swg */
-template<typename T> class SwigValueWrapper {
+template <typename T>
+class SwigValueWrapper {
   struct SwigMovePointer {
     T *ptr;
-    SwigMovePointer(T *p) : ptr(p) { }
+    SwigMovePointer(T *p) : ptr(p) {}
     ~SwigMovePointer() { delete ptr; }
-    SwigMovePointer& operator=(SwigMovePointer& rhs) { T* oldptr = ptr; ptr = 0; delete oldptr; ptr = rhs.ptr; rhs.ptr = 0; return *this; }
+    SwigMovePointer &operator=(SwigMovePointer &rhs) {
+      T *oldptr = ptr;
+      ptr = 0;
+      delete oldptr;
+      ptr = rhs.ptr;
+      rhs.ptr = 0;
+      return *this;
+    }
   } pointer;
-  SwigValueWrapper& operator=(const SwigValueWrapper<T>& rhs);
-  SwigValueWrapper(const SwigValueWrapper<T>& rhs);
-public:
-  SwigValueWrapper() : pointer(0) { }
-  SwigValueWrapper& operator=(const T& t) { SwigMovePointer tmp(new T(t)); pointer = tmp; return *this; }
-  operator T&() const { return *pointer.ptr; }
+  SwigValueWrapper &operator=(const SwigValueWrapper<T> &rhs);
+  SwigValueWrapper(const SwigValueWrapper<T> &rhs);
+
+ public:
+  SwigValueWrapper() : pointer(0) {}
+  SwigValueWrapper &operator=(const T &t) {
+    SwigMovePointer tmp(new T(t));
+    pointer = tmp;
+    return *this;
+  }
+  operator T &() const { return *pointer.ptr; }
   T *operator&() { return pointer.ptr; }
 };
 
-template <typename T> T SwigValueInit() {
+template <typename T>
+T SwigValueInit() {
   return T();
 }
 #endif
@@ -38,120 +53,127 @@ template <typename T> T SwigValueInit() {
 /* -----------------------------------------------------------------------------
  *  This section contains generic SWIG labels for method/variable
  *  declarations/attributes, and other compiler dependent labels.
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
-/* template workaround for compilers that cannot correctly implement the C++ standard */
+/* template workaround for compilers that cannot correctly implement the C++
+ * standard */
 #ifndef SWIGTEMPLATEDISAMBIGUATOR
-# if defined(__SUNPRO_CC) && (__SUNPRO_CC <= 0x560)
-#  define SWIGTEMPLATEDISAMBIGUATOR template
-# elif defined(__HP_aCC)
-/* Needed even with `aCC -AA' when `aCC -V' reports HP ANSI C++ B3910B A.03.55 */
-/* If we find a maximum version that requires this, the test would be __HP_aCC <= 35500 for A.03.55 */
-#  define SWIGTEMPLATEDISAMBIGUATOR template
-# else
-#  define SWIGTEMPLATEDISAMBIGUATOR
-# endif
+#if defined(__SUNPRO_CC) && (__SUNPRO_CC <= 0x560)
+#define SWIGTEMPLATEDISAMBIGUATOR template
+#elif defined(__HP_aCC)
+/* Needed even with `aCC -AA' when `aCC -V' reports HP ANSI C++ B3910B A.03.55
+ */
+/* If we find a maximum version that requires this, the test would be __HP_aCC
+ * <= 35500 for A.03.55 */
+#define SWIGTEMPLATEDISAMBIGUATOR template
+#else
+#define SWIGTEMPLATEDISAMBIGUATOR
+#endif
 #endif
 
 /* inline attribute */
 #ifndef SWIGINLINE
-# if defined(__cplusplus) || (defined(__GNUC__) && !defined(__STRICT_ANSI__))
-#   define SWIGINLINE inline
-# else
-#   define SWIGINLINE
-# endif
+#if defined(__cplusplus) || (defined(__GNUC__) && !defined(__STRICT_ANSI__))
+#define SWIGINLINE inline
+#else
+#define SWIGINLINE
+#endif
 #endif
 
 /* attribute recognised by some compilers to avoid 'unused' warnings */
 #ifndef SWIGUNUSED
-# if defined(__GNUC__)
-#   if !(defined(__cplusplus)) || (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
-#     define SWIGUNUSED __attribute__ ((__unused__))
-#   else
-#     define SWIGUNUSED
-#   endif
-# elif defined(__ICC)
-#   define SWIGUNUSED __attribute__ ((__unused__))
-# else
-#   define SWIGUNUSED
-# endif
+#if defined(__GNUC__)
+#if !(defined(__cplusplus)) || \
+    (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+#define SWIGUNUSED __attribute__((__unused__))
+#else
+#define SWIGUNUSED
+#endif
+#elif defined(__ICC)
+#define SWIGUNUSED __attribute__((__unused__))
+#else
+#define SWIGUNUSED
+#endif
 #endif
 
 #ifndef SWIG_MSC_UNSUPPRESS_4505
-# if defined(_MSC_VER)
-#   pragma warning(disable : 4505) /* unreferenced local function has been removed */
-# endif
+#if defined(_MSC_VER)
+#pragma warning( \
+    disable : 4505) /* unreferenced local function has been removed */
+#endif
 #endif
 
 #ifndef SWIGUNUSEDPARM
-# ifdef __cplusplus
-#   define SWIGUNUSEDPARM(p)
-# else
-#   define SWIGUNUSEDPARM(p) p SWIGUNUSED
-# endif
+#ifdef __cplusplus
+#define SWIGUNUSEDPARM(p)
+#else
+#define SWIGUNUSEDPARM(p) p SWIGUNUSED
+#endif
 #endif
 
 /* internal SWIG method */
 #ifndef SWIGINTERN
-# define SWIGINTERN static SWIGUNUSED
+#define SWIGINTERN static SWIGUNUSED
 #endif
 
 /* internal inline SWIG method */
 #ifndef SWIGINTERNINLINE
-# define SWIGINTERNINLINE SWIGINTERN SWIGINLINE
+#define SWIGINTERNINLINE SWIGINTERN SWIGINLINE
 #endif
 
 /* exporting methods */
 #if (__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
-#  ifndef GCC_HASCLASSVISIBILITY
-#    define GCC_HASCLASSVISIBILITY
-#  endif
+#ifndef GCC_HASCLASSVISIBILITY
+#define GCC_HASCLASSVISIBILITY
+#endif
 #endif
 
 #ifndef SWIGEXPORT
-# if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
-#   if defined(STATIC_LINKED)
-#     define SWIGEXPORT
-#   else
-#     define SWIGEXPORT __declspec(dllexport)
-#   endif
-# else
-#   if defined(__GNUC__) && defined(GCC_HASCLASSVISIBILITY)
-#     define SWIGEXPORT __attribute__ ((visibility("default")))
-#   else
-#     define SWIGEXPORT
-#   endif
-# endif
+#if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
+#if defined(STATIC_LINKED)
+#define SWIGEXPORT
+#else
+#define SWIGEXPORT __declspec(dllexport)
+#endif
+#else
+#if defined(__GNUC__) && defined(GCC_HASCLASSVISIBILITY)
+#define SWIGEXPORT __attribute__((visibility("default")))
+#else
+#define SWIGEXPORT
+#endif
+#endif
 #endif
 
 /* calling conventions for Windows */
 #ifndef SWIGSTDCALL
-# if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
-#   define SWIGSTDCALL __stdcall
-# else
-#   define SWIGSTDCALL
-# endif
+#if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
+#define SWIGSTDCALL __stdcall
+#else
+#define SWIGSTDCALL
+#endif
 #endif
 
 /* Deal with Microsoft's attempt at deprecating C standard runtime functions */
-#if !defined(SWIG_NO_CRT_SECURE_NO_DEPRECATE) && defined(_MSC_VER) && !defined(_CRT_SECURE_NO_DEPRECATE)
-# define _CRT_SECURE_NO_DEPRECATE
+#if !defined(SWIG_NO_CRT_SECURE_NO_DEPRECATE) && defined(_MSC_VER) && \
+    !defined(_CRT_SECURE_NO_DEPRECATE)
+#define _CRT_SECURE_NO_DEPRECATE
 #endif
 
-/* Deal with Microsoft's attempt at deprecating methods in the standard C++ library */
-#if !defined(SWIG_NO_SCL_SECURE_NO_DEPRECATE) && defined(_MSC_VER) && !defined(_SCL_SECURE_NO_DEPRECATE)
-# define _SCL_SECURE_NO_DEPRECATE
+/* Deal with Microsoft's attempt at deprecating methods in the standard C++
+ * library */
+#if !defined(SWIG_NO_SCL_SECURE_NO_DEPRECATE) && defined(_MSC_VER) && \
+    !defined(_SCL_SECURE_NO_DEPRECATE)
+#define _SCL_SECURE_NO_DEPRECATE
 #endif
-
-
 
 #if defined(_DEBUG) && defined(SWIG_PYTHON_INTERPRETER_NO_DEBUG)
 /* Use debug wrappers with the Python release dll */
-# undef _DEBUG
-# include <Python.h>
-# define _DEBUG
+#undef _DEBUG
+#include <Python.h>
+#define _DEBUG
 #else
-# include <Python.h>
+#include <Python.h>
 #endif
 
 /* -----------------------------------------------------------------------------
@@ -159,19 +181,21 @@ template <typename T> T SwigValueInit() {
  *
  * This file contains generic C API SWIG runtime support for pointer
  * type checking.
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
-/* This should only be incremented when either the layout of swig_type_info changes,
+/* This should only be incremented when either the layout of swig_type_info
+   changes,
    or for whatever reason, the runtime changes incompatibly */
 #define SWIG_RUNTIME_VERSION "4"
 
 /* define SWIG_TYPE_TABLE_NAME as "SWIG_TYPE_TABLE" */
 #ifdef SWIG_TYPE_TABLE
-# define SWIG_QUOTE_STRING(x) #x
-# define SWIG_EXPAND_AND_QUOTE_STRING(x) SWIG_QUOTE_STRING(x)
-# define SWIG_TYPE_TABLE_NAME SWIG_EXPAND_AND_QUOTE_STRING(SWIG_TYPE_TABLE)
+#define SWIG_QUOTE_STRING(x) #x
+#define SWIG_EXPAND_AND_QUOTE_STRING(x) SWIG_QUOTE_STRING(x)
+#define SWIG_TYPE_TABLE_NAME SWIG_EXPAND_AND_QUOTE_STRING(SWIG_TYPE_TABLE)
 #else
-# define SWIG_TYPE_TABLE_NAME
+#define SWIG_TYPE_TABLE_NAME
 #endif
 
 /*
@@ -184,25 +208,24 @@ template <typename T> T SwigValueInit() {
 */
 
 #ifndef SWIGRUNTIME
-# define SWIGRUNTIME SWIGINTERN
+#define SWIGRUNTIME SWIGINTERN
 #endif
 
 #ifndef SWIGRUNTIMEINLINE
-# define SWIGRUNTIMEINLINE SWIGRUNTIME SWIGINLINE
+#define SWIGRUNTIMEINLINE SWIGRUNTIME SWIGINLINE
 #endif
 
 /*  Generic buffer size */
 #ifndef SWIG_BUFFER_SIZE
-# define SWIG_BUFFER_SIZE 1024
+#define SWIG_BUFFER_SIZE 1024
 #endif
 
 /* Flags for pointer conversions */
-#define SWIG_POINTER_DISOWN        0x1
-#define SWIG_CAST_NEW_MEMORY       0x2
+#define SWIG_POINTER_DISOWN 0x1
+#define SWIG_CAST_NEW_MEMORY 0x2
 
 /* Flags for new pointer objects */
-#define SWIG_POINTER_OWN           0x1
-
+#define SWIG_POINTER_OWN 0x1
 
 /*
    Flags/methods for returning states.
@@ -239,7 +262,7 @@ template <typename T> T SwigValueInit() {
       // success code
       if (SWIG_IsNewObj(res) {
         ...
-	delete *ptr;
+        delete *ptr;
       } else {
         ...
       }
@@ -265,7 +288,8 @@ template <typename T> T SwigValueInit() {
         }
       }
 
-   Of course, returning the plain '0(success)/-1(fail)' still works, but you can be
+   Of course, returning the plain '0(success)/-1(fail)' still works, but you can
+   be
    more explicit by returning SWIG_BADOBJ, SWIG_ERROR or any of the
    SWIG errors code.
 
@@ -283,51 +307,52 @@ template <typename T> T SwigValueInit() {
    just use the SWIG_AddCast()/SWIG_CheckState()
 */
 
-#define SWIG_OK                    (0)
-#define SWIG_ERROR                 (-1)
-#define SWIG_IsOK(r)               (r >= 0)
-#define SWIG_ArgError(r)           ((r != SWIG_ERROR) ? r : SWIG_TypeError)
+#define SWIG_OK (0)
+#define SWIG_ERROR (-1)
+#define SWIG_IsOK(r) (r >= 0)
+#define SWIG_ArgError(r) ((r != SWIG_ERROR) ? r : SWIG_TypeError)
 
 /* The CastRankLimit says how many bits are used for the cast rank */
-#define SWIG_CASTRANKLIMIT         (1 << 8)
+#define SWIG_CASTRANKLIMIT (1 << 8)
 /* The NewMask denotes the object was created (using new/malloc) */
-#define SWIG_NEWOBJMASK            (SWIG_CASTRANKLIMIT  << 1)
+#define SWIG_NEWOBJMASK (SWIG_CASTRANKLIMIT << 1)
 /* The TmpMask is for in/out typemaps that use temporal objects */
-#define SWIG_TMPOBJMASK            (SWIG_NEWOBJMASK << 1)
+#define SWIG_TMPOBJMASK (SWIG_NEWOBJMASK << 1)
 /* Simple returning values */
-#define SWIG_BADOBJ                (SWIG_ERROR)
-#define SWIG_OLDOBJ                (SWIG_OK)
-#define SWIG_NEWOBJ                (SWIG_OK | SWIG_NEWOBJMASK)
-#define SWIG_TMPOBJ                (SWIG_OK | SWIG_TMPOBJMASK)
+#define SWIG_BADOBJ (SWIG_ERROR)
+#define SWIG_OLDOBJ (SWIG_OK)
+#define SWIG_NEWOBJ (SWIG_OK | SWIG_NEWOBJMASK)
+#define SWIG_TMPOBJ (SWIG_OK | SWIG_TMPOBJMASK)
 /* Check, add and del mask methods */
-#define SWIG_AddNewMask(r)         (SWIG_IsOK(r) ? (r | SWIG_NEWOBJMASK) : r)
-#define SWIG_DelNewMask(r)         (SWIG_IsOK(r) ? (r & ~SWIG_NEWOBJMASK) : r)
-#define SWIG_IsNewObj(r)           (SWIG_IsOK(r) && (r & SWIG_NEWOBJMASK))
-#define SWIG_AddTmpMask(r)         (SWIG_IsOK(r) ? (r | SWIG_TMPOBJMASK) : r)
-#define SWIG_DelTmpMask(r)         (SWIG_IsOK(r) ? (r & ~SWIG_TMPOBJMASK) : r)
-#define SWIG_IsTmpObj(r)           (SWIG_IsOK(r) && (r & SWIG_TMPOBJMASK))
+#define SWIG_AddNewMask(r) (SWIG_IsOK(r) ? (r | SWIG_NEWOBJMASK) : r)
+#define SWIG_DelNewMask(r) (SWIG_IsOK(r) ? (r & ~SWIG_NEWOBJMASK) : r)
+#define SWIG_IsNewObj(r) (SWIG_IsOK(r) && (r & SWIG_NEWOBJMASK))
+#define SWIG_AddTmpMask(r) (SWIG_IsOK(r) ? (r | SWIG_TMPOBJMASK) : r)
+#define SWIG_DelTmpMask(r) (SWIG_IsOK(r) ? (r & ~SWIG_TMPOBJMASK) : r)
+#define SWIG_IsTmpObj(r) (SWIG_IsOK(r) && (r & SWIG_TMPOBJMASK))
 
 /* Cast-Rank Mode */
 #if defined(SWIG_CASTRANK_MODE)
-#  ifndef SWIG_TypeRank
-#    define SWIG_TypeRank             unsigned long
-#  endif
-#  ifndef SWIG_MAXCASTRANK            /* Default cast allowed */
-#    define SWIG_MAXCASTRANK          (2)
-#  endif
-#  define SWIG_CASTRANKMASK          ((SWIG_CASTRANKLIMIT) -1)
-#  define SWIG_CastRank(r)           (r & SWIG_CASTRANKMASK)
+#ifndef SWIG_TypeRank
+#define SWIG_TypeRank unsigned long
+#endif
+#ifndef SWIG_MAXCASTRANK /* Default cast allowed */
+#define SWIG_MAXCASTRANK (2)
+#endif
+#define SWIG_CASTRANKMASK ((SWIG_CASTRANKLIMIT)-1)
+#define SWIG_CastRank(r) (r & SWIG_CASTRANKMASK)
 SWIGINTERNINLINE int SWIG_AddCast(int r) {
-  return SWIG_IsOK(r) ? ((SWIG_CastRank(r) < SWIG_MAXCASTRANK) ? (r + 1) : SWIG_ERROR) : r;
+  return SWIG_IsOK(r)
+             ? ((SWIG_CastRank(r) < SWIG_MAXCASTRANK) ? (r + 1) : SWIG_ERROR)
+             : r;
 }
 SWIGINTERNINLINE int SWIG_CheckState(int r) {
   return SWIG_IsOK(r) ? SWIG_CastRank(r) + 1 : 0;
 }
 #else /* no cast-rank mode */
-#  define SWIG_AddCast(r) (r)
-#  define SWIG_CheckState(r) (SWIG_IsOK(r) ? 1 : 0)
+#define SWIG_AddCast(r) (r)
+#define SWIG_CheckState(r) (SWIG_IsOK(r) ? 1 : 0)
 #endif
-
 
 #include <string.h>
 
@@ -340,32 +365,38 @@ typedef struct swig_type_info *(*swig_dycast_func)(void **);
 
 /* Structure to store information on one type */
 typedef struct swig_type_info {
-  const char             *name;			/* mangled name of this type */
-  const char             *str;			/* human readable name of this type */
-  swig_dycast_func        dcast;		/* dynamic cast function down a hierarchy */
-  struct swig_cast_info  *cast;			/* linked list of types that can cast into this type */
-  void                   *clientdata;		/* language specific type data */
-  int                    owndata;		/* flag if the structure owns the clientdata */
+  const char *name;       /* mangled name of this type */
+  const char *str;        /* human readable name of this type */
+  swig_dycast_func dcast; /* dynamic cast function down a hierarchy */
+  struct swig_cast_info
+      *cast;        /* linked list of types that can cast into this type */
+  void *clientdata; /* language specific type data */
+  int owndata;      /* flag if the structure owns the clientdata */
 } swig_type_info;
 
 /* Structure to store a type and conversion function used for casting */
 typedef struct swig_cast_info {
-  swig_type_info         *type;			/* pointer to type that is equivalent to this type */
-  swig_converter_func     converter;		/* function to cast the void pointers */
-  struct swig_cast_info  *next;			/* pointer to next cast in linked list */
-  struct swig_cast_info  *prev;			/* pointer to the previous cast */
+  swig_type_info *type; /* pointer to type that is equivalent to this type */
+  swig_converter_func converter; /* function to cast the void pointers */
+  struct swig_cast_info *next;   /* pointer to next cast in linked list */
+  struct swig_cast_info *prev;   /* pointer to the previous cast */
 } swig_cast_info;
 
 /* Structure used to store module information
  * Each module generates one structure like this, and the runtime collects
  * all of these structures and stores them in a circularly linked list.*/
 typedef struct swig_module_info {
-  swig_type_info         **types;		/* Array of pointers to swig_type_info structures that are in this module */
-  size_t                 size;		        /* Number of types in this module */
-  struct swig_module_info *next;		/* Pointer to next element in circularly linked list */
-  swig_type_info         **type_initial;	/* Array of initially generated type structures */
-  swig_cast_info         **cast_initial;	/* Array of initially generated casting structures */
-  void                    *clientdata;		/* Language specific module data */
+  swig_type_info
+      **types; /* Array of pointers to swig_type_info structures that are in
+                  this module */
+  size_t size; /* Number of types in this module */
+  struct swig_module_info
+      *next; /* Pointer to next element in circularly linked list */
+  swig_type_info *
+      *type_initial; /* Array of initially generated type structures */
+  swig_cast_info *
+      *cast_initial; /* Array of initially generated casting structures */
+  void *clientdata;  /* Language specific module data */
 } swig_module_info;
 
 /*
@@ -375,10 +406,9 @@ typedef struct swig_module_info {
   Return 0 when the two name types are equivalent, as in
   strncmp, but skipping ' '.
 */
-SWIGRUNTIME int
-SWIG_TypeNameComp(const char *f1, const char *l1,
-		  const char *f2, const char *l2) {
-  for (;(f1 != l1) && (f2 != l2); ++f1, ++f2) {
+SWIGRUNTIME int SWIG_TypeNameComp(const char *f1, const char *l1,
+                                  const char *f2, const char *l2) {
+  for (; (f1 != l1) && (f2 != l2); ++f1, ++f2) {
     while ((*f1 == ' ') && (f1 != l1)) ++f1;
     while ((*f2 == ' ') && (f2 != l2)) ++f2;
     if (*f1 != *f2) return (*f1 > *f2) ? 1 : -1;
@@ -390,11 +420,10 @@ SWIG_TypeNameComp(const char *f1, const char *l1,
   Check type equivalence in a name list like <name1>|<name2>|...
   Return 0 if equal, -1 if nb < tb, 1 if nb > tb
 */
-SWIGRUNTIME int
-SWIG_TypeCmp(const char *nb, const char *tb) {
+SWIGRUNTIME int SWIG_TypeCmp(const char *nb, const char *tb) {
   int equiv = 1;
-  const char* te = tb + strlen(tb);
-  const char* ne = nb;
+  const char *te = tb + strlen(tb);
+  const char *ne = nb;
   while (equiv != 0 && *ne) {
     for (nb = ne; *ne; ++ne) {
       if (*ne == '|') break;
@@ -409,26 +438,22 @@ SWIG_TypeCmp(const char *nb, const char *tb) {
   Check type equivalence in a name list like <name1>|<name2>|...
   Return 0 if not equal, 1 if equal
 */
-SWIGRUNTIME int
-SWIG_TypeEquiv(const char *nb, const char *tb) {
+SWIGRUNTIME int SWIG_TypeEquiv(const char *nb, const char *tb) {
   return SWIG_TypeCmp(nb, tb) == 0 ? 1 : 0;
 }
 
 /*
   Check the typename
 */
-SWIGRUNTIME swig_cast_info *
-SWIG_TypeCheck(const char *c, swig_type_info *ty) {
+SWIGRUNTIME swig_cast_info *SWIG_TypeCheck(const char *c, swig_type_info *ty) {
   if (ty) {
     swig_cast_info *iter = ty->cast;
     while (iter) {
       if (strcmp(iter->type->name, c) == 0) {
-        if (iter == ty->cast)
-          return iter;
+        if (iter == ty->cast) return iter;
         /* Move iter to the top of the linked list */
         iter->prev->next = iter->next;
-        if (iter->next)
-          iter->next->prev = iter->prev;
+        if (iter->next) iter->next->prev = iter->prev;
         iter->next = ty->cast;
         iter->prev = 0;
         if (ty->cast) ty->cast->prev = iter;
@@ -442,20 +467,19 @@ SWIG_TypeCheck(const char *c, swig_type_info *ty) {
 }
 
 /*
-  Identical to SWIG_TypeCheck, except strcmp is replaced with a pointer comparison
+  Identical to SWIG_TypeCheck, except strcmp is replaced with a pointer
+  comparison
 */
-SWIGRUNTIME swig_cast_info *
-SWIG_TypeCheckStruct(swig_type_info *from, swig_type_info *ty) {
+SWIGRUNTIME swig_cast_info *SWIG_TypeCheckStruct(swig_type_info *from,
+                                                 swig_type_info *ty) {
   if (ty) {
     swig_cast_info *iter = ty->cast;
     while (iter) {
       if (iter->type == from) {
-        if (iter == ty->cast)
-          return iter;
+        if (iter == ty->cast) return iter;
         /* Move iter to the top of the linked list */
         iter->prev->next = iter->next;
-        if (iter->next)
-          iter->next->prev = iter->prev;
+        if (iter->next) iter->next->prev = iter->prev;
         iter->next = ty->cast;
         iter->prev = 0;
         if (ty->cast) ty->cast->prev = iter;
@@ -471,16 +495,16 @@ SWIG_TypeCheckStruct(swig_type_info *from, swig_type_info *ty) {
 /*
   Cast a pointer up an inheritance hierarchy
 */
-SWIGRUNTIMEINLINE void *
-SWIG_TypeCast(swig_cast_info *ty, void *ptr, int *newmemory) {
+SWIGRUNTIMEINLINE void *SWIG_TypeCast(swig_cast_info *ty, void *ptr,
+                                      int *newmemory) {
   return ((!ty) || (!ty->converter)) ? ptr : (*ty->converter)(ptr, newmemory);
 }
 
 /*
    Dynamic pointer casting. Down an inheritance hierarchy
 */
-SWIGRUNTIME swig_type_info *
-SWIG_TypeDynamicCast(swig_type_info *ty, void **ptr) {
+SWIGRUNTIME swig_type_info *SWIG_TypeDynamicCast(swig_type_info *ty,
+                                                 void **ptr) {
   swig_type_info *lastty = ty;
   if (!ty || !ty->dcast) return ty;
   while (ty && (ty->dcast)) {
@@ -493,8 +517,7 @@ SWIG_TypeDynamicCast(swig_type_info *ty, void **ptr) {
 /*
   Return the name associated with this type
 */
-SWIGRUNTIMEINLINE const char *
-SWIG_TypeName(const swig_type_info *ty) {
+SWIGRUNTIMEINLINE const char *SWIG_TypeName(const swig_type_info *ty) {
   return ty->name;
 }
 
@@ -502,8 +525,7 @@ SWIG_TypeName(const swig_type_info *ty) {
   Return the pretty name associated with this type,
   that is an unmangled type name in a form presentable to the user.
 */
-SWIGRUNTIME const char *
-SWIG_TypePrettyName(const swig_type_info *type) {
+SWIGRUNTIME const char *SWIG_TypePrettyName(const swig_type_info *type) {
   /* The "str" field contains the equivalent pretty names of the
      type, separated by vertical-bar characters.  We choose
      to print the last name, as it is often (?) the most
@@ -513,18 +535,16 @@ SWIG_TypePrettyName(const swig_type_info *type) {
     const char *last_name = type->str;
     const char *s;
     for (s = type->str; *s; s++)
-      if (*s == '|') last_name = s+1;
+      if (*s == '|') last_name = s + 1;
     return last_name;
-  }
-  else
+  } else
     return type->name;
 }
 
 /*
    Set the clientdata field for a type
 */
-SWIGRUNTIME void
-SWIG_TypeClientData(swig_type_info *ti, void *clientdata) {
+SWIGRUNTIME void SWIG_TypeClientData(swig_type_info *ti, void *clientdata) {
   swig_cast_info *cast = ti->cast;
   /* if (ti->clientdata == clientdata) return; */
   ti->clientdata = clientdata;
@@ -533,14 +553,13 @@ SWIG_TypeClientData(swig_type_info *ti, void *clientdata) {
     if (!cast->converter) {
       swig_type_info *tc = cast->type;
       if (!tc->clientdata) {
-	SWIG_TypeClientData(tc, clientdata);
+        SWIG_TypeClientData(tc, clientdata);
       }
     }
     cast = cast->next;
   }
 }
-SWIGRUNTIME void
-SWIG_TypeNewClientData(swig_type_info *ti, void *clientdata) {
+SWIGRUNTIME void SWIG_TypeNewClientData(swig_type_info *ti, void *clientdata) {
   SWIG_TypeClientData(ti, clientdata);
   ti->owndata = 1;
 }
@@ -550,38 +569,38 @@ SWIG_TypeNewClientData(swig_type_info *ti, void *clientdata) {
   Search is a O(log #types)
 
   We start searching at module start, and finish searching when start == end.
-  Note: if start == end at the beginning of the function, we go all the way around
+  Note: if start == end at the beginning of the function, we go all the way
+  around
   the circular list.
 */
-SWIGRUNTIME swig_type_info *
-SWIG_MangledTypeQueryModule(swig_module_info *start,
-                            swig_module_info *end,
-		            const char *name) {
+SWIGRUNTIME swig_type_info *SWIG_MangledTypeQueryModule(swig_module_info *start,
+                                                        swig_module_info *end,
+                                                        const char *name) {
   swig_module_info *iter = start;
   do {
     if (iter->size) {
       size_t l = 0;
       size_t r = iter->size - 1;
       do {
-	/* since l+r >= 0, we can (>> 1) instead (/ 2) */
-	size_t i = (l + r) >> 1;
-	const char *iname = iter->types[i]->name;
-	if (iname) {
-	  int compare = strcmp(name, iname);
-	  if (compare == 0) {
-	    return iter->types[i];
-	  } else if (compare < 0) {
-	    if (i) {
-	      r = i - 1;
-	    } else {
-	      break;
-	    }
-	  } else if (compare > 0) {
-	    l = i + 1;
-	  }
-	} else {
-	  break; /* should never happen */
-	}
+        /* since l+r >= 0, we can (>> 1) instead (/ 2) */
+        size_t i = (l + r) >> 1;
+        const char *iname = iter->types[i]->name;
+        if (iname) {
+          int compare = strcmp(name, iname);
+          if (compare == 0) {
+            return iter->types[i];
+          } else if (compare < 0) {
+            if (i) {
+              r = i - 1;
+            } else {
+              break;
+            }
+          } else if (compare > 0) {
+            l = i + 1;
+          }
+        } else {
+          break; /* should never happen */
+        }
       } while (l <= r);
     }
     iter = iter->next;
@@ -590,18 +609,20 @@ SWIG_MangledTypeQueryModule(swig_module_info *start,
 }
 
 /*
-  Search for a swig_type_info structure for either a mangled name or a human readable name.
+  Search for a swig_type_info structure for either a mangled name or a human
+  readable name.
   It first searches the mangled names of the types, which is a O(log #types)
-  If a type is not found it then searches the human readable names, which is O(#types).
+  If a type is not found it then searches the human readable names, which is
+  O(#types).
 
   We start searching at module start, and finish searching when start == end.
-  Note: if start == end at the beginning of the function, we go all the way around
+  Note: if start == end at the beginning of the function, we go all the way
+  around
   the circular list.
 */
-SWIGRUNTIME swig_type_info *
-SWIG_TypeQueryModule(swig_module_info *start,
-                     swig_module_info *end,
-		     const char *name) {
+SWIGRUNTIME swig_type_info *SWIG_TypeQueryModule(swig_module_info *start,
+                                                 swig_module_info *end,
+                                                 const char *name) {
   /* STEP 1: Search the name field using binary search */
   swig_type_info *ret = SWIG_MangledTypeQueryModule(start, end, name);
   if (ret) {
@@ -613,8 +634,8 @@ SWIG_TypeQueryModule(swig_module_info *start,
     do {
       size_t i = 0;
       for (; i < iter->size; ++i) {
-	if (iter->types[i]->str && (SWIG_TypeEquiv(iter->types[i]->str, name)))
-	  return iter->types[i];
+        if (iter->types[i]->str && (SWIG_TypeEquiv(iter->types[i]->str, name)))
+          return iter->types[i];
       }
       iter = iter->next;
     } while (iter != end);
@@ -627,11 +648,10 @@ SWIG_TypeQueryModule(swig_module_info *start,
 /*
    Pack binary data into a string
 */
-SWIGRUNTIME char *
-SWIG_PackData(char *c, void *ptr, size_t sz) {
+SWIGRUNTIME char *SWIG_PackData(char *c, void *ptr, size_t sz) {
   static const char hex[17] = "0123456789abcdef";
-  const unsigned char *u = (unsigned char *) ptr;
-  const unsigned char *eu =  u + sz;
+  const unsigned char *u = (unsigned char *)ptr;
+  const unsigned char *eu = u + sz;
   for (; u != eu; ++u) {
     unsigned char uu = *u;
     *(c++) = hex[(uu & 0xf0) >> 4];
@@ -643,9 +663,8 @@ SWIG_PackData(char *c, void *ptr, size_t sz) {
 /*
    Unpack binary data from a string
 */
-SWIGRUNTIME const char *
-SWIG_UnpackData(const char *c, void *ptr, size_t sz) {
-  unsigned char *u = (unsigned char *) ptr;
+SWIGRUNTIME const char *SWIG_UnpackData(const char *c, void *ptr, size_t sz) {
+  unsigned char *u = (unsigned char *)ptr;
   const unsigned char *eu = u + sz;
   for (; u != eu; ++u) {
     char d = *(c++);
@@ -653,16 +672,16 @@ SWIG_UnpackData(const char *c, void *ptr, size_t sz) {
     if ((d >= '0') && (d <= '9'))
       uu = ((d - '0') << 4);
     else if ((d >= 'a') && (d <= 'f'))
-      uu = ((d - ('a'-10)) << 4);
+      uu = ((d - ('a' - 10)) << 4);
     else
-      return (char *) 0;
+      return (char *)0;
     d = *(c++);
     if ((d >= '0') && (d <= '9'))
       uu |= (d - '0');
     else if ((d >= 'a') && (d <= 'f'))
-      uu |= (d - ('a'-10));
+      uu |= (d - ('a' - 10));
     else
-      return (char *) 0;
+      return (char *)0;
     *u = uu;
   }
   return c;
@@ -671,56 +690,56 @@ SWIG_UnpackData(const char *c, void *ptr, size_t sz) {
 /*
    Pack 'void *' into a string buffer.
 */
-SWIGRUNTIME char *
-SWIG_PackVoidPtr(char *buff, void *ptr, const char *name, size_t bsz) {
+SWIGRUNTIME char *SWIG_PackVoidPtr(char *buff, void *ptr, const char *name,
+                                   size_t bsz) {
   char *r = buff;
-  if ((2*sizeof(void *) + 2) > bsz) return 0;
+  if ((2 * sizeof(void *) + 2) > bsz) return 0;
   *(r++) = '_';
-  r = SWIG_PackData(r,&ptr,sizeof(void *));
+  r = SWIG_PackData(r, &ptr, sizeof(void *));
   if (strlen(name) + 1 > (bsz - (r - buff))) return 0;
-  strcpy(r,name);
+  strcpy(r, name);
   return buff;
 }
 
-SWIGRUNTIME const char *
-SWIG_UnpackVoidPtr(const char *c, void **ptr, const char *name) {
+SWIGRUNTIME const char *SWIG_UnpackVoidPtr(const char *c, void **ptr,
+                                           const char *name) {
   if (*c != '_') {
-    if (strcmp(c,"NULL") == 0) {
-      *ptr = (void *) 0;
+    if (strcmp(c, "NULL") == 0) {
+      *ptr = (void *)0;
       return name;
     } else {
       return 0;
     }
   }
-  return SWIG_UnpackData(++c,ptr,sizeof(void *));
+  return SWIG_UnpackData(++c, ptr, sizeof(void *));
 }
 
-SWIGRUNTIME char *
-SWIG_PackDataName(char *buff, void *ptr, size_t sz, const char *name, size_t bsz) {
+SWIGRUNTIME char *SWIG_PackDataName(char *buff, void *ptr, size_t sz,
+                                    const char *name, size_t bsz) {
   char *r = buff;
   size_t lname = (name ? strlen(name) : 0);
-  if ((2*sz + 2 + lname) > bsz) return 0;
+  if ((2 * sz + 2 + lname) > bsz) return 0;
   *(r++) = '_';
-  r = SWIG_PackData(r,ptr,sz);
+  r = SWIG_PackData(r, ptr, sz);
   if (lname) {
-    strncpy(r,name,lname+1);
+    strncpy(r, name, lname + 1);
   } else {
     *r = 0;
   }
   return buff;
 }
 
-SWIGRUNTIME const char *
-SWIG_UnpackDataName(const char *c, void *ptr, size_t sz, const char *name) {
+SWIGRUNTIME const char *SWIG_UnpackDataName(const char *c, void *ptr, size_t sz,
+                                            const char *name) {
   if (*c != '_') {
-    if (strcmp(c,"NULL") == 0) {
-      memset(ptr,0,sz);
+    if (strcmp(c, "NULL") == 0) {
+      memset(ptr, 0, sz);
       return name;
     } else {
       return 0;
     }
   }
-  return SWIG_UnpackData(++c,ptr,sz);
+  return SWIG_UnpackData(++c, ptr, sz);
 }
 
 #ifdef __cplusplus
@@ -728,21 +747,19 @@ SWIG_UnpackDataName(const char *c, void *ptr, size_t sz, const char *name) {
 #endif
 
 /*  Errors in SWIG */
-#define  SWIG_UnknownError    	   -1
-#define  SWIG_IOError        	   -2
-#define  SWIG_RuntimeError   	   -3
-#define  SWIG_IndexError     	   -4
-#define  SWIG_TypeError      	   -5
-#define  SWIG_DivisionByZero 	   -6
-#define  SWIG_OverflowError  	   -7
-#define  SWIG_SyntaxError    	   -8
-#define  SWIG_ValueError     	   -9
-#define  SWIG_SystemError    	   -10
-#define  SWIG_AttributeError 	   -11
-#define  SWIG_MemoryError    	   -12
-#define  SWIG_NullReferenceError   -13
-
-
+#define SWIG_UnknownError -1
+#define SWIG_IOError -2
+#define SWIG_RuntimeError -3
+#define SWIG_IndexError -4
+#define SWIG_TypeError -5
+#define SWIG_DivisionByZero -6
+#define SWIG_OverflowError -7
+#define SWIG_SyntaxError -8
+#define SWIG_ValueError -9
+#define SWIG_SystemError -10
+#define SWIG_AttributeError -11
+#define SWIG_MemoryError -12
+#define SWIG_NullReferenceError -13
 
 /* Compatibility macros for Python 3 */
 #if PY_VERSION_HEX >= 0x03000000
@@ -754,9 +771,9 @@ SWIG_UnpackDataName(const char *c, void *ptr, size_t sz, const char *name) {
 #define PyInt_FromSize_t(x) PyLong_FromSize_t(x)
 #define PyString_Check(name) PyBytes_Check(name)
 #define PyString_FromString(x) PyUnicode_FromString(x)
-#define PyString_Format(fmt, args)  PyUnicode_Format(fmt, args)
+#define PyString_Format(fmt, args) PyUnicode_Format(fmt, args)
 #define PyString_AsString(str) PyBytes_AsString(str)
-#define PyString_Size(str) PyBytes_Size(str)	
+#define PyString_Size(str) PyBytes_Size(str)
 #define PyString_InternFromString(key) PyUnicode_InternFromString(key)
 #define Py_TPFLAGS_HAVE_CLASS Py_TPFLAGS_BASETYPE
 #define PyString_AS_STRING(x) PyUnicode_AS_STRING(x)
@@ -765,32 +782,29 @@ SWIG_UnpackDataName(const char *c, void *ptr, size_t sz, const char *name) {
 #endif
 
 #ifndef Py_TYPE
-#  define Py_TYPE(op) ((op)->ob_type)
+#define Py_TYPE(op) ((op)->ob_type)
 #endif
 
 /* SWIG APIs for compatibility of both Python 2 & 3 */
 
 #if PY_VERSION_HEX >= 0x03000000
-#  define SWIG_Python_str_FromFormat PyUnicode_FromFormat
+#define SWIG_Python_str_FromFormat PyUnicode_FromFormat
 #else
-#  define SWIG_Python_str_FromFormat PyString_FromFormat
+#define SWIG_Python_str_FromFormat PyString_FromFormat
 #endif
-
 
 /* Warning: This function will allocate a new string in Python 3,
  * so please call SWIG_Python_str_DelForPy3(x) to free the space.
  */
-SWIGINTERN char*
-SWIG_Python_str_AsChar(PyObject *str)
-{
+SWIGINTERN char *SWIG_Python_str_AsChar(PyObject *str) {
 #if PY_VERSION_HEX >= 0x03000000
   char *cstr;
   char *newstr;
   Py_ssize_t len;
   str = PyUnicode_AsUTF8String(str);
   PyBytes_AsStringAndSize(str, &cstr, &len);
-  newstr = (char *) malloc(len+1);
-  memcpy(newstr, cstr, len+1);
+  newstr = (char *)malloc(len + 1);
+  memcpy(newstr, cstr, len + 1);
   Py_XDECREF(str);
   return newstr;
 #else
@@ -799,17 +813,14 @@ SWIG_Python_str_AsChar(PyObject *str)
 }
 
 #if PY_VERSION_HEX >= 0x03000000
-#  define SWIG_Python_str_DelForPy3(x) free( (void*) (x) )
+#define SWIG_Python_str_DelForPy3(x) free((void *)(x))
 #else
-#  define SWIG_Python_str_DelForPy3(x) 
+#define SWIG_Python_str_DelForPy3(x)
 #endif
 
-
-SWIGINTERN PyObject*
-SWIG_Python_str_FromChar(const char *c)
-{
+SWIGINTERN PyObject *SWIG_Python_str_FromChar(const char *c) {
 #if PY_VERSION_HEX >= 0x03000000
-  return PyUnicode_FromString(c); 
+  return PyUnicode_FromString(c);
 #else
   return PyString_FromString(c);
 #endif
@@ -817,22 +828,21 @@ SWIG_Python_str_FromChar(const char *c)
 
 /* Add PyOS_snprintf for old Pythons */
 #if PY_VERSION_HEX < 0x02020000
-# if defined(_MSC_VER) || defined(__BORLANDC__) || defined(_WATCOM)
-#  define PyOS_snprintf _snprintf
-# else
-#  define PyOS_snprintf snprintf
-# endif
+#if defined(_MSC_VER) || defined(__BORLANDC__) || defined(_WATCOM)
+#define PyOS_snprintf _snprintf
+#else
+#define PyOS_snprintf snprintf
+#endif
 #endif
 
 /* A crude PyString_FromFormat implementation for old Pythons */
 #if PY_VERSION_HEX < 0x02020000
 
 #ifndef SWIG_PYBUFFER_SIZE
-# define SWIG_PYBUFFER_SIZE 1024
+#define SWIG_PYBUFFER_SIZE 1024
 #endif
 
-static PyObject *
-PyString_FromFormat(const char *fmt, ...) {
+static PyObject *PyString_FromFormat(const char *fmt, ...) {
   va_list ap;
   char buf[SWIG_PYBUFFER_SIZE * 2];
   int res;
@@ -845,48 +855,50 @@ PyString_FromFormat(const char *fmt, ...) {
 
 /* Add PyObject_Del for old Pythons */
 #if PY_VERSION_HEX < 0x01060000
-# define PyObject_Del(op) PyMem_DEL((op))
+#define PyObject_Del(op) PyMem_DEL((op))
 #endif
 #ifndef PyObject_DEL
-# define PyObject_DEL PyObject_Del
+#define PyObject_DEL PyObject_Del
 #endif
 
 /* A crude PyExc_StopIteration exception for old Pythons */
 #if PY_VERSION_HEX < 0x02020000
-# ifndef PyExc_StopIteration
-#  define PyExc_StopIteration PyExc_RuntimeError
-# endif
-# ifndef PyObject_GenericGetAttr
-#  define PyObject_GenericGetAttr 0
-# endif
+#ifndef PyExc_StopIteration
+#define PyExc_StopIteration PyExc_RuntimeError
+#endif
+#ifndef PyObject_GenericGetAttr
+#define PyObject_GenericGetAttr 0
+#endif
 #endif
 
 /* Py_NotImplemented is defined in 2.1 and up. */
 #if PY_VERSION_HEX < 0x02010000
-# ifndef Py_NotImplemented
-#  define Py_NotImplemented PyExc_RuntimeError
-# endif
+#ifndef Py_NotImplemented
+#define Py_NotImplemented PyExc_RuntimeError
+#endif
 #endif
 
 /* A crude PyString_AsStringAndSize implementation for old Pythons */
 #if PY_VERSION_HEX < 0x02010000
-# ifndef PyString_AsStringAndSize
-#  define PyString_AsStringAndSize(obj, s, len) {*s = PyString_AsString(obj); *len = *s ? strlen(*s) : 0;}
-# endif
+#ifndef PyString_AsStringAndSize
+#define PyString_AsStringAndSize(obj, s, len) \
+  {                                           \
+    *s = PyString_AsString(obj);              \
+    *len = *s ? strlen(*s) : 0;               \
+  }
+#endif
 #endif
 
 /* PySequence_Size for old Pythons */
 #if PY_VERSION_HEX < 0x02000000
-# ifndef PySequence_Size
-#  define PySequence_Size PySequence_Length
-# endif
+#ifndef PySequence_Size
+#define PySequence_Size PySequence_Length
+#endif
 #endif
 
 /* PyBool_FromLong for old Pythons */
 #if PY_VERSION_HEX < 0x02030000
-static
-PyObject *PyBool_FromLong(long ok)
-{
+static PyObject *PyBool_FromLong(long ok) {
   PyObject *result = ok ? Py_True : Py_False;
   Py_INCREF(result);
   return result;
@@ -898,8 +910,8 @@ PyObject *PyBool_FromLong(long ok)
 /* http://www.python.org/dev/peps/pep-0353/#conversion-guidelines */
 #if PY_VERSION_HEX < 0x02050000 && !defined(PY_SSIZE_T_MIN)
 typedef int Py_ssize_t;
-# define PY_SSIZE_T_MAX INT_MAX
-# define PY_SSIZE_T_MIN INT_MIN
+#define PY_SSIZE_T_MAX INT_MAX
+#define PY_SSIZE_T_MIN INT_MIN
 typedef inquiry lenfunc;
 typedef intargfunc ssizeargfunc;
 typedef intintargfunc ssizessizeargfunc;
@@ -909,8 +921,7 @@ typedef getreadbufferproc readbufferproc;
 typedef getwritebufferproc writebufferproc;
 typedef getsegcountproc segcountproc;
 typedef getcharbufferproc charbufferproc;
-static long PyNumber_AsSsize_t (PyObject *x, void *SWIGUNUSEDPARM(exc))
-{
+static long PyNumber_AsSsize_t(PyObject *x, void *SWIGUNUSEDPARM(exc)) {
   long result = 0;
   PyObject *i = PyNumber_Int(x);
   if (i) {
@@ -926,13 +937,12 @@ static long PyNumber_AsSsize_t (PyObject *x, void *SWIGUNUSEDPARM(exc))
 #endif
 
 #if PY_VERSION_HEX < 0x02040000
-#define Py_VISIT(op)				\
-  do { 						\
-    if (op) {					\
-      int vret = visit((op), arg);		\
-      if (vret)					\
-        return vret;				\
-    }						\
+#define Py_VISIT(op)               \
+  do {                             \
+    if (op) {                      \
+      int vret = visit((op), arg); \
+      if (vret) return vret;       \
+    }                              \
   } while (0)
 #endif
 
@@ -954,8 +964,10 @@ typedef destructor freefunc;
 #if ((PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION > 6) || \
      (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION > 0) || \
      (PY_MAJOR_VERSION > 3))
-# define SWIGPY_USE_CAPSULE
-# define SWIGPY_CAPSULE_NAME ((char*)"swig_runtime_data" SWIG_RUNTIME_VERSION ".type_pointer_capsule" SWIG_TYPE_TABLE_NAME)
+#define SWIGPY_USE_CAPSULE
+#define SWIGPY_CAPSULE_NAME                         \
+  ((char *)"swig_runtime_data" SWIG_RUNTIME_VERSION \
+           ".type_pointer_capsule" SWIG_TYPE_TABLE_NAME)
 #endif
 
 #if PY_VERSION_HEX < 0x03020000
@@ -965,55 +977,52 @@ typedef destructor freefunc;
 
 /* -----------------------------------------------------------------------------
  * error manipulation
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
-SWIGRUNTIME PyObject*
-SWIG_Python_ErrorType(int code) {
-  PyObject* type = 0;
-  switch(code) {
-  case SWIG_MemoryError:
-    type = PyExc_MemoryError;
-    break;
-  case SWIG_IOError:
-    type = PyExc_IOError;
-    break;
-  case SWIG_RuntimeError:
-    type = PyExc_RuntimeError;
-    break;
-  case SWIG_IndexError:
-    type = PyExc_IndexError;
-    break;
-  case SWIG_TypeError:
-    type = PyExc_TypeError;
-    break;
-  case SWIG_DivisionByZero:
-    type = PyExc_ZeroDivisionError;
-    break;
-  case SWIG_OverflowError:
-    type = PyExc_OverflowError;
-    break;
-  case SWIG_SyntaxError:
-    type = PyExc_SyntaxError;
-    break;
-  case SWIG_ValueError:
-    type = PyExc_ValueError;
-    break;
-  case SWIG_SystemError:
-    type = PyExc_SystemError;
-    break;
-  case SWIG_AttributeError:
-    type = PyExc_AttributeError;
-    break;
-  default:
-    type = PyExc_RuntimeError;
+SWIGRUNTIME PyObject *SWIG_Python_ErrorType(int code) {
+  PyObject *type = 0;
+  switch (code) {
+    case SWIG_MemoryError:
+      type = PyExc_MemoryError;
+      break;
+    case SWIG_IOError:
+      type = PyExc_IOError;
+      break;
+    case SWIG_RuntimeError:
+      type = PyExc_RuntimeError;
+      break;
+    case SWIG_IndexError:
+      type = PyExc_IndexError;
+      break;
+    case SWIG_TypeError:
+      type = PyExc_TypeError;
+      break;
+    case SWIG_DivisionByZero:
+      type = PyExc_ZeroDivisionError;
+      break;
+    case SWIG_OverflowError:
+      type = PyExc_OverflowError;
+      break;
+    case SWIG_SyntaxError:
+      type = PyExc_SyntaxError;
+      break;
+    case SWIG_ValueError:
+      type = PyExc_ValueError;
+      break;
+    case SWIG_SystemError:
+      type = PyExc_SystemError;
+      break;
+    case SWIG_AttributeError:
+      type = PyExc_AttributeError;
+      break;
+    default:
+      type = PyExc_RuntimeError;
   }
   return type;
 }
 
-
-SWIGRUNTIME void
-SWIG_Python_AddErrorMsg(const char* mesg)
-{
+SWIGRUNTIME void SWIG_Python_AddErrorMsg(const char *mesg) {
   PyObject *type = 0;
   PyObject *value = 0;
   PyObject *traceback = 0;
@@ -1035,75 +1044,93 @@ SWIG_Python_AddErrorMsg(const char* mesg)
 }
 
 #if defined(SWIG_PYTHON_NO_THREADS)
-#  if defined(SWIG_PYTHON_THREADS)
-#    undef SWIG_PYTHON_THREADS
-#  endif
+#if defined(SWIG_PYTHON_THREADS)
+#undef SWIG_PYTHON_THREADS
+#endif
 #endif
 #if defined(SWIG_PYTHON_THREADS) /* Threading support is enabled */
-#  if !defined(SWIG_PYTHON_USE_GIL) && !defined(SWIG_PYTHON_NO_USE_GIL)
-#    if (PY_VERSION_HEX >= 0x02030000) /* For 2.3 or later, use the PyGILState calls */
-#      define SWIG_PYTHON_USE_GIL
-#    endif
-#  endif
-#  if defined(SWIG_PYTHON_USE_GIL) /* Use PyGILState threads calls */
-#    ifndef SWIG_PYTHON_INITIALIZE_THREADS
-#     define SWIG_PYTHON_INITIALIZE_THREADS  PyEval_InitThreads() 
-#    endif
-#    ifdef __cplusplus /* C++ code */
-       class SWIG_Python_Thread_Block {
-         bool status;
-         PyGILState_STATE state;
-       public:
-         void end() { if (status) { PyGILState_Release(state); status = false;} }
-         SWIG_Python_Thread_Block() : status(true), state(PyGILState_Ensure()) {}
-         ~SWIG_Python_Thread_Block() { end(); }
-       };
-       class SWIG_Python_Thread_Allow {
-         bool status;
-         PyThreadState *save;
-       public:
-         void end() { if (status) { PyEval_RestoreThread(save); status = false; }}
-         SWIG_Python_Thread_Allow() : status(true), save(PyEval_SaveThread()) {}
-         ~SWIG_Python_Thread_Allow() { end(); }
-       };
-#      define SWIG_PYTHON_THREAD_BEGIN_BLOCK   SWIG_Python_Thread_Block _swig_thread_block
-#      define SWIG_PYTHON_THREAD_END_BLOCK     _swig_thread_block.end()
-#      define SWIG_PYTHON_THREAD_BEGIN_ALLOW   SWIG_Python_Thread_Allow _swig_thread_allow
-#      define SWIG_PYTHON_THREAD_END_ALLOW     _swig_thread_allow.end()
-#    else /* C code */
-#      define SWIG_PYTHON_THREAD_BEGIN_BLOCK   PyGILState_STATE _swig_thread_block = PyGILState_Ensure()
-#      define SWIG_PYTHON_THREAD_END_BLOCK     PyGILState_Release(_swig_thread_block)
-#      define SWIG_PYTHON_THREAD_BEGIN_ALLOW   PyThreadState *_swig_thread_allow = PyEval_SaveThread()
-#      define SWIG_PYTHON_THREAD_END_ALLOW     PyEval_RestoreThread(_swig_thread_allow)
-#    endif
-#  else /* Old thread way, not implemented, user must provide it */
-#    if !defined(SWIG_PYTHON_INITIALIZE_THREADS)
-#      define SWIG_PYTHON_INITIALIZE_THREADS
-#    endif
-#    if !defined(SWIG_PYTHON_THREAD_BEGIN_BLOCK)
-#      define SWIG_PYTHON_THREAD_BEGIN_BLOCK
-#    endif
-#    if !defined(SWIG_PYTHON_THREAD_END_BLOCK)
-#      define SWIG_PYTHON_THREAD_END_BLOCK
-#    endif
-#    if !defined(SWIG_PYTHON_THREAD_BEGIN_ALLOW)
-#      define SWIG_PYTHON_THREAD_BEGIN_ALLOW
-#    endif
-#    if !defined(SWIG_PYTHON_THREAD_END_ALLOW)
-#      define SWIG_PYTHON_THREAD_END_ALLOW
-#    endif
-#  endif
+#if !defined(SWIG_PYTHON_USE_GIL) && !defined(SWIG_PYTHON_NO_USE_GIL)
+#if (PY_VERSION_HEX >= \
+     0x02030000) /* For 2.3 or later, use the PyGILState calls */
+#define SWIG_PYTHON_USE_GIL
+#endif
+#endif
+#if defined(SWIG_PYTHON_USE_GIL) /* Use PyGILState threads calls */
+#ifndef SWIG_PYTHON_INITIALIZE_THREADS
+#define SWIG_PYTHON_INITIALIZE_THREADS PyEval_InitThreads()
+#endif
+#ifdef __cplusplus /* C++ code */
+class SWIG_Python_Thread_Block {
+  bool status;
+  PyGILState_STATE state;
+
+ public:
+  void end() {
+    if (status) {
+      PyGILState_Release(state);
+      status = false;
+    }
+  }
+  SWIG_Python_Thread_Block() : status(true), state(PyGILState_Ensure()) {}
+  ~SWIG_Python_Thread_Block() { end(); }
+};
+class SWIG_Python_Thread_Allow {
+  bool status;
+  PyThreadState *save;
+
+ public:
+  void end() {
+    if (status) {
+      PyEval_RestoreThread(save);
+      status = false;
+    }
+  }
+  SWIG_Python_Thread_Allow() : status(true), save(PyEval_SaveThread()) {}
+  ~SWIG_Python_Thread_Allow() { end(); }
+};
+#define SWIG_PYTHON_THREAD_BEGIN_BLOCK \
+  SWIG_Python_Thread_Block _swig_thread_block
+#define SWIG_PYTHON_THREAD_END_BLOCK _swig_thread_block.end()
+#define SWIG_PYTHON_THREAD_BEGIN_ALLOW \
+  SWIG_Python_Thread_Allow _swig_thread_allow
+#define SWIG_PYTHON_THREAD_END_ALLOW _swig_thread_allow.end()
+#else /* C code */
+#define SWIG_PYTHON_THREAD_BEGIN_BLOCK \
+  PyGILState_STATE _swig_thread_block = PyGILState_Ensure()
+#define SWIG_PYTHON_THREAD_END_BLOCK PyGILState_Release(_swig_thread_block)
+#define SWIG_PYTHON_THREAD_BEGIN_ALLOW \
+  PyThreadState *_swig_thread_allow = PyEval_SaveThread()
+#define SWIG_PYTHON_THREAD_END_ALLOW PyEval_RestoreThread(_swig_thread_allow)
+#endif
+#else /* Old thread way, not implemented, user must provide it */
+#if !defined(SWIG_PYTHON_INITIALIZE_THREADS)
+#define SWIG_PYTHON_INITIALIZE_THREADS
+#endif
+#if !defined(SWIG_PYTHON_THREAD_BEGIN_BLOCK)
+#define SWIG_PYTHON_THREAD_BEGIN_BLOCK
+#endif
+#if !defined(SWIG_PYTHON_THREAD_END_BLOCK)
+#define SWIG_PYTHON_THREAD_END_BLOCK
+#endif
+#if !defined(SWIG_PYTHON_THREAD_BEGIN_ALLOW)
+#define SWIG_PYTHON_THREAD_BEGIN_ALLOW
+#endif
+#if !defined(SWIG_PYTHON_THREAD_END_ALLOW)
+#define SWIG_PYTHON_THREAD_END_ALLOW
+#endif
+#endif
 #else /* No thread support */
-#  define SWIG_PYTHON_INITIALIZE_THREADS
-#  define SWIG_PYTHON_THREAD_BEGIN_BLOCK
-#  define SWIG_PYTHON_THREAD_END_BLOCK
-#  define SWIG_PYTHON_THREAD_BEGIN_ALLOW
-#  define SWIG_PYTHON_THREAD_END_ALLOW
+#define SWIG_PYTHON_INITIALIZE_THREADS
+#define SWIG_PYTHON_THREAD_BEGIN_BLOCK
+#define SWIG_PYTHON_THREAD_END_BLOCK
+#define SWIG_PYTHON_THREAD_BEGIN_ALLOW
+#define SWIG_PYTHON_THREAD_END_ALLOW
 #endif
 
 /* -----------------------------------------------------------------------------
  * Python API portion that goes into the runtime
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -1111,11 +1138,12 @@ extern "C" {
 
 /* -----------------------------------------------------------------------------
  * Constant declarations
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 /* Constant Types */
 #define SWIG_PY_POINTER 4
-#define SWIG_PY_BINARY  5
+#define SWIG_PY_BINARY 5
 
 /* Constant information structure */
 typedef struct swig_const_info {
@@ -1123,23 +1151,23 @@ typedef struct swig_const_info {
   char *name;
   long lvalue;
   double dvalue;
-  void   *pvalue;
+  void *pvalue;
   swig_type_info **ptype;
 } swig_const_info;
-
 
 /* -----------------------------------------------------------------------------
  * Wrapper of PyInstanceMethod_New() used in Python 3
  * It is exported to the generated module, used for -fastproxy
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 #if PY_VERSION_HEX >= 0x03000000
-SWIGRUNTIME PyObject* SWIG_PyInstanceMethod_New(PyObject *SWIGUNUSEDPARM(self), PyObject *func)
-{
+SWIGRUNTIME PyObject *SWIG_PyInstanceMethod_New(PyObject *SWIGUNUSEDPARM(self),
+                                                PyObject *func) {
   return PyInstanceMethod_New(func);
 }
 #else
-SWIGRUNTIME PyObject* SWIG_PyInstanceMethod_New(PyObject *SWIGUNUSEDPARM(self), PyObject *SWIGUNUSEDPARM(func))
-{
+SWIGRUNTIME PyObject *SWIG_PyInstanceMethod_New(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *SWIGUNUSEDPARM(func)) {
   return NULL;
 }
 #endif
@@ -1148,7 +1176,6 @@ SWIGRUNTIME PyObject* SWIG_PyInstanceMethod_New(PyObject *SWIGUNUSEDPARM(self), 
 }
 #endif
 
-
 /* -----------------------------------------------------------------------------
  * pyrun.swg
  *
@@ -1156,119 +1183,126 @@ SWIGRUNTIME PyObject* SWIG_PyInstanceMethod_New(PyObject *SWIGUNUSEDPARM(self), 
  * and includes code for managing global variables and pointer
  * type checking.
  *
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 /* Common SWIG API */
 
 /* for raw pointers */
-#define SWIG_Python_ConvertPtr(obj, pptr, type, flags)  SWIG_Python_ConvertPtrAndOwn(obj, pptr, type, flags, 0)
-#define SWIG_ConvertPtr(obj, pptr, type, flags)         SWIG_Python_ConvertPtr(obj, pptr, type, flags)
-#define SWIG_ConvertPtrAndOwn(obj,pptr,type,flags,own)  SWIG_Python_ConvertPtrAndOwn(obj, pptr, type, flags, own)
+#define SWIG_Python_ConvertPtr(obj, pptr, type, flags) \
+  SWIG_Python_ConvertPtrAndOwn(obj, pptr, type, flags, 0)
+#define SWIG_ConvertPtr(obj, pptr, type, flags) \
+  SWIG_Python_ConvertPtr(obj, pptr, type, flags)
+#define SWIG_ConvertPtrAndOwn(obj, pptr, type, flags, own) \
+  SWIG_Python_ConvertPtrAndOwn(obj, pptr, type, flags, own)
 
 #ifdef SWIGPYTHON_BUILTIN
-#define SWIG_NewPointerObj(ptr, type, flags)            SWIG_Python_NewPointerObj(self, ptr, type, flags)
+#define SWIG_NewPointerObj(ptr, type, flags) \
+  SWIG_Python_NewPointerObj(self, ptr, type, flags)
 #else
-#define SWIG_NewPointerObj(ptr, type, flags)            SWIG_Python_NewPointerObj(NULL, ptr, type, flags)
+#define SWIG_NewPointerObj(ptr, type, flags) \
+  SWIG_Python_NewPointerObj(NULL, ptr, type, flags)
 #endif
 
-#define SWIG_InternalNewPointerObj(ptr, type, flags)	SWIG_Python_NewPointerObj(NULL, ptr, type, flags)
+#define SWIG_InternalNewPointerObj(ptr, type, flags) \
+  SWIG_Python_NewPointerObj(NULL, ptr, type, flags)
 
-#define SWIG_CheckImplicit(ty)                          SWIG_Python_CheckImplicit(ty) 
-#define SWIG_AcquirePtr(ptr, src)                       SWIG_Python_AcquirePtr(ptr, src)
-#define swig_owntype                                    int
+#define SWIG_CheckImplicit(ty) SWIG_Python_CheckImplicit(ty)
+#define SWIG_AcquirePtr(ptr, src) SWIG_Python_AcquirePtr(ptr, src)
+#define swig_owntype int
 
 /* for raw packed data */
-#define SWIG_ConvertPacked(obj, ptr, sz, ty)            SWIG_Python_ConvertPacked(obj, ptr, sz, ty)
-#define SWIG_NewPackedObj(ptr, sz, type)                SWIG_Python_NewPackedObj(ptr, sz, type)
+#define SWIG_ConvertPacked(obj, ptr, sz, ty) \
+  SWIG_Python_ConvertPacked(obj, ptr, sz, ty)
+#define SWIG_NewPackedObj(ptr, sz, type) SWIG_Python_NewPackedObj(ptr, sz, type)
 
 /* for class or struct pointers */
-#define SWIG_ConvertInstance(obj, pptr, type, flags)    SWIG_ConvertPtr(obj, pptr, type, flags)
-#define SWIG_NewInstanceObj(ptr, type, flags)           SWIG_NewPointerObj(ptr, type, flags)
+#define SWIG_ConvertInstance(obj, pptr, type, flags) \
+  SWIG_ConvertPtr(obj, pptr, type, flags)
+#define SWIG_NewInstanceObj(ptr, type, flags) \
+  SWIG_NewPointerObj(ptr, type, flags)
 
 /* for C or C++ function pointers */
-#define SWIG_ConvertFunctionPtr(obj, pptr, type)        SWIG_Python_ConvertFunctionPtr(obj, pptr, type)
-#define SWIG_NewFunctionPtrObj(ptr, type)               SWIG_Python_NewPointerObj(NULL, ptr, type, 0)
+#define SWIG_ConvertFunctionPtr(obj, pptr, type) \
+  SWIG_Python_ConvertFunctionPtr(obj, pptr, type)
+#define SWIG_NewFunctionPtrObj(ptr, type) \
+  SWIG_Python_NewPointerObj(NULL, ptr, type, 0)
 
 /* for C++ member pointers, ie, member methods */
-#define SWIG_ConvertMember(obj, ptr, sz, ty)            SWIG_Python_ConvertPacked(obj, ptr, sz, ty)
-#define SWIG_NewMemberObj(ptr, sz, type)                SWIG_Python_NewPackedObj(ptr, sz, type)
-
+#define SWIG_ConvertMember(obj, ptr, sz, ty) \
+  SWIG_Python_ConvertPacked(obj, ptr, sz, ty)
+#define SWIG_NewMemberObj(ptr, sz, type) SWIG_Python_NewPackedObj(ptr, sz, type)
 
 /* Runtime API */
 
-#define SWIG_GetModule(clientdata)                      SWIG_Python_GetModule(clientdata)
-#define SWIG_SetModule(clientdata, pointer)             SWIG_Python_SetModule(pointer)
-#define SWIG_NewClientData(obj)                         SwigPyClientData_New(obj)
+#define SWIG_GetModule(clientdata) SWIG_Python_GetModule(clientdata)
+#define SWIG_SetModule(clientdata, pointer) SWIG_Python_SetModule(pointer)
+#define SWIG_NewClientData(obj) SwigPyClientData_New(obj)
 
-#define SWIG_SetErrorObj                                SWIG_Python_SetErrorObj                            
-#define SWIG_SetErrorMsg                        	SWIG_Python_SetErrorMsg				   
-#define SWIG_ErrorType(code)                    	SWIG_Python_ErrorType(code)                        
-#define SWIG_Error(code, msg)            		SWIG_Python_SetErrorMsg(SWIG_ErrorType(code), msg) 
-#define SWIG_fail                        		goto fail					   
-
+#define SWIG_SetErrorObj SWIG_Python_SetErrorObj
+#define SWIG_SetErrorMsg SWIG_Python_SetErrorMsg
+#define SWIG_ErrorType(code) SWIG_Python_ErrorType(code)
+#define SWIG_Error(code, msg) SWIG_Python_SetErrorMsg(SWIG_ErrorType(code), msg)
+#define SWIG_fail goto fail
 
 /* Runtime API implementation */
 
 /* Error manipulation */
 
-SWIGINTERN void 
-SWIG_Python_SetErrorObj(PyObject *errtype, PyObject *obj) {
-  SWIG_PYTHON_THREAD_BEGIN_BLOCK; 
+SWIGINTERN void SWIG_Python_SetErrorObj(PyObject *errtype, PyObject *obj) {
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
   PyErr_SetObject(errtype, obj);
   Py_DECREF(obj);
   SWIG_PYTHON_THREAD_END_BLOCK;
 }
 
-SWIGINTERN void 
-SWIG_Python_SetErrorMsg(PyObject *errtype, const char *msg) {
+SWIGINTERN void SWIG_Python_SetErrorMsg(PyObject *errtype, const char *msg) {
   SWIG_PYTHON_THREAD_BEGIN_BLOCK;
   PyErr_SetString(errtype, msg);
   SWIG_PYTHON_THREAD_END_BLOCK;
 }
 
-#define SWIG_Python_Raise(obj, type, desc)  SWIG_Python_SetErrorObj(SWIG_Python_ExceptionType(desc), obj)
+#define SWIG_Python_Raise(obj, type, desc) \
+  SWIG_Python_SetErrorObj(SWIG_Python_ExceptionType(desc), obj)
 
 /* Set a constant value */
 
 #if defined(SWIGPYTHON_BUILTIN)
 
-SWIGINTERN void
-SwigPyBuiltin_AddPublicSymbol(PyObject *seq, const char *key) {
+SWIGINTERN void SwigPyBuiltin_AddPublicSymbol(PyObject *seq, const char *key) {
   PyObject *s = PyString_InternFromString(key);
   PyList_Append(seq, s);
   Py_DECREF(s);
 }
 
-SWIGINTERN void
-SWIG_Python_SetConstant(PyObject *d, PyObject *public_interface, const char *name, PyObject *obj) {   
+SWIGINTERN void SWIG_Python_SetConstant(PyObject *d, PyObject *public_interface,
+                                        const char *name, PyObject *obj) {
 #if PY_VERSION_HEX < 0x02030000
   PyDict_SetItemString(d, (char *)name, obj);
 #else
   PyDict_SetItemString(d, name, obj);
 #endif
   Py_DECREF(obj);
-  if (public_interface)
-    SwigPyBuiltin_AddPublicSymbol(public_interface, name);
+  if (public_interface) SwigPyBuiltin_AddPublicSymbol(public_interface, name);
 }
 
 #else
 
-SWIGINTERN void
-SWIG_Python_SetConstant(PyObject *d, const char *name, PyObject *obj) {   
+SWIGINTERN void SWIG_Python_SetConstant(PyObject *d, const char *name,
+                                        PyObject *obj) {
 #if PY_VERSION_HEX < 0x02030000
   PyDict_SetItemString(d, (char *)name, obj);
 #else
   PyDict_SetItemString(d, name, obj);
 #endif
-  Py_DECREF(obj);                            
+  Py_DECREF(obj);
 }
 
 #endif
 
 /* Append a value to the result obj */
 
-SWIGINTERN PyObject*
-SWIG_Python_AppendOutput(PyObject* result, PyObject* obj) {
+SWIGINTERN PyObject *SWIG_Python_AppendOutput(PyObject *result, PyObject *obj) {
 #if !defined(SWIG_PYTHON_OUTPUT_TUPLE)
   if (!result) {
     result = obj;
@@ -1281,13 +1315,13 @@ SWIG_Python_AppendOutput(PyObject* result, PyObject* obj) {
       result = PyList_New(1);
       PyList_SetItem(result, 0, o2);
     }
-    PyList_Append(result,obj);
+    PyList_Append(result, obj);
     Py_DECREF(obj);
   }
   return result;
 #else
-  PyObject*   o2;
-  PyObject*   o3;
+  PyObject *o2;
+  PyObject *o3;
   if (!result) {
     result = obj;
   } else if (result == Py_None) {
@@ -1312,57 +1346,60 @@ SWIG_Python_AppendOutput(PyObject* result, PyObject* obj) {
 
 /* Unpack the argument tuple */
 
-SWIGINTERN int
-SWIG_Python_UnpackTuple(PyObject *args, const char *name, Py_ssize_t min, Py_ssize_t max, PyObject **objs)
-{
+SWIGINTERN int SWIG_Python_UnpackTuple(PyObject *args, const char *name,
+                                       Py_ssize_t min, Py_ssize_t max,
+                                       PyObject **objs) {
   if (!args) {
     if (!min && !max) {
       return 1;
     } else {
-      PyErr_Format(PyExc_TypeError, "%s expected %s%d arguments, got none", 
-		   name, (min == max ? "" : "at least "), (int)min);
+      PyErr_Format(PyExc_TypeError, "%s expected %s%d arguments, got none",
+                   name, (min == max ? "" : "at least "), (int)min);
       return 0;
     }
-  }  
+  }
   if (!PyTuple_Check(args)) {
     if (min <= 1 && max >= 1) {
       int i;
       objs[0] = args;
       for (i = 1; i < max; ++i) {
-	objs[i] = 0;
+        objs[i] = 0;
       }
       return 2;
     }
-    PyErr_SetString(PyExc_SystemError, "UnpackTuple() argument list is not a tuple");
+    PyErr_SetString(PyExc_SystemError,
+                    "UnpackTuple() argument list is not a tuple");
     return 0;
   } else {
     Py_ssize_t l = PyTuple_GET_SIZE(args);
     if (l < min) {
-      PyErr_Format(PyExc_TypeError, "%s expected %s%d arguments, got %d", 
-		   name, (min == max ? "" : "at least "), (int)min, (int)l);
+      PyErr_Format(PyExc_TypeError, "%s expected %s%d arguments, got %d", name,
+                   (min == max ? "" : "at least "), (int)min, (int)l);
       return 0;
     } else if (l > max) {
-      PyErr_Format(PyExc_TypeError, "%s expected %s%d arguments, got %d", 
-		   name, (min == max ? "" : "at most "), (int)max, (int)l);
+      PyErr_Format(PyExc_TypeError, "%s expected %s%d arguments, got %d", name,
+                   (min == max ? "" : "at most "), (int)max, (int)l);
       return 0;
     } else {
       int i;
       for (i = 0; i < l; ++i) {
-	objs[i] = PyTuple_GET_ITEM(args, i);
+        objs[i] = PyTuple_GET_ITEM(args, i);
       }
       for (; l < max; ++l) {
-	objs[l] = 0;
+        objs[l] = 0;
       }
       return i + 1;
-    }    
+    }
   }
 }
 
 /* A functor is a function object with one single object argument */
 #if PY_VERSION_HEX >= 0x02020000
-#define SWIG_Python_CallFunctor(functor, obj)	        PyObject_CallFunctionObjArgs(functor, obj, NULL);
+#define SWIG_Python_CallFunctor(functor, obj) \
+  PyObject_CallFunctionObjArgs(functor, obj, NULL);
 #else
-#define SWIG_Python_CallFunctor(functor, obj)	        PyObject_CallFunction(functor, "O", obj);
+#define SWIG_Python_CallFunctor(functor, obj) \
+  PyObject_CallFunction(functor, "O", obj);
 #endif
 
 /*
@@ -1370,23 +1407,26 @@ SWIG_Python_UnpackTuple(PyObject *args, const char *name, Py_ssize_t min, Py_ssi
   static PyObject *SWIG_STATIC_POINTER(MyVar) = NewSomething(...);
 */
 #ifdef __cplusplus
-#define SWIG_STATIC_POINTER(var)  var
+#define SWIG_STATIC_POINTER(var) var
 #else
-#define SWIG_STATIC_POINTER(var)  var = 0; if (!var) var
+#define SWIG_STATIC_POINTER(var) \
+  var = 0;                       \
+  if (!var) var
 #endif
 
 /* -----------------------------------------------------------------------------
  * Pointer declarations
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 /* Flags for new pointer objects */
-#define SWIG_POINTER_NOSHADOW       (SWIG_POINTER_OWN      << 1)
-#define SWIG_POINTER_NEW            (SWIG_POINTER_NOSHADOW | SWIG_POINTER_OWN)
+#define SWIG_POINTER_NOSHADOW (SWIG_POINTER_OWN << 1)
+#define SWIG_POINTER_NEW (SWIG_POINTER_NOSHADOW | SWIG_POINTER_OWN)
 
-#define SWIG_POINTER_IMPLICIT_CONV  (SWIG_POINTER_DISOWN   << 1)
+#define SWIG_POINTER_IMPLICIT_CONV (SWIG_POINTER_DISOWN << 1)
 
-#define SWIG_BUILTIN_TP_INIT	    (SWIG_POINTER_OWN << 2)
-#define SWIG_BUILTIN_INIT	    (SWIG_BUILTIN_TP_INIT | SWIG_POINTER_OWN)
+#define SWIG_BUILTIN_TP_INIT (SWIG_POINTER_OWN << 2)
+#define SWIG_BUILTIN_INIT (SWIG_BUILTIN_TP_INIT | SWIG_POINTER_OWN)
 
 #ifdef __cplusplus
 extern "C" {
@@ -1394,28 +1434,24 @@ extern "C" {
 
 /*  How to access Py_None */
 #if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
-#  ifndef SWIG_PYTHON_NO_BUILD_NONE
-#    ifndef SWIG_PYTHON_BUILD_NONE
-#      define SWIG_PYTHON_BUILD_NONE
-#    endif
-#  endif
+#ifndef SWIG_PYTHON_NO_BUILD_NONE
+#ifndef SWIG_PYTHON_BUILD_NONE
+#define SWIG_PYTHON_BUILD_NONE
+#endif
+#endif
 #endif
 
 #ifdef SWIG_PYTHON_BUILD_NONE
-#  ifdef Py_None
-#   undef Py_None
-#   define Py_None SWIG_Py_None()
-#  endif
-SWIGRUNTIMEINLINE PyObject * 
-_SWIG_Py_None(void)
-{
-  PyObject *none = Py_BuildValue((char*)"");
+#ifdef Py_None
+#undef Py_None
+#define Py_None SWIG_Py_None()
+#endif
+SWIGRUNTIMEINLINE PyObject *_SWIG_Py_None(void) {
+  PyObject *none = Py_BuildValue((char *)"");
   Py_DECREF(none);
   return none;
 }
-SWIGRUNTIME PyObject * 
-SWIG_Py_None(void)
-{
+SWIGRUNTIME PyObject *SWIG_Py_None(void) {
   static PyObject *SWIG_STATIC_POINTER(none) = _SWIG_Py_None();
   return none;
 }
@@ -1423,9 +1459,7 @@ SWIG_Py_None(void)
 
 /* The python void return value */
 
-SWIGRUNTIMEINLINE PyObject * 
-SWIG_Py_Void(void)
-{
+SWIGRUNTIMEINLINE PyObject *SWIG_Py_Void(void) {
   PyObject *none = Py_None;
   Py_INCREF(none);
   return none;
@@ -1443,32 +1477,28 @@ typedef struct {
   PyTypeObject *pytype;
 } SwigPyClientData;
 
-SWIGRUNTIMEINLINE int 
-SWIG_Python_CheckImplicit(swig_type_info *ty)
-{
+SWIGRUNTIMEINLINE int SWIG_Python_CheckImplicit(swig_type_info *ty) {
   SwigPyClientData *data = (SwigPyClientData *)ty->clientdata;
   return data ? data->implicitconv : 0;
 }
 
-SWIGRUNTIMEINLINE PyObject *
-SWIG_Python_ExceptionType(swig_type_info *desc) {
-  SwigPyClientData *data = desc ? (SwigPyClientData *) desc->clientdata : 0;
+SWIGRUNTIMEINLINE PyObject *SWIG_Python_ExceptionType(swig_type_info *desc) {
+  SwigPyClientData *data = desc ? (SwigPyClientData *)desc->clientdata : 0;
   PyObject *klass = data ? data->klass : 0;
   return (klass ? klass : PyExc_RuntimeError);
 }
 
-
-SWIGRUNTIME SwigPyClientData * 
-SwigPyClientData_New(PyObject* obj)
-{
+SWIGRUNTIME SwigPyClientData *SwigPyClientData_New(PyObject *obj) {
   if (!obj) {
     return 0;
   } else {
-    SwigPyClientData *data = (SwigPyClientData *)malloc(sizeof(SwigPyClientData));
+    SwigPyClientData *data =
+        (SwigPyClientData *)malloc(sizeof(SwigPyClientData));
     /* the klass element */
     data->klass = obj;
     Py_INCREF(data->klass);
-    /* the newraw method and newargs arguments used to create a new raw instance */
+    /* the newraw method and newargs arguments used to create a new raw instance
+     */
     if (PyClass_Check(obj)) {
       data->newraw = 0;
       data->newargs = obj;
@@ -1480,16 +1510,17 @@ SwigPyClientData_New(PyObject* obj)
       data->newraw = PyObject_GetAttrString(data->klass, (char *)"__new__");
 #endif
       if (data->newraw) {
-	Py_INCREF(data->newraw);
-	data->newargs = PyTuple_New(1);
-	PyTuple_SetItem(data->newargs, 0, obj);
+        Py_INCREF(data->newraw);
+        data->newargs = PyTuple_New(1);
+        PyTuple_SetItem(data->newargs, 0, obj);
       } else {
-	data->newargs = obj;
+        data->newargs = obj;
       }
       Py_INCREF(data->newargs);
     }
     /* the destroy method, aka as the C++ delete method */
-    data->destroy = PyObject_GetAttrString(data->klass, (char *)"__swig_destroy__");
+    data->destroy =
+        PyObject_GetAttrString(data->klass, (char *)"__swig_destroy__");
     if (PyErr_Occurred()) {
       PyErr_Clear();
       data->destroy = 0;
@@ -1512,8 +1543,7 @@ SwigPyClientData_New(PyObject* obj)
   }
 }
 
-SWIGRUNTIME void 
-SwigPyClientData_Del(SwigPyClientData *data) {
+SWIGRUNTIME void SwigPyClientData_Del(SwigPyClientData *data) {
   Py_XDECREF(data->newraw);
   Py_XDECREF(data->newargs);
   Py_XDECREF(data->destroy);
@@ -1522,8 +1552,7 @@ SwigPyClientData_Del(SwigPyClientData *data) {
 /* =============== SwigPyObject =====================*/
 
 typedef struct {
-  PyObject_HEAD
-  void *ptr;
+  PyObject_HEAD void *ptr;
   swig_type_info *ty;
   int own;
   PyObject *next;
@@ -1532,15 +1561,11 @@ typedef struct {
 #endif
 } SwigPyObject;
 
-SWIGRUNTIME PyObject *
-SwigPyObject_long(SwigPyObject *v)
-{
+SWIGRUNTIME PyObject *SwigPyObject_long(SwigPyObject *v) {
   return PyLong_FromVoidPtr(v->ptr);
 }
 
-SWIGRUNTIME PyObject *
-SwigPyObject_format(const char* fmt, SwigPyObject *v)
-{
+SWIGRUNTIME PyObject *SwigPyObject_format(const char *fmt, SwigPyObject *v) {
   PyObject *res = NULL;
   PyObject *args = PyTuple_New(1);
   if (args) {
@@ -1548,11 +1573,11 @@ SwigPyObject_format(const char* fmt, SwigPyObject *v)
       PyObject *ofmt = SWIG_Python_str_FromChar(fmt);
       if (ofmt) {
 #if PY_VERSION_HEX >= 0x03000000
-	res = PyUnicode_Format(ofmt,args);
+        res = PyUnicode_Format(ofmt, args);
 #else
-	res = PyString_Format(ofmt,args);
+        res = PyString_Format(ofmt, args);
 #endif
-	Py_DECREF(ofmt);
+        Py_DECREF(ofmt);
       }
       Py_DECREF(args);
     }
@@ -1560,16 +1585,12 @@ SwigPyObject_format(const char* fmt, SwigPyObject *v)
   return res;
 }
 
-SWIGRUNTIME PyObject *
-SwigPyObject_oct(SwigPyObject *v)
-{
-  return SwigPyObject_format("%o",v);
+SWIGRUNTIME PyObject *SwigPyObject_oct(SwigPyObject *v) {
+  return SwigPyObject_format("%o", v);
 }
 
-SWIGRUNTIME PyObject *
-SwigPyObject_hex(SwigPyObject *v)
-{
-  return SwigPyObject_format("%x",v);
+SWIGRUNTIME PyObject *SwigPyObject_hex(SwigPyObject *v) {
+  return SwigPyObject_format("%x", v);
 }
 
 SWIGRUNTIME PyObject *
@@ -1580,126 +1601,119 @@ SwigPyObject_repr(SwigPyObject *v, PyObject *args)
 #endif
 {
   const char *name = SWIG_TypePrettyName(v->ty);
-  PyObject *repr = SWIG_Python_str_FromFormat("<Swig Object of type '%s' at %p>", (name ? name : "unknown"), (void *)v);
+  PyObject *repr = SWIG_Python_str_FromFormat(
+      "<Swig Object of type '%s' at %p>", (name ? name : "unknown"), (void *)v);
   if (v->next) {
-# ifdef METH_NOARGS
+#ifdef METH_NOARGS
     PyObject *nrep = SwigPyObject_repr((SwigPyObject *)v->next);
-# else
+#else
     PyObject *nrep = SwigPyObject_repr((SwigPyObject *)v->next, args);
-# endif
-# if PY_VERSION_HEX >= 0x03000000
+#endif
+#if PY_VERSION_HEX >= 0x03000000
     PyObject *joined = PyUnicode_Concat(repr, nrep);
     Py_DecRef(repr);
     Py_DecRef(nrep);
     repr = joined;
-# else
-    PyString_ConcatAndDel(&repr,nrep);
-# endif
+#else
+    PyString_ConcatAndDel(&repr, nrep);
+#endif
   }
-  return repr;  
+  return repr;
 }
 
-SWIGRUNTIME int
-SwigPyObject_compare(SwigPyObject *v, SwigPyObject *w)
-{
+SWIGRUNTIME int SwigPyObject_compare(SwigPyObject *v, SwigPyObject *w) {
   void *i = v->ptr;
   void *j = w->ptr;
   return (i < j) ? -1 : ((i > j) ? 1 : 0);
 }
 
 /* Added for Python 3.x, would it also be useful for Python 2.x? */
-SWIGRUNTIME PyObject*
-SwigPyObject_richcompare(SwigPyObject *v, SwigPyObject *w, int op)
-{
-  PyObject* res;
-  if( op != Py_EQ && op != Py_NE ) {
+SWIGRUNTIME PyObject *SwigPyObject_richcompare(SwigPyObject *v, SwigPyObject *w,
+                                               int op) {
+  PyObject *res;
+  if (op != Py_EQ && op != Py_NE) {
     Py_INCREF(Py_NotImplemented);
     return Py_NotImplemented;
   }
-  res = PyBool_FromLong( (SwigPyObject_compare(v, w)==0) == (op == Py_EQ) ? 1 : 0);
-  return res;  
+  res = PyBool_FromLong((SwigPyObject_compare(v, w) == 0) == (op == Py_EQ) ? 1
+                                                                           : 0);
+  return res;
 }
 
-
-SWIGRUNTIME PyTypeObject* SwigPyObject_TypeOnce(void);
+SWIGRUNTIME PyTypeObject *SwigPyObject_TypeOnce(void);
 
 #ifdef SWIGPYTHON_BUILTIN
 static swig_type_info *SwigPyObject_stype = 0;
-SWIGRUNTIME PyTypeObject*
-SwigPyObject_type(void) {
-    SwigPyClientData *cd;
-    assert(SwigPyObject_stype);
-    cd = (SwigPyClientData*) SwigPyObject_stype->clientdata;
-    assert(cd);
-    assert(cd->pytype);
-    return cd->pytype;
+SWIGRUNTIME PyTypeObject *SwigPyObject_type(void) {
+  SwigPyClientData *cd;
+  assert(SwigPyObject_stype);
+  cd = (SwigPyClientData *)SwigPyObject_stype->clientdata;
+  assert(cd);
+  assert(cd->pytype);
+  return cd->pytype;
 }
 #else
-SWIGRUNTIME PyTypeObject*
-SwigPyObject_type(void) {
+SWIGRUNTIME PyTypeObject *SwigPyObject_type(void) {
   static PyTypeObject *SWIG_STATIC_POINTER(type) = SwigPyObject_TypeOnce();
   return type;
 }
 #endif
 
-SWIGRUNTIMEINLINE int
-SwigPyObject_Check(PyObject *op) {
+SWIGRUNTIMEINLINE int SwigPyObject_Check(PyObject *op) {
 #ifdef SWIGPYTHON_BUILTIN
   PyTypeObject *target_tp = SwigPyObject_type();
-  if (PyType_IsSubtype(op->ob_type, target_tp))
-    return 1;
+  if (PyType_IsSubtype(op->ob_type, target_tp)) return 1;
   return (strcmp(op->ob_type->tp_name, "SwigPyObject") == 0);
 #else
-  return (Py_TYPE(op) == SwigPyObject_type())
-    || (strcmp(Py_TYPE(op)->tp_name,"SwigPyObject") == 0);
+  return (Py_TYPE(op) == SwigPyObject_type()) ||
+         (strcmp(Py_TYPE(op)->tp_name, "SwigPyObject") == 0);
 #endif
 }
 
-SWIGRUNTIME PyObject *
-SwigPyObject_New(void *ptr, swig_type_info *ty, int own);
+SWIGRUNTIME PyObject *SwigPyObject_New(void *ptr, swig_type_info *ty, int own);
 
-SWIGRUNTIME void
-SwigPyObject_dealloc(PyObject *v)
-{
-  SwigPyObject *sobj = (SwigPyObject *) v;
+SWIGRUNTIME void SwigPyObject_dealloc(PyObject *v) {
+  SwigPyObject *sobj = (SwigPyObject *)v;
   PyObject *next = sobj->next;
   if (sobj->own == SWIG_POINTER_OWN) {
     swig_type_info *ty = sobj->ty;
-    SwigPyClientData *data = ty ? (SwigPyClientData *) ty->clientdata : 0;
+    SwigPyClientData *data = ty ? (SwigPyClientData *)ty->clientdata : 0;
     PyObject *destroy = data ? data->destroy : 0;
     if (destroy) {
       /* destroy is always a VARARGS method */
       PyObject *res;
       if (data->delargs) {
-	/* we need to create a temporary object to carry the destroy operation */
-	PyObject *tmp = SwigPyObject_New(sobj->ptr, ty, 0);
-	res = SWIG_Python_CallFunctor(destroy, tmp);
-	Py_DECREF(tmp);
+        /* we need to create a temporary object to carry the destroy operation
+         */
+        PyObject *tmp = SwigPyObject_New(sobj->ptr, ty, 0);
+        res = SWIG_Python_CallFunctor(destroy, tmp);
+        Py_DECREF(tmp);
       } else {
-	PyCFunction meth = PyCFunction_GET_FUNCTION(destroy);
-	PyObject *mself = PyCFunction_GET_SELF(destroy);
-	res = ((*meth)(mself, v));
+        PyCFunction meth = PyCFunction_GET_FUNCTION(destroy);
+        PyObject *mself = PyCFunction_GET_SELF(destroy);
+        res = ((*meth)(mself, v));
       }
       Py_XDECREF(res);
-    } 
+    }
 #if !defined(SWIG_PYTHON_SILENT_MEMLEAK)
     else {
       const char *name = SWIG_TypePrettyName(ty);
-      printf("swig/python detected a memory leak of type '%s', no destructor found.\n", (name ? name : "unknown"));
+      printf(
+          "swig/python detected a memory leak of type '%s', no destructor "
+          "found.\n",
+          (name ? name : "unknown"));
     }
 #endif
-  } 
+  }
   Py_XDECREF(next);
   PyObject_DEL(v);
 }
 
-SWIGRUNTIME PyObject* 
-SwigPyObject_append(PyObject* v, PyObject* next)
-{
-  SwigPyObject *sobj = (SwigPyObject *) v;
+SWIGRUNTIME PyObject *SwigPyObject_append(PyObject *v, PyObject *next) {
+  SwigPyObject *sobj = (SwigPyObject *)v;
 #ifndef METH_O
   PyObject *tmp = 0;
-  if (!PyArg_ParseTuple(next,(char *)"O:append", &tmp)) return NULL;
+  if (!PyArg_ParseTuple(next, (char *)"O:append", &tmp)) return NULL;
   next = tmp;
 #endif
   if (!SwigPyObject_Check(next)) {
@@ -1710,15 +1724,15 @@ SwigPyObject_append(PyObject* v, PyObject* next)
   return SWIG_Py_Void();
 }
 
-SWIGRUNTIME PyObject* 
+SWIGRUNTIME PyObject *
 #ifdef METH_NOARGS
-SwigPyObject_next(PyObject* v)
+SwigPyObject_next(PyObject *v)
 #else
-SwigPyObject_next(PyObject* v, PyObject *SWIGUNUSEDPARM(args))
+SwigPyObject_next(PyObject *v, PyObject *SWIGUNUSEDPARM(args))
 #endif
 {
-  SwigPyObject *sobj = (SwigPyObject *) v;
-  if (sobj->next) {    
+  SwigPyObject *sobj = (SwigPyObject *)v;
+  if (sobj->next) {
     Py_INCREF(sobj->next);
     return sobj->next;
   } else {
@@ -1726,11 +1740,11 @@ SwigPyObject_next(PyObject* v, PyObject *SWIGUNUSEDPARM(args))
   }
 }
 
-SWIGINTERN PyObject*
+SWIGINTERN PyObject *
 #ifdef METH_NOARGS
 SwigPyObject_disown(PyObject *v)
 #else
-SwigPyObject_disown(PyObject* v, PyObject *SWIGUNUSEDPARM(args))
+SwigPyObject_disown(PyObject *v, PyObject *SWIGUNUSEDPARM(args))
 #endif
 {
   SwigPyObject *sobj = (SwigPyObject *)v;
@@ -1738,11 +1752,11 @@ SwigPyObject_disown(PyObject* v, PyObject *SWIGUNUSEDPARM(args))
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject*
+SWIGINTERN PyObject *
 #ifdef METH_NOARGS
 SwigPyObject_acquire(PyObject *v)
 #else
-SwigPyObject_acquire(PyObject* v, PyObject *SWIGUNUSEDPARM(args))
+SwigPyObject_acquire(PyObject *v, PyObject *SWIGUNUSEDPARM(args))
 #endif
 {
   SwigPyObject *sobj = (SwigPyObject *)v;
@@ -1750,102 +1764,103 @@ SwigPyObject_acquire(PyObject* v, PyObject *SWIGUNUSEDPARM(args))
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject*
-SwigPyObject_own(PyObject *v, PyObject *args)
-{
+SWIGINTERN PyObject *SwigPyObject_own(PyObject *v, PyObject *args) {
   PyObject *val = 0;
 #if (PY_VERSION_HEX < 0x02020000)
-  if (!PyArg_ParseTuple(args,(char *)"|O:own",&val))
-#elif (PY_VERSION_HEX < 0x02050000)
-  if (!PyArg_UnpackTuple(args, (char *)"own", 0, 1, &val)) 
+  if (!PyArg_ParseTuple(args, (char *)"|O:own", &val))
+#elif(PY_VERSION_HEX < 0x02050000)
+  if (!PyArg_UnpackTuple(args, (char *)"own", 0, 1, &val))
 #else
-  if (!PyArg_UnpackTuple(args, "own", 0, 1, &val)) 
+  if (!PyArg_UnpackTuple(args, "own", 0, 1, &val))
 #endif
-    {
-      return NULL;
-    } 
-  else
-    {
-      SwigPyObject *sobj = (SwigPyObject *)v;
-      PyObject *obj = PyBool_FromLong(sobj->own);
-      if (val) {
+  {
+    return NULL;
+  } else {
+    SwigPyObject *sobj = (SwigPyObject *)v;
+    PyObject *obj = PyBool_FromLong(sobj->own);
+    if (val) {
 #ifdef METH_NOARGS
-	if (PyObject_IsTrue(val)) {
-	  SwigPyObject_acquire(v);
-	} else {
-	  SwigPyObject_disown(v);
-	}
+      if (PyObject_IsTrue(val)) {
+        SwigPyObject_acquire(v);
+      } else {
+        SwigPyObject_disown(v);
+      }
 #else
-	if (PyObject_IsTrue(val)) {
-	  SwigPyObject_acquire(v,args);
-	} else {
-	  SwigPyObject_disown(v,args);
-	}
+      if (PyObject_IsTrue(val)) {
+        SwigPyObject_acquire(v, args);
+      } else {
+        SwigPyObject_disown(v, args);
+      }
 #endif
-      } 
-      return obj;
     }
+    return obj;
+  }
 }
 
 #ifdef METH_O
-static PyMethodDef
-swigobject_methods[] = {
-  {(char *)"disown",  (PyCFunction)SwigPyObject_disown,  METH_NOARGS,  (char *)"releases ownership of the pointer"},
-  {(char *)"acquire", (PyCFunction)SwigPyObject_acquire, METH_NOARGS,  (char *)"acquires ownership of the pointer"},
-  {(char *)"own",     (PyCFunction)SwigPyObject_own,     METH_VARARGS, (char *)"returns/sets ownership of the pointer"},
-  {(char *)"append",  (PyCFunction)SwigPyObject_append,  METH_O,       (char *)"appends another 'this' object"},
-  {(char *)"next",    (PyCFunction)SwigPyObject_next,    METH_NOARGS,  (char *)"returns the next 'this' object"},
-  {(char *)"__repr__",(PyCFunction)SwigPyObject_repr,    METH_NOARGS,  (char *)"returns object representation"},
-  {0, 0, 0, 0}  
-};
+static PyMethodDef swigobject_methods[] = {
+    {(char *)"disown", (PyCFunction)SwigPyObject_disown, METH_NOARGS,
+     (char *) "releases ownership of the pointer"},
+    {(char *)"acquire", (PyCFunction)SwigPyObject_acquire, METH_NOARGS,
+     (char *) "acquires ownership of the pointer"},
+    {(char *)"own", (PyCFunction)SwigPyObject_own, METH_VARARGS,
+     (char *) "returns/sets ownership of the pointer"},
+    {(char *)"append", (PyCFunction)SwigPyObject_append, METH_O,
+     (char *) "appends another 'this' object"},
+    {(char *)"next", (PyCFunction)SwigPyObject_next, METH_NOARGS,
+     (char *) "returns the next 'this' object"},
+    {(char *)"__repr__", (PyCFunction)SwigPyObject_repr, METH_NOARGS,
+     (char *) "returns object representation"},
+    {0, 0, 0, 0}};
 #else
-static PyMethodDef
-swigobject_methods[] = {
-  {(char *)"disown",  (PyCFunction)SwigPyObject_disown,  METH_VARARGS,  (char *)"releases ownership of the pointer"},
-  {(char *)"acquire", (PyCFunction)SwigPyObject_acquire, METH_VARARGS,  (char *)"aquires ownership of the pointer"},
-  {(char *)"own",     (PyCFunction)SwigPyObject_own,     METH_VARARGS,  (char *)"returns/sets ownership of the pointer"},
-  {(char *)"append",  (PyCFunction)SwigPyObject_append,  METH_VARARGS,  (char *)"appends another 'this' object"},
-  {(char *)"next",    (PyCFunction)SwigPyObject_next,    METH_VARARGS,  (char *)"returns the next 'this' object"},
-  {(char *)"__repr__",(PyCFunction)SwigPyObject_repr,   METH_VARARGS,  (char *)"returns object representation"},
-  {0, 0, 0, 0}  
-};
+static PyMethodDef swigobject_methods[] = {
+    {(char *)"disown", (PyCFunction)SwigPyObject_disown, METH_VARARGS,
+     (char *) "releases ownership of the pointer"},
+    {(char *)"acquire", (PyCFunction)SwigPyObject_acquire, METH_VARARGS,
+     (char *) "aquires ownership of the pointer"},
+    {(char *)"own", (PyCFunction)SwigPyObject_own, METH_VARARGS,
+     (char *) "returns/sets ownership of the pointer"},
+    {(char *)"append", (PyCFunction)SwigPyObject_append, METH_VARARGS,
+     (char *) "appends another 'this' object"},
+    {(char *)"next", (PyCFunction)SwigPyObject_next, METH_VARARGS,
+     (char *) "returns the next 'this' object"},
+    {(char *)"__repr__", (PyCFunction)SwigPyObject_repr, METH_VARARGS,
+     (char *) "returns object representation"},
+    {0, 0, 0, 0}};
 #endif
 
 #if PY_VERSION_HEX < 0x02020000
-SWIGINTERN PyObject *
-SwigPyObject_getattr(SwigPyObject *sobj,char *name)
-{
+SWIGINTERN PyObject *SwigPyObject_getattr(SwigPyObject *sobj, char *name) {
   return Py_FindMethod(swigobject_methods, (PyObject *)sobj, name);
 }
 #endif
 
-SWIGRUNTIME PyTypeObject*
-SwigPyObject_TypeOnce(void) {
+SWIGRUNTIME PyTypeObject *SwigPyObject_TypeOnce(void) {
   static char swigobject_doc[] = "Swig object carries a C/C++ instance pointer";
 
   static PyNumberMethods SwigPyObject_as_number = {
     (binaryfunc)0, /*nb_add*/
     (binaryfunc)0, /*nb_subtract*/
     (binaryfunc)0, /*nb_multiply*/
-    /* nb_divide removed in Python 3 */
+                   /* nb_divide removed in Python 3 */
 #if PY_VERSION_HEX < 0x03000000
     (binaryfunc)0, /*nb_divide*/
 #endif
-    (binaryfunc)0, /*nb_remainder*/
-    (binaryfunc)0, /*nb_divmod*/
-    (ternaryfunc)0,/*nb_power*/
-    (unaryfunc)0,  /*nb_negative*/
-    (unaryfunc)0,  /*nb_positive*/
-    (unaryfunc)0,  /*nb_absolute*/
-    (inquiry)0,    /*nb_nonzero*/
-    0,		   /*nb_invert*/
-    0,		   /*nb_lshift*/
-    0,		   /*nb_rshift*/
-    0,		   /*nb_and*/
-    0,		   /*nb_xor*/
-    0,		   /*nb_or*/
+    (binaryfunc)0,  /*nb_remainder*/
+    (binaryfunc)0,  /*nb_divmod*/
+    (ternaryfunc)0, /*nb_power*/
+    (unaryfunc)0,   /*nb_negative*/
+    (unaryfunc)0,   /*nb_positive*/
+    (unaryfunc)0,   /*nb_absolute*/
+    (inquiry)0,     /*nb_nonzero*/
+    0,              /*nb_invert*/
+    0,              /*nb_lshift*/
+    0,              /*nb_rshift*/
+    0,              /*nb_and*/
+    0,              /*nb_xor*/
+    0,              /*nb_or*/
 #if PY_VERSION_HEX < 0x03000000
-    0,   /*nb_coerce*/
+    0, /*nb_coerce*/
 #endif
     (unaryfunc)SwigPyObject_long, /*nb_int*/
 #if PY_VERSION_HEX < 0x03000000
@@ -1853,19 +1868,72 @@ SwigPyObject_TypeOnce(void) {
 #else
     0, /*nb_reserved*/
 #endif
-    (unaryfunc)0,                 /*nb_float*/
+    (unaryfunc)0, /*nb_float*/
 #if PY_VERSION_HEX < 0x03000000
-    (unaryfunc)SwigPyObject_oct,  /*nb_oct*/
-    (unaryfunc)SwigPyObject_hex,  /*nb_hex*/
+    (unaryfunc)SwigPyObject_oct, /*nb_oct*/
+    (unaryfunc)SwigPyObject_hex, /*nb_hex*/
 #endif
 #if PY_VERSION_HEX >= 0x03000000 /* 3.0 */
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 /* nb_inplace_add -> nb_index, nb_inplace_divide removed */
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0 /* nb_inplace_add -> nb_index, nb_inplace_divide removed */
 #elif PY_VERSION_HEX >= 0x02050000 /* 2.5.0 */
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 /* nb_inplace_add -> nb_index */
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0                                /* nb_inplace_add -> nb_index */
 #elif PY_VERSION_HEX >= 0x02020000 /* 2.2.0 */
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 /* nb_inplace_add -> nb_inplace_true_divide */
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0 /* nb_inplace_add -> nb_inplace_true_divide */
 #elif PY_VERSION_HEX >= 0x02000000 /* 2.0.0 */
-    0,0,0,0,0,0,0,0,0,0,0 /* nb_inplace_add -> nb_inplace_or */
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0 /* nb_inplace_add -> nb_inplace_or */
 #endif
   };
 
@@ -1873,75 +1941,77 @@ SwigPyObject_TypeOnce(void) {
   static int type_init = 0;
   if (!type_init) {
     const PyTypeObject tmp = {
-      /* PyObject header changed in Python 3 */
+/* PyObject header changed in Python 3 */
 #if PY_VERSION_HEX >= 0x03000000
       PyVarObject_HEAD_INIT(NULL, 0)
 #else
-      PyObject_HEAD_INIT(NULL)
-      0,                                    /* ob_size */
+      PyObject_HEAD_INIT(NULL)0,     /* ob_size */
 #endif
-      (char *)"SwigPyObject",               /* tp_name */
-      sizeof(SwigPyObject),                 /* tp_basicsize */
-      0,                                    /* tp_itemsize */
-      (destructor)SwigPyObject_dealloc,     /* tp_dealloc */
-      0,				    /* tp_print */
+          (char *)"SwigPyObject",       /* tp_name */
+      sizeof(SwigPyObject),             /* tp_basicsize */
+      0,                                /* tp_itemsize */
+      (destructor)SwigPyObject_dealloc, /* tp_dealloc */
+      0,                                /* tp_print */
 #if PY_VERSION_HEX < 0x02020000
-      (getattrfunc)SwigPyObject_getattr,    /* tp_getattr */
+      (getattrfunc)SwigPyObject_getattr, /* tp_getattr */
 #else
-      (getattrfunc)0,                       /* tp_getattr */
+      (getattrfunc)0,                /* tp_getattr */
 #endif
-      (setattrfunc)0,                       /* tp_setattr */
+      (setattrfunc)0, /* tp_setattr */
 #if PY_VERSION_HEX >= 0x03000000
-    0, /* tp_reserved in 3.0.1, tp_compare in 3.0.0 but not used */
+      0, /* tp_reserved in 3.0.1, tp_compare in 3.0.0 but not used */
 #else
-      (cmpfunc)SwigPyObject_compare,        /* tp_compare */
+      (cmpfunc)SwigPyObject_compare, /* tp_compare */
 #endif
-      (reprfunc)SwigPyObject_repr,          /* tp_repr */
-      &SwigPyObject_as_number,              /* tp_as_number */
-      0,                                    /* tp_as_sequence */
-      0,                                    /* tp_as_mapping */
-      (hashfunc)0,                          /* tp_hash */
-      (ternaryfunc)0,                       /* tp_call */
-      0,				    /* tp_str */
-      PyObject_GenericGetAttr,              /* tp_getattro */
-      0,                                    /* tp_setattro */
-      0,                                    /* tp_as_buffer */
-      Py_TPFLAGS_DEFAULT,                   /* tp_flags */
-      swigobject_doc,                       /* tp_doc */
-      0,                                    /* tp_traverse */
-      0,                                    /* tp_clear */
-      (richcmpfunc)SwigPyObject_richcompare,/* tp_richcompare */
-      0,                                    /* tp_weaklistoffset */
+      (reprfunc)SwigPyObject_repr,           /* tp_repr */
+      &SwigPyObject_as_number,               /* tp_as_number */
+      0,                                     /* tp_as_sequence */
+      0,                                     /* tp_as_mapping */
+      (hashfunc)0,                           /* tp_hash */
+      (ternaryfunc)0,                        /* tp_call */
+      0,                                     /* tp_str */
+      PyObject_GenericGetAttr,               /* tp_getattro */
+      0,                                     /* tp_setattro */
+      0,                                     /* tp_as_buffer */
+      Py_TPFLAGS_DEFAULT,                    /* tp_flags */
+      swigobject_doc,                        /* tp_doc */
+      0,                                     /* tp_traverse */
+      0,                                     /* tp_clear */
+      (richcmpfunc)SwigPyObject_richcompare, /* tp_richcompare */
+      0,                                     /* tp_weaklistoffset */
 #if PY_VERSION_HEX >= 0x02020000
-      0,                                    /* tp_iter */
-      0,                                    /* tp_iternext */
-      swigobject_methods,                   /* tp_methods */
-      0,                                    /* tp_members */
-      0,                                    /* tp_getset */
-      0,                                    /* tp_base */
-      0,                                    /* tp_dict */
-      0,                                    /* tp_descr_get */
-      0,                                    /* tp_descr_set */
-      0,                                    /* tp_dictoffset */
-      0,                                    /* tp_init */
-      0,                                    /* tp_alloc */
-      0,                                    /* tp_new */
-      0,                                    /* tp_free */
-      0,                                    /* tp_is_gc */
-      0,                                    /* tp_bases */
-      0,                                    /* tp_mro */
-      0,                                    /* tp_cache */
-      0,                                    /* tp_subclasses */
-      0,                                    /* tp_weaklist */
+      0,                  /* tp_iter */
+      0,                  /* tp_iternext */
+      swigobject_methods, /* tp_methods */
+      0,                  /* tp_members */
+      0,                  /* tp_getset */
+      0,                  /* tp_base */
+      0,                  /* tp_dict */
+      0,                  /* tp_descr_get */
+      0,                  /* tp_descr_set */
+      0,                  /* tp_dictoffset */
+      0,                  /* tp_init */
+      0,                  /* tp_alloc */
+      0,                  /* tp_new */
+      0,                  /* tp_free */
+      0,                  /* tp_is_gc */
+      0,                  /* tp_bases */
+      0,                  /* tp_mro */
+      0,                  /* tp_cache */
+      0,                  /* tp_subclasses */
+      0,                  /* tp_weaklist */
 #endif
 #if PY_VERSION_HEX >= 0x02030000
-      0,                                    /* tp_del */
+      0, /* tp_del */
 #endif
 #if PY_VERSION_HEX >= 0x02060000
-      0,                                    /* tp_version */
+      0, /* tp_version */
 #endif
 #ifdef COUNT_ALLOCS
-      0,0,0,0                               /* tp_alloc -> tp_next */
+      0,
+      0,
+      0,
+      0 /* tp_alloc -> tp_next */
 #endif
     };
     swigpyobject_type = tmp;
@@ -1949,21 +2019,18 @@ SwigPyObject_TypeOnce(void) {
 #if PY_VERSION_HEX < 0x02020000
     swigpyobject_type.ob_type = &PyType_Type;
 #else
-    if (PyType_Ready(&swigpyobject_type) < 0)
-      return NULL;
+    if (PyType_Ready(&swigpyobject_type) < 0) return NULL;
 #endif
   }
   return &swigpyobject_type;
 }
 
-SWIGRUNTIME PyObject *
-SwigPyObject_New(void *ptr, swig_type_info *ty, int own)
-{
+SWIGRUNTIME PyObject *SwigPyObject_New(void *ptr, swig_type_info *ty, int own) {
   SwigPyObject *sobj = PyObject_NEW(SwigPyObject, SwigPyObject_type());
   if (sobj) {
-    sobj->ptr  = ptr;
-    sobj->ty   = ty;
-    sobj->own  = own;
+    sobj->ptr = ptr;
+    sobj->ty = ty;
+    sobj->own = own;
     sobj->next = 0;
   }
   return (PyObject *)sobj;
@@ -1971,156 +2038,147 @@ SwigPyObject_New(void *ptr, swig_type_info *ty, int own)
 
 /* -----------------------------------------------------------------------------
  * Implements a simple Swig Packed type, and use it instead of string
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 typedef struct {
-  PyObject_HEAD
-  void *pack;
+  PyObject_HEAD void *pack;
   swig_type_info *ty;
   size_t size;
 } SwigPyPacked;
 
-SWIGRUNTIME int
-SwigPyPacked_print(SwigPyPacked *v, FILE *fp, int SWIGUNUSEDPARM(flags))
-{
+SWIGRUNTIME int SwigPyPacked_print(SwigPyPacked *v, FILE *fp,
+                                   int SWIGUNUSEDPARM(flags)) {
   char result[SWIG_BUFFER_SIZE];
-  fputs("<Swig Packed ", fp); 
+  fputs("<Swig Packed ", fp);
   if (SWIG_PackDataName(result, v->pack, v->size, 0, sizeof(result))) {
-    fputs("at ", fp); 
-    fputs(result, fp); 
+    fputs("at ", fp);
+    fputs(result, fp);
   }
-  fputs(v->ty->name,fp); 
+  fputs(v->ty->name, fp);
   fputs(">", fp);
-  return 0; 
-}
-  
-SWIGRUNTIME PyObject *
-SwigPyPacked_repr(SwigPyPacked *v)
-{
-  char result[SWIG_BUFFER_SIZE];
-  if (SWIG_PackDataName(result, v->pack, v->size, 0, sizeof(result))) {
-    return SWIG_Python_str_FromFormat("<Swig Packed at %s%s>", result, v->ty->name);
-  } else {
-    return SWIG_Python_str_FromFormat("<Swig Packed %s>", v->ty->name);
-  }  
+  return 0;
 }
 
-SWIGRUNTIME PyObject *
-SwigPyPacked_str(SwigPyPacked *v)
-{
+SWIGRUNTIME PyObject *SwigPyPacked_repr(SwigPyPacked *v) {
   char result[SWIG_BUFFER_SIZE];
-  if (SWIG_PackDataName(result, v->pack, v->size, 0, sizeof(result))){
+  if (SWIG_PackDataName(result, v->pack, v->size, 0, sizeof(result))) {
+    return SWIG_Python_str_FromFormat("<Swig Packed at %s%s>", result,
+                                      v->ty->name);
+  } else {
+    return SWIG_Python_str_FromFormat("<Swig Packed %s>", v->ty->name);
+  }
+}
+
+SWIGRUNTIME PyObject *SwigPyPacked_str(SwigPyPacked *v) {
+  char result[SWIG_BUFFER_SIZE];
+  if (SWIG_PackDataName(result, v->pack, v->size, 0, sizeof(result))) {
     return SWIG_Python_str_FromFormat("%s%s", result, v->ty->name);
   } else {
     return SWIG_Python_str_FromChar(v->ty->name);
-  }  
+  }
 }
 
-SWIGRUNTIME int
-SwigPyPacked_compare(SwigPyPacked *v, SwigPyPacked *w)
-{
+SWIGRUNTIME int SwigPyPacked_compare(SwigPyPacked *v, SwigPyPacked *w) {
   size_t i = v->size;
   size_t j = w->size;
   int s = (i < j) ? -1 : ((i > j) ? 1 : 0);
-  return s ? s : strncmp((char *)v->pack, (char *)w->pack, 2*v->size);
+  return s ? s : strncmp((char *)v->pack, (char *)w->pack, 2 * v->size);
 }
 
-SWIGRUNTIME PyTypeObject* SwigPyPacked_TypeOnce(void);
+SWIGRUNTIME PyTypeObject *SwigPyPacked_TypeOnce(void);
 
-SWIGRUNTIME PyTypeObject*
-SwigPyPacked_type(void) {
+SWIGRUNTIME PyTypeObject *SwigPyPacked_type(void) {
   static PyTypeObject *SWIG_STATIC_POINTER(type) = SwigPyPacked_TypeOnce();
   return type;
 }
 
-SWIGRUNTIMEINLINE int
-SwigPyPacked_Check(PyObject *op) {
-  return ((op)->ob_type == SwigPyPacked_TypeOnce()) 
-    || (strcmp((op)->ob_type->tp_name,"SwigPyPacked") == 0);
+SWIGRUNTIMEINLINE int SwigPyPacked_Check(PyObject *op) {
+  return ((op)->ob_type == SwigPyPacked_TypeOnce()) ||
+         (strcmp((op)->ob_type->tp_name, "SwigPyPacked") == 0);
 }
 
-SWIGRUNTIME void
-SwigPyPacked_dealloc(PyObject *v)
-{
+SWIGRUNTIME void SwigPyPacked_dealloc(PyObject *v) {
   if (SwigPyPacked_Check(v)) {
-    SwigPyPacked *sobj = (SwigPyPacked *) v;
+    SwigPyPacked *sobj = (SwigPyPacked *)v;
     free(sobj->pack);
   }
   PyObject_DEL(v);
 }
 
-SWIGRUNTIME PyTypeObject*
-SwigPyPacked_TypeOnce(void) {
+SWIGRUNTIME PyTypeObject *SwigPyPacked_TypeOnce(void) {
   static char swigpacked_doc[] = "Swig object carries a C/C++ instance pointer";
   static PyTypeObject swigpypacked_type;
   static int type_init = 0;
   if (!type_init) {
     const PyTypeObject tmp = {
-      /* PyObject header changed in Python 3 */
-#if PY_VERSION_HEX>=0x03000000
+/* PyObject header changed in Python 3 */
+#if PY_VERSION_HEX >= 0x03000000
       PyVarObject_HEAD_INIT(NULL, 0)
 #else
-      PyObject_HEAD_INIT(NULL)
-      0,                                    /* ob_size */
+      PyObject_HEAD_INIT(NULL)0,     /* ob_size */
 #endif
-      (char *)"SwigPyPacked",               /* tp_name */
-      sizeof(SwigPyPacked),                 /* tp_basicsize */
-      0,                                    /* tp_itemsize */
-      (destructor)SwigPyPacked_dealloc,     /* tp_dealloc */
-      (printfunc)SwigPyPacked_print,        /* tp_print */
-      (getattrfunc)0,                       /* tp_getattr */
-      (setattrfunc)0,                       /* tp_setattr */
-#if PY_VERSION_HEX>=0x03000000
+          (char *)"SwigPyPacked",       /* tp_name */
+      sizeof(SwigPyPacked),             /* tp_basicsize */
+      0,                                /* tp_itemsize */
+      (destructor)SwigPyPacked_dealloc, /* tp_dealloc */
+      (printfunc)SwigPyPacked_print,    /* tp_print */
+      (getattrfunc)0,                   /* tp_getattr */
+      (setattrfunc)0,                   /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
       0, /* tp_reserved in 3.0.1 */
 #else
-      (cmpfunc)SwigPyPacked_compare,        /* tp_compare */
+      (cmpfunc)SwigPyPacked_compare, /* tp_compare */
 #endif
-      (reprfunc)SwigPyPacked_repr,          /* tp_repr */
-      0,                                    /* tp_as_number */
-      0,                                    /* tp_as_sequence */
-      0,                                    /* tp_as_mapping */
-      (hashfunc)0,                          /* tp_hash */
-      (ternaryfunc)0,                       /* tp_call */
-      (reprfunc)SwigPyPacked_str,           /* tp_str */
-      PyObject_GenericGetAttr,              /* tp_getattro */
-      0,                                    /* tp_setattro */
-      0,                                    /* tp_as_buffer */
-      Py_TPFLAGS_DEFAULT,                   /* tp_flags */
-      swigpacked_doc,                       /* tp_doc */
-      0,                                    /* tp_traverse */
-      0,                                    /* tp_clear */
-      0,                                    /* tp_richcompare */
-      0,                                    /* tp_weaklistoffset */
+      (reprfunc)SwigPyPacked_repr, /* tp_repr */
+      0,                           /* tp_as_number */
+      0,                           /* tp_as_sequence */
+      0,                           /* tp_as_mapping */
+      (hashfunc)0,                 /* tp_hash */
+      (ternaryfunc)0,              /* tp_call */
+      (reprfunc)SwigPyPacked_str,  /* tp_str */
+      PyObject_GenericGetAttr,     /* tp_getattro */
+      0,                           /* tp_setattro */
+      0,                           /* tp_as_buffer */
+      Py_TPFLAGS_DEFAULT,          /* tp_flags */
+      swigpacked_doc,              /* tp_doc */
+      0,                           /* tp_traverse */
+      0,                           /* tp_clear */
+      0,                           /* tp_richcompare */
+      0,                           /* tp_weaklistoffset */
 #if PY_VERSION_HEX >= 0x02020000
-      0,                                    /* tp_iter */
-      0,                                    /* tp_iternext */
-      0,                                    /* tp_methods */
-      0,                                    /* tp_members */
-      0,                                    /* tp_getset */
-      0,                                    /* tp_base */
-      0,                                    /* tp_dict */
-      0,                                    /* tp_descr_get */
-      0,                                    /* tp_descr_set */
-      0,                                    /* tp_dictoffset */
-      0,                                    /* tp_init */
-      0,                                    /* tp_alloc */
-      0,                                    /* tp_new */
-      0,                                    /* tp_free */
-      0,                                    /* tp_is_gc */
-      0,                                    /* tp_bases */
-      0,                                    /* tp_mro */
-      0,                                    /* tp_cache */
-      0,                                    /* tp_subclasses */
-      0,                                    /* tp_weaklist */
+      0, /* tp_iter */
+      0, /* tp_iternext */
+      0, /* tp_methods */
+      0, /* tp_members */
+      0, /* tp_getset */
+      0, /* tp_base */
+      0, /* tp_dict */
+      0, /* tp_descr_get */
+      0, /* tp_descr_set */
+      0, /* tp_dictoffset */
+      0, /* tp_init */
+      0, /* tp_alloc */
+      0, /* tp_new */
+      0, /* tp_free */
+      0, /* tp_is_gc */
+      0, /* tp_bases */
+      0, /* tp_mro */
+      0, /* tp_cache */
+      0, /* tp_subclasses */
+      0, /* tp_weaklist */
 #endif
 #if PY_VERSION_HEX >= 0x02030000
-      0,                                    /* tp_del */
+      0, /* tp_del */
 #endif
 #if PY_VERSION_HEX >= 0x02060000
-      0,                                    /* tp_version */
+      0, /* tp_version */
 #endif
 #ifdef COUNT_ALLOCS
-      0,0,0,0                               /* tp_alloc -> tp_next */
+      0,
+      0,
+      0,
+      0 /* tp_alloc -> tp_next */
 #endif
     };
     swigpypacked_type = tmp;
@@ -2128,35 +2186,32 @@ SwigPyPacked_TypeOnce(void) {
 #if PY_VERSION_HEX < 0x02020000
     swigpypacked_type.ob_type = &PyType_Type;
 #else
-    if (PyType_Ready(&swigpypacked_type) < 0)
-      return NULL;
+    if (PyType_Ready(&swigpypacked_type) < 0) return NULL;
 #endif
   }
   return &swigpypacked_type;
 }
 
-SWIGRUNTIME PyObject *
-SwigPyPacked_New(void *ptr, size_t size, swig_type_info *ty)
-{
+SWIGRUNTIME PyObject *SwigPyPacked_New(void *ptr, size_t size,
+                                       swig_type_info *ty) {
   SwigPyPacked *sobj = PyObject_NEW(SwigPyPacked, SwigPyPacked_type());
   if (sobj) {
     void *pack = malloc(size);
     if (pack) {
       memcpy(pack, ptr, size);
       sobj->pack = pack;
-      sobj->ty   = ty;
+      sobj->ty = ty;
       sobj->size = size;
     } else {
-      PyObject_DEL((PyObject *) sobj);
+      PyObject_DEL((PyObject *)sobj);
       sobj = 0;
     }
   }
-  return (PyObject *) sobj;
+  return (PyObject *)sobj;
 }
 
-SWIGRUNTIME swig_type_info *
-SwigPyPacked_UnpackData(PyObject *obj, void *ptr, size_t size)
-{
+SWIGRUNTIME swig_type_info *SwigPyPacked_UnpackData(PyObject *obj, void *ptr,
+                                                    size_t size) {
   if (SwigPyPacked_Check(obj)) {
     SwigPyPacked *sobj = (SwigPyPacked *)obj;
     if (sobj->size != size) return 0;
@@ -2169,48 +2224,40 @@ SwigPyPacked_UnpackData(PyObject *obj, void *ptr, size_t size)
 
 /* -----------------------------------------------------------------------------
  * pointers/data manipulation
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
-SWIGRUNTIMEINLINE PyObject *
-_SWIG_This(void)
-{
-    return SWIG_Python_str_FromChar("this");
+SWIGRUNTIMEINLINE PyObject *_SWIG_This(void) {
+  return SWIG_Python_str_FromChar("this");
 }
 
 static PyObject *swig_this = NULL;
 
-SWIGRUNTIME PyObject *
-SWIG_This(void)
-{
-  if (swig_this == NULL)
-    swig_this = _SWIG_This();
+SWIGRUNTIME PyObject *SWIG_This(void) {
+  if (swig_this == NULL) swig_this = _SWIG_This();
   return swig_this;
 }
 
 /* #define SWIG_PYTHON_SLOW_GETSET_THIS */
 
 /* TODO: I don't know how to implement the fast getset in Python 3 right now */
-#if PY_VERSION_HEX>=0x03000000
-#define SWIG_PYTHON_SLOW_GETSET_THIS 
+#if PY_VERSION_HEX >= 0x03000000
+#define SWIG_PYTHON_SLOW_GETSET_THIS
 #endif
 
-SWIGRUNTIME SwigPyObject *
-SWIG_Python_GetSwigThis(PyObject *pyobj) 
-{
+SWIGRUNTIME SwigPyObject *SWIG_Python_GetSwigThis(PyObject *pyobj) {
   PyObject *obj;
 
-  if (SwigPyObject_Check(pyobj))
-    return (SwigPyObject *) pyobj;
+  if (SwigPyObject_Check(pyobj)) return (SwigPyObject *)pyobj;
 
 #ifdef SWIGPYTHON_BUILTIN
   (void)obj;
-# ifdef PyWeakref_CheckProxy
+#ifdef PyWeakref_CheckProxy
   if (PyWeakref_CheckProxy(pyobj)) {
     pyobj = PyWeakref_GET_OBJECT(pyobj);
-    if (pyobj && SwigPyObject_Check(pyobj))
-      return (SwigPyObject*) pyobj;
+    if (pyobj && SwigPyObject_Check(pyobj)) return (SwigPyObject *)pyobj;
   }
-# endif
+#endif
   return NULL;
 #else
 
@@ -2218,7 +2265,7 @@ SWIG_Python_GetSwigThis(PyObject *pyobj)
 
 #if (!defined(SWIG_PYTHON_SLOW_GETSET_THIS) && (PY_VERSION_HEX >= 0x02030000))
   if (PyInstance_Check(pyobj)) {
-    obj = _PyInstance_Lookup(pyobj, SWIG_This());      
+    obj = _PyInstance_Lookup(pyobj, SWIG_This());
   } else {
     PyObject **dictptr = _PyObject_GetDictPtr(pyobj);
     if (dictptr != NULL) {
@@ -2227,21 +2274,21 @@ SWIG_Python_GetSwigThis(PyObject *pyobj)
     } else {
 #ifdef PyWeakref_CheckProxy
       if (PyWeakref_CheckProxy(pyobj)) {
-	PyObject *wobj = PyWeakref_GET_OBJECT(pyobj);
-	return wobj ? SWIG_Python_GetSwigThis(wobj) : 0;
+        PyObject *wobj = PyWeakref_GET_OBJECT(pyobj);
+        return wobj ? SWIG_Python_GetSwigThis(wobj) : 0;
       }
 #endif
-      obj = PyObject_GetAttr(pyobj,SWIG_This());
+      obj = PyObject_GetAttr(pyobj, SWIG_This());
       if (obj) {
-	Py_DECREF(obj);
+        Py_DECREF(obj);
       } else {
-	if (PyErr_Occurred()) PyErr_Clear();
-	return 0;
+        if (PyErr_Occurred()) PyErr_Clear();
+        return 0;
       }
     }
   }
 #else
-  obj = PyObject_GetAttr(pyobj,SWIG_This());
+  obj = PyObject_GetAttr(pyobj, SWIG_This());
   if (obj) {
     Py_DECREF(obj);
   } else {
@@ -2251,7 +2298,7 @@ SWIG_Python_GetSwigThis(PyObject *pyobj)
 #endif
   if (obj && !SwigPyObject_Check(obj)) {
     /* a PyObject is called 'this', try to get the 'real this'
-       SwigPyObject from it */ 
+       SwigPyObject from it */
     return SWIG_Python_GetSwigThis(obj);
   }
   return (SwigPyObject *)obj;
@@ -2260,8 +2307,7 @@ SWIG_Python_GetSwigThis(PyObject *pyobj)
 
 /* Acquire a pointer value */
 
-SWIGRUNTIME int
-SWIG_Python_AcquirePtr(PyObject *obj, int own) {
+SWIGRUNTIME int SWIG_Python_AcquirePtr(PyObject *obj, int own) {
   if (own == SWIG_POINTER_OWN) {
     SwigPyObject *sobj = SWIG_Python_GetSwigThis(obj);
     if (sobj) {
@@ -2275,25 +2321,23 @@ SWIG_Python_AcquirePtr(PyObject *obj, int own) {
 
 /* Convert a pointer value */
 
-SWIGRUNTIME int
-SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr, swig_type_info *ty, int flags, int *own) {
+SWIGRUNTIME int SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr,
+                                             swig_type_info *ty, int flags,
+                                             int *own) {
   int res;
   SwigPyObject *sobj;
   int implicit_conv = (flags & SWIG_POINTER_IMPLICIT_CONV) != 0;
 
-  if (!obj)
-    return SWIG_ERROR;
+  if (!obj) return SWIG_ERROR;
   if (obj == Py_None && !implicit_conv) {
-    if (ptr)
-      *ptr = 0;
+    if (ptr) *ptr = 0;
     return SWIG_OK;
   }
 
   res = SWIG_ERROR;
 
   sobj = SWIG_Python_GetSwigThis(obj);
-  if (own)
-    *own = 0;
+  if (own) *own = 0;
   while (sobj) {
     void *vptr = sobj->ptr;
     if (ty) {
@@ -2303,17 +2347,17 @@ SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr, swig_type_info *ty, int 
         if (ptr) *ptr = vptr;
         break;
       } else {
-        swig_cast_info *tc = SWIG_TypeCheck(to->name,ty);
+        swig_cast_info *tc = SWIG_TypeCheck(to->name, ty);
         if (!tc) {
           sobj = (SwigPyObject *)sobj->next;
         } else {
           if (ptr) {
             int newmemory = 0;
-            *ptr = SWIG_TypeCast(tc,vptr,&newmemory);
+            *ptr = SWIG_TypeCast(tc, vptr, &newmemory);
             if (newmemory == SWIG_CAST_NEW_MEMORY) {
-              assert(own); /* badly formed typemap which will lead to a memory leak - it must set and use own to delete *ptr */
-              if (own)
-                *own = *own | SWIG_CAST_NEW_MEMORY;
+              assert(own); /* badly formed typemap which will lead to a memory
+                              leak - it must set and use own to delete *ptr */
+              if (own) *own = *own | SWIG_CAST_NEW_MEMORY;
             }
           }
           break;
@@ -2325,20 +2369,20 @@ SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr, swig_type_info *ty, int 
     }
   }
   if (sobj) {
-    if (own)
-      *own = *own | sobj->own;
+    if (own) *own = *own | sobj->own;
     if (flags & SWIG_POINTER_DISOWN) {
       sobj->own = 0;
     }
     res = SWIG_OK;
   } else {
     if (implicit_conv) {
-      SwigPyClientData *data = ty ? (SwigPyClientData *) ty->clientdata : 0;
+      SwigPyClientData *data = ty ? (SwigPyClientData *)ty->clientdata : 0;
       if (data && !data->implicitconv) {
         PyObject *klass = data->klass;
         if (klass) {
           PyObject *impconv;
-          data->implicitconv = 1; /* avoid recursion and call 'explicit' constructors*/
+          data->implicitconv =
+              1; /* avoid recursion and call 'explicit' constructors*/
           impconv = SWIG_Python_CallFunctor(klass, obj);
           data->implicitconv = 0;
           if (PyErr_Occurred()) {
@@ -2349,7 +2393,8 @@ SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr, swig_type_info *ty, int 
             SwigPyObject *iobj = SWIG_Python_GetSwigThis(impconv);
             if (iobj) {
               void *vptr;
-              res = SWIG_Python_ConvertPtrAndOwn((PyObject*)iobj, &vptr, ty, 0, 0);
+              res = SWIG_Python_ConvertPtrAndOwn((PyObject *)iobj, &vptr, ty, 0,
+                                                 0);
               if (SWIG_IsOK(res)) {
                 if (ptr) {
                   *ptr = vptr;
@@ -2358,7 +2403,7 @@ SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr, swig_type_info *ty, int 
                   res = SWIG_AddCast(res);
                   res = SWIG_AddNewMask(res);
                 } else {
-                  res = SWIG_AddCast(res);		    
+                  res = SWIG_AddCast(res);
                 }
               }
             }
@@ -2368,10 +2413,8 @@ SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr, swig_type_info *ty, int 
       }
     }
     if (!SWIG_IsOK(res) && obj == Py_None) {
-      if (ptr)
-        *ptr = 0;
-      if (PyErr_Occurred())
-        PyErr_Clear();
+      if (ptr) *ptr = 0;
+      if (PyErr_Occurred()) PyErr_Clear();
       res = SWIG_OK;
     }
   }
@@ -2380,25 +2423,23 @@ SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr, swig_type_info *ty, int 
 
 /* Convert a function ptr value */
 
-SWIGRUNTIME int
-SWIG_Python_ConvertFunctionPtr(PyObject *obj, void **ptr, swig_type_info *ty) {
+SWIGRUNTIME int SWIG_Python_ConvertFunctionPtr(PyObject *obj, void **ptr,
+                                               swig_type_info *ty) {
   if (!PyCFunction_Check(obj)) {
     return SWIG_ConvertPtr(obj, ptr, ty, 0);
   } else {
     void *vptr = 0;
-    
+
     /* here we get the method pointer for callbacks */
-    const char *doc = (((PyCFunctionObject *)obj) -> m_ml -> ml_doc);
+    const char *doc = (((PyCFunctionObject *)obj)->m_ml->ml_doc);
     const char *desc = doc ? strstr(doc, "swig_ptr: ") : 0;
-    if (desc)
-      desc = ty ? SWIG_UnpackVoidPtr(desc + 10, &vptr, ty->name) : 0;
-    if (!desc) 
-      return SWIG_ERROR;
+    if (desc) desc = ty ? SWIG_UnpackVoidPtr(desc + 10, &vptr, ty->name) : 0;
+    if (!desc) return SWIG_ERROR;
     if (ty) {
-      swig_cast_info *tc = SWIG_TypeCheck(desc,ty);
+      swig_cast_info *tc = SWIG_TypeCheck(desc, ty);
       if (tc) {
         int newmemory = 0;
-        *ptr = SWIG_TypeCast(tc,vptr,&newmemory);
+        *ptr = SWIG_TypeCast(tc, vptr, &newmemory);
         assert(!newmemory); /* newmemory handling not yet implemented */
       } else {
         return SWIG_ERROR;
@@ -2412,32 +2453,32 @@ SWIG_Python_ConvertFunctionPtr(PyObject *obj, void **ptr, swig_type_info *ty) {
 
 /* Convert a packed value value */
 
-SWIGRUNTIME int
-SWIG_Python_ConvertPacked(PyObject *obj, void *ptr, size_t sz, swig_type_info *ty) {
+SWIGRUNTIME int SWIG_Python_ConvertPacked(PyObject *obj, void *ptr, size_t sz,
+                                          swig_type_info *ty) {
   swig_type_info *to = SwigPyPacked_UnpackData(obj, ptr, sz);
   if (!to) return SWIG_ERROR;
   if (ty) {
     if (to != ty) {
       /* check type cast? */
-      swig_cast_info *tc = SWIG_TypeCheck(to->name,ty);
+      swig_cast_info *tc = SWIG_TypeCheck(to->name, ty);
       if (!tc) return SWIG_ERROR;
     }
   }
   return SWIG_OK;
-}  
+}
 
 /* -----------------------------------------------------------------------------
  * Create a new pointer object
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 /*
   Create a new instance object, without calling __init__, and set the
   'this' attribute.
 */
 
-SWIGRUNTIME PyObject* 
-SWIG_Python_NewShadowInstance(SwigPyClientData *data, PyObject *swig_this)
-{
+SWIGRUNTIME PyObject *SWIG_Python_NewShadowInstance(SwigPyClientData *data,
+                                                    PyObject *swig_this) {
 #if (PY_VERSION_HEX >= 0x02020000)
   PyObject *inst = 0;
   PyObject *newraw = data->newraw;
@@ -2447,12 +2488,12 @@ SWIG_Python_NewShadowInstance(SwigPyClientData *data, PyObject *swig_this)
 #if !defined(SWIG_PYTHON_SLOW_GETSET_THIS)
       PyObject **dictptr = _PyObject_GetDictPtr(inst);
       if (dictptr != NULL) {
-	PyObject *dict = *dictptr;
-	if (dict == NULL) {
-	  dict = PyDict_New();
-	  *dictptr = dict;
-	  PyDict_SetItem(dict, SWIG_This(), swig_this);
-	}
+        PyObject *dict = *dictptr;
+        if (dict == NULL) {
+          dict = PyDict_New();
+          *dictptr = dict;
+          PyDict_SetItem(dict, SWIG_This(), swig_this);
+        }
       }
 #else
       PyObject *key = SWIG_This();
@@ -2461,7 +2502,8 @@ SWIG_Python_NewShadowInstance(SwigPyClientData *data, PyObject *swig_this)
     }
   } else {
 #if PY_VERSION_HEX >= 0x03000000
-    inst = ((PyTypeObject*) data->newargs)->tp_new((PyTypeObject*) data->newargs, Py_None, Py_None);
+    inst = ((PyTypeObject *)data->newargs)
+               ->tp_new((PyTypeObject *)data->newargs, Py_None, Py_None);
     if (inst) {
       PyObject_SetAttr(inst, SWIG_This(), swig_this);
       Py_TYPE(inst)->tp_flags &= ~Py_TPFLAGS_VALID_VERSION_TAG;
@@ -2485,7 +2527,7 @@ SWIG_Python_NewShadowInstance(SwigPyClientData *data, PyObject *swig_this)
     inst = PyInstance_NewRaw(data->newargs, dict);
     Py_DECREF(dict);
   }
-  return (PyObject *) inst;
+  return (PyObject *)inst;
 #else
   PyInstanceObject *inst = PyObject_NEW(PyInstanceObject, &PyInstance_Type);
   if (inst == NULL) {
@@ -2505,42 +2547,38 @@ SWIG_Python_NewShadowInstance(SwigPyClientData *data, PyObject *swig_this)
   PyObject_GC_Init(inst);
 #endif
   PyDict_SetItem(inst->in_dict, SWIG_This(), swig_this);
-  return (PyObject *) inst;
+  return (PyObject *)inst;
 #endif
 #endif
 }
 
-SWIGRUNTIME void
-SWIG_Python_SetSwigThis(PyObject *inst, PyObject *swig_this)
-{
- PyObject *dict;
+SWIGRUNTIME void SWIG_Python_SetSwigThis(PyObject *inst, PyObject *swig_this) {
+  PyObject *dict;
 #if (PY_VERSION_HEX >= 0x02020000) && !defined(SWIG_PYTHON_SLOW_GETSET_THIS)
- PyObject **dictptr = _PyObject_GetDictPtr(inst);
- if (dictptr != NULL) {
-   dict = *dictptr;
-   if (dict == NULL) {
-     dict = PyDict_New();
-     *dictptr = dict;
-   }
-   PyDict_SetItem(dict, SWIG_This(), swig_this);
-   return;
- }
+  PyObject **dictptr = _PyObject_GetDictPtr(inst);
+  if (dictptr != NULL) {
+    dict = *dictptr;
+    if (dict == NULL) {
+      dict = PyDict_New();
+      *dictptr = dict;
+    }
+    PyDict_SetItem(dict, SWIG_This(), swig_this);
+    return;
+  }
 #endif
- dict = PyObject_GetAttrString(inst, (char*)"__dict__");
- PyDict_SetItem(dict, SWIG_This(), swig_this);
- Py_DECREF(dict);
-} 
+  dict = PyObject_GetAttrString(inst, (char *)"__dict__");
+  PyDict_SetItem(dict, SWIG_This(), swig_this);
+  Py_DECREF(dict);
+}
 
-
-SWIGINTERN PyObject *
-SWIG_Python_InitShadowInstance(PyObject *args) {
+SWIGINTERN PyObject *SWIG_Python_InitShadowInstance(PyObject *args) {
   PyObject *obj[2];
   if (!SWIG_Python_UnpackTuple(args, "swiginit", 2, 2, obj)) {
     return NULL;
   } else {
     SwigPyObject *sthis = SWIG_Python_GetSwigThis(obj[0]);
     if (sthis) {
-      SwigPyObject_append((PyObject*) sthis, obj[1]);
+      SwigPyObject_append((PyObject *)sthis, obj[1]);
     } else {
       SWIG_Python_SetSwigThis(obj[0], obj[1]);
     }
@@ -2550,25 +2588,25 @@ SWIG_Python_InitShadowInstance(PyObject *args) {
 
 /* Create a new pointer object */
 
-SWIGRUNTIME PyObject *
-SWIG_Python_NewPointerObj(PyObject *self, void *ptr, swig_type_info *type, int flags) {
+SWIGRUNTIME PyObject *SWIG_Python_NewPointerObj(PyObject *self, void *ptr,
+                                                swig_type_info *type,
+                                                int flags) {
   SwigPyClientData *clientdata;
-  PyObject * robj;
+  PyObject *robj;
   int own;
 
-  if (!ptr)
-    return SWIG_Py_Void();
+  if (!ptr) return SWIG_Py_Void();
 
   clientdata = type ? (SwigPyClientData *)(type->clientdata) : 0;
   own = (flags & SWIG_POINTER_OWN) ? SWIG_POINTER_OWN : 0;
   if (clientdata && clientdata->pytype) {
     SwigPyObject *newobj;
     if (flags & SWIG_BUILTIN_TP_INIT) {
-      newobj = (SwigPyObject*) self;
+      newobj = (SwigPyObject *)self;
       if (newobj->ptr) {
-        PyObject *next_self = clientdata->pytype->tp_alloc(clientdata->pytype, 0);
-        while (newobj->next)
-	  newobj = (SwigPyObject *) newobj->next;
+        PyObject *next_self =
+            clientdata->pytype->tp_alloc(clientdata->pytype, 0);
+        while (newobj->next) newobj = (SwigPyObject *)newobj->next;
         newobj->next = next_self;
         newobj = (SwigPyObject *)next_self;
       }
@@ -2583,7 +2621,7 @@ SWIG_Python_NewPointerObj(PyObject *self, void *ptr, swig_type_info *type, int f
 #ifdef SWIGPYTHON_BUILTIN
       newobj->dict = 0;
 #endif
-      return (PyObject*) newobj;
+      return (PyObject *)newobj;
     }
     return SWIG_Py_Void();
   }
@@ -2601,69 +2639,68 @@ SWIG_Python_NewPointerObj(PyObject *self, void *ptr, swig_type_info *type, int f
 
 /* Create a new packed object */
 
-SWIGRUNTIMEINLINE PyObject *
-SWIG_Python_NewPackedObj(void *ptr, size_t sz, swig_type_info *type) {
-  return ptr ? SwigPyPacked_New((void *) ptr, sz, type) : SWIG_Py_Void();
+SWIGRUNTIMEINLINE PyObject *SWIG_Python_NewPackedObj(void *ptr, size_t sz,
+                                                     swig_type_info *type) {
+  return ptr ? SwigPyPacked_New((void *)ptr, sz, type) : SWIG_Py_Void();
 }
 
 /* -----------------------------------------------------------------------------*
- *  Get type list 
+ *  Get type list
  * -----------------------------------------------------------------------------*/
 
 #ifdef SWIG_LINK_RUNTIME
 void *SWIG_ReturnGlobalTypeList(void *);
 #endif
 
-SWIGRUNTIME swig_module_info *
-SWIG_Python_GetModule(void *SWIGUNUSEDPARM(clientdata)) {
+SWIGRUNTIME swig_module_info *SWIG_Python_GetModule(
+    void *SWIGUNUSEDPARM(clientdata)) {
   static void *type_pointer = (void *)0;
   /* first check if module already created */
   if (!type_pointer) {
 #ifdef SWIG_LINK_RUNTIME
     type_pointer = SWIG_ReturnGlobalTypeList((void *)0);
 #else
-# ifdef SWIGPY_USE_CAPSULE
+#ifdef SWIGPY_USE_CAPSULE
     type_pointer = PyCapsule_Import(SWIGPY_CAPSULE_NAME, 0);
-# else
-    type_pointer = PyCObject_Import((char*)"swig_runtime_data" SWIG_RUNTIME_VERSION,
-				    (char*)"type_pointer" SWIG_TYPE_TABLE_NAME);
-# endif
+#else
+    type_pointer =
+        PyCObject_Import((char *)"swig_runtime_data" SWIG_RUNTIME_VERSION,
+                         (char *)"type_pointer" SWIG_TYPE_TABLE_NAME);
+#endif
     if (PyErr_Occurred()) {
       PyErr_Clear();
       type_pointer = (void *)0;
     }
 #endif
   }
-  return (swig_module_info *) type_pointer;
+  return (swig_module_info *)type_pointer;
 }
 
 #if PY_MAJOR_VERSION < 2
-/* PyModule_AddObject function was introduced in Python 2.0.  The following function
+/* PyModule_AddObject function was introduced in Python 2.0.  The following
+   function
    is copied out of Python/modsupport.c in python version 2.3.4 */
-SWIGINTERN int
-PyModule_AddObject(PyObject *m, char *name, PyObject *o)
-{
+SWIGINTERN int PyModule_AddObject(PyObject *m, char *name, PyObject *o) {
   PyObject *dict;
   if (!PyModule_Check(m)) {
     PyErr_SetString(PyExc_TypeError,
-		    "PyModule_AddObject() needs module as first arg");
+                    "PyModule_AddObject() needs module as first arg");
     return SWIG_ERROR;
   }
   if (!o) {
     PyErr_SetString(PyExc_TypeError,
-		    "PyModule_AddObject() needs non-NULL value");
+                    "PyModule_AddObject() needs non-NULL value");
     return SWIG_ERROR;
   }
-  
+
   dict = PyModule_GetDict(m);
   if (dict == NULL) {
     /* Internal error -- modules must have a dict! */
     PyErr_Format(PyExc_SystemError, "module '%s' has no __dict__",
-		 PyModule_GetName(m));
+                 PyModule_GetName(m));
     return SWIG_ERROR;
   }
-  if (PyDict_SetItemString(dict, name, o))
-    return SWIG_ERROR;
+  if (PyDict_SetItemString(dict, name, o)) return SWIG_ERROR;
   Py_DECREF(o);
   return SWIG_OK;
 }
@@ -2677,16 +2714,17 @@ SWIG_Python_DestroyModule(void *vptr)
 #endif
 {
 #ifdef SWIGPY_USE_CAPSULE
-  swig_module_info *swig_module = (swig_module_info *) PyCapsule_GetPointer(obj, SWIGPY_CAPSULE_NAME);
+  swig_module_info *swig_module =
+      (swig_module_info *)PyCapsule_GetPointer(obj, SWIGPY_CAPSULE_NAME);
 #else
-  swig_module_info *swig_module = (swig_module_info *) vptr;
+  swig_module_info *swig_module = (swig_module_info *)vptr;
 #endif
   swig_type_info **types = swig_module->types;
   size_t i;
-  for (i =0; i < swig_module->size; ++i) {
+  for (i = 0; i < swig_module->size; ++i) {
     swig_type_info *ty = types[i];
     if (ty->owndata) {
-      SwigPyClientData *data = (SwigPyClientData *) ty->clientdata;
+      SwigPyClientData *data = (SwigPyClientData *)ty->clientdata;
       if (data) SwigPyClientData_Del(data);
     }
   }
@@ -2694,26 +2732,33 @@ SWIG_Python_DestroyModule(void *vptr)
   swig_this = NULL;
 }
 
-SWIGRUNTIME void
-SWIG_Python_SetModule(swig_module_info *swig_module) {
+SWIGRUNTIME void SWIG_Python_SetModule(swig_module_info *swig_module) {
 #if PY_VERSION_HEX >= 0x03000000
- /* Add a dummy module object into sys.modules */
-  PyObject *module = PyImport_AddModule((char*)"swig_runtime_data" SWIG_RUNTIME_VERSION);
+  /* Add a dummy module object into sys.modules */
+  PyObject *module =
+      PyImport_AddModule((char *)"swig_runtime_data" SWIG_RUNTIME_VERSION);
 #else
-  static PyMethodDef swig_empty_runtime_method_table[] = { {NULL, NULL, 0, NULL} }; /* Sentinel */
-  PyObject *module = Py_InitModule((char*)"swig_runtime_data" SWIG_RUNTIME_VERSION, swig_empty_runtime_method_table);
+  static PyMethodDef swig_empty_runtime_method_table[] = {
+      {NULL, NULL, 0, NULL}}; /* Sentinel */
+  PyObject *module =
+      Py_InitModule((char *)"swig_runtime_data" SWIG_RUNTIME_VERSION,
+                    swig_empty_runtime_method_table);
 #endif
 #ifdef SWIGPY_USE_CAPSULE
-  PyObject *pointer = PyCapsule_New((void *) swig_module, SWIGPY_CAPSULE_NAME, SWIG_Python_DestroyModule);
+  PyObject *pointer = PyCapsule_New((void *)swig_module, SWIGPY_CAPSULE_NAME,
+                                    SWIG_Python_DestroyModule);
   if (pointer && module) {
-    PyModule_AddObject(module, (char*)"type_pointer_capsule" SWIG_TYPE_TABLE_NAME, pointer);
+    PyModule_AddObject(
+        module, (char *)"type_pointer_capsule" SWIG_TYPE_TABLE_NAME, pointer);
   } else {
     Py_XDECREF(pointer);
   }
 #else
-  PyObject *pointer = PyCObject_FromVoidPtr((void *) swig_module, SWIG_Python_DestroyModule);
+  PyObject *pointer =
+      PyCObject_FromVoidPtr((void *)swig_module, SWIG_Python_DestroyModule);
   if (pointer && module) {
-    PyModule_AddObject(module, (char*)"type_pointer" SWIG_TYPE_TABLE_NAME, pointer);
+    PyModule_AddObject(module, (char *)"type_pointer" SWIG_TYPE_TABLE_NAME,
+                       pointer);
   } else {
     Py_XDECREF(pointer);
   }
@@ -2721,31 +2766,28 @@ SWIG_Python_SetModule(swig_module_info *swig_module) {
 }
 
 /* The python cached type query */
-SWIGRUNTIME PyObject *
-SWIG_Python_TypeCache(void) {
+SWIGRUNTIME PyObject *SWIG_Python_TypeCache(void) {
   static PyObject *SWIG_STATIC_POINTER(cache) = PyDict_New();
   return cache;
 }
 
-SWIGRUNTIME swig_type_info *
-SWIG_Python_TypeQuery(const char *type)
-{
+SWIGRUNTIME swig_type_info *SWIG_Python_TypeQuery(const char *type) {
   PyObject *cache = SWIG_Python_TypeCache();
-  PyObject *key = SWIG_Python_str_FromChar(type); 
+  PyObject *key = SWIG_Python_str_FromChar(type);
   PyObject *obj = PyDict_GetItem(cache, key);
   swig_type_info *descriptor;
   if (obj) {
 #ifdef SWIGPY_USE_CAPSULE
-    descriptor = (swig_type_info *) PyCapsule_GetPointer(obj, NULL);
+    descriptor = (swig_type_info *)PyCapsule_GetPointer(obj, NULL);
 #else
-    descriptor = (swig_type_info *) PyCObject_AsVoidPtr(obj);
+    descriptor = (swig_type_info *)PyCObject_AsVoidPtr(obj);
 #endif
   } else {
     swig_module_info *swig_module = SWIG_GetModule(0);
     descriptor = SWIG_TypeQueryModule(swig_module, swig_module, type);
     if (descriptor) {
 #ifdef SWIGPY_USE_CAPSULE
-      obj = PyCapsule_New((void*) descriptor, NULL, NULL);
+      obj = PyCapsule_New((void *)descriptor, NULL, NULL);
 #else
       obj = PyCObject_FromVoidPtr(descriptor, NULL);
 #endif
@@ -2757,16 +2799,15 @@ SWIG_Python_TypeQuery(const char *type)
   return descriptor;
 }
 
-/* 
+/*
    For backward compatibility only
 */
-#define SWIG_POINTER_EXCEPTION  0
-#define SWIG_arg_fail(arg)      SWIG_Python_ArgFail(arg)
-#define SWIG_MustGetPtr(p, type, argnum, flags)  SWIG_Python_MustGetPtr(p, type, argnum, flags)
+#define SWIG_POINTER_EXCEPTION 0
+#define SWIG_arg_fail(arg) SWIG_Python_ArgFail(arg)
+#define SWIG_MustGetPtr(p, type, argnum, flags) \
+  SWIG_Python_MustGetPtr(p, type, argnum, flags)
 
-SWIGRUNTIME int
-SWIG_Python_AddErrMesg(const char* mesg, int infront)
-{  
+SWIGRUNTIME int SWIG_Python_AddErrMesg(const char *mesg, int infront) {
   if (PyErr_Occurred()) {
     PyObject *type = 0;
     PyObject *value = 0;
@@ -2778,9 +2819,11 @@ SWIG_Python_AddErrMesg(const char* mesg, int infront)
       Py_XINCREF(type);
       PyErr_Clear();
       if (infront) {
-	PyErr_Format(type, "%s %s", mesg, tmp = SWIG_Python_str_AsChar(old_str));
+        PyErr_Format(type, "%s %s", mesg,
+                     tmp = SWIG_Python_str_AsChar(old_str));
       } else {
-	PyErr_Format(type, "%s %s", tmp = SWIG_Python_str_AsChar(old_str), mesg);
+        PyErr_Format(type, "%s %s", tmp = SWIG_Python_str_AsChar(old_str),
+                     mesg);
       }
       SWIG_Python_str_DelForPy3(tmp);
       Py_DECREF(old_str);
@@ -2790,10 +2833,8 @@ SWIG_Python_AddErrMesg(const char* mesg, int infront)
     return 0;
   }
 }
-  
-SWIGRUNTIME int
-SWIG_Python_ArgFail(int argnum)
-{
+
+SWIGRUNTIME int SWIG_Python_ArgFail(int argnum) {
   if (PyErr_Occurred()) {
     /* add information about failing argument */
     char mesg[256];
@@ -2804,55 +2845,53 @@ SWIG_Python_ArgFail(int argnum)
   }
 }
 
-SWIGRUNTIMEINLINE const char *
-SwigPyObject_GetDesc(PyObject *self)
-{
+SWIGRUNTIMEINLINE const char *SwigPyObject_GetDesc(PyObject *self) {
   SwigPyObject *v = (SwigPyObject *)self;
   swig_type_info *ty = v ? v->ty : 0;
   return ty ? ty->str : "";
 }
 
-SWIGRUNTIME void
-SWIG_Python_TypeError(const char *type, PyObject *obj)
-{
+SWIGRUNTIME void SWIG_Python_TypeError(const char *type, PyObject *obj) {
   if (type) {
 #if defined(SWIG_COBJECT_TYPES)
     if (obj && SwigPyObject_Check(obj)) {
-      const char *otype = (const char *) SwigPyObject_GetDesc(obj);
+      const char *otype = (const char *)SwigPyObject_GetDesc(obj);
       if (otype) {
-	PyErr_Format(PyExc_TypeError, "a '%s' is expected, 'SwigPyObject(%s)' is received",
-		     type, otype);
-	return;
+        PyErr_Format(PyExc_TypeError,
+                     "a '%s' is expected, 'SwigPyObject(%s)' is received", type,
+                     otype);
+        return;
       }
-    } else 
-#endif      
+    } else
+#endif
     {
-      const char *otype = (obj ? obj->ob_type->tp_name : 0); 
+      const char *otype = (obj ? obj->ob_type->tp_name : 0);
       if (otype) {
-	PyObject *str = PyObject_Str(obj);
-	const char *cstr = str ? SWIG_Python_str_AsChar(str) : 0;
-	if (cstr) {
-	  PyErr_Format(PyExc_TypeError, "a '%s' is expected, '%s(%s)' is received",
-		       type, otype, cstr);
+        PyObject *str = PyObject_Str(obj);
+        const char *cstr = str ? SWIG_Python_str_AsChar(str) : 0;
+        if (cstr) {
+          PyErr_Format(PyExc_TypeError,
+                       "a '%s' is expected, '%s(%s)' is received", type, otype,
+                       cstr);
           SWIG_Python_str_DelForPy3(cstr);
-	} else {
-	  PyErr_Format(PyExc_TypeError, "a '%s' is expected, '%s' is received",
-		       type, otype);
-	}
-	Py_XDECREF(str);
-	return;
+        } else {
+          PyErr_Format(PyExc_TypeError, "a '%s' is expected, '%s' is received",
+                       type, otype);
+        }
+        Py_XDECREF(str);
+        return;
       }
-    }   
+    }
     PyErr_Format(PyExc_TypeError, "a '%s' is expected", type);
   } else {
     PyErr_Format(PyExc_TypeError, "unexpected type is received");
   }
 }
 
-
 /* Convert a pointer value, signal an exception on a type mismatch */
-SWIGRUNTIME void *
-SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int SWIGUNUSEDPARM(argnum), int flags) {
+SWIGRUNTIME void *SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty,
+                                         int SWIGUNUSEDPARM(argnum),
+                                         int flags) {
   void *result;
   if (SWIG_Python_ConvertPtr(obj, &result, ty, flags) == -1) {
     PyErr_Clear();
@@ -2867,39 +2906,38 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int SWIGUNUSEDPARM(arg
 }
 
 #ifdef SWIGPYTHON_BUILTIN
-SWIGRUNTIME int
-SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
+SWIGRUNTIME int SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name,
+                                              PyObject *value) {
   PyTypeObject *tp = obj->ob_type;
   PyObject *descr;
   PyObject *encoded_name;
   descrsetfunc f;
   int res = -1;
 
-# ifdef Py_USING_UNICODE
+#ifdef Py_USING_UNICODE
   if (PyString_Check(name)) {
-    name = PyUnicode_Decode(PyString_AsString(name), PyString_Size(name), NULL, NULL);
-    if (!name)
-      return -1;
+    name = PyUnicode_Decode(PyString_AsString(name), PyString_Size(name), NULL,
+                            NULL);
+    if (!name) return -1;
   } else if (!PyUnicode_Check(name))
-# else
+#else
   if (!PyString_Check(name))
-# endif
+#endif
   {
-    PyErr_Format(PyExc_TypeError, "attribute name must be string, not '%.200s'", name->ob_type->tp_name);
+    PyErr_Format(PyExc_TypeError, "attribute name must be string, not '%.200s'",
+                 name->ob_type->tp_name);
     return -1;
   } else {
     Py_INCREF(name);
   }
 
   if (!tp->tp_dict) {
-    if (PyType_Ready(tp) < 0)
-      goto done;
+    if (PyType_Ready(tp) < 0) goto done;
   }
 
   descr = _PyType_Lookup(tp, name);
   f = NULL;
-  if (descr != NULL)
-    f = descr->ob_type->tp_descr_set;
+  if (descr != NULL) f = descr->ob_type->tp_descr_set;
   if (!f) {
     if (PyString_Check(name)) {
       encoded_name = name;
@@ -2907,33 +2945,42 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
     } else {
       encoded_name = PyUnicode_AsUTF8String(name);
     }
-    PyErr_Format(PyExc_AttributeError, "'%.100s' object has no attribute '%.200s'", tp->tp_name, PyString_AsString(encoded_name));
+    PyErr_Format(PyExc_AttributeError,
+                 "'%.100s' object has no attribute '%.200s'", tp->tp_name,
+                 PyString_AsString(encoded_name));
     Py_DECREF(encoded_name);
   } else {
     res = f(descr, obj, value);
   }
-  
-  done:
+
+done:
   Py_DECREF(name);
   return res;
 }
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif
 
+#define SWIG_exception_fail(code, msg) \
+  do {                                 \
+    SWIG_Error(code, msg);             \
+    SWIG_fail;                         \
+  } while (0)
 
+#define SWIG_contract_assert(expr, msg) \
+  if (!(expr)) {                        \
+    SWIG_Error(SWIG_RuntimeError, msg); \
+    SWIG_fail;                          \
+  } else
 
-#define SWIG_exception_fail(code, msg) do { SWIG_Error(code, msg); SWIG_fail; } while(0) 
-
-#define SWIG_contract_assert(expr, msg) if (!(expr)) { SWIG_Error(SWIG_RuntimeError, msg); SWIG_fail; } else 
-
-
-
-  #define SWIG_exception(code, msg) do { SWIG_Error(code, msg); SWIG_fail;; } while(0) 
-
+#define SWIG_exception(code, msg) \
+  do {                            \
+    SWIG_Error(code, msg);        \
+    SWIG_fail;                    \
+    ;                             \
+  } while (0)
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
@@ -2956,287 +3003,221 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_std__shared_ptrT_ITrainable_t swig_types[16]
 #define SWIGTYPE_p_std__vectorT__Tp__Alloc_t swig_types[17]
 #define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[18]
-#define SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t swig_types[19]
+#define SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t \
+  swig_types[19]
 #define SWIGTYPE_p_std__wstring swig_types[20]
 #define SWIGTYPE_p_swig__SwigPyIterator swig_types[21]
 #define SWIGTYPE_p_value_type swig_types[22]
 #define SWIGTYPE_p_wchar_t swig_types[23]
 static swig_type_info *swig_types[25];
 static swig_module_info swig_module = {swig_types, 24, 0, 0, 0, 0};
-#define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
-#define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
+#define SWIG_TypeQuery(name) \
+  SWIG_TypeQueryModule(&swig_module, &swig_module, name)
+#define SWIG_MangledTypeQuery(name) \
+  SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
 /* -------- TYPES TABLE (END) -------- */
 
 #if (PY_VERSION_HEX <= 0x02000000)
-# if !defined(SWIG_PYTHON_CLASSIC)
-#  error "This python version requires swig to be run with the '-classic' option"
-# endif
+#if !defined(SWIG_PYTHON_CLASSIC)
+#error "This python version requires swig to be run with the '-classic' option"
+#endif
 #endif
 
 /*-----------------------------------------------
               @(target):= _clstm.so
   ------------------------------------------------*/
 #if PY_VERSION_HEX >= 0x03000000
-#  define SWIG_init    PyInit__clstm
+#define SWIG_init PyInit__clstm
 
 #else
-#  define SWIG_init    init_clstm
+#define SWIG_init init_clstm
 
 #endif
-#define SWIG_name    "_clstm"
+#define SWIG_name "_clstm"
 
-#define SWIGVERSION 0x030002 
+#define SWIGVERSION 0x030002
 #define SWIG_VERSION SWIGVERSION
 
-
-#define SWIG_as_voidptr(a) const_cast< void * >(static_cast< const void * >(a)) 
-#define SWIG_as_voidptrptr(a) ((void)SWIG_as_voidptr(*a),reinterpret_cast< void** >(a)) 
-
+#define SWIG_as_voidptr(a) const_cast<void *>(static_cast<const void *>(a))
+#define SWIG_as_voidptrptr(a) \
+  ((void)SWIG_as_voidptr(*a), reinterpret_cast<void **>(a))
 
 #include <stdexcept>
 
-
 namespace swig {
-  class SwigPtr_PyObject {
-  protected:
-    PyObject *_obj;
+class SwigPtr_PyObject {
+ protected:
+  PyObject *_obj;
 
-  public:
-    SwigPtr_PyObject() :_obj(0)
-    {
-    }
+ public:
+  SwigPtr_PyObject() : _obj(0) {}
 
-    SwigPtr_PyObject(const SwigPtr_PyObject& item) : _obj(item._obj)
-    {
-      Py_XINCREF(_obj);      
-    }
-    
-    SwigPtr_PyObject(PyObject *obj, bool initial_ref = true) :_obj(obj)
-    {
-      if (initial_ref) {
-        Py_XINCREF(_obj);
-      }
-    }
-    
-    SwigPtr_PyObject & operator=(const SwigPtr_PyObject& item) 
-    {
-      Py_XINCREF(item._obj);
-      Py_XDECREF(_obj);
-      _obj = item._obj;
-      return *this;      
-    }
-    
-    ~SwigPtr_PyObject() 
-    {
-      Py_XDECREF(_obj);
-    }
-    
-    operator PyObject *() const
-    {
-      return _obj;
-    }
+  SwigPtr_PyObject(const SwigPtr_PyObject &item) : _obj(item._obj) {
+    Py_XINCREF(_obj);
+  }
 
-    PyObject *operator->() const
-    {
-      return _obj;
+  SwigPtr_PyObject(PyObject *obj, bool initial_ref = true) : _obj(obj) {
+    if (initial_ref) {
+      Py_XINCREF(_obj);
     }
-  };
+  }
+
+  SwigPtr_PyObject &operator=(const SwigPtr_PyObject &item) {
+    Py_XINCREF(item._obj);
+    Py_XDECREF(_obj);
+    _obj = item._obj;
+    return *this;
+  }
+
+  ~SwigPtr_PyObject() { Py_XDECREF(_obj); }
+
+  operator PyObject *() const { return _obj; }
+
+  PyObject *operator->() const { return _obj; }
+};
 }
 
-
 namespace swig {
-  struct SwigVar_PyObject : SwigPtr_PyObject {
-    SwigVar_PyObject(PyObject* obj = 0) : SwigPtr_PyObject(obj, false) { }
-    
-    SwigVar_PyObject & operator = (PyObject* obj)
-    {
-      Py_XDECREF(_obj);
-      _obj = obj;
-      return *this;      
-    }
-  };
-}
+struct SwigVar_PyObject : SwigPtr_PyObject {
+  SwigVar_PyObject(PyObject *obj = 0) : SwigPtr_PyObject(obj, false) {}
 
+  SwigVar_PyObject &operator=(PyObject *obj) {
+    Py_XDECREF(_obj);
+    _obj = obj;
+    return *this;
+  }
+};
+}
 
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wuninitialized"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-
 #include <string>
 
-
 #if PY_VERSION_HEX >= 0x03020000
-# define SWIGPY_UNICODE_ARG(obj) ((PyObject*) (obj))
+#define SWIGPY_UNICODE_ARG(obj) ((PyObject *)(obj))
 #else
-# define SWIGPY_UNICODE_ARG(obj) ((PyUnicodeObject*) (obj))
+#define SWIGPY_UNICODE_ARG(obj) ((PyUnicodeObject *)(obj))
 #endif
-
 
 #include <cwchar>
 
-
-SWIGINTERNINLINE PyObject*
-  SWIG_From_int  (int value)
-{
-  return PyInt_FromLong((long) value);
+SWIGINTERNINLINE PyObject *SWIG_From_int(int value) {
+  return PyInt_FromLong((long)value);
 }
-
 
 #include <iostream>
 
 #if PY_VERSION_HEX >= 0x03020000
-# define SWIGPY_SLICE_ARG(obj) ((PyObject*) (obj))
+#define SWIGPY_SLICE_ARG(obj) ((PyObject *)(obj))
 #else
-# define SWIGPY_SLICE_ARG(obj) ((PySliceObject*) (obj))
+#define SWIGPY_SLICE_ARG(obj) ((PySliceObject *)(obj))
 #endif
-
 
 #include <stdexcept>
 
-
 #if defined(__GNUC__)
-#  if __GNUC__ == 2 && __GNUC_MINOR <= 96
-#     define SWIG_STD_NOMODERN_STL
-#  endif
+#if __GNUC__ == 2 && __GNUC_MINOR <= 96
+#define SWIG_STD_NOMODERN_STL
 #endif
-
+#endif
 
 #include <stddef.h>
 
-
 namespace swig {
-  struct stop_iteration {
-  };
+struct stop_iteration {};
 
-  struct SwigPyIterator {
-  private:
-    SwigPtr_PyObject _seq;
+struct SwigPyIterator {
+ private:
+  SwigPtr_PyObject _seq;
 
-  protected:
-    SwigPyIterator(PyObject *seq) : _seq(seq)
-    {
-    }
-      
-  public:
-    virtual ~SwigPyIterator() {}
+ protected:
+  SwigPyIterator(PyObject *seq) : _seq(seq) {}
 
-    // Access iterator method, required by Python
-    virtual PyObject *value() const = 0;
+ public:
+  virtual ~SwigPyIterator() {}
 
-    // Forward iterator method, required by Python
-    virtual SwigPyIterator *incr(size_t n = 1) = 0;
-    
-    // Backward iterator method, very common in C++, but not required in Python
-    virtual SwigPyIterator *decr(size_t /*n*/ = 1)
-    {
-      throw stop_iteration();
-    }
+  // Access iterator method, required by Python
+  virtual PyObject *value() const = 0;
 
-    // Random access iterator methods, but not required in Python
-    virtual ptrdiff_t distance(const SwigPyIterator &/*x*/) const
-    {
-      throw std::invalid_argument("operation not supported");
-    }
+  // Forward iterator method, required by Python
+  virtual SwigPyIterator *incr(size_t n = 1) = 0;
 
-    virtual bool equal (const SwigPyIterator &/*x*/) const
-    {
-      throw std::invalid_argument("operation not supported");
-    }
-    
-    // C++ common/needed methods
-    virtual SwigPyIterator *copy() const = 0;
+  // Backward iterator method, very common in C++, but not required in Python
+  virtual SwigPyIterator *decr(size_t /*n*/ = 1) { throw stop_iteration(); }
 
-    PyObject *next()     
-    {
-      SWIG_PYTHON_THREAD_BEGIN_BLOCK; // disable threads       
-      PyObject *obj = value();
-      incr();       
-      SWIG_PYTHON_THREAD_END_BLOCK; // re-enable threads
-      return obj;     
-    }
+  // Random access iterator methods, but not required in Python
+  virtual ptrdiff_t distance(const SwigPyIterator & /*x*/) const {
+    throw std::invalid_argument("operation not supported");
+  }
 
-    /* Make an alias for Python 3.x */
-    PyObject *__next__()
-    {
-      return next();
-    }
+  virtual bool equal(const SwigPyIterator & /*x*/) const {
+    throw std::invalid_argument("operation not supported");
+  }
 
-    PyObject *previous()
-    {
-      SWIG_PYTHON_THREAD_BEGIN_BLOCK; // disable threads       
-      decr();
-      PyObject *obj = value();
-      SWIG_PYTHON_THREAD_END_BLOCK; // re-enable threads       
-      return obj;
-    }
+  // C++ common/needed methods
+  virtual SwigPyIterator *copy() const = 0;
 
-    SwigPyIterator *advance(ptrdiff_t n)
-    {
-      return  (n > 0) ?  incr(n) : decr(-n);
-    }
-      
-    bool operator == (const SwigPyIterator& x)  const
-    {
-      return equal(x);
-    }
-      
-    bool operator != (const SwigPyIterator& x) const
-    {
-      return ! operator==(x);
-    }
-      
-    SwigPyIterator& operator += (ptrdiff_t n)
-    {
-      return *advance(n);
-    }
+  PyObject *next() {
+    SWIG_PYTHON_THREAD_BEGIN_BLOCK;  // disable threads
+    PyObject *obj = value();
+    incr();
+    SWIG_PYTHON_THREAD_END_BLOCK;  // re-enable threads
+    return obj;
+  }
 
-    SwigPyIterator& operator -= (ptrdiff_t n)
-    {
-      return *advance(-n);
-    }
-      
-    SwigPyIterator* operator + (ptrdiff_t n) const
-    {
-      return copy()->advance(n);
-    }
+  /* Make an alias for Python 3.x */
+  PyObject *__next__() { return next(); }
 
-    SwigPyIterator* operator - (ptrdiff_t n) const
-    {
-      return copy()->advance(-n);
+  PyObject *previous() {
+    SWIG_PYTHON_THREAD_BEGIN_BLOCK;  // disable threads
+    decr();
+    PyObject *obj = value();
+    SWIG_PYTHON_THREAD_END_BLOCK;  // re-enable threads
+    return obj;
+  }
+
+  SwigPyIterator *advance(ptrdiff_t n) { return (n > 0) ? incr(n) : decr(-n); }
+
+  bool operator==(const SwigPyIterator &x) const { return equal(x); }
+
+  bool operator!=(const SwigPyIterator &x) const { return !operator==(x); }
+
+  SwigPyIterator &operator+=(ptrdiff_t n) { return *advance(n); }
+
+  SwigPyIterator &operator-=(ptrdiff_t n) { return *advance(-n); }
+
+  SwigPyIterator *operator+(ptrdiff_t n) const { return copy()->advance(n); }
+
+  SwigPyIterator *operator-(ptrdiff_t n) const { return copy()->advance(-n); }
+
+  ptrdiff_t operator-(const SwigPyIterator &x) const {
+    return x.distance(*this);
+  }
+
+  static swig_type_info *descriptor() {
+    static int init = 0;
+    static swig_type_info *desc = 0;
+    if (!init) {
+      desc = SWIG_TypeQuery("swig::SwigPyIterator *");
+      init = 1;
     }
-      
-    ptrdiff_t operator - (const SwigPyIterator& x) const
-    {
-      return x.distance(*this);
-    }
-      
-    static swig_type_info* descriptor() {
-      static int init = 0;
-      static swig_type_info* desc = 0;
-      if (!init) {
-	desc = SWIG_TypeQuery("swig::SwigPyIterator *");
-	init = 1;
-      }	
-      return desc;
-    }    
-  };
+    return desc;
+  }
+};
 
 #if defined(SWIGPYTHON_BUILTIN)
-  inline PyObject* make_output_iterator_builtin (PyObject *pyself)
-  {
-    Py_INCREF(pyself);
-    return pyself;
-  }
+inline PyObject *make_output_iterator_builtin(PyObject *pyself) {
+  Py_INCREF(pyself);
+  return pyself;
+}
 #endif
 }
 
-
-SWIGINTERN int
-SWIG_AsVal_double (PyObject *obj, double *val)
-{
+SWIGINTERN int SWIG_AsVal_double(PyObject *obj, double *val) {
   int res = SWIG_TypeError;
   if (PyFloat_Check(obj)) {
     if (val) *val = PyFloat_AsDouble(obj);
@@ -3266,10 +3247,10 @@ SWIG_AsVal_double (PyObject *obj, double *val)
     if (!dispatch) {
       long v = PyLong_AsLong(obj);
       if (!PyErr_Occurred()) {
-	if (val) *val = v;
-	return SWIG_AddCast(SWIG_AddCast(SWIG_OK));
+        if (val) *val = v;
+        return SWIG_AddCast(SWIG_AddCast(SWIG_OK));
       } else {
-	PyErr_Clear();
+        PyErr_Clear();
       }
     }
   }
@@ -3277,46 +3258,39 @@ SWIG_AsVal_double (PyObject *obj, double *val)
   return res;
 }
 
-
 #include <float.h>
-
 
 #include <math.h>
 
-
-SWIGINTERNINLINE int
-SWIG_CanCastAsInteger(double *d, double min, double max) {
+SWIGINTERNINLINE int SWIG_CanCastAsInteger(double *d, double min, double max) {
   double x = *d;
   if ((min <= x && x <= max)) {
-   double fx = floor(x);
-   double cx = ceil(x);
-   double rd =  ((x - fx) < 0.5) ? fx : cx; /* simple rint */
-   if ((errno == EDOM) || (errno == ERANGE)) {
-     errno = 0;
-   } else {
-     double summ, reps, diff;
-     if (rd < x) {
-       diff = x - rd;
-     } else if (rd > x) {
-       diff = rd - x;
-     } else {
-       return 1;
-     }
-     summ = rd + x;
-     reps = diff/summ;
-     if (reps < 8*DBL_EPSILON) {
-       *d = rd;
-       return 1;
-     }
-   }
+    double fx = floor(x);
+    double cx = ceil(x);
+    double rd = ((x - fx) < 0.5) ? fx : cx; /* simple rint */
+    if ((errno == EDOM) || (errno == ERANGE)) {
+      errno = 0;
+    } else {
+      double summ, reps, diff;
+      if (rd < x) {
+        diff = x - rd;
+      } else if (rd > x) {
+        diff = rd - x;
+      } else {
+        return 1;
+      }
+      summ = rd + x;
+      reps = diff / summ;
+      if (reps < 8 * DBL_EPSILON) {
+        *d = rd;
+        return 1;
+      }
+    }
   }
   return 0;
 }
 
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
-{
+SWIGINTERN int SWIG_AsVal_unsigned_SS_long(PyObject *obj, unsigned long *val) {
 #if PY_VERSION_HEX < 0x03000000
   if (PyInt_Check(obj)) {
     long v = PyInt_AsLong(obj);
@@ -3328,7 +3302,7 @@ SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val)
     }
   } else
 #endif
-  if (PyLong_Check(obj)) {
+      if (PyLong_Check(obj)) {
     unsigned long v = PyLong_AsUnsignedLong(obj);
     if (!PyErr_Occurred()) {
       if (val) *val = v;
@@ -3361,10 +3335,10 @@ SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val)
     }
     if (!dispatch) {
       double d;
-      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
+      int res = SWIG_AddCast(SWIG_AsVal_double(obj, &d));
       if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ULONG_MAX)) {
-	if (val) *val = (unsigned long)(d);
-	return res;
+        if (val) *val = (unsigned long)(d);
+        return res;
       }
     }
   }
@@ -3372,37 +3346,24 @@ SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val)
   return SWIG_TypeError;
 }
 
-
-SWIGINTERNINLINE int
-SWIG_AsVal_size_t (PyObject * obj, size_t *val)
-{
+SWIGINTERNINLINE int SWIG_AsVal_size_t(PyObject *obj, size_t *val) {
   unsigned long v;
-  int res = SWIG_AsVal_unsigned_SS_long (obj, val ? &v : 0);
-  if (SWIG_IsOK(res) && val) *val = static_cast< size_t >(v);
+  int res = SWIG_AsVal_unsigned_SS_long(obj, val ? &v : 0);
+  if (SWIG_IsOK(res) && val) *val = static_cast<size_t>(v);
   return res;
 }
 
+#define SWIG_From_long PyLong_FromLong
 
-  #define SWIG_From_long   PyLong_FromLong 
-
-
-SWIGINTERNINLINE PyObject *
-SWIG_From_ptrdiff_t  (ptrdiff_t value)
-{    
-  return SWIG_From_long  (static_cast< long >(value));
+SWIGINTERNINLINE PyObject *SWIG_From_ptrdiff_t(ptrdiff_t value) {
+  return SWIG_From_long(static_cast<long>(value));
 }
 
-
-SWIGINTERNINLINE PyObject*
-  SWIG_From_bool  (bool value)
-{
+SWIGINTERNINLINE PyObject *SWIG_From_bool(bool value) {
   return PyBool_FromLong(value ? 1 : 0);
 }
 
-
-SWIGINTERN int
-SWIG_AsVal_long (PyObject *obj, long* val)
-{
+SWIGINTERN int SWIG_AsVal_long(PyObject *obj, long *val) {
   if (PyInt_Check(obj)) {
     if (val) *val = PyInt_AsLong(obj);
     return SWIG_OK;
@@ -3427,10 +3388,10 @@ SWIG_AsVal_long (PyObject *obj, long* val)
     }
     if (!dispatch) {
       double d;
-      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
+      int res = SWIG_AddCast(SWIG_AsVal_double(obj, &d));
       if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, LONG_MIN, LONG_MAX)) {
-	if (val) *val = (long)(d);
-	return res;
+        if (val) *val = (long)(d);
+        return res;
       }
     }
   }
@@ -3438,22 +3399,16 @@ SWIG_AsVal_long (PyObject *obj, long* val)
   return SWIG_TypeError;
 }
 
-
-SWIGINTERNINLINE int
-SWIG_AsVal_ptrdiff_t (PyObject * obj, ptrdiff_t *val)
-{
+SWIGINTERNINLINE int SWIG_AsVal_ptrdiff_t(PyObject *obj, ptrdiff_t *val) {
   long v;
-  int res = SWIG_AsVal_long (obj, val ? &v : 0);
-  if (SWIG_IsOK(res) && val) *val = static_cast< ptrdiff_t >(v);
+  int res = SWIG_AsVal_long(obj, val ? &v : 0);
+  if (SWIG_IsOK(res) && val) *val = static_cast<ptrdiff_t>(v);
   return res;
 }
 
-
 #include <algorithm>
 
-
 #include <vector>
-
 
 #include <memory>
 #include <iostream>
@@ -3461,117 +3416,102 @@ SWIG_AsVal_ptrdiff_t (PyObject * obj, ptrdiff_t *val)
 using namespace ocropus;
 using namespace std;
 
-
 #include "numpy/arrayobject.h"
-
-
 
 #include <limits.h>
 #if !defined(SWIG_NO_LLONG_MAX)
-# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
-#   define LLONG_MAX __LONG_LONG_MAX__
-#   define LLONG_MIN (-LLONG_MAX - 1LL)
-#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
-# endif
+#if !defined(LLONG_MAX) && defined(__GNUC__) && defined(__LONG_LONG_MAX__)
+#define LLONG_MAX __LONG_LONG_MAX__
+#define LLONG_MIN (-LLONG_MAX - 1LL)
+#define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+#endif
 #endif
 
-
-SWIGINTERN int
-SWIG_AsVal_int (PyObject * obj, int *val)
-{
+SWIGINTERN int SWIG_AsVal_int(PyObject *obj, int *val) {
   long v;
-  int res = SWIG_AsVal_long (obj, &v);
+  int res = SWIG_AsVal_long(obj, &v);
   if (SWIG_IsOK(res)) {
     if ((v < INT_MIN || v > INT_MAX)) {
       return SWIG_OverflowError;
     } else {
-      if (val) *val = static_cast< int >(v);
+      if (val) *val = static_cast<int>(v);
     }
-  }  
+  }
   return res;
 }
 
-SWIGINTERN void Classes___setitem__(Classes *self,int i,int value){
-        (*self)[i] = value;
-    }
-
-  #define SWIG_From_double   PyFloat_FromDouble 
-
-
-SWIGINTERNINLINE PyObject *
-SWIG_From_float  (float value)
-{    
-  return SWIG_From_double  (value);
+SWIGINTERN void Classes___setitem__(Classes *self, int i, int value) {
+  (*self)[i] = value;
 }
 
+#define SWIG_From_double PyFloat_FromDouble
 
-/* Getting isfinite working pre C99 across multiple platforms is non-trivial. Users can provide SWIG_isfinite on older platforms. */
+SWIGINTERNINLINE PyObject *SWIG_From_float(float value) {
+  return SWIG_From_double(value);
+}
+
+/* Getting isfinite working pre C99 across multiple platforms is non-trivial.
+ * Users can provide SWIG_isfinite on older platforms. */
 #ifndef SWIG_isfinite
-# if defined(isfinite)
-#  define SWIG_isfinite(X) (isfinite(X))
-# elif defined(_MSC_VER)
-#  define SWIG_isfinite(X) (_finite(X))
-# elif defined(__sun) && defined(__SVR4)
-#  include <ieeefp.h>
-#  define SWIG_isfinite(X) (finite(X))
-# endif
+#if defined(isfinite)
+#define SWIG_isfinite(X) (isfinite(X))
+#elif defined(_MSC_VER)
+#define SWIG_isfinite(X) (_finite(X))
+#elif defined(__sun) && defined(__SVR4)
+#include <ieeefp.h>
+#define SWIG_isfinite(X) (finite(X))
+#endif
 #endif
 
-
-/* Accept infinite as a valid float value unless we are unable to check if a value is finite */
+/* Accept infinite as a valid float value unless we are unable to check if a
+ * value is finite */
 #ifdef SWIG_isfinite
-# define SWIG_Float_Overflow_Check(X) ((X < -FLT_MAX || X > FLT_MAX) && SWIG_isfinite(X))
+#define SWIG_Float_Overflow_Check(X) \
+  ((X < -FLT_MAX || X > FLT_MAX) && SWIG_isfinite(X))
 #else
-# define SWIG_Float_Overflow_Check(X) ((X < -FLT_MAX || X > FLT_MAX))
+#define SWIG_Float_Overflow_Check(X) ((X < -FLT_MAX || X > FLT_MAX))
 #endif
 
-
-SWIGINTERN int
-SWIG_AsVal_float (PyObject * obj, float *val)
-{
+SWIGINTERN int SWIG_AsVal_float(PyObject *obj, float *val) {
   double v;
-  int res = SWIG_AsVal_double (obj, &v);
+  int res = SWIG_AsVal_double(obj, &v);
   if (SWIG_IsOK(res)) {
     if (SWIG_Float_Overflow_Check(v)) {
       return SWIG_OverflowError;
     } else {
-      if (val) *val = static_cast< float >(v);
+      if (val) *val = static_cast<float>(v);
     }
-  }  
+  }
   return res;
 }
 
-SWIGINTERN void Vec___setitem__(Vec *self,int i,float value){
-        (*self)[i] = value;
-    }
-SWIGINTERN void Mat_setValue(Mat *self,int i,int j,float value){
-        (*self)(i,j) = value;
-    }
-SWIGINTERN int Sequence_length(Sequence *self){
-        return self->size();
-    }
-SWIGINTERN int Sequence_depth(Sequence *self){
-        if(self->size()==0) return -1;
-        return (*self)[0].rows();
-    }
-SWIGINTERN int Sequence_batchsize(Sequence *self){
-        if(self->size()==0) return -1;
-        return (*self)[0].cols();
-    }
-SWIGINTERN void Sequence_assign(Sequence *self,Sequence &other){
-        self->resize(other.size());
-        for(int t=0;t<self->size();t++)
-            (*self)[t] = other[t];
-    }
-SWIGINTERN void Sequence_resize(Sequence *self,int len,int depth,int batchsize){
-        throw "unimplemented";
-    }
+SWIGINTERN void Vec___setitem__(Vec *self, int i, float value) {
+  (*self)[i] = value;
+}
+SWIGINTERN void Mat_setValue(Mat *self, int i, int j, float value) {
+  (*self)(i, j) = value;
+}
+SWIGINTERN int Sequence_length(Sequence *self) { return self->size(); }
+SWIGINTERN int Sequence_depth(Sequence *self) {
+  if (self->size() == 0) return -1;
+  return (*self)[0].rows();
+}
+SWIGINTERN int Sequence_batchsize(Sequence *self) {
+  if (self->size() == 0) return -1;
+  return (*self)[0].cols();
+}
+SWIGINTERN void Sequence_assign(Sequence *self, Sequence &other) {
+  self->resize(other.size());
+  for (int t = 0; t < self->size(); t++) (*self)[t] = other[t];
+}
+SWIGINTERN void Sequence_resize(Sequence *self, int len, int depth,
+                                int batchsize) {
+  throw "unimplemented";
+}
 
-SWIGINTERN swig_type_info*
-SWIG_pchar_descriptor(void)
-{
+SWIGINTERN swig_type_info *SWIG_pchar_descriptor(void) {
   static int init = 0;
-  static swig_type_info* info = 0;
+  static swig_type_info *info = 0;
   if (!init) {
     info = SWIG_TypeQuery("_p_char");
     init = 1;
@@ -3579,87 +3519,85 @@ SWIG_pchar_descriptor(void)
   return info;
 }
 
-
-SWIGINTERN int
-SWIG_AsCharPtrAndSize(PyObject *obj, char** cptr, size_t* psize, int *alloc)
-{
-#if PY_VERSION_HEX>=0x03000000
+SWIGINTERN int SWIG_AsCharPtrAndSize(PyObject *obj, char **cptr, size_t *psize,
+                                     int *alloc) {
+#if PY_VERSION_HEX >= 0x03000000
   if (PyUnicode_Check(obj))
-#else  
+#else
   if (PyString_Check(obj))
 #endif
   {
-    char *cstr; Py_ssize_t len;
-#if PY_VERSION_HEX>=0x03000000
+    char *cstr;
+    Py_ssize_t len;
+#if PY_VERSION_HEX >= 0x03000000
     if (!alloc && cptr) {
-        /* We can't allow converting without allocation, since the internal
-           representation of string in Python 3 is UCS-2/UCS-4 but we require
-           a UTF-8 representation.
-           TODO(bhy) More detailed explanation */
-        return SWIG_RuntimeError;
+      /* We can't allow converting without allocation, since the internal
+         representation of string in Python 3 is UCS-2/UCS-4 but we require
+         a UTF-8 representation.
+         TODO(bhy) More detailed explanation */
+      return SWIG_RuntimeError;
     }
     obj = PyUnicode_AsUTF8String(obj);
     PyBytes_AsStringAndSize(obj, &cstr, &len);
-    if(alloc) *alloc = SWIG_NEWOBJ;
+    if (alloc) *alloc = SWIG_NEWOBJ;
 #else
     PyString_AsStringAndSize(obj, &cstr, &len);
 #endif
     if (cptr) {
       if (alloc) {
-	/* 
-	   In python the user should not be able to modify the inner
-	   string representation. To warranty that, if you define
-	   SWIG_PYTHON_SAFE_CSTRINGS, a new/copy of the python string
-	   buffer is always returned.
+/*
+   In python the user should not be able to modify the inner
+   string representation. To warranty that, if you define
+   SWIG_PYTHON_SAFE_CSTRINGS, a new/copy of the python string
+   buffer is always returned.
 
-	   The default behavior is just to return the pointer value,
-	   so, be careful.
-	*/ 
+   The default behavior is just to return the pointer value,
+   so, be careful.
+*/
 #if defined(SWIG_PYTHON_SAFE_CSTRINGS)
-	if (*alloc != SWIG_OLDOBJ) 
+        if (*alloc != SWIG_OLDOBJ)
 #else
-	if (*alloc == SWIG_NEWOBJ) 
+        if (*alloc == SWIG_NEWOBJ)
 #endif
-	  {
-	    *cptr = reinterpret_cast< char* >(memcpy((new char[len + 1]), cstr, sizeof(char)*(len + 1)));
-	    *alloc = SWIG_NEWOBJ;
-	  }
-	else {
-	  *cptr = cstr;
-	  *alloc = SWIG_OLDOBJ;
-	}
+        {
+          *cptr = reinterpret_cast<char *>(
+              memcpy((new char[len + 1]), cstr, sizeof(char) * (len + 1)));
+          *alloc = SWIG_NEWOBJ;
+        } else {
+          *cptr = cstr;
+          *alloc = SWIG_OLDOBJ;
+        }
       } else {
-        #if PY_VERSION_HEX>=0x03000000
+#if PY_VERSION_HEX >= 0x03000000
         assert(0); /* Should never reach here in Python 3 */
-        #endif
-	*cptr = SWIG_Python_str_AsChar(obj);
+#endif
+        *cptr = SWIG_Python_str_AsChar(obj);
       }
     }
     if (psize) *psize = len + 1;
-#if PY_VERSION_HEX>=0x03000000
+#if PY_VERSION_HEX >= 0x03000000
     Py_XDECREF(obj);
 #endif
     return SWIG_OK;
   } else {
-    swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+    swig_type_info *pchar_descriptor = SWIG_pchar_descriptor();
     if (pchar_descriptor) {
-      void* vptr = 0;
+      void *vptr = 0;
       if (SWIG_ConvertPtr(obj, &vptr, pchar_descriptor, 0) == SWIG_OK) {
-	if (cptr) *cptr = (char *) vptr;
-	if (psize) *psize = vptr ? (strlen((char *)vptr) + 1) : 0;
-	if (alloc) *alloc = SWIG_OLDOBJ;
-	return SWIG_OK;
+        if (cptr) *cptr = (char *)vptr;
+        if (psize) *psize = vptr ? (strlen((char *)vptr) + 1) : 0;
+        if (alloc) *alloc = SWIG_OLDOBJ;
+        return SWIG_OK;
       }
     }
   }
   return SWIG_TypeError;
 }
 
-
-SWIGINTERN int
-SWIG_AsPtr_std_string (PyObject * obj, std::string **val) 
-{
-  char* buf = 0 ; size_t size = 0; int alloc = SWIG_OLDOBJ;
+SWIGINTERN int SWIG_AsPtr_std_string(PyObject *obj, std::string **val) {
+  char *buf = 0;
+  size_t size = 0;
+  int alloc = SWIG_OLDOBJ;
   if (SWIG_IsOK((SWIG_AsCharPtrAndSize(obj, &buf, &size, &alloc)))) {
     if (buf) {
       if (val) *val = new std::string(buf, size - 1);
@@ -3671,14 +3609,16 @@ SWIG_AsPtr_std_string (PyObject * obj, std::string **val)
     }
   } else {
     static int init = 0;
-    static swig_type_info* descriptor = 0;
+    static swig_type_info *descriptor = 0;
     if (!init) {
-      descriptor = SWIG_TypeQuery("std::string" " *");
+      descriptor = SWIG_TypeQuery(
+          "std::string"
+          " *");
       init = 1;
     }
     if (descriptor) {
       std::string *vptr;
-      int res = SWIG_ConvertPtr(obj, (void**)&vptr, descriptor, 0);
+      int res = SWIG_ConvertPtr(obj, (void **)&vptr, descriptor, 0);
       if (SWIG_IsOK(res) && val) *val = vptr;
       return res;
     }
@@ -3686,24 +3626,25 @@ SWIG_AsPtr_std_string (PyObject * obj, std::string **val)
   return SWIG_ERROR;
 }
 
-
-SWIGINTERNINLINE PyObject *
-SWIG_FromCharPtrAndSize(const char* carray, size_t size)
-{
+SWIGINTERNINLINE PyObject *SWIG_FromCharPtrAndSize(const char *carray,
+                                                   size_t size) {
   if (carray) {
     if (size > INT_MAX) {
-      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
-      return pchar_descriptor ? 
-	SWIG_InternalNewPointerObj(const_cast< char * >(carray), pchar_descriptor, 0) : SWIG_Py_Void();
+      swig_type_info *pchar_descriptor = SWIG_pchar_descriptor();
+      return pchar_descriptor
+                 ? SWIG_InternalNewPointerObj(const_cast<char *>(carray),
+                                              pchar_descriptor, 0)
+                 : SWIG_Py_Void();
     } else {
 #if PY_VERSION_HEX >= 0x03000000
 #if PY_VERSION_HEX >= 0x03010000
-      return PyUnicode_DecodeUTF8(carray, static_cast< int >(size), "surrogateescape");
+      return PyUnicode_DecodeUTF8(carray, static_cast<int>(size),
+                                  "surrogateescape");
 #else
-      return PyUnicode_FromStringAndSize(carray, static_cast< int >(size));
+      return PyUnicode_FromStringAndSize(carray, static_cast<int>(size));
 #endif
 #else
-      return PyString_FromStringAndSize(carray, static_cast< int >(size));
+      return PyString_FromStringAndSize(carray, static_cast<int>(size));
 #endif
     }
   } else {
@@ -3711,1257 +3652,1238 @@ SWIG_FromCharPtrAndSize(const char* carray, size_t size)
   }
 }
 
-
-SWIGINTERNINLINE PyObject *
-SWIG_From_std_string  (const std::string& s)
-{
+SWIGINTERNINLINE PyObject *SWIG_From_std_string(const std::string &s) {
   return SWIG_FromCharPtrAndSize(s.data(), s.size());
 }
 
+namespace swig {
+template <class Type>
+struct noconst_traits {
+  typedef Type noconst_type;
+};
 
-namespace swig {  
-  template <class Type>
-  struct noconst_traits {
-    typedef Type noconst_type;
-  };
+template <class Type>
+struct noconst_traits<const Type> {
+  typedef Type noconst_type;
+};
 
-  template <class Type>
-  struct noconst_traits<const Type> {
-    typedef Type noconst_type;
-  };
+/*
+  type categories
+*/
+struct pointer_category {};
+struct value_category {};
 
-  /*
-    type categories
-  */
-  struct pointer_category { };  
-  struct value_category { };
+/*
+  General traits that provides type_name and type_info
+*/
+template <class Type>
+struct traits {};
 
-  /*
-    General traits that provides type_name and type_info
-  */
-  template <class Type> struct traits { };
-
-  template <class Type>
-  inline const char* type_name() {
-    return traits<typename noconst_traits<Type >::noconst_type >::type_name();
-  }
-
-  template <class Type> 
-  struct traits_info {
-    static swig_type_info *type_query(std::string name) {
-      name += " *";
-      return SWIG_TypeQuery(name.c_str());
-    }    
-    static swig_type_info *type_info() {
-      static swig_type_info *info = type_query(type_name<Type>());
-      return info;
-    }
-  };
-
-  template <class Type>
-  inline swig_type_info *type_info() {
-    return traits_info<Type>::type_info();
-  }
-
-  /*
-    Partial specialization for pointers
-  */
-  template <class Type> struct traits <Type *> {
-    typedef pointer_category category;
-    static std::string make_ptr_name(const char* name) {
-      std::string ptrname = name;
-      ptrname += " *";
-      return ptrname;
-    }    
-    static const char* type_name() {
-      static std::string name = make_ptr_name(swig::type_name<Type>());
-      return name.c_str();
-    }
-  };
-
-  template <class Type, class Category> 
-  struct traits_as { };
- 
-  template <class Type, class Category> 
-  struct traits_check { };
-
+template <class Type>
+inline const char *type_name() {
+  return traits<typename noconst_traits<Type>::noconst_type>::type_name();
 }
 
-
-namespace swig {  
-  /*
-    Traits that provides the from method
-  */
-  template <class Type> struct traits_from_ptr {
-    static PyObject *from(Type *val, int owner = 0) {
-      return SWIG_InternalNewPointerObj(val, type_info<Type>(), owner);
-    }
-  };
-
-  template <class Type> struct traits_from {
-    static PyObject *from(const Type& val) {
-      return traits_from_ptr<Type>::from(new Type(val), 1);
-    }
-  };
-
-  template <class Type> struct traits_from<Type *> {
-    static PyObject *from(Type* val) {
-      return traits_from_ptr<Type>::from(val, 0);
-    }
-  };
-
-  template <class Type> struct traits_from<const Type *> {
-    static PyObject *from(const Type* val) {
-      return traits_from_ptr<Type>::from(const_cast<Type*>(val), 0);
-    }
-  };
-
-
-  template <class Type>
-  inline PyObject *from(const Type& val) {
-    return traits_from<Type>::from(val);
+template <class Type>
+struct traits_info {
+  static swig_type_info *type_query(std::string name) {
+    name += " *";
+    return SWIG_TypeQuery(name.c_str());
   }
-
-  template <class Type>
-  inline PyObject *from_ptr(Type* val, int owner) {
-    return traits_from_ptr<Type>::from(val, owner);
+  static swig_type_info *type_info() {
+    static swig_type_info *info = type_query(type_name<Type>());
+    return info;
   }
+};
 
-  /*
-    Traits that provides the asval/as/check method
-  */
-  template <class Type>
-  struct traits_asptr {   
-    static int asptr(PyObject *obj, Type **val) {
-      Type *p;
-      int res = SWIG_ConvertPtr(obj, (void**)&p, type_info<Type>(), 0);
+template <class Type>
+inline swig_type_info *type_info() {
+  return traits_info<Type>::type_info();
+}
+
+/*
+  Partial specialization for pointers
+*/
+template <class Type>
+struct traits<Type *> {
+  typedef pointer_category category;
+  static std::string make_ptr_name(const char *name) {
+    std::string ptrname = name;
+    ptrname += " *";
+    return ptrname;
+  }
+  static const char *type_name() {
+    static std::string name = make_ptr_name(swig::type_name<Type>());
+    return name.c_str();
+  }
+};
+
+template <class Type, class Category>
+struct traits_as {};
+
+template <class Type, class Category>
+struct traits_check {};
+}
+
+namespace swig {
+/*
+  Traits that provides the from method
+*/
+template <class Type>
+struct traits_from_ptr {
+  static PyObject *from(Type *val, int owner = 0) {
+    return SWIG_InternalNewPointerObj(val, type_info<Type>(), owner);
+  }
+};
+
+template <class Type>
+struct traits_from {
+  static PyObject *from(const Type &val) {
+    return traits_from_ptr<Type>::from(new Type(val), 1);
+  }
+};
+
+template <class Type>
+struct traits_from<Type *> {
+  static PyObject *from(Type *val) {
+    return traits_from_ptr<Type>::from(val, 0);
+  }
+};
+
+template <class Type>
+struct traits_from<const Type *> {
+  static PyObject *from(const Type *val) {
+    return traits_from_ptr<Type>::from(const_cast<Type *>(val), 0);
+  }
+};
+
+template <class Type>
+inline PyObject *from(const Type &val) {
+  return traits_from<Type>::from(val);
+}
+
+template <class Type>
+inline PyObject *from_ptr(Type *val, int owner) {
+  return traits_from_ptr<Type>::from(val, owner);
+}
+
+/*
+  Traits that provides the asval/as/check method
+*/
+template <class Type>
+struct traits_asptr {
+  static int asptr(PyObject *obj, Type **val) {
+    Type *p;
+    int res = SWIG_ConvertPtr(obj, (void **)&p, type_info<Type>(), 0);
+    if (SWIG_IsOK(res)) {
+      if (val) *val = p;
+    }
+    return res;
+  }
+};
+
+template <class Type>
+inline int asptr(PyObject *obj, Type **vptr) {
+  return traits_asptr<Type>::asptr(obj, vptr);
+}
+
+template <class Type>
+struct traits_asval {
+  static int asval(PyObject *obj, Type *val) {
+    if (val) {
+      Type *p = 0;
+      int res = traits_asptr<Type>::asptr(obj, &p);
+      if (!SWIG_IsOK(res)) return res;
+      if (p) {
+        typedef typename noconst_traits<Type>::noconst_type noconst_type;
+        *(const_cast<noconst_type *>(val)) = *p;
+        if (SWIG_IsNewObj(res)) {
+          delete p;
+          res = SWIG_DelNewMask(res);
+        }
+        return res;
+      } else {
+        return SWIG_ERROR;
+      }
+    } else {
+      return traits_asptr<Type>::asptr(obj, (Type **)(0));
+    }
+  }
+};
+
+template <class Type>
+struct traits_asval<Type *> {
+  static int asval(PyObject *obj, Type **val) {
+    if (val) {
+      typedef typename noconst_traits<Type>::noconst_type noconst_type;
+      noconst_type *p = 0;
+      int res = traits_asptr<noconst_type>::asptr(obj, &p);
       if (SWIG_IsOK(res)) {
-	if (val) *val = p;
+        *(const_cast<noconst_type **>(val)) = p;
       }
       return res;
+    } else {
+      return traits_asptr<Type>::asptr(obj, (Type **)(0));
     }
-  }; 
-
-  template <class Type>
-  inline int asptr(PyObject *obj, Type **vptr) {
-    return traits_asptr<Type>::asptr(obj, vptr);
   }
+};
 
-  template <class Type> 
-  struct traits_asval {
-    static int asval(PyObject *obj, Type *val) {
-      if (val) {
-	Type *p = 0;
-	int res = traits_asptr<Type>::asptr(obj, &p);
-	if (!SWIG_IsOK(res)) return res;	
-	if (p) {
-	  typedef typename noconst_traits<Type>::noconst_type noconst_type;
-	  *(const_cast<noconst_type*>(val)) = *p;
-	  if (SWIG_IsNewObj(res)){
-	    delete p;
-	    res = SWIG_DelNewMask(res);
-	  }
-	  return res;
-	} else {
-	  return SWIG_ERROR;
-	}
-      } else {
-	return traits_asptr<Type>::asptr(obj, (Type **)(0));
-      }
-    }
-  };
-
-  template <class Type> struct traits_asval<Type*> {
-    static int asval(PyObject *obj, Type **val) {
-      if (val) {
-        typedef typename noconst_traits<Type>::noconst_type noconst_type;
-        noconst_type *p = 0;
-        int res = traits_asptr<noconst_type>::asptr(obj,  &p);
-        if (SWIG_IsOK(res)) {
-          *(const_cast<noconst_type**>(val)) = p;
-	}
-	return res;
-      } else {
-	return traits_asptr<Type>::asptr(obj, (Type **)(0));
-      }
-    }
-  };
-  
-  template <class Type>
-  inline int asval(PyObject *obj, Type *val) {
-    return traits_asval<Type>::asval(obj, val);
-  }
-
-  template <class Type> 
-  struct traits_as<Type, value_category> {
-    static Type as(PyObject *obj, bool throw_error) {
-      Type v;
-      int res = asval(obj, &v);
-      if (!obj || !SWIG_IsOK(res)) {
-	if (!PyErr_Occurred()) {
-	  ::SWIG_Error(SWIG_TypeError,  swig::type_name<Type>());
-	}
-	if (throw_error) throw std::invalid_argument("bad type");
-      }
-      return v;
-    }
-  };
-
-  template <class Type> 
-  struct traits_as<Type, pointer_category> {
-    static Type as(PyObject *obj, bool throw_error) {
-      Type *v = 0;      
-      int res = (obj ? traits_asptr<Type>::asptr(obj, &v) : SWIG_ERROR);
-      if (SWIG_IsOK(res) && v) {
-	if (SWIG_IsNewObj(res)) {
-	  Type r(*v);
-	  delete v;
-	  return r;
-	} else {
-	  return *v;
-	}
-      } else {
-	// Uninitialized return value, no Type() constructor required.
-	static Type *v_def = (Type*) malloc(sizeof(Type));
-	if (!PyErr_Occurred()) {
-	  SWIG_Error(SWIG_TypeError,  swig::type_name<Type>());
-	}
-	if (throw_error) throw std::invalid_argument("bad type");
-	memset(v_def,0,sizeof(Type));
-	return *v_def;
-      }
-    }
-  };
-
-  template <class Type> 
-  struct traits_as<Type*, pointer_category> {
-    static Type* as(PyObject *obj, bool throw_error) {
-      Type *v = 0;      
-      int res = (obj ? traits_asptr<Type>::asptr(obj, &v) : SWIG_ERROR);
-      if (SWIG_IsOK(res)) {
-	return v;
-      } else {
-	if (!PyErr_Occurred()) {
-	  SWIG_Error(SWIG_TypeError,  swig::type_name<Type>());
-	}
-	if (throw_error) throw std::invalid_argument("bad type");
-	return 0;
-      }
-    }
-  };
-    
-  template <class Type>
-  inline Type as(PyObject *obj, bool te = false) {
-    return traits_as<Type, typename traits<Type>::category>::as(obj, te);
-  }
-
-  template <class Type> 
-  struct traits_check<Type, value_category> {
-    static bool check(PyObject *obj) {
-      int res = obj ? asval(obj, (Type *)(0)) : SWIG_ERROR;
-      return SWIG_IsOK(res) ? true : false;
-    }
-  };
-
-  template <class Type> 
-  struct traits_check<Type, pointer_category> {
-    static bool check(PyObject *obj) {
-      int res = obj ? asptr(obj, (Type **)(0)) : SWIG_ERROR;
-      return SWIG_IsOK(res) ? true : false;
-    }
-  };
-
-  template <class Type>
-  inline bool check(PyObject *obj) {
-    return traits_check<Type, typename traits<Type>::category>::check(obj);
-  }
+template <class Type>
+inline int asval(PyObject *obj, Type *val) {
+  return traits_asval<Type>::asval(obj, val);
 }
 
+template <class Type>
+struct traits_as<Type, value_category> {
+  static Type as(PyObject *obj, bool throw_error) {
+    Type v;
+    int res = asval(obj, &v);
+    if (!obj || !SWIG_IsOK(res)) {
+      if (!PyErr_Occurred()) {
+        ::SWIG_Error(SWIG_TypeError, swig::type_name<Type>());
+      }
+      if (throw_error) throw std::invalid_argument("bad type");
+    }
+    return v;
+  }
+};
+
+template <class Type>
+struct traits_as<Type, pointer_category> {
+  static Type as(PyObject *obj, bool throw_error) {
+    Type *v = 0;
+    int res = (obj ? traits_asptr<Type>::asptr(obj, &v) : SWIG_ERROR);
+    if (SWIG_IsOK(res) && v) {
+      if (SWIG_IsNewObj(res)) {
+        Type r(*v);
+        delete v;
+        return r;
+      } else {
+        return *v;
+      }
+    } else {
+      // Uninitialized return value, no Type() constructor required.
+      static Type *v_def = (Type *)malloc(sizeof(Type));
+      if (!PyErr_Occurred()) {
+        SWIG_Error(SWIG_TypeError, swig::type_name<Type>());
+      }
+      if (throw_error) throw std::invalid_argument("bad type");
+      memset(v_def, 0, sizeof(Type));
+      return *v_def;
+    }
+  }
+};
+
+template <class Type>
+struct traits_as<Type *, pointer_category> {
+  static Type *as(PyObject *obj, bool throw_error) {
+    Type *v = 0;
+    int res = (obj ? traits_asptr<Type>::asptr(obj, &v) : SWIG_ERROR);
+    if (SWIG_IsOK(res)) {
+      return v;
+    } else {
+      if (!PyErr_Occurred()) {
+        SWIG_Error(SWIG_TypeError, swig::type_name<Type>());
+      }
+      if (throw_error) throw std::invalid_argument("bad type");
+      return 0;
+    }
+  }
+};
+
+template <class Type>
+inline Type as(PyObject *obj, bool te = false) {
+  return traits_as<Type, typename traits<Type>::category>::as(obj, te);
+}
+
+template <class Type>
+struct traits_check<Type, value_category> {
+  static bool check(PyObject *obj) {
+    int res = obj ? asval(obj, (Type *)(0)) : SWIG_ERROR;
+    return SWIG_IsOK(res) ? true : false;
+  }
+};
+
+template <class Type>
+struct traits_check<Type, pointer_category> {
+  static bool check(PyObject *obj) {
+    int res = obj ? asptr(obj, (Type **)(0)) : SWIG_ERROR;
+    return SWIG_IsOK(res) ? true : false;
+  }
+};
+
+template <class Type>
+inline bool check(PyObject *obj) {
+  return traits_check<Type, typename traits<Type>::category>::check(obj);
+}
+}
 
 #include <functional>
 
 namespace std {
-  template <>
-  struct less <PyObject *>: public binary_function<PyObject *, PyObject *, bool>
-  {
-    bool
-    operator()(PyObject * v, PyObject *w) const
-    { 
-      bool res;
-      SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-      res = PyObject_RichCompareBool(v, w, Py_LT) ? true : false;
-      /* This may fall into a case of inconsistent
-               eg. ObjA > ObjX > ObjB
-               but ObjA < ObjB
-      */
-      if( PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_TypeError) )
-      {
-        /* Objects can't be compared, this mostly occurred in Python 3.0 */
-        /* Compare their ptr directly for a workaround */
-        res = (v < w);
-        PyErr_Clear();
-      }
-      SWIG_PYTHON_THREAD_END_BLOCK;
-      return res;
+template <>
+struct less<PyObject *> : public binary_function<PyObject *, PyObject *, bool> {
+  bool operator()(PyObject *v, PyObject *w) const {
+    bool res;
+    SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+    res = PyObject_RichCompareBool(v, w, Py_LT) ? true : false;
+    /* This may fall into a case of inconsistent
+             eg. ObjA > ObjX > ObjB
+             but ObjA < ObjB
+    */
+    if (PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_TypeError)) {
+      /* Objects can't be compared, this mostly occurred in Python 3.0 */
+      /* Compare their ptr directly for a workaround */
+      res = (v < w);
+      PyErr_Clear();
     }
-  };
-
-  template <>
-  struct less <swig::SwigPtr_PyObject>: public binary_function<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject, bool>
-  {
-    bool
-    operator()(const swig::SwigPtr_PyObject& v, const swig::SwigPtr_PyObject& w) const
-    {
-      return std::less<PyObject *>()(v, w);
-    }
-  };
-
-  template <>
-  struct less <swig::SwigVar_PyObject>: public binary_function<swig::SwigVar_PyObject, swig::SwigVar_PyObject, bool>
-  {
-    bool
-    operator()(const swig::SwigVar_PyObject& v, const swig::SwigVar_PyObject& w) const
-    {
-      return std::less<PyObject *>()(v, w);
-    }
-  };
-
-}
-
-namespace swig {
-  template <> struct traits<PyObject *> {
-    typedef value_category category;
-    static const char* type_name() { return "PyObject *"; }
-  };  
-
-  template <>  struct traits_asval<PyObject * > {   
-    typedef PyObject * value_type;
-    static int asval(PyObject *obj, value_type *val) {
-      if (val) *val = obj;
-      return SWIG_OK;
-    }
-  };
-
-  template <> 
-  struct traits_check<PyObject *, value_category> {
-    static bool check(PyObject *) {
-      return true;
-    }
-  };
-
-  template <>  struct traits_from<PyObject *> {
-    typedef PyObject * value_type;
-    static PyObject *from(const value_type& val) {
-      Py_XINCREF(val);
-      return val;
-    }
-  };
-  
-}
-
-namespace swig {
-  template <class Difference>
-  inline size_t
-  check_index(Difference i, size_t size, bool insert = false) {
-    if ( i < 0 ) {
-      if ((size_t) (-i) <= size)
-	return (size_t) (i + size);
-    } else if ( (size_t) i < size ) {
-      return (size_t) i;
-    } else if (insert && ((size_t) i == size)) {
-      return size;
-    }
-    throw std::out_of_range("index out of range");
+    SWIG_PYTHON_THREAD_END_BLOCK;
+    return res;
   }
+};
 
-  template <class Difference>
-  void
-  slice_adjust(Difference i, Difference j, Py_ssize_t step, size_t size, Difference &ii, Difference &jj, bool insert = false) {
-    if (step == 0) {
-      throw std::invalid_argument("slice step cannot be zero");
-    } else if (step > 0) {
-      // Required range: 0 <= i < size, 0 <= j < size
-      if (i < 0) {
-        ii = 0;
-      } else if (i < (Difference)size) {
-        ii = i;
-      } else if (insert && (i >= (Difference)size)) {
-        ii = (Difference)size;
-      }
-      if ( j < 0 ) {
-        jj = 0;
-      } else {
-        jj = (j < (Difference)size) ? j : (Difference)size;
-      }
+template <>
+struct less<swig::SwigPtr_PyObject>
+    : public binary_function<swig::SwigPtr_PyObject, swig::SwigPtr_PyObject,
+                             bool> {
+  bool operator()(const swig::SwigPtr_PyObject &v,
+                  const swig::SwigPtr_PyObject &w) const {
+    return std::less<PyObject *>()(v, w);
+  }
+};
+
+template <>
+struct less<swig::SwigVar_PyObject>
+    : public binary_function<swig::SwigVar_PyObject, swig::SwigVar_PyObject,
+                             bool> {
+  bool operator()(const swig::SwigVar_PyObject &v,
+                  const swig::SwigVar_PyObject &w) const {
+    return std::less<PyObject *>()(v, w);
+  }
+};
+}
+
+namespace swig {
+template <>
+struct traits<PyObject *> {
+  typedef value_category category;
+  static const char *type_name() { return "PyObject *"; }
+};
+
+template <>
+struct traits_asval<PyObject *> {
+  typedef PyObject *value_type;
+  static int asval(PyObject *obj, value_type *val) {
+    if (val) *val = obj;
+    return SWIG_OK;
+  }
+};
+
+template <>
+struct traits_check<PyObject *, value_category> {
+  static bool check(PyObject *) { return true; }
+};
+
+template <>
+struct traits_from<PyObject *> {
+  typedef PyObject *value_type;
+  static PyObject *from(const value_type &val) {
+    Py_XINCREF(val);
+    return val;
+  }
+};
+}
+
+namespace swig {
+template <class Difference>
+inline size_t check_index(Difference i, size_t size, bool insert = false) {
+  if (i < 0) {
+    if ((size_t)(-i) <= size) return (size_t)(i + size);
+  } else if ((size_t)i < size) {
+    return (size_t)i;
+  } else if (insert && ((size_t)i == size)) {
+    return size;
+  }
+  throw std::out_of_range("index out of range");
+}
+
+template <class Difference>
+void slice_adjust(Difference i, Difference j, Py_ssize_t step, size_t size,
+                  Difference &ii, Difference &jj, bool insert = false) {
+  if (step == 0) {
+    throw std::invalid_argument("slice step cannot be zero");
+  } else if (step > 0) {
+    // Required range: 0 <= i < size, 0 <= j < size
+    if (i < 0) {
+      ii = 0;
+    } else if (i < (Difference)size) {
+      ii = i;
+    } else if (insert && (i >= (Difference)size)) {
+      ii = (Difference)size;
+    }
+    if (j < 0) {
+      jj = 0;
     } else {
-      // Required range: -1 <= i < size-1, -1 <= j < size-1
-      if (i < -1) {
-        ii = -1;
-      } else if (i < (Difference) size) {
-        ii = i;
-      } else if (i >= (Difference)(size-1)) {
-        ii = (Difference)(size-1);
-      }
-      if (j < -1) {
-        jj = -1;
-      } else {
-        jj = (j < (Difference)size ) ? j : (Difference)(size-1);
-      }
+      jj = (j < (Difference)size) ? j : (Difference)size;
+    }
+  } else {
+    // Required range: -1 <= i < size-1, -1 <= j < size-1
+    if (i < -1) {
+      ii = -1;
+    } else if (i < (Difference)size) {
+      ii = i;
+    } else if (i >= (Difference)(size - 1)) {
+      ii = (Difference)(size - 1);
+    }
+    if (j < -1) {
+      jj = -1;
+    } else {
+      jj = (j < (Difference)size) ? j : (Difference)(size - 1);
     }
   }
+}
 
-  template <class Sequence, class Difference>
-  inline typename Sequence::iterator
-  getpos(Sequence* self, Difference i)  {
-    typename Sequence::iterator pos = self->begin();
-    std::advance(pos, check_index(i,self->size()));
-    return pos;
-  }
+template <class Sequence, class Difference>
+inline typename Sequence::iterator getpos(Sequence *self, Difference i) {
+  typename Sequence::iterator pos = self->begin();
+  std::advance(pos, check_index(i, self->size()));
+  return pos;
+}
 
-  template <class Sequence, class Difference>
-  inline typename Sequence::const_iterator
-  cgetpos(const Sequence* self, Difference i)  {
-    typename Sequence::const_iterator pos = self->begin();
-    std::advance(pos, check_index(i,self->size()));
-    return pos;
-  }
+template <class Sequence, class Difference>
+inline typename Sequence::const_iterator cgetpos(const Sequence *self,
+                                                 Difference i) {
+  typename Sequence::const_iterator pos = self->begin();
+  std::advance(pos, check_index(i, self->size()));
+  return pos;
+}
 
-  template <class Sequence, class Difference>
-  inline Sequence*
-  getslice(const Sequence* self, Difference i, Difference j, Py_ssize_t step) {
-    typename Sequence::size_type size = self->size();
-    Difference ii = 0;
-    Difference jj = 0;
-    swig::slice_adjust(i, j, step, size, ii, jj);
+template <class Sequence, class Difference>
+inline Sequence *getslice(const Sequence *self, Difference i, Difference j,
+                          Py_ssize_t step) {
+  typename Sequence::size_type size = self->size();
+  Difference ii = 0;
+  Difference jj = 0;
+  swig::slice_adjust(i, j, step, size, ii, jj);
 
-    if (step > 0) {
-      typename Sequence::const_iterator sb = self->begin();
-      typename Sequence::const_iterator se = self->begin();
-      std::advance(sb,ii);
-      std::advance(se,jj);
-      if (step == 1) {
-        return new Sequence(sb, se);
-      } else {
-        Sequence *sequence = new Sequence();
-        typename Sequence::const_iterator it = sb;
-        while (it!=se) {
-          sequence->push_back(*it);
-          for (Py_ssize_t c=0; c<step && it!=se; ++c)
-            it++;
-        }
-        return sequence;
-      } 
+  if (step > 0) {
+    typename Sequence::const_iterator sb = self->begin();
+    typename Sequence::const_iterator se = self->begin();
+    std::advance(sb, ii);
+    std::advance(se, jj);
+    if (step == 1) {
+      return new Sequence(sb, se);
     } else {
       Sequence *sequence = new Sequence();
-      if (ii > jj) {
-        typename Sequence::const_reverse_iterator sb = self->rbegin();
-        typename Sequence::const_reverse_iterator se = self->rbegin();
-        std::advance(sb,size-ii-1);
-        std::advance(se,size-jj-1);
-        typename Sequence::const_reverse_iterator it = sb;
-        while (it!=se) {
-          sequence->push_back(*it);
-          for (Py_ssize_t c=0; c<-step && it!=se; ++c)
-            it++;
-        }
+      typename Sequence::const_iterator it = sb;
+      while (it != se) {
+        sequence->push_back(*it);
+        for (Py_ssize_t c = 0; c < step && it != se; ++c) it++;
       }
       return sequence;
     }
+  } else {
+    Sequence *sequence = new Sequence();
+    if (ii > jj) {
+      typename Sequence::const_reverse_iterator sb = self->rbegin();
+      typename Sequence::const_reverse_iterator se = self->rbegin();
+      std::advance(sb, size - ii - 1);
+      std::advance(se, size - jj - 1);
+      typename Sequence::const_reverse_iterator it = sb;
+      while (it != se) {
+        sequence->push_back(*it);
+        for (Py_ssize_t c = 0; c < -step && it != se; ++c) it++;
+      }
+    }
+    return sequence;
   }
+}
 
-  template <class Sequence, class Difference, class InputSeq>
-  inline void
-  setslice(Sequence* self, Difference i, Difference j, Py_ssize_t step, const InputSeq& is = InputSeq()) {
-    typename Sequence::size_type size = self->size();
-    Difference ii = 0;
-    Difference jj = 0;
-    swig::slice_adjust(i, j, step, size, ii, jj, true);
-    if (step > 0) {
-      if (jj < ii)
-        jj = ii;
-      if (step == 1) {
-        size_t ssize = jj - ii;
-        if (ssize <= is.size()) {
-          // expanding/staying the same size
-          typename Sequence::iterator sb = self->begin();
-          typename InputSeq::const_iterator isit = is.begin();
-          std::advance(sb,ii);
-          std::advance(isit, jj - ii);
-          self->insert(std::copy(is.begin(), isit, sb), isit, is.end());
-        } else {
-          // shrinking
-          typename Sequence::iterator sb = self->begin();
-          typename Sequence::iterator se = self->begin();
-          std::advance(sb,ii);
-          std::advance(se,jj);
-          self->erase(sb,se);
-          sb = self->begin();
-          std::advance(sb,ii);
-          self->insert(sb, is.begin(), is.end());
-        }
+template <class Sequence, class Difference, class InputSeq>
+inline void setslice(Sequence *self, Difference i, Difference j,
+                     Py_ssize_t step, const InputSeq &is = InputSeq()) {
+  typename Sequence::size_type size = self->size();
+  Difference ii = 0;
+  Difference jj = 0;
+  swig::slice_adjust(i, j, step, size, ii, jj, true);
+  if (step > 0) {
+    if (jj < ii) jj = ii;
+    if (step == 1) {
+      size_t ssize = jj - ii;
+      if (ssize <= is.size()) {
+        // expanding/staying the same size
+        typename Sequence::iterator sb = self->begin();
+        typename InputSeq::const_iterator isit = is.begin();
+        std::advance(sb, ii);
+        std::advance(isit, jj - ii);
+        self->insert(std::copy(is.begin(), isit, sb), isit, is.end());
       } else {
-        size_t replacecount = (jj - ii + step - 1) / step;
-        if (is.size() != replacecount) {
-          char msg[1024];
-          sprintf(msg, "attempt to assign sequence of size %lu to extended slice of size %lu", (unsigned long)is.size(), (unsigned long)replacecount);
-          throw std::invalid_argument(msg);
-        }
-        typename Sequence::const_iterator isit = is.begin();
-        typename Sequence::iterator it = self->begin();
-        std::advance(it,ii);
-        for (size_t rc=0; rc<replacecount; ++rc) {
-          *it++ = *isit++;
-          for (Py_ssize_t c=0; c<(step-1) && it != self->end(); ++c)
-            it++;
-        }
+        // shrinking
+        typename Sequence::iterator sb = self->begin();
+        typename Sequence::iterator se = self->begin();
+        std::advance(sb, ii);
+        std::advance(se, jj);
+        self->erase(sb, se);
+        sb = self->begin();
+        std::advance(sb, ii);
+        self->insert(sb, is.begin(), is.end());
       }
     } else {
-      if (jj > ii)
-        jj = ii;
-      size_t replacecount = (ii - jj - step - 1) / -step;
+      size_t replacecount = (jj - ii + step - 1) / step;
       if (is.size() != replacecount) {
         char msg[1024];
-        sprintf(msg, "attempt to assign sequence of size %lu to extended slice of size %lu", (unsigned long)is.size(), (unsigned long)replacecount);
+        sprintf(msg,
+                "attempt to assign sequence of size %lu to extended slice of "
+                "size %lu",
+                (unsigned long)is.size(), (unsigned long)replacecount);
         throw std::invalid_argument(msg);
       }
       typename Sequence::const_iterator isit = is.begin();
-      typename Sequence::reverse_iterator it = self->rbegin();
-      std::advance(it,size-ii-1);
-      for (size_t rc=0; rc<replacecount; ++rc) {
+      typename Sequence::iterator it = self->begin();
+      std::advance(it, ii);
+      for (size_t rc = 0; rc < replacecount; ++rc) {
         *it++ = *isit++;
-        for (Py_ssize_t c=0; c<(-step-1) && it != self->rend(); ++c)
-          it++;
+        for (Py_ssize_t c = 0; c < (step - 1) && it != self->end(); ++c) it++;
       }
     }
+  } else {
+    if (jj > ii) jj = ii;
+    size_t replacecount = (ii - jj - step - 1) / -step;
+    if (is.size() != replacecount) {
+      char msg[1024];
+      sprintf(msg,
+              "attempt to assign sequence of size %lu to extended slice of "
+              "size %lu",
+              (unsigned long)is.size(), (unsigned long)replacecount);
+      throw std::invalid_argument(msg);
+    }
+    typename Sequence::const_iterator isit = is.begin();
+    typename Sequence::reverse_iterator it = self->rbegin();
+    std::advance(it, size - ii - 1);
+    for (size_t rc = 0; rc < replacecount; ++rc) {
+      *it++ = *isit++;
+      for (Py_ssize_t c = 0; c < (-step - 1) && it != self->rend(); ++c) it++;
+    }
   }
+}
 
-  template <class Sequence, class Difference>
-  inline void
-  delslice(Sequence* self, Difference i, Difference j, Py_ssize_t step) {
-    typename Sequence::size_type size = self->size();
-    Difference ii = 0;
-    Difference jj = 0;
-    swig::slice_adjust(i, j, step, size, ii, jj, true);
-    if (step > 0) {
-      if (jj > ii) {
-        typename Sequence::iterator sb = self->begin();
-        std::advance(sb,ii);
-        if (step == 1) {
-          typename Sequence::iterator se = self->begin();
-          std::advance(se,jj);
-          self->erase(sb,se);
-        } else {
-          typename Sequence::iterator it = sb;
-          size_t delcount = (jj - ii + step - 1) / step;
-          while (delcount) {
-            it = self->erase(it);
-            for (Py_ssize_t c=0; c<(step-1) && it != self->end(); ++c)
-              it++;
-            delcount--;
-          }
-        }
-      }
-    } else {
-      if (ii > jj) {
-        typename Sequence::reverse_iterator sb = self->rbegin();
-        std::advance(sb,size-ii-1);
-        typename Sequence::reverse_iterator it = sb;
-        size_t delcount = (ii - jj - step - 1) / -step;
+template <class Sequence, class Difference>
+inline void delslice(Sequence *self, Difference i, Difference j,
+                     Py_ssize_t step) {
+  typename Sequence::size_type size = self->size();
+  Difference ii = 0;
+  Difference jj = 0;
+  swig::slice_adjust(i, j, step, size, ii, jj, true);
+  if (step > 0) {
+    if (jj > ii) {
+      typename Sequence::iterator sb = self->begin();
+      std::advance(sb, ii);
+      if (step == 1) {
+        typename Sequence::iterator se = self->begin();
+        std::advance(se, jj);
+        self->erase(sb, se);
+      } else {
+        typename Sequence::iterator it = sb;
+        size_t delcount = (jj - ii + step - 1) / step;
         while (delcount) {
-          it = typename Sequence::reverse_iterator(self->erase((++it).base()));
-          for (Py_ssize_t c=0; c<(-step-1) && it != self->rend(); ++c)
-            it++;
+          it = self->erase(it);
+          for (Py_ssize_t c = 0; c < (step - 1) && it != self->end(); ++c) it++;
           delcount--;
         }
       }
     }
+  } else {
+    if (ii > jj) {
+      typename Sequence::reverse_iterator sb = self->rbegin();
+      std::advance(sb, size - ii - 1);
+      typename Sequence::reverse_iterator it = sb;
+      size_t delcount = (ii - jj - step - 1) / -step;
+      while (delcount) {
+        it = typename Sequence::reverse_iterator(self->erase((++it).base()));
+        for (Py_ssize_t c = 0; c < (-step - 1) && it != self->rend(); ++c) it++;
+        delcount--;
+      }
+    }
   }
 }
-
+}
 
 #if defined(__SUNPRO_CC) && defined(_RWSTD_VER)
-#  if !defined(SWIG_NO_STD_NOITERATOR_TRAITS_STL)
-#    define SWIG_STD_NOITERATOR_TRAITS_STL
-#  endif
+#if !defined(SWIG_NO_STD_NOITERATOR_TRAITS_STL)
+#define SWIG_STD_NOITERATOR_TRAITS_STL
+#endif
 #endif
 
 #if !defined(SWIG_STD_NOITERATOR_TRAITS_STL)
 #include <iterator>
 #else
 namespace std {
-  template <class Iterator>
-  struct iterator_traits {
-    typedef ptrdiff_t difference_type;
-    typedef typename Iterator::value_type value_type;
-  };
+template <class Iterator>
+struct iterator_traits {
+  typedef ptrdiff_t difference_type;
+  typedef typename Iterator::value_type value_type;
+};
 
-  template <class Iterator, class Category,class T, class Reference, class Pointer, class Distance>
-  struct iterator_traits<__reverse_bi_iterator<Iterator,Category,T,Reference,Pointer,Distance> > {
-    typedef Distance difference_type;
-    typedef T value_type;
-  };
+template <class Iterator, class Category, class T, class Reference,
+          class Pointer, class Distance>
+struct iterator_traits<__reverse_bi_iterator<Iterator, Category, T, Reference,
+                                             Pointer, Distance> > {
+  typedef Distance difference_type;
+  typedef T value_type;
+};
 
-  template <class T>
-  struct iterator_traits<T*> {
-    typedef T value_type;
-    typedef ptrdiff_t difference_type;
-  };
+template <class T>
+struct iterator_traits<T *> {
+  typedef T value_type;
+  typedef ptrdiff_t difference_type;
+};
 
-  template<typename _InputIterator>
-  inline typename iterator_traits<_InputIterator>::difference_type
-  distance(_InputIterator __first, _InputIterator __last)
-  {
-    typename iterator_traits<_InputIterator>::difference_type __n = 0;
-    while (__first != __last) {
-      ++__first; ++__n;
-    }
-    return __n;
+template <typename _InputIterator>
+inline typename iterator_traits<_InputIterator>::difference_type distance(
+    _InputIterator __first, _InputIterator __last) {
+  typename iterator_traits<_InputIterator>::difference_type __n = 0;
+  while (__first != __last) {
+    ++__first;
+    ++__n;
   }
+  return __n;
+}
 }
 #endif
 
-
 namespace swig {
-  template<typename OutIterator>
-  class SwigPyIterator_T :  public SwigPyIterator
-  {
-  public:
-    typedef OutIterator out_iterator;
-    typedef typename std::iterator_traits<out_iterator>::value_type value_type;    
-    typedef SwigPyIterator_T<out_iterator> self_type;
+template <typename OutIterator>
+class SwigPyIterator_T : public SwigPyIterator {
+ public:
+  typedef OutIterator out_iterator;
+  typedef typename std::iterator_traits<out_iterator>::value_type value_type;
+  typedef SwigPyIterator_T<out_iterator> self_type;
 
-    SwigPyIterator_T(out_iterator curr, PyObject *seq)
-      : SwigPyIterator(seq), current(curr)
-    {
-    }
+  SwigPyIterator_T(out_iterator curr, PyObject *seq)
+      : SwigPyIterator(seq), current(curr) {}
 
-    const out_iterator& get_current() const
-    {
-      return current;
-    }
+  const out_iterator &get_current() const { return current; }
 
-    
-    bool equal (const SwigPyIterator &iter) const
-    {
-      const self_type *iters = dynamic_cast<const self_type *>(&iter);
-      if (iters) {
-	return (current == iters->get_current());
-      } else {
-	throw std::invalid_argument("bad iterator type");
-      }
+  bool equal(const SwigPyIterator &iter) const {
+    const self_type *iters = dynamic_cast<const self_type *>(&iter);
+    if (iters) {
+      return (current == iters->get_current());
+    } else {
+      throw std::invalid_argument("bad iterator type");
     }
-    
-    ptrdiff_t distance(const SwigPyIterator &iter) const
-    {
-      const self_type *iters = dynamic_cast<const self_type *>(&iter);
-      if (iters) {
-	return std::distance(current, iters->get_current());
-      } else {
-	throw std::invalid_argument("bad iterator type");
-      }
-    }    
-    
-  protected:
-    out_iterator current;
-  };
-  
-  template <class ValueType>
-  struct from_oper 
-  {
-    typedef const ValueType& argument_type;
-    typedef PyObject *result_type;
-    result_type operator()(argument_type v) const
-    {
-      return swig::from(v);
-    }
-  };
+  }
 
-  template<typename OutIterator, 
-	   typename ValueType = typename std::iterator_traits<OutIterator>::value_type,
-	   typename FromOper = from_oper<ValueType> >
-  class SwigPyIteratorOpen_T :  public SwigPyIterator_T<OutIterator>
-  {
-  public:
-    FromOper from;
-    typedef OutIterator out_iterator;
-    typedef ValueType value_type;
-    typedef SwigPyIterator_T<out_iterator>  base;
-    typedef SwigPyIteratorOpen_T<OutIterator, ValueType, FromOper> self_type;
-    
-    SwigPyIteratorOpen_T(out_iterator curr, PyObject *seq)
-      : SwigPyIterator_T<OutIterator>(curr, seq)
-    {
+  ptrdiff_t distance(const SwigPyIterator &iter) const {
+    const self_type *iters = dynamic_cast<const self_type *>(&iter);
+    if (iters) {
+      return std::distance(current, iters->get_current());
+    } else {
+      throw std::invalid_argument("bad iterator type");
     }
-    
-    PyObject *value() const {
-      return from(static_cast<const value_type&>(*(base::current)));
-    }
-    
-    SwigPyIterator *copy() const
-    {
-      return new self_type(*this);
-    }
+  }
 
-    SwigPyIterator *incr(size_t n = 1)
-    {
-      while (n--) {
-	++base::current;
-      }
-      return this;
-    }
+ protected:
+  out_iterator current;
+};
 
-    SwigPyIterator *decr(size_t n = 1)
-    {
-      while (n--) {
-	--base::current;
-      }
-      return this;
-    }
-  };
+template <class ValueType>
+struct from_oper {
+  typedef const ValueType &argument_type;
+  typedef PyObject *result_type;
+  result_type operator()(argument_type v) const { return swig::from(v); }
+};
 
-  template<typename OutIterator, 
-	   typename ValueType = typename std::iterator_traits<OutIterator>::value_type,
-	   typename FromOper = from_oper<ValueType> >
-  class SwigPyIteratorClosed_T :  public SwigPyIterator_T<OutIterator>
-  {
-  public:
-    FromOper from;
-    typedef OutIterator out_iterator;
-    typedef ValueType value_type;
-    typedef SwigPyIterator_T<out_iterator>  base;    
-    typedef SwigPyIteratorClosed_T<OutIterator, ValueType, FromOper> self_type;
-    
-    SwigPyIteratorClosed_T(out_iterator curr, out_iterator first, out_iterator last, PyObject *seq)
-      : SwigPyIterator_T<OutIterator>(curr, seq), begin(first), end(last)
-    {
+template <typename OutIterator,
+          typename ValueType =
+              typename std::iterator_traits<OutIterator>::value_type,
+          typename FromOper = from_oper<ValueType> >
+class SwigPyIteratorOpen_T : public SwigPyIterator_T<OutIterator> {
+ public:
+  FromOper from;
+  typedef OutIterator out_iterator;
+  typedef ValueType value_type;
+  typedef SwigPyIterator_T<out_iterator> base;
+  typedef SwigPyIteratorOpen_T<OutIterator, ValueType, FromOper> self_type;
+
+  SwigPyIteratorOpen_T(out_iterator curr, PyObject *seq)
+      : SwigPyIterator_T<OutIterator>(curr, seq) {}
+
+  PyObject *value() const {
+    return from(static_cast<const value_type &>(*(base::current)));
+  }
+
+  SwigPyIterator *copy() const { return new self_type(*this); }
+
+  SwigPyIterator *incr(size_t n = 1) {
+    while (n--) {
+      ++base::current;
     }
-    
-    PyObject *value() const {
+    return this;
+  }
+
+  SwigPyIterator *decr(size_t n = 1) {
+    while (n--) {
+      --base::current;
+    }
+    return this;
+  }
+};
+
+template <typename OutIterator,
+          typename ValueType =
+              typename std::iterator_traits<OutIterator>::value_type,
+          typename FromOper = from_oper<ValueType> >
+class SwigPyIteratorClosed_T : public SwigPyIterator_T<OutIterator> {
+ public:
+  FromOper from;
+  typedef OutIterator out_iterator;
+  typedef ValueType value_type;
+  typedef SwigPyIterator_T<out_iterator> base;
+  typedef SwigPyIteratorClosed_T<OutIterator, ValueType, FromOper> self_type;
+
+  SwigPyIteratorClosed_T(out_iterator curr, out_iterator first,
+                         out_iterator last, PyObject *seq)
+      : SwigPyIterator_T<OutIterator>(curr, seq), begin(first), end(last) {}
+
+  PyObject *value() const {
+    if (base::current == end) {
+      throw stop_iteration();
+    } else {
+      return from(static_cast<const value_type &>(*(base::current)));
+    }
+  }
+
+  SwigPyIterator *copy() const { return new self_type(*this); }
+
+  SwigPyIterator *incr(size_t n = 1) {
+    while (n--) {
       if (base::current == end) {
-	throw stop_iteration();
+        throw stop_iteration();
       } else {
-	return from(static_cast<const value_type&>(*(base::current)));
+        ++base::current;
       }
     }
-    
-    SwigPyIterator *copy() const
-    {
-      return new self_type(*this);
-    }
-
-    SwigPyIterator *incr(size_t n = 1)
-    {
-      while (n--) {
-	if (base::current == end) {
-	  throw stop_iteration();
-	} else {
-	  ++base::current;
-	}
-      }
-      return this;
-    }
-
-    SwigPyIterator *decr(size_t n = 1)
-    {
-      while (n--) {
-	if (base::current == begin) {
-	  throw stop_iteration();
-	} else {
-	  --base::current;
-	}
-      }
-      return this;
-    }
-
-  private:
-    out_iterator begin;
-    out_iterator end;
-  };
-
-  template<typename OutIter>
-  inline SwigPyIterator*
-  make_output_iterator(const OutIter& current, const OutIter& begin,const OutIter& end, PyObject *seq = 0)
-  {
-    return new SwigPyIteratorClosed_T<OutIter>(current, begin, end, seq);
+    return this;
   }
 
-  template<typename OutIter>
-  inline SwigPyIterator*
-  make_output_iterator(const OutIter& current, PyObject *seq = 0)
-  {
-    return new SwigPyIteratorOpen_T<OutIter>(current, seq);
+  SwigPyIterator *decr(size_t n = 1) {
+    while (n--) {
+      if (base::current == begin) {
+        throw stop_iteration();
+      } else {
+        --base::current;
+      }
+    }
+    return this;
   }
 
+ private:
+  out_iterator begin;
+  out_iterator end;
+};
+
+template <typename OutIter>
+inline SwigPyIterator *make_output_iterator(const OutIter &current,
+                                            const OutIter &begin,
+                                            const OutIter &end,
+                                            PyObject *seq = 0) {
+  return new SwigPyIteratorClosed_T<OutIter>(current, begin, end, seq);
 }
 
-
-namespace swig
-{
-  template <class T>
-  struct SwigPySequence_Ref
-  {
-    SwigPySequence_Ref(PyObject* seq, int index)
-      : _seq(seq), _index(index)
-    {
-    }
-    
-    operator T () const
-    {
-      swig::SwigVar_PyObject item = PySequence_GetItem(_seq, _index);
-      try {
-	return swig::as<T>(item, true);
-      } catch (std::exception& e) {
-	char msg[1024];
-	sprintf(msg, "in sequence element %d ", _index);
-	if (!PyErr_Occurred()) {
-	  ::SWIG_Error(SWIG_TypeError,  swig::type_name<T>());
-	}
-	SWIG_Python_AddErrorMsg(msg);
-	SWIG_Python_AddErrorMsg(e.what());
-	throw;
-      }
-    }
-
-    SwigPySequence_Ref& operator=(const T& v)
-    {
-      PySequence_SetItem(_seq, _index, swig::from<T>(v));
-      return *this;
-    }
-
-  private:
-    PyObject* _seq;
-    int _index;
-  };
-
-  template <class T>
-  struct SwigPySequence_ArrowProxy
-  {
-    SwigPySequence_ArrowProxy(const T& x): m_value(x) {}
-    const T* operator->() const { return &m_value; }
-    operator const T*() const { return &m_value; }
-    T m_value;
-  };
-
-  template <class T, class Reference >
-  struct SwigPySequence_InputIterator
-  {
-    typedef SwigPySequence_InputIterator<T, Reference > self;
-
-    typedef std::random_access_iterator_tag iterator_category;
-    typedef Reference reference;
-    typedef T value_type;
-    typedef T* pointer;
-    typedef int difference_type;
-
-    SwigPySequence_InputIterator()
-    {
-    }
-
-    SwigPySequence_InputIterator(PyObject* seq, int index)
-      : _seq(seq), _index(index)
-    {
-    }
-
-    reference operator*() const
-    {
-      return reference(_seq, _index);
-    }
-
-    SwigPySequence_ArrowProxy<T>
-    operator->() const {
-      return SwigPySequence_ArrowProxy<T>(operator*());
-    }
-
-    bool operator==(const self& ri) const
-    {
-      return (_index == ri._index) && (_seq == ri._seq);
-    }
-
-    bool operator!=(const self& ri) const
-    {
-      return !(operator==(ri));
-    }
-
-    self& operator ++ ()
-    {
-      ++_index;
-      return *this;
-    }
-
-    self& operator -- ()
-    {
-      --_index;
-      return *this;
-    }
-
-    self& operator += (difference_type n)
-    {
-      _index += n;
-      return *this;
-    }
-
-    self operator +(difference_type n) const
-    {
-      return self(_seq, _index + n);
-    }
-
-    self& operator -= (difference_type n)
-    {
-      _index -= n;
-      return *this;
-    }
-
-    self operator -(difference_type n) const
-    {
-      return self(_seq, _index - n);
-    }
-
-    difference_type operator - (const self& ri) const
-    {
-      return _index - ri._index;
-    }
-
-    bool operator < (const self& ri) const
-    {
-      return _index < ri._index;
-    }
-
-    reference
-    operator[](difference_type n) const
-    {
-      return reference(_seq, _index + n);
-    }
-
-  private:
-    PyObject* _seq;
-    difference_type _index;
-  };
-
-  template <class T>
-  struct SwigPySequence_Cont
-  {
-    typedef SwigPySequence_Ref<T> reference;
-    typedef const SwigPySequence_Ref<T> const_reference;
-    typedef T value_type;
-    typedef T* pointer;
-    typedef int difference_type;
-    typedef int size_type;
-    typedef const pointer const_pointer;
-    typedef SwigPySequence_InputIterator<T, reference> iterator;
-    typedef SwigPySequence_InputIterator<T, const_reference> const_iterator;
-
-    SwigPySequence_Cont(PyObject* seq) : _seq(0)
-    {
-      if (!PySequence_Check(seq)) {
-	throw std::invalid_argument("a sequence is expected");
-      }
-      _seq = seq;
-      Py_INCREF(_seq);
-    }
-
-    ~SwigPySequence_Cont()
-    {
-      Py_XDECREF(_seq);
-    }
-
-    size_type size() const
-    {
-      return static_cast<size_type>(PySequence_Size(_seq));
-    }
-
-    bool empty() const
-    {
-      return size() == 0;
-    }
-
-    iterator begin()
-    {
-      return iterator(_seq, 0);
-    }
-
-    const_iterator begin() const
-    {
-      return const_iterator(_seq, 0);
-    }
-
-    iterator end()
-    {
-      return iterator(_seq, size());
-    }
-
-    const_iterator end() const
-    {
-      return const_iterator(_seq, size());
-    }
-
-    reference operator[](difference_type n)
-    {
-      return reference(_seq, n);
-    }
-
-    const_reference operator[](difference_type n)  const
-    {
-      return const_reference(_seq, n);
-    }
-
-    bool check(bool set_err = true) const
-    {
-      int s = size();
-      for (int i = 0; i < s; ++i) {
-	swig::SwigVar_PyObject item = PySequence_GetItem(_seq, i);
-	if (!swig::check<value_type>(item)) {
-	  if (set_err) {
-	    char msg[1024];
-	    sprintf(msg, "in sequence element %d", i);
-	    SWIG_Error(SWIG_RuntimeError, msg);
-	  }
-	  return false;
-	}
-      }
-      return true;
-    }
-
-  private:
-    PyObject* _seq;
-  };
-
+template <typename OutIter>
+inline SwigPyIterator *make_output_iterator(const OutIter &current,
+                                            PyObject *seq = 0) {
+  return new SwigPyIteratorOpen_T<OutIter>(current, seq);
 }
-
-
-  namespace swig {
-    template <>  struct traits<std::shared_ptr< INetwork > > {
-      typedef pointer_category category;
-      static const char* type_name() { return"std::shared_ptr< INetwork >"; }
-    };
-  }
-
+}
 
 namespace swig {
-  template <class SwigPySeq, class Seq>
-  inline void
-  assign(const SwigPySeq& swigpyseq, Seq* seq) {
-    // seq->assign(swigpyseq.begin(), swigpyseq.end()); // not used as not always implemented
-    typedef typename SwigPySeq::value_type value_type;
-    typename SwigPySeq::const_iterator it = swigpyseq.begin();
-    for (;it != swigpyseq.end(); ++it) {
-      seq->insert(seq->end(),(value_type)(*it));
+template <class T>
+struct SwigPySequence_Ref {
+  SwigPySequence_Ref(PyObject *seq, int index) : _seq(seq), _index(index) {}
+
+  operator T() const {
+    swig::SwigVar_PyObject item = PySequence_GetItem(_seq, _index);
+    try {
+      return swig::as<T>(item, true);
+    } catch (std::exception &e) {
+      char msg[1024];
+      sprintf(msg, "in sequence element %d ", _index);
+      if (!PyErr_Occurred()) {
+        ::SWIG_Error(SWIG_TypeError, swig::type_name<T>());
+      }
+      SWIG_Python_AddErrorMsg(msg);
+      SWIG_Python_AddErrorMsg(e.what());
+      throw;
     }
   }
 
-  template <class Seq, class T = typename Seq::value_type >
-  struct traits_asptr_stdseq {
-    typedef Seq sequence;
-    typedef T value_type;
+  SwigPySequence_Ref &operator=(const T &v) {
+    PySequence_SetItem(_seq, _index, swig::from<T>(v));
+    return *this;
+  }
 
-    static int asptr(PyObject *obj, sequence **seq) {
-      if (obj == Py_None || SWIG_Python_GetSwigThis(obj)) {
-	sequence *p;
-	if (::SWIG_ConvertPtr(obj,(void**)&p,
-			      swig::type_info<sequence>(),0) == SWIG_OK) {
-	  if (seq) *seq = p;
-	  return SWIG_OLDOBJ;
-	}
-      } else if (PySequence_Check(obj)) {
-	try {
-	  SwigPySequence_Cont<value_type> swigpyseq(obj);
-	  if (seq) {
-	    sequence *pseq = new sequence();
-	    assign(swigpyseq, pseq);
-	    *seq = pseq;
-	    return SWIG_NEWOBJ;
-	  } else {
-	    return swigpyseq.check() ? SWIG_OK : SWIG_ERROR;
-	  }
-	} catch (std::exception& e) {
-	  if (seq) {
-	    if (!PyErr_Occurred()) {
-	      PyErr_SetString(PyExc_TypeError, e.what());
-	    }
-	  }
-	  return SWIG_ERROR;
-	}
-      }
-      return SWIG_ERROR;
+ private:
+  PyObject *_seq;
+  int _index;
+};
+
+template <class T>
+struct SwigPySequence_ArrowProxy {
+  SwigPySequence_ArrowProxy(const T &x) : m_value(x) {}
+  const T *operator->() const { return &m_value; }
+  operator const T *() const { return &m_value; }
+  T m_value;
+};
+
+template <class T, class Reference>
+struct SwigPySequence_InputIterator {
+  typedef SwigPySequence_InputIterator<T, Reference> self;
+
+  typedef std::random_access_iterator_tag iterator_category;
+  typedef Reference reference;
+  typedef T value_type;
+  typedef T *pointer;
+  typedef int difference_type;
+
+  SwigPySequence_InputIterator() {}
+
+  SwigPySequence_InputIterator(PyObject *seq, int index)
+      : _seq(seq), _index(index) {}
+
+  reference operator*() const { return reference(_seq, _index); }
+
+  SwigPySequence_ArrowProxy<T> operator->() const {
+    return SwigPySequence_ArrowProxy<T>(operator*());
+  }
+
+  bool operator==(const self &ri) const {
+    return (_index == ri._index) && (_seq == ri._seq);
+  }
+
+  bool operator!=(const self &ri) const { return !(operator==(ri)); }
+
+  self &operator++() {
+    ++_index;
+    return *this;
+  }
+
+  self &operator--() {
+    --_index;
+    return *this;
+  }
+
+  self &operator+=(difference_type n) {
+    _index += n;
+    return *this;
+  }
+
+  self operator+(difference_type n) const { return self(_seq, _index + n); }
+
+  self &operator-=(difference_type n) {
+    _index -= n;
+    return *this;
+  }
+
+  self operator-(difference_type n) const { return self(_seq, _index - n); }
+
+  difference_type operator-(const self &ri) const { return _index - ri._index; }
+
+  bool operator<(const self &ri) const { return _index < ri._index; }
+
+  reference operator[](difference_type n) const {
+    return reference(_seq, _index + n);
+  }
+
+ private:
+  PyObject *_seq;
+  difference_type _index;
+};
+
+template <class T>
+struct SwigPySequence_Cont {
+  typedef SwigPySequence_Ref<T> reference;
+  typedef const SwigPySequence_Ref<T> const_reference;
+  typedef T value_type;
+  typedef T *pointer;
+  typedef int difference_type;
+  typedef int size_type;
+  typedef const pointer const_pointer;
+  typedef SwigPySequence_InputIterator<T, reference> iterator;
+  typedef SwigPySequence_InputIterator<T, const_reference> const_iterator;
+
+  SwigPySequence_Cont(PyObject *seq) : _seq(0) {
+    if (!PySequence_Check(seq)) {
+      throw std::invalid_argument("a sequence is expected");
     }
-  };
+    _seq = seq;
+    Py_INCREF(_seq);
+  }
 
-  template <class Seq, class T = typename Seq::value_type >
-  struct traits_from_stdseq {
-    typedef Seq sequence;
-    typedef T value_type;
-    typedef typename Seq::size_type size_type;
-    typedef typename sequence::const_iterator const_iterator;
+  ~SwigPySequence_Cont() { Py_XDECREF(_seq); }
 
-    static PyObject *from(const sequence& seq) {
+  size_type size() const {
+    return static_cast<size_type>(PySequence_Size(_seq));
+  }
+
+  bool empty() const { return size() == 0; }
+
+  iterator begin() { return iterator(_seq, 0); }
+
+  const_iterator begin() const { return const_iterator(_seq, 0); }
+
+  iterator end() { return iterator(_seq, size()); }
+
+  const_iterator end() const { return const_iterator(_seq, size()); }
+
+  reference operator[](difference_type n) { return reference(_seq, n); }
+
+  const_reference operator[](difference_type n) const {
+    return const_reference(_seq, n);
+  }
+
+  bool check(bool set_err = true) const {
+    int s = size();
+    for (int i = 0; i < s; ++i) {
+      swig::SwigVar_PyObject item = PySequence_GetItem(_seq, i);
+      if (!swig::check<value_type>(item)) {
+        if (set_err) {
+          char msg[1024];
+          sprintf(msg, "in sequence element %d", i);
+          SWIG_Error(SWIG_RuntimeError, msg);
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
+ private:
+  PyObject *_seq;
+};
+}
+
+namespace swig {
+template <>
+struct traits<std::shared_ptr<INetwork> > {
+  typedef pointer_category category;
+  static const char *type_name() { return "std::shared_ptr< INetwork >"; }
+};
+}
+
+namespace swig {
+template <class SwigPySeq, class Seq>
+inline void assign(const SwigPySeq &swigpyseq, Seq *seq) {
+  // seq->assign(swigpyseq.begin(), swigpyseq.end()); // not used as not always
+  // implemented
+  typedef typename SwigPySeq::value_type value_type;
+  typename SwigPySeq::const_iterator it = swigpyseq.begin();
+  for (; it != swigpyseq.end(); ++it) {
+    seq->insert(seq->end(), (value_type)(*it));
+  }
+}
+
+template <class Seq, class T = typename Seq::value_type>
+struct traits_asptr_stdseq {
+  typedef Seq sequence;
+  typedef T value_type;
+
+  static int asptr(PyObject *obj, sequence **seq) {
+    if (obj == Py_None || SWIG_Python_GetSwigThis(obj)) {
+      sequence *p;
+      if (::SWIG_ConvertPtr(obj, (void **)&p, swig::type_info<sequence>(), 0) ==
+          SWIG_OK) {
+        if (seq) *seq = p;
+        return SWIG_OLDOBJ;
+      }
+    } else if (PySequence_Check(obj)) {
+      try {
+        SwigPySequence_Cont<value_type> swigpyseq(obj);
+        if (seq) {
+          sequence *pseq = new sequence();
+          assign(swigpyseq, pseq);
+          *seq = pseq;
+          return SWIG_NEWOBJ;
+        } else {
+          return swigpyseq.check() ? SWIG_OK : SWIG_ERROR;
+        }
+      } catch (std::exception &e) {
+        if (seq) {
+          if (!PyErr_Occurred()) {
+            PyErr_SetString(PyExc_TypeError, e.what());
+          }
+        }
+        return SWIG_ERROR;
+      }
+    }
+    return SWIG_ERROR;
+  }
+};
+
+template <class Seq, class T = typename Seq::value_type>
+struct traits_from_stdseq {
+  typedef Seq sequence;
+  typedef T value_type;
+  typedef typename Seq::size_type size_type;
+  typedef typename sequence::const_iterator const_iterator;
+
+  static PyObject *from(const sequence &seq) {
 #ifdef SWIG_PYTHON_EXTRA_NATIVE_CONTAINERS
-      swig_type_info *desc = swig::type_info<sequence>();
-      if (desc && desc->clientdata) {
-	return SWIG_NewPointerObj(new sequence(seq), desc, SWIG_POINTER_OWN);
-      }
+    swig_type_info *desc = swig::type_info<sequence>();
+    if (desc && desc->clientdata) {
+      return SWIG_NewPointerObj(new sequence(seq), desc, SWIG_POINTER_OWN);
+    }
 #endif
-      size_type size = seq.size();
-      if (size <= (size_type)INT_MAX) {
-	PyObject *obj = PyTuple_New((int)size);
-	int i = 0;
-	for (const_iterator it = seq.begin();
-	     it != seq.end(); ++it, ++i) {
-	  PyTuple_SetItem(obj,i,swig::from<value_type>(*it));
-	}
-	return obj;
-      } else {
-	PyErr_SetString(PyExc_OverflowError,"sequence size not valid in python");
-	return NULL;
+    size_type size = seq.size();
+    if (size <= (size_type)INT_MAX) {
+      PyObject *obj = PyTuple_New((int)size);
+      int i = 0;
+      for (const_iterator it = seq.begin(); it != seq.end(); ++it, ++i) {
+        PyTuple_SetItem(obj, i, swig::from<value_type>(*it));
       }
+      return obj;
+    } else {
+      PyErr_SetString(PyExc_OverflowError, "sequence size not valid in python");
+      return NULL;
     }
-  };
-}
-
-
-  namespace swig {
-    template <class T>
-    struct traits_asptr<std::vector<T> >  {
-      static int asptr(PyObject *obj, std::vector<T> **vec) {
-	return traits_asptr_stdseq<std::vector<T> >::asptr(obj, vec);
-      }
-    };
-    
-    template <class T>
-    struct traits_from<std::vector<T> > {
-      static PyObject *from(const std::vector<T>& vec) {
-	return traits_from_stdseq<std::vector<T> >::from(vec);
-      }
-    };
   }
-
-
-      namespace swig {
-	template <>  struct traits<std::vector<std::shared_ptr< INetwork >, std::allocator< std::shared_ptr< INetwork > > > > {
-	  typedef pointer_category category;
-	  static const char* type_name() {
-	    return "std::vector<" "std::shared_ptr< INetwork >" "," "std::allocator< std::shared_ptr< INetwork > >" " >";
-	  }
-	};
-      }
-    
-SWIGINTERN swig::SwigPyIterator *std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__iterator(std::vector< std::shared_ptr< INetwork > > *self,PyObject **PYTHON_SELF){
-      return swig::make_output_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
-    }
-SWIGINTERN bool std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____nonzero__(std::vector< std::shared_ptr< INetwork > > const *self){
-      return !(self->empty());
-    }
-SWIGINTERN bool std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____bool__(std::vector< std::shared_ptr< INetwork > > const *self){
-      return !(self->empty());
-    }
-SWIGINTERN std::vector< std::shared_ptr< INetwork > >::size_type std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____len__(std::vector< std::shared_ptr< INetwork > > const *self){
-      return self->size();
-    }
-
-SWIGINTERNINLINE PyObject* 
-SWIG_From_unsigned_SS_long  (unsigned long value)
-{
-  return (value > LONG_MAX) ?
-    PyLong_FromUnsignedLong(value) : PyLong_FromLong(static_cast< long >(value)); 
+};
 }
 
+namespace swig {
+template <class T>
+struct traits_asptr<std::vector<T> > {
+  static int asptr(PyObject *obj, std::vector<T> **vec) {
+    return traits_asptr_stdseq<std::vector<T> >::asptr(obj, vec);
+  }
+};
 
-SWIGINTERNINLINE PyObject *
-SWIG_From_size_t  (size_t value)
-{    
-  return SWIG_From_unsigned_SS_long  (static_cast< unsigned long >(value));
+template <class T>
+struct traits_from<std::vector<T> > {
+  static PyObject *from(const std::vector<T> &vec) {
+    return traits_from_stdseq<std::vector<T> >::from(vec);
+  }
+};
 }
 
-SWIGINTERN std::vector< std::shared_ptr< INetwork > >::value_type std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__pop(std::vector< std::shared_ptr< INetwork > > *self){
-      if (self->size() == 0)
-	throw std::out_of_range("pop from empty container");
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::value_type x = self->back();
-      self->pop_back();
-      return x;
-    }
-SWIGINTERN std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getslice__(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::difference_type i,std::vector< std::shared_ptr< INetwork > >::difference_type j){
-      return swig::getslice(self, i, j, 1);
-    }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setslice____SWIG_0(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::difference_type i,std::vector< std::shared_ptr< INetwork > >::difference_type j,std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &v=std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >()){
-      swig::setslice(self, i, j, 1, v);
-    }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delslice__(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::difference_type i,std::vector< std::shared_ptr< INetwork > >::difference_type j){
-      swig::delslice(self, i, j, 1);
-    }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delitem____SWIG_0(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::difference_type i){
-      self->erase(swig::getpos(self,i));
-    }
-SWIGINTERN std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getitem____SWIG_0(std::vector< std::shared_ptr< INetwork > > *self,PySliceObject *slice){
-      Py_ssize_t i, j, step;
-      if( !PySlice_Check(slice) ) {
-        SWIG_Error(SWIG_TypeError, "Slice object expected.");
-        return NULL;
-      }
-      PySlice_GetIndices(SWIGPY_SLICE_ARG(slice), (Py_ssize_t)self->size(), &i, &j, &step);
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::difference_type id = i;
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::difference_type jd = j;
-      return swig::getslice(self, id, jd, step);
-    }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_0(std::vector< std::shared_ptr< INetwork > > *self,PySliceObject *slice,std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &v){
-      Py_ssize_t i, j, step;
-      if( !PySlice_Check(slice) ) {
-        SWIG_Error(SWIG_TypeError, "Slice object expected.");
-        return;
-      }
-      PySlice_GetIndices(SWIGPY_SLICE_ARG(slice), (Py_ssize_t)self->size(), &i, &j, &step);
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::difference_type id = i;
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::difference_type jd = j;
-      swig::setslice(self, id, jd, step, v);
-    }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_1(std::vector< std::shared_ptr< INetwork > > *self,PySliceObject *slice){
-      Py_ssize_t i, j, step;
-      if( !PySlice_Check(slice) ) {
-        SWIG_Error(SWIG_TypeError, "Slice object expected.");
-        return;
-      }
-      PySlice_GetIndices(SWIGPY_SLICE_ARG(slice), (Py_ssize_t)self->size(), &i, &j, &step);
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::difference_type id = i;
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::difference_type jd = j;
-      swig::delslice(self, id, jd, step);
-    }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delitem____SWIG_1(std::vector< std::shared_ptr< INetwork > > *self,PySliceObject *slice){
-      Py_ssize_t i, j, step;
-      if( !PySlice_Check(slice) ) {
-        SWIG_Error(SWIG_TypeError, "Slice object expected.");
-        return;
-      }
-      PySlice_GetIndices(SWIGPY_SLICE_ARG(slice), (Py_ssize_t)self->size(), &i, &j, &step);
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::difference_type id = i;
-      std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >::difference_type jd = j;
-      swig::delslice(self, id, jd, step);
-    }
-SWIGINTERN std::vector< std::shared_ptr< INetwork > >::value_type const &std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getitem____SWIG_1(std::vector< std::shared_ptr< INetwork > > const *self,std::vector< std::shared_ptr< INetwork > >::difference_type i){
-      return *(swig::cgetpos(self, i));
-    }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_2(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::difference_type i,std::vector< std::shared_ptr< INetwork > >::value_type const &x){
-      *(swig::getpos(self,i)) = x;
-    }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__append(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::value_type const &x){
-      self->push_back(x);
-    }
-SWIGINTERN std::vector< std::shared_ptr< INetwork > >::iterator std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__erase__SWIG_0(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::iterator pos){ return self->erase(pos); }
-SWIGINTERN std::vector< std::shared_ptr< INetwork > >::iterator std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__erase__SWIG_1(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::iterator first,std::vector< std::shared_ptr< INetwork > >::iterator last){ return self->erase(first, last); }
-SWIGINTERN std::vector< std::shared_ptr< INetwork > >::iterator std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__insert__SWIG_0(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::iterator pos,std::vector< std::shared_ptr< INetwork > >::value_type const &x){ return self->insert(pos, x); }
-SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__insert__SWIG_1(std::vector< std::shared_ptr< INetwork > > *self,std::vector< std::shared_ptr< INetwork > >::iterator pos,std::vector< std::shared_ptr< INetwork > >::size_type n,std::vector< std::shared_ptr< INetwork > >::value_type const &x){ self->insert(pos, n, x); }
+namespace swig {
+template <>
+struct traits<std::vector<std::shared_ptr<INetwork>,
+                          std::allocator<std::shared_ptr<INetwork> > > > {
+  typedef pointer_category category;
+  static const char *type_name() {
+    return "std::vector<"
+           "std::shared_ptr< INetwork >"
+           ","
+           "std::allocator< std::shared_ptr< INetwork > >"
+           " >";
+  }
+};
+}
+
+SWIGINTERN swig::SwigPyIterator *
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__iterator(
+    std::vector<std::shared_ptr<INetwork> > *self, PyObject **PYTHON_SELF) {
+  return swig::make_output_iterator(self->begin(), self->begin(), self->end(),
+                                    *PYTHON_SELF);
+}
+SWIGINTERN bool std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____nonzero__(
+    std::vector<std::shared_ptr<INetwork> > const *self) {
+  return !(self->empty());
+}
+SWIGINTERN bool std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____bool__(
+    std::vector<std::shared_ptr<INetwork> > const *self) {
+  return !(self->empty());
+}
+SWIGINTERN std::vector<std::shared_ptr<INetwork> >::size_type
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____len__(
+    std::vector<std::shared_ptr<INetwork> > const *self) {
+  return self->size();
+}
+
+SWIGINTERNINLINE PyObject *SWIG_From_unsigned_SS_long(unsigned long value) {
+  return (value > LONG_MAX) ? PyLong_FromUnsignedLong(value)
+                            : PyLong_FromLong(static_cast<long>(value));
+}
+
+SWIGINTERNINLINE PyObject *SWIG_From_size_t(size_t value) {
+  return SWIG_From_unsigned_SS_long(static_cast<unsigned long>(value));
+}
+
+SWIGINTERN std::vector<std::shared_ptr<INetwork> >::value_type
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__pop(
+    std::vector<std::shared_ptr<INetwork> > *self) {
+  if (self->size() == 0) throw std::out_of_range("pop from empty container");
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::value_type x =
+      self->back();
+  self->pop_back();
+  return x;
+}
+SWIGINTERN std::vector<std::shared_ptr<INetwork>,
+                       std::allocator<std::shared_ptr<INetwork> > >
+    *std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getslice__(
+        std::vector<std::shared_ptr<INetwork> > *self,
+        std::vector<std::shared_ptr<INetwork> >::difference_type i,
+        std::vector<std::shared_ptr<INetwork> >::difference_type j) {
+  return swig::getslice(self, i, j, 1);
+}
+SWIGINTERN void
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setslice____SWIG_0(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::difference_type i,
+    std::vector<std::shared_ptr<INetwork> >::difference_type j,
+    std::vector<std::shared_ptr<INetwork>,
+                std::allocator<std::shared_ptr<INetwork> > > const &v =
+        std::vector<std::shared_ptr<INetwork>,
+                    std::allocator<std::shared_ptr<INetwork> > >()) {
+  swig::setslice(self, i, j, 1, v);
+}
+SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delslice__(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::difference_type i,
+    std::vector<std::shared_ptr<INetwork> >::difference_type j) {
+  swig::delslice(self, i, j, 1);
+}
+SWIGINTERN void
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delitem____SWIG_0(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::difference_type i) {
+  self->erase(swig::getpos(self, i));
+}
+SWIGINTERN std::vector<std::shared_ptr<INetwork>,
+                       std::allocator<std::shared_ptr<INetwork> > >
+    *std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getitem____SWIG_0(
+        std::vector<std::shared_ptr<INetwork> > *self, PySliceObject *slice) {
+  Py_ssize_t i, j, step;
+  if (!PySlice_Check(slice)) {
+    SWIG_Error(SWIG_TypeError, "Slice object expected.");
+    return NULL;
+  }
+  PySlice_GetIndices(SWIGPY_SLICE_ARG(slice), (Py_ssize_t)self->size(), &i, &j,
+                     &step);
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::difference_type id =
+      i;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::difference_type jd =
+      j;
+  return swig::getslice(self, id, jd, step);
+}
+SWIGINTERN void
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_0(
+    std::vector<std::shared_ptr<INetwork> > *self, PySliceObject *slice,
+    std::vector<std::shared_ptr<INetwork>,
+                std::allocator<std::shared_ptr<INetwork> > > const &v) {
+  Py_ssize_t i, j, step;
+  if (!PySlice_Check(slice)) {
+    SWIG_Error(SWIG_TypeError, "Slice object expected.");
+    return;
+  }
+  PySlice_GetIndices(SWIGPY_SLICE_ARG(slice), (Py_ssize_t)self->size(), &i, &j,
+                     &step);
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::difference_type id =
+      i;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::difference_type jd =
+      j;
+  swig::setslice(self, id, jd, step, v);
+}
+SWIGINTERN void
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_1(
+    std::vector<std::shared_ptr<INetwork> > *self, PySliceObject *slice) {
+  Py_ssize_t i, j, step;
+  if (!PySlice_Check(slice)) {
+    SWIG_Error(SWIG_TypeError, "Slice object expected.");
+    return;
+  }
+  PySlice_GetIndices(SWIGPY_SLICE_ARG(slice), (Py_ssize_t)self->size(), &i, &j,
+                     &step);
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::difference_type id =
+      i;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::difference_type jd =
+      j;
+  swig::delslice(self, id, jd, step);
+}
+SWIGINTERN void
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delitem____SWIG_1(
+    std::vector<std::shared_ptr<INetwork> > *self, PySliceObject *slice) {
+  Py_ssize_t i, j, step;
+  if (!PySlice_Check(slice)) {
+    SWIG_Error(SWIG_TypeError, "Slice object expected.");
+    return;
+  }
+  PySlice_GetIndices(SWIGPY_SLICE_ARG(slice), (Py_ssize_t)self->size(), &i, &j,
+                     &step);
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::difference_type id =
+      i;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > >::difference_type jd =
+      j;
+  swig::delslice(self, id, jd, step);
+}
+SWIGINTERN std::vector<std::shared_ptr<INetwork> >::value_type const &
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getitem____SWIG_1(
+    std::vector<std::shared_ptr<INetwork> > const *self,
+    std::vector<std::shared_ptr<INetwork> >::difference_type i) {
+  return *(swig::cgetpos(self, i));
+}
+SWIGINTERN void
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_2(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::difference_type i,
+    std::vector<std::shared_ptr<INetwork> >::value_type const &x) {
+  *(swig::getpos(self, i)) = x;
+}
+SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__append(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::value_type const &x) {
+  self->push_back(x);
+}
+SWIGINTERN std::vector<std::shared_ptr<INetwork> >::iterator
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__erase__SWIG_0(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::iterator pos) {
+  return self->erase(pos);
+}
+SWIGINTERN std::vector<std::shared_ptr<INetwork> >::iterator
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__erase__SWIG_1(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::iterator first,
+    std::vector<std::shared_ptr<INetwork> >::iterator last) {
+  return self->erase(first, last);
+}
+SWIGINTERN std::vector<std::shared_ptr<INetwork> >::iterator
+std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__insert__SWIG_0(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::iterator pos,
+    std::vector<std::shared_ptr<INetwork> >::value_type const &x) {
+  return self->insert(pos, x);
+}
+SWIGINTERN void std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__insert__SWIG_1(
+    std::vector<std::shared_ptr<INetwork> > *self,
+    std::vector<std::shared_ptr<INetwork> >::iterator pos,
+    std::vector<std::shared_ptr<INetwork> >::size_type n,
+    std::vector<std::shared_ptr<INetwork> >::value_type const &x) {
+  self->insert(pos, n, x);
+}
 
 #include <wchar.h>
 #include <limits.h>
 #ifndef WCHAR_MIN
-#  define WCHAR_MIN 0
+#define WCHAR_MIN 0
 #endif
 #ifndef WCHAR_MAX
-#  define WCHAR_MAX 65535
+#define WCHAR_MAX 65535
 #endif
 
-
-SWIGINTERN swig_type_info*
-SWIG_pwchar_descriptor()
-{
+SWIGINTERN swig_type_info *SWIG_pwchar_descriptor() {
   static int init = 0;
-  static swig_type_info* info = 0;
+  static swig_type_info *info = 0;
   if (!init) {
     info = SWIG_TypeQuery("_p_wchar_t");
     init = 1;
@@ -4969,256 +4891,243 @@ SWIG_pwchar_descriptor()
   return info;
 }
 
-
-SWIGINTERNINLINE PyObject *
-SWIG_FromWCharPtrAndSize(const wchar_t * carray, size_t size)
-{
+SWIGINTERNINLINE PyObject *SWIG_FromWCharPtrAndSize(const wchar_t *carray,
+                                                    size_t size) {
   if (carray) {
     if (size > INT_MAX) {
-      swig_type_info* pwchar_descriptor = SWIG_pwchar_descriptor();
-      return pwchar_descriptor ? 
-	SWIG_InternalNewPointerObj(const_cast< wchar_t * >(carray), pwchar_descriptor, 0) : SWIG_Py_Void();
+      swig_type_info *pwchar_descriptor = SWIG_pwchar_descriptor();
+      return pwchar_descriptor
+                 ? SWIG_InternalNewPointerObj(const_cast<wchar_t *>(carray),
+                                              pwchar_descriptor, 0)
+                 : SWIG_Py_Void();
     } else {
-      return PyUnicode_FromWideChar(carray, static_cast< int >(size));
+      return PyUnicode_FromWideChar(carray, static_cast<int>(size));
     }
   } else {
     return SWIG_Py_Void();
   }
 }
 
-
-SWIGINTERNINLINE PyObject *
-SWIG_From_std_wstring  (const std::wstring& s)
-{
+SWIGINTERNINLINE PyObject *SWIG_From_std_wstring(const std::wstring &s) {
   return SWIG_FromWCharPtrAndSize(s.data(), s.size());
 }
 
-
-SWIGINTERN int
-SWIG_AsVal_bool (PyObject *obj, bool *val)
-{
+SWIGINTERN int SWIG_AsVal_bool(PyObject *obj, bool *val) {
   int r;
-  if (!PyBool_Check(obj))
-    return SWIG_ERROR;
+  if (!PyBool_Check(obj)) return SWIG_ERROR;
   r = PyObject_IsTrue(obj);
-  if (r == -1)
-    return SWIG_ERROR;
+  if (r == -1) return SWIG_ERROR;
   if (val) *val = r ? true : false;
   return SWIG_OK;
 }
 
+Mat &getdebugmat() { return debugmat; }
 
-Mat &getdebugmat() {
-    return debugmat;
-}
-
-int string_edit_distance(string a, string b) {
-    return levenshtein(a, b);
-}
+int string_edit_distance(string a, string b) { return levenshtein(a, b); }
 
 string network_info(std::shared_ptr<INetwork> net) {
-    string result = "";
-    net->networks("", [&result] (string s, INetwork *net) {
-        result += s + ": " + to_string(net->learning_rate);
-        result += string(" ") + to_string(net->momentum);
-        result += string(" ") + to_string(net->ninput());
-        result += string(" ") + to_string(net->noutput());
-        result += "\n";
-    });
-    return result;
+  string result = "";
+  net->networks("", [&result](string s, INetwork *net) {
+    result += s + ": " + to_string(net->learning_rate);
+    result += string(" ") + to_string(net->momentum);
+    result += string(" ") + to_string(net->ninput());
+    result += string(" ") + to_string(net->noutput());
+    result += "\n";
+  });
+  return result;
 }
 
 string sequence_info(Sequence &seq) {
-    string result = "";
-    result += to_string(seq.size());
-    result += string(":") + (seq.size()>0?to_string(seq[0].rows()):"*");
-    result += string(":") + (seq.size()>0?to_string(seq[0].cols()):"*");
-    double lo = 1e99, hi = -1e99;
-    for (int t=0;t<seq.size(); t++) {
-        lo = fmin(lo, seq[t].minCoeff());
-        hi = fmax(hi, seq[t].maxCoeff());
-    }
-    result += "[" + to_string(lo) + "," + to_string(hi) + "]";
-    return result;
+  string result = "";
+  result += to_string(seq.size());
+  result += string(":") + (seq.size() > 0 ? to_string(seq[0].rows()) : "*");
+  result += string(":") + (seq.size() > 0 ? to_string(seq[0].cols()) : "*");
+  double lo = 1e99, hi = -1e99;
+  for (int t = 0; t < seq.size(); t++) {
+    lo = fmin(lo, seq[t].minCoeff());
+    hi = fmax(hi, seq[t].maxCoeff());
+  }
+  result += "[" + to_string(lo) + "," + to_string(hi) + "]";
+  return result;
 }
-
-
 
 template <class T, int TYPENUM>
 struct NumPyArray {
-    PyArrayObject *obj = 0;
-    NumPyArray() {}
-    NumPyArray(PyObject *object_) {
-        if(!object_) throw "null pointer";
-        if(!PyArray_Check(object_))
-            throw "expected a numpy array";
-        obj = (PyArrayObject *)object_;
-        Py_INCREF(obj);
-        valid();
-    }
-    NumPyArray(NumPyArray<T,TYPENUM> &other) {
-        Py_INCREF(other.obj);
-        Py_DECREF(obj);
-        obj = other.obj;
-    }
-    NumPyArray(int d0, int d1=0, int d2=0, int d3=0) {
-        npy_intp ndims[] = {d0, d1, d2, d3, 0};
-        int rank = 0;
-        while (ndims[rank]) rank++;
-        obj = PyArray_SimpleNew(rank, ndims, TYPENUM);
-        valid();
-    }
-    ~NumPyArray() {
-        Py_DECREF(obj);
-        obj = 0;
-    }
-    void operator=(NumPyArray<T,TYPENUM> &other) {
-        Py_INCREF(other.obj);
-        Py_DECREF(obj);
-        obj = other.obj;
-    }
-    void valid() {
-        if (!obj)
-            throw "no array set";
-        if(PyArray_TYPE(obj)!=TYPENUM)
-            throw "wrong numpy array type";
-        if((PyArray_FLAGS(obj)&NPY_ARRAY_C_CONTIGUOUS)==0)
-            throw "expected contiguous array";
-    }
-    int rank() {
-        valid();
-        return PyArray_NDIM(obj);
-    }
-    int dim(int i) {
-        valid();
-        return PyArray_DIM(obj,i);
-    }
-    int size() {
-        valid();
-        return PyArray_SIZE(obj);
-    }
-    void resize(int d0, int d1=0, int d2=0, int d3=0) {
-        npy_intp ndims[] = {d0, d1, d2, d3, 0};
-        int rank = 0;
-        while (ndims[rank]) rank++;
-        PyArray_Dims dims = { ndims, rank };
-        if (PyArray_Resize(obj, &dims, 0, NPY_CORDER)==nullptr)
-            throw "resize failed";
-    }
-    T &operator()(int i) {
-        assert(rank()==1);
-        assert(unsigned(i)<unsigned(dim(0)));
-        T *data = (T*)PyArray_DATA(obj);
-        return data[i];
-    }
-    T &operator()(int i,int j) {
-        assert(rank()==2);
-        assert(unsigned(i)<unsigned(dim(0)));
-        assert(unsigned(j)<unsigned(dim(1)));
-        T *data = (T*)PyArray_DATA(obj);
-        return data[i*dim(1)+j];
-    }
-    T &operator()(int i,int j,int k) {
-        assert(rank()==3);
-        assert(unsigned(i)<unsigned(dim(0)));
-        assert(unsigned(j)<unsigned(dim(1)));
-        assert(unsigned(k)<unsigned(dim(2)));
-        T *data = (T*)PyArray_DATA(obj);
-        return data[(i*dim(1)+j)*dim(2)+k];
-    }
-    T &operator()(int i,int j,int k,int l) {
-        assert(rank()==4);
-        assert(unsigned(i)<unsigned(dim(0)));
-        assert(unsigned(j)<unsigned(dim(1)));
-        assert(unsigned(k)<unsigned(dim(2)));
-        assert(unsigned(l)<unsigned(dim(3)));
-        T *data = (T*)PyArray_DATA(obj);
-        return data[((i*dim(1)+j)*dim(2)+k)*dim(3)+l];
-    }
-    T *data() {
-        valid();
-        return (T*)PyArray_DATA(obj);
-    }
-    void copyTo(T *dest) {
-        valid();
-        T *data = (T*)PyArray_DATA(obj);
-        int N = size();
-        for(int i=0; i<N; i++) dest[i] = data[i];
-    }
+  PyArrayObject *obj = 0;
+  NumPyArray() {}
+  NumPyArray(PyObject *object_) {
+    if (!object_) throw "null pointer";
+    if (!PyArray_Check(object_)) throw "expected a numpy array";
+    obj = (PyArrayObject *)object_;
+    Py_INCREF(obj);
+    valid();
+  }
+  NumPyArray(NumPyArray<T, TYPENUM> &other) {
+    Py_INCREF(other.obj);
+    Py_DECREF(obj);
+    obj = other.obj;
+  }
+  NumPyArray(int d0, int d1 = 0, int d2 = 0, int d3 = 0) {
+    npy_intp ndims[] = {d0, d1, d2, d3, 0};
+    int rank = 0;
+    while (ndims[rank]) rank++;
+    obj = PyArray_SimpleNew(rank, ndims, TYPENUM);
+    valid();
+  }
+  ~NumPyArray() {
+    Py_DECREF(obj);
+    obj = 0;
+  }
+  void operator=(NumPyArray<T, TYPENUM> &other) {
+    Py_INCREF(other.obj);
+    Py_DECREF(obj);
+    obj = other.obj;
+  }
+  void valid() {
+    if (!obj) throw "no array set";
+    if (PyArray_TYPE(obj) != TYPENUM) throw "wrong numpy array type";
+    if ((PyArray_FLAGS(obj) & NPY_ARRAY_C_CONTIGUOUS) == 0)
+      throw "expected contiguous array";
+  }
+  int rank() {
+    valid();
+    return PyArray_NDIM(obj);
+  }
+  int dim(int i) {
+    valid();
+    return PyArray_DIM(obj, i);
+  }
+  int size() {
+    valid();
+    return PyArray_SIZE(obj);
+  }
+  void resize(int d0, int d1 = 0, int d2 = 0, int d3 = 0) {
+    npy_intp ndims[] = {d0, d1, d2, d3, 0};
+    int rank = 0;
+    while (ndims[rank]) rank++;
+    PyArray_Dims dims = {ndims, rank};
+    if (PyArray_Resize(obj, &dims, 0, NPY_CORDER) == nullptr)
+      throw "resize failed";
+  }
+  T &operator()(int i) {
+    assert(rank() == 1);
+    assert(unsigned(i) < unsigned(dim(0)));
+    T *data = (T *)PyArray_DATA(obj);
+    return data[i];
+  }
+  T &operator()(int i, int j) {
+    assert(rank() == 2);
+    assert(unsigned(i) < unsigned(dim(0)));
+    assert(unsigned(j) < unsigned(dim(1)));
+    T *data = (T *)PyArray_DATA(obj);
+    return data[i * dim(1) + j];
+  }
+  T &operator()(int i, int j, int k) {
+    assert(rank() == 3);
+    assert(unsigned(i) < unsigned(dim(0)));
+    assert(unsigned(j) < unsigned(dim(1)));
+    assert(unsigned(k) < unsigned(dim(2)));
+    T *data = (T *)PyArray_DATA(obj);
+    return data[(i * dim(1) + j) * dim(2) + k];
+  }
+  T &operator()(int i, int j, int k, int l) {
+    assert(rank() == 4);
+    assert(unsigned(i) < unsigned(dim(0)));
+    assert(unsigned(j) < unsigned(dim(1)));
+    assert(unsigned(k) < unsigned(dim(2)));
+    assert(unsigned(l) < unsigned(dim(3)));
+    T *data = (T *)PyArray_DATA(obj);
+    return data[((i * dim(1) + j) * dim(2) + k) * dim(3) + l];
+  }
+  T *data() {
+    valid();
+    return (T *)PyArray_DATA(obj);
+  }
+  void copyTo(T *dest) {
+    valid();
+    T *data = (T *)PyArray_DATA(obj);
+    int N = size();
+    for (int i = 0; i < N; i++) dest[i] = data[i];
+  }
 };
 
 typedef NumPyArray<float, NPY_FLOAT> npa_float;
 
-
-void mat_of_array(Mat &a,PyObject *object_) {
-    npa_float np(object_);
-    if(np.rank()!=2) throw "rank must be 2";
-    int N = np.dim(0);
-    int d = np.dim(1);
-    a.resize(N,d);
-    for(int t=0;t<N;t++)
-        for(int i=0;i<d;i++)
-            a(t,i) = np(d,i);
+void mat_of_array(Mat &a, PyObject *object_) {
+  npa_float np(object_);
+  if (np.rank() != 2) throw "rank must be 2";
+  int N = np.dim(0);
+  int d = np.dim(1);
+  a.resize(N, d);
+  for (int t = 0; t < N; t++)
+    for (int i = 0; i < d; i++) a(t, i) = np(d, i);
 }
 
-void array_of_mat(PyObject *object_,Mat &a) {
-    npa_float np(object_);
-    if(np.rank()!=2) throw "rank must be 2";
-    int N = a.rows();
-    int d = a.cols();
-    np.resize(N,d);
-    for(int t=0;t<N;t++)
-        for(int i=0;i<d;i++)
-            np(t,i) = a(t,i);
+void array_of_mat(PyObject *object_, Mat &a) {
+  npa_float np(object_);
+  if (np.rank() != 2) throw "rank must be 2";
+  int N = a.rows();
+  int d = a.cols();
+  np.resize(N, d);
+  for (int t = 0; t < N; t++)
+    for (int i = 0; i < d; i++) np(t, i) = a(t, i);
 }
 
-void sequence_of_array(Sequence &a,PyObject *object_) {
-    npa_float np(object_);
-    if(np.rank()!=3) throw "rank must be 3";
-    int N = np.dim(0);
-    int d = np.dim(1);
-    int bs = np.dim(2);
-    a.resize(N);
-    for(int t=0;t<N;t++) {
-        a[t].resize(d,bs);
-        for(int i=0; i<d; i++)
-            for(int b=0; b<bs; b++)
-                a[t](i,b) = np(t,i,b);
-    }
+void sequence_of_array(Sequence &a, PyObject *object_) {
+  npa_float np(object_);
+  if (np.rank() != 3) throw "rank must be 3";
+  int N = np.dim(0);
+  int d = np.dim(1);
+  int bs = np.dim(2);
+  a.resize(N);
+  for (int t = 0; t < N; t++) {
+    a[t].resize(d, bs);
+    for (int i = 0; i < d; i++)
+      for (int b = 0; b < bs; b++) a[t](i, b) = np(t, i, b);
+  }
 }
 
-void array_of_sequence(PyObject *object_,Sequence &a) {
-    npa_float np(object_);
-    int N = a.size();
-    if (N==0) throw "empty sequence";
-    int d = a[0].rows();
-    if (d==0) throw "empty feature vector";
-    int bs = a[0].cols();
-    if (bs==0) throw "empty batch";
-    np.resize(N,d,bs);
-    for(int t=0; t<N; t++) {
-        for(int i=0; i<d; i++)
-            for(int b=0; b<bs; b++)
-                np(t,i,b) = a[t](i,b);
-    }
+void array_of_sequence(PyObject *object_, Sequence &a) {
+  npa_float np(object_);
+  int N = a.size();
+  if (N == 0) throw "empty sequence";
+  int d = a[0].rows();
+  if (d == 0) throw "empty feature vector";
+  int bs = a[0].cols();
+  if (bs == 0) throw "empty batch";
+  np.resize(N, d, bs);
+  for (int t = 0; t < N; t++) {
+    for (int i = 0; i < d; i++)
+      for (int b = 0; b < bs; b++) np(t, i, b) = a[t](i, b);
+  }
 }
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-SWIGINTERN PyObject *_wrap_delete_SwigPyIterator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_SwigPyIterator(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_SwigPyIterator",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_DISOWN |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:delete_SwigPyIterator", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator,
+                         SWIG_POINTER_DISOWN | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_SwigPyIterator" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "delete_SwigPyIterator"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   delete arg1;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -5226,126 +5135,156 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_value(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_value(PyObject *SWIGUNUSEDPARM(self),
+                                                PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:SwigPyIterator_value",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:SwigPyIterator_value", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_value" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_value"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   try {
     result = (PyObject *)((swig::SwigPyIterator const *)arg1)->value();
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
+
   resultobj = result;
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_incr__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_incr__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  size_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator_incr",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  size_t arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  size_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator_incr", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_incr" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_incr"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   ecode2 = SWIG_AsVal_size_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SwigPyIterator_incr" "', argument " "2"" of type '" "size_t""'");
-  } 
-  arg2 = static_cast< size_t >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "SwigPyIterator_incr"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "size_t"
+                        "'");
+  }
+  arg2 = static_cast<size_t>(val2);
   try {
     result = (swig::SwigPyIterator *)(arg1)->incr(arg2);
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                                 SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_incr__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_incr__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:SwigPyIterator_incr",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:SwigPyIterator_incr", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_incr" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_incr"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   try {
     result = (swig::SwigPyIterator *)(arg1)->incr();
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                                 SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_SwigPyIterator_incr(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[3];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 1) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
+    int res =
+        SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       return _wrap_SwigPyIterator_incr__SWIG_1(self, args);
@@ -5354,7 +5293,8 @@ SWIGINTERN PyObject *_wrap_SwigPyIterator_incr(PyObject *self, PyObject *args) {
   if (argc == 2) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
+    int res =
+        SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -5366,103 +5306,128 @@ SWIGINTERN PyObject *_wrap_SwigPyIterator_incr(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'SwigPyIterator_incr'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    swig::SwigPyIterator::incr(size_t)\n"
-    "    swig::SwigPyIterator::incr()\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'SwigPyIterator_incr'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    swig::SwigPyIterator::incr(size_t)\n"
+                   "    swig::SwigPyIterator::incr()\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_decr__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_decr__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  size_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator_decr",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  size_t arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  size_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator_decr", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_decr" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_decr"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   ecode2 = SWIG_AsVal_size_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SwigPyIterator_decr" "', argument " "2"" of type '" "size_t""'");
-  } 
-  arg2 = static_cast< size_t >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "SwigPyIterator_decr"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "size_t"
+                        "'");
+  }
+  arg2 = static_cast<size_t>(val2);
   try {
     result = (swig::SwigPyIterator *)(arg1)->decr(arg2);
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                                 SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_decr__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_decr__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:SwigPyIterator_decr",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:SwigPyIterator_decr", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_decr" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_decr"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   try {
     result = (swig::SwigPyIterator *)(arg1)->decr();
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                                 SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_SwigPyIterator_decr(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[3];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 1) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
+    int res =
+        SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       return _wrap_SwigPyIterator_decr__SWIG_1(self, args);
@@ -5471,7 +5436,8 @@ SWIGINTERN PyObject *_wrap_SwigPyIterator_decr(PyObject *self, PyObject *args) {
   if (argc == 2) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
+    int res =
+        SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -5483,535 +5449,792 @@ SWIGINTERN PyObject *_wrap_SwigPyIterator_decr(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'SwigPyIterator_decr'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    swig::SwigPyIterator::decr(size_t)\n"
-    "    swig::SwigPyIterator::decr()\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'SwigPyIterator_decr'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    swig::SwigPyIterator::decr(size_t)\n"
+                   "    swig::SwigPyIterator::decr()\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_distance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_distance(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  swig::SwigPyIterator *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  swig::SwigPyIterator *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   ptrdiff_t result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator_distance",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator_distance", &obj0,
+                        &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_distance" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_distance"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator,  0  | 0);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SwigPyIterator_distance" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "SwigPyIterator_distance"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SwigPyIterator_distance" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "SwigPyIterator_distance"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
-  arg2 = reinterpret_cast< swig::SwigPyIterator * >(argp2);
+  arg2 = reinterpret_cast<swig::SwigPyIterator *>(argp2);
   try {
-    result = ((swig::SwigPyIterator const *)arg1)->distance((swig::SwigPyIterator const &)*arg2);
+    result = ((swig::SwigPyIterator const *)arg1)
+                 ->distance((swig::SwigPyIterator const &)*arg2);
+  } catch (std::invalid_argument &_e) {
+    SWIG_Python_Raise(
+        SWIG_NewPointerObj((new std::invalid_argument(
+                               static_cast<const std::invalid_argument &>(_e))),
+                           SWIGTYPE_p_std__invalid_argument, SWIG_POINTER_OWN),
+        "std::invalid_argument", SWIGTYPE_p_std__invalid_argument);
+    SWIG_fail;
   }
-  catch(std::invalid_argument &_e) {
-    SWIG_Python_Raise(SWIG_NewPointerObj((new std::invalid_argument(static_cast< const std::invalid_argument& >(_e))),SWIGTYPE_p_std__invalid_argument,SWIG_POINTER_OWN), "std::invalid_argument", SWIGTYPE_p_std__invalid_argument); SWIG_fail;
-  }
-  
-  resultobj = SWIG_From_ptrdiff_t(static_cast< ptrdiff_t >(result));
+
+  resultobj = SWIG_From_ptrdiff_t(static_cast<ptrdiff_t>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_equal(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_equal(PyObject *SWIGUNUSEDPARM(self),
+                                                PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  swig::SwigPyIterator *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  swig::SwigPyIterator *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator_equal",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator_equal", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_equal" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_equal"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator,  0  | 0);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SwigPyIterator_equal" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "SwigPyIterator_equal"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SwigPyIterator_equal" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "SwigPyIterator_equal"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
-  arg2 = reinterpret_cast< swig::SwigPyIterator * >(argp2);
+  arg2 = reinterpret_cast<swig::SwigPyIterator *>(argp2);
   try {
-    result = (bool)((swig::SwigPyIterator const *)arg1)->equal((swig::SwigPyIterator const &)*arg2);
+    result = (bool)((swig::SwigPyIterator const *)arg1)
+                 ->equal((swig::SwigPyIterator const &)*arg2);
+  } catch (std::invalid_argument &_e) {
+    SWIG_Python_Raise(
+        SWIG_NewPointerObj((new std::invalid_argument(
+                               static_cast<const std::invalid_argument &>(_e))),
+                           SWIGTYPE_p_std__invalid_argument, SWIG_POINTER_OWN),
+        "std::invalid_argument", SWIGTYPE_p_std__invalid_argument);
+    SWIG_fail;
   }
-  catch(std::invalid_argument &_e) {
-    SWIG_Python_Raise(SWIG_NewPointerObj((new std::invalid_argument(static_cast< const std::invalid_argument& >(_e))),SWIGTYPE_p_std__invalid_argument,SWIG_POINTER_OWN), "std::invalid_argument", SWIGTYPE_p_std__invalid_argument); SWIG_fail;
-  }
-  
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
+
+  resultobj = SWIG_From_bool(static_cast<bool>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_copy(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:SwigPyIterator_copy",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:SwigPyIterator_copy", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_copy" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_copy"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   result = (swig::SwigPyIterator *)((swig::SwigPyIterator const *)arg1)->copy();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                         SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_next(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_next(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:SwigPyIterator_next",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:SwigPyIterator_next", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_next" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_next"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   try {
     result = (PyObject *)(arg1)->next();
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
+
   resultobj = result;
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___next__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___next__(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:SwigPyIterator___next__",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:SwigPyIterator___next__", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator___next__" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator___next__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   try {
     result = (PyObject *)(arg1)->__next__();
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
+
   resultobj = result;
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_previous(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_previous(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:SwigPyIterator_previous",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:SwigPyIterator_previous", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_previous" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_previous"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   try {
     result = (PyObject *)(arg1)->previous();
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
+
   resultobj = result;
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator_advance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator_advance(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  ptrdiff_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator_advance",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  ptrdiff_t arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator_advance", &obj0,
+                        &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator_advance" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator_advance"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SwigPyIterator_advance" "', argument " "2"" of type '" "ptrdiff_t""'");
-  } 
-  arg2 = static_cast< ptrdiff_t >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "SwigPyIterator_advance"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "ptrdiff_t"
+                        "'");
+  }
+  arg2 = static_cast<ptrdiff_t>(val2);
   try {
     result = (swig::SwigPyIterator *)(arg1)->advance(arg2);
-  }
-  catch(swig::stop_iteration &_e) {
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                                 SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___eq__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___eq__(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  swig::SwigPyIterator *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  swig::SwigPyIterator *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator___eq__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator___eq__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator___eq__" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator___eq__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator,  0  | 0);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SwigPyIterator___eq__" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "SwigPyIterator___eq__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SwigPyIterator___eq__" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "SwigPyIterator___eq__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
-  arg2 = reinterpret_cast< swig::SwigPyIterator * >(argp2);
-  result = (bool)((swig::SwigPyIterator const *)arg1)->operator ==((swig::SwigPyIterator const &)*arg2);
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  arg2 = reinterpret_cast<swig::SwigPyIterator *>(argp2);
+  result = (bool)((swig::SwigPyIterator const *)arg1)
+               ->
+               operator==((swig::SwigPyIterator const &)*arg2);
+  resultobj = SWIG_From_bool(static_cast<bool>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___ne__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___ne__(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  swig::SwigPyIterator *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  swig::SwigPyIterator *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator___ne__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator___ne__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator___ne__" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator___ne__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator,  0  | 0);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SwigPyIterator___ne__" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "SwigPyIterator___ne__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SwigPyIterator___ne__" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "SwigPyIterator___ne__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
-  arg2 = reinterpret_cast< swig::SwigPyIterator * >(argp2);
-  result = (bool)((swig::SwigPyIterator const *)arg1)->operator !=((swig::SwigPyIterator const &)*arg2);
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  arg2 = reinterpret_cast<swig::SwigPyIterator *>(argp2);
+  result = (bool)((swig::SwigPyIterator const *)arg1)
+               ->
+               operator!=((swig::SwigPyIterator const &)*arg2);
+  resultobj = SWIG_From_bool(static_cast<bool>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___iadd__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___iadd__(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  ptrdiff_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator___iadd__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_DISOWN |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  ptrdiff_t arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator___iadd__", &obj0,
+                        &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator,
+                         SWIG_POINTER_DISOWN | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator___iadd__" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator___iadd__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SwigPyIterator___iadd__" "', argument " "2"" of type '" "ptrdiff_t""'");
-  } 
-  arg2 = static_cast< ptrdiff_t >(val2);
-  try {
-    result = (swig::SwigPyIterator *) &(arg1)->operator +=(arg2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "SwigPyIterator___iadd__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "ptrdiff_t"
+                        "'");
   }
-  catch(swig::stop_iteration &_e) {
+  arg2 = static_cast<ptrdiff_t>(val2);
+  try {
+    result = (swig::SwigPyIterator *)&(arg1)->operator+=(arg2);
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                         SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___isub__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___isub__(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  ptrdiff_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator___isub__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_DISOWN |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  ptrdiff_t arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator___isub__", &obj0,
+                        &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator,
+                         SWIG_POINTER_DISOWN | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator___isub__" "', argument " "1"" of type '" "swig::SwigPyIterator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator___isub__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SwigPyIterator___isub__" "', argument " "2"" of type '" "ptrdiff_t""'");
-  } 
-  arg2 = static_cast< ptrdiff_t >(val2);
-  try {
-    result = (swig::SwigPyIterator *) &(arg1)->operator -=(arg2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "SwigPyIterator___isub__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "ptrdiff_t"
+                        "'");
   }
-  catch(swig::stop_iteration &_e) {
+  arg2 = static_cast<ptrdiff_t>(val2);
+  try {
+    result = (swig::SwigPyIterator *)&(arg1)->operator-=(arg2);
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                         SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___add__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___add__(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  ptrdiff_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator___add__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  ptrdiff_t arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator___add__", &obj0,
+                        &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator___add__" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator___add__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SwigPyIterator___add__" "', argument " "2"" of type '" "ptrdiff_t""'");
-  } 
-  arg2 = static_cast< ptrdiff_t >(val2);
-  try {
-    result = (swig::SwigPyIterator *)((swig::SwigPyIterator const *)arg1)->operator +(arg2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "SwigPyIterator___add__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "ptrdiff_t"
+                        "'");
   }
-  catch(swig::stop_iteration &_e) {
+  arg2 = static_cast<ptrdiff_t>(val2);
+  try {
+    result = (swig::SwigPyIterator *)((swig::SwigPyIterator const *)arg1)
+                 ->
+                 operator+(arg2);
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                         SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___sub____SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___sub____SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  ptrdiff_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator___sub__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  ptrdiff_t arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  swig::SwigPyIterator *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator___sub__", &obj0,
+                        &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator___sub__" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator___sub__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SwigPyIterator___sub__" "', argument " "2"" of type '" "ptrdiff_t""'");
-  } 
-  arg2 = static_cast< ptrdiff_t >(val2);
-  try {
-    result = (swig::SwigPyIterator *)((swig::SwigPyIterator const *)arg1)->operator -(arg2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "SwigPyIterator___sub__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "ptrdiff_t"
+                        "'");
   }
-  catch(swig::stop_iteration &_e) {
+  arg2 = static_cast<ptrdiff_t>(val2);
+  try {
+    result = (swig::SwigPyIterator *)((swig::SwigPyIterator const *)arg1)
+                 ->
+                 operator-(arg2);
+  } catch (swig::stop_iteration &_e) {
     {
       (void)_e;
       SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
       SWIG_fail;
     }
   }
-  
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                         SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___sub____SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___sub____SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *) 0 ;
-  swig::SwigPyIterator *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  swig::SwigPyIterator *arg1 = (swig::SwigPyIterator *)0;
+  swig::SwigPyIterator *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   ptrdiff_t result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SwigPyIterator___sub__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_swig__SwigPyIterator, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:SwigPyIterator___sub__", &obj0,
+                        &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SwigPyIterator___sub__" "', argument " "1"" of type '" "swig::SwigPyIterator const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "SwigPyIterator___sub__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "swig::SwigPyIterator const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< swig::SwigPyIterator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator,  0  | 0);
+  arg1 = reinterpret_cast<swig::SwigPyIterator *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_swig__SwigPyIterator, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SwigPyIterator___sub__" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "SwigPyIterator___sub__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SwigPyIterator___sub__" "', argument " "2"" of type '" "swig::SwigPyIterator const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "SwigPyIterator___sub__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "swig::SwigPyIterator const &"
+                        "'");
   }
-  arg2 = reinterpret_cast< swig::SwigPyIterator * >(argp2);
-  result = ((swig::SwigPyIterator const *)arg1)->operator -((swig::SwigPyIterator const &)*arg2);
-  resultobj = SWIG_From_ptrdiff_t(static_cast< ptrdiff_t >(result));
+  arg2 = reinterpret_cast<swig::SwigPyIterator *>(argp2);
+  result = ((swig::SwigPyIterator const *)arg1)
+               ->
+               operator-((swig::SwigPyIterator const &)*arg2);
+  resultobj = SWIG_From_ptrdiff_t(static_cast<ptrdiff_t>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_SwigPyIterator___sub__(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_SwigPyIterator___sub__(PyObject *self,
+                                                  PyObject *args) {
   int argc;
   PyObject *argv[3];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
+    int res =
+        SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_swig__SwigPyIterator, 0);
@@ -6024,7 +6247,8 @@ SWIGINTERN PyObject *_wrap_SwigPyIterator___sub__(PyObject *self, PyObject *args
   if (argc == 2) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
+    int res =
+        SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_swig__SwigPyIterator, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -6036,68 +6260,75 @@ SWIGINTERN PyObject *_wrap_SwigPyIterator___sub__(PyObject *self, PyObject *args
       }
     }
   }
-  
+
 fail:
   Py_INCREF(Py_NotImplemented);
   return Py_NotImplemented;
 }
 
-
-SWIGINTERN PyObject *SwigPyIterator_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *SwigPyIterator_swigregister(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_swig__SwigPyIterator, SWIG_NewClientData(obj));
+  if (!PyArg_ParseTuple(args, (char *)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_swig__SwigPyIterator,
+                         SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_new_Classes(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Classes(PyObject *SWIGUNUSEDPARM(self),
+                                       PyObject *args) {
   PyObject *resultobj = 0;
-  Classes *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":new_Classes")) SWIG_fail;
+  Classes *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)":new_Classes")) SWIG_fail;
   {
     try {
       result = (Classes *)new Classes();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Classes, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Classes,
+                                 SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_delete_Classes(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Classes(PyObject *SWIGUNUSEDPARM(self),
+                                          PyObject *args) {
   PyObject *resultobj = 0;
-  Classes *arg1 = (Classes *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Classes",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Classes, SWIG_POINTER_DISOWN |  0 );
+  Classes *arg1 = (Classes *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:delete_Classes", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Classes,
+                         SWIG_POINTER_DISOWN | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Classes" "', argument " "1"" of type '" "Classes *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "delete_Classes"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Classes *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Classes * >(argp1);
+  arg1 = reinterpret_cast<Classes *>(argp1);
   {
     try {
       delete arg1;
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -6107,116 +6338,147 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Classes___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Classes___getitem__(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  Classes *arg1 = (Classes *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  Classes *arg1 = (Classes *)0;
+  int arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Classes___getitem__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Classes, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:Classes___getitem__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Classes, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Classes___getitem__" "', argument " "1"" of type '" "Classes *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Classes___getitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Classes *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Classes * >(argp1);
+  arg1 = reinterpret_cast<Classes *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Classes___getitem__" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Classes___getitem__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   {
     try {
-      result = (int)(arg1)->operator [](arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (int)(arg1)->operator[](arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Classes_size(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Classes_size(PyObject *SWIGUNUSEDPARM(self),
+                                        PyObject *args) {
   PyObject *resultobj = 0;
-  Classes *arg1 = (Classes *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Classes *arg1 = (Classes *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Classes_size",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Classes, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:Classes_size", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Classes, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Classes_size" "', argument " "1"" of type '" "Classes *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Classes_size"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Classes *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Classes * >(argp1);
+  arg1 = reinterpret_cast<Classes *>(argp1);
   {
     try {
       result = (int)(arg1)->size();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Classes_resize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Classes_resize(PyObject *SWIGUNUSEDPARM(self),
+                                          PyObject *args) {
   PyObject *resultobj = 0;
-  Classes *arg1 = (Classes *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Classes_resize",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Classes, 0 |  0 );
+  Classes *arg1 = (Classes *)0;
+  int arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:Classes_resize", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Classes, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Classes_resize" "', argument " "1"" of type '" "Classes *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Classes_resize"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Classes *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Classes * >(argp1);
+  arg1 = reinterpret_cast<Classes *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Classes_resize" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Classes_resize"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   {
     try {
       (arg1)->resize(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -6226,48 +6488,69 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Classes___setitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Classes___setitem__(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  Classes *arg1 = (Classes *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Classes___setitem__",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Classes, 0 |  0 );
+  Classes *arg1 = (Classes *)0;
+  int arg2;
+  int arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  int val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:Classes___setitem__", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Classes, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Classes___setitem__" "', argument " "1"" of type '" "Classes *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Classes___setitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Classes *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Classes * >(argp1);
+  arg1 = reinterpret_cast<Classes *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Classes___setitem__" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Classes___setitem__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Classes___setitem__" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "Classes___setitem__"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   {
     try {
-      Classes___setitem__(arg1,arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      Classes___setitem__(arg1, arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -6277,82 +6560,87 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *Classes_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *Classes_swigregister(PyObject *SWIGUNUSEDPARM(self),
+                                          PyObject *args) {
   PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  if (!PyArg_ParseTuple(args, (char *)"O:swigregister", &obj)) return NULL;
   SWIG_TypeNewClientData(SWIGTYPE_p_Classes, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_new_Vec__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Vec__SWIG_0(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Vec *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":new_Vec")) SWIG_fail;
+  Vec *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)":new_Vec")) SWIG_fail;
   {
     try {
       result = (Vec *)new Vec();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Vec, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Vec,
+                                 SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_new_Vec__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Vec__SWIG_1(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  int arg1 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  PyObject * obj0 = 0 ;
-  Vec *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:new_Vec",&obj0)) SWIG_fail;
+  int arg1;
+  int val1;
+  int ecode1 = 0;
+  PyObject *obj0 = 0;
+  Vec *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:new_Vec", &obj0)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_Vec" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
+    SWIG_exception_fail(SWIG_ArgError(ecode1),
+                        "in method '"
+                        "new_Vec"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg1 = static_cast<int>(val1);
   {
     try {
       result = (Vec *)new Vec(arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Vec, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Vec,
+                                 SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_new_Vec(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[2];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 1) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 0) {
     return _wrap_new_Vec__SWIG_0(self, args);
@@ -6367,134 +6655,175 @@ SWIGINTERN PyObject *_wrap_new_Vec(PyObject *self, PyObject *args) {
       return _wrap_new_Vec__SWIG_1(self, args);
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_Vec'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    Vec::Vec()\n"
-    "    Vec::Vec(int)\n");
+  SWIG_SetErrorMsg(
+      PyExc_NotImplementedError,
+      "Wrong number or type of arguments for overloaded function 'new_Vec'.\n"
+      "  Possible C/C++ prototypes are:\n"
+      "    Vec::Vec()\n"
+      "    Vec::Vec(int)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_Vec___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Vec___getitem__(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Vec *arg1 = (Vec *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  Vec *arg1 = (Vec *)0;
+  int arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   float result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Vec___getitem__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Vec, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:Vec___getitem__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Vec, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Vec___getitem__" "', argument " "1"" of type '" "Vec *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Vec___getitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Vec *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Vec * >(argp1);
+  arg1 = reinterpret_cast<Vec *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Vec___getitem__" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Vec___getitem__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   {
     try {
-      result = (float)(arg1)->operator [](arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (float)(arg1)->operator[](arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_float(static_cast< float >(result));
+  resultobj = SWIG_From_float(static_cast<float>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Vec_size(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Vec_size(PyObject *SWIGUNUSEDPARM(self),
+                                    PyObject *args) {
   PyObject *resultobj = 0;
-  Vec *arg1 = (Vec *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Vec *arg1 = (Vec *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Vec_size",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Vec, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:Vec_size", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Vec, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Vec_size" "', argument " "1"" of type '" "Vec *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Vec_size"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Vec *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Vec * >(argp1);
+  arg1 = reinterpret_cast<Vec *>(argp1);
   {
     try {
       result = (int)(arg1)->size();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Vec___setitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Vec___setitem__(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Vec *arg1 = (Vec *) 0 ;
-  int arg2 ;
-  float arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  float val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Vec___setitem__",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Vec, 0 |  0 );
+  Vec *arg1 = (Vec *)0;
+  int arg2;
+  float arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  float val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:Vec___setitem__", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Vec, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Vec___setitem__" "', argument " "1"" of type '" "Vec *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Vec___setitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Vec *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Vec * >(argp1);
+  arg1 = reinterpret_cast<Vec *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Vec___setitem__" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Vec___setitem__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   ecode3 = SWIG_AsVal_float(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Vec___setitem__" "', argument " "3"" of type '" "float""'");
-  } 
-  arg3 = static_cast< float >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "Vec___setitem__"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "float"
+                        "'");
+  }
+  arg3 = static_cast<float>(val3);
   {
     try {
-      Vec___setitem__(arg1,arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      Vec___setitem__(arg1, arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -6504,30 +6833,35 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_delete_Vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Vec(PyObject *SWIGUNUSEDPARM(self),
+                                      PyObject *args) {
   PyObject *resultobj = 0;
-  Vec *arg1 = (Vec *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Vec",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Vec, SWIG_POINTER_DISOWN |  0 );
+  Vec *arg1 = (Vec *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:delete_Vec", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Vec, SWIG_POINTER_DISOWN | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Vec" "', argument " "1"" of type '" "Vec *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "delete_Vec"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Vec *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Vec * >(argp1);
+  arg1 = reinterpret_cast<Vec *>(argp1);
   {
     try {
       delete arg1;
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -6537,91 +6871,103 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *Vec_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *Vec_swigregister(PyObject *SWIGUNUSEDPARM(self),
+                                      PyObject *args) {
   PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  if (!PyArg_ParseTuple(args, (char *)"O:swigregister", &obj)) return NULL;
   SWIG_TypeNewClientData(SWIGTYPE_p_Vec, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_new_Mat__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Mat__SWIG_0(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":new_Mat")) SWIG_fail;
+  Mat *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)":new_Mat")) SWIG_fail;
   {
     try {
       result = (Mat *)new Mat();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mat, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mat,
+                                 SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_new_Mat__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Mat__SWIG_1(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  int arg1 ;
-  int arg2 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  Mat *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:new_Mat",&obj0,&obj1)) SWIG_fail;
+  int arg1;
+  int arg2;
+  int val1;
+  int ecode1 = 0;
+  int val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  Mat *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:new_Mat", &obj0, &obj1)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_Mat" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
+    SWIG_exception_fail(SWIG_ArgError(ecode1),
+                        "in method '"
+                        "new_Mat"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg1 = static_cast<int>(val1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "new_Mat" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "new_Mat"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   {
     try {
-      result = (Mat *)new Mat(arg1,arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (Mat *)new Mat(arg1, arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mat, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mat,
+                                 SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_new_Mat(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[3];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 0) {
     return _wrap_new_Mat__SWIG_0(self, args);
@@ -6642,186 +6988,247 @@ SWIGINTERN PyObject *_wrap_new_Mat(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_Mat'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    Mat::Mat()\n"
-    "    Mat::Mat(int,int)\n");
+  SWIG_SetErrorMsg(
+      PyExc_NotImplementedError,
+      "Wrong number or type of arguments for overloaded function 'new_Mat'.\n"
+      "  Possible C/C++ prototypes are:\n"
+      "    Mat::Mat()\n"
+      "    Mat::Mat(int,int)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_Mat___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mat___getitem__(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = (Mat *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  Mat *arg1 = (Mat *)0;
+  int arg2;
+  int arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  int val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
   float result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Mat___getitem__",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mat, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:Mat___getitem__", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mat___getitem__" "', argument " "1"" of type '" "Mat *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Mat___getitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
+  arg1 = reinterpret_cast<Mat *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mat___getitem__" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Mat___getitem__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Mat___getitem__" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "Mat___getitem__"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   {
     try {
-      result = (float)(arg1)->operator ()(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (float)(arg1)->operator()(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_float(static_cast< float >(result));
+  resultobj = SWIG_From_float(static_cast<float>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Mat_rows(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mat_rows(PyObject *SWIGUNUSEDPARM(self),
+                                    PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = (Mat *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Mat *arg1 = (Mat *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Mat_rows",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mat, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:Mat_rows", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mat_rows" "', argument " "1"" of type '" "Mat *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Mat_rows"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
+  arg1 = reinterpret_cast<Mat *>(argp1);
   {
     try {
       result = (int)(arg1)->rows();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Mat_cols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mat_cols(PyObject *SWIGUNUSEDPARM(self),
+                                    PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = (Mat *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Mat *arg1 = (Mat *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Mat_cols",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mat, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:Mat_cols", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mat_cols" "', argument " "1"" of type '" "Mat *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Mat_cols"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
+  arg1 = reinterpret_cast<Mat *>(argp1);
   {
     try {
       result = (int)(arg1)->cols();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Mat_setValue(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mat_setValue(PyObject *SWIGUNUSEDPARM(self),
+                                        PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = (Mat *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  float arg4 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  float val4 ;
-  int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:Mat_setValue",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mat, 0 |  0 );
+  Mat *arg1 = (Mat *)0;
+  int arg2;
+  int arg3;
+  float arg4;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  int val3;
+  int ecode3 = 0;
+  float val4;
+  int ecode4 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  PyObject *obj3 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOOO:Mat_setValue", &obj0, &obj1, &obj2,
+                        &obj3))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mat_setValue" "', argument " "1"" of type '" "Mat *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Mat_setValue"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
+  arg1 = reinterpret_cast<Mat *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mat_setValue" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Mat_setValue"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Mat_setValue" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "Mat_setValue"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   ecode4 = SWIG_AsVal_float(obj3, &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Mat_setValue" "', argument " "4"" of type '" "float""'");
-  } 
-  arg4 = static_cast< float >(val4);
+    SWIG_exception_fail(SWIG_ArgError(ecode4),
+                        "in method '"
+                        "Mat_setValue"
+                        "', argument "
+                        "4"
+                        " of type '"
+                        "float"
+                        "'");
+  }
+  arg4 = static_cast<float>(val4);
   {
     try {
-      Mat_setValue(arg1,arg2,arg3,arg4);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      Mat_setValue(arg1, arg2, arg3, arg4);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -6831,30 +7238,35 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_delete_Mat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Mat(PyObject *SWIGUNUSEDPARM(self),
+                                      PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = (Mat *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Mat",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mat, SWIG_POINTER_DISOWN |  0 );
+  Mat *arg1 = (Mat *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:delete_Mat", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, SWIG_POINTER_DISOWN | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Mat" "', argument " "1"" of type '" "Mat *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "delete_Mat"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
+  arg1 = reinterpret_cast<Mat *>(argp1);
   {
     try {
       delete arg1;
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -6864,62 +7276,68 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *Mat_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *Mat_swigregister(PyObject *SWIGUNUSEDPARM(self),
+                                      PyObject *args) {
   PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  if (!PyArg_ParseTuple(args, (char *)"O:swigregister", &obj)) return NULL;
   SWIG_TypeNewClientData(SWIGTYPE_p_Mat, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_new_Sequence(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_Sequence(PyObject *SWIGUNUSEDPARM(self),
+                                        PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":new_Sequence")) SWIG_fail;
+  Sequence *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)":new_Sequence")) SWIG_fail;
   {
     try {
       result = (Sequence *)new Sequence();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence,
+                                 SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_delete_Sequence(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Sequence(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Sequence",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Sequence, SWIG_POINTER_DISOWN |  0 );
+  Sequence *arg1 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:delete_Sequence", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence,
+                         SWIG_POINTER_DISOWN | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Sequence" "', argument " "1"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "delete_Sequence"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   {
     try {
       delete arg1;
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -6929,221 +7347,276 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Sequence_size(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Sequence_size(PyObject *SWIGUNUSEDPARM(self),
+                                         PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Sequence *arg1 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Sequence_size",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Sequence, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:Sequence_size", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Sequence_size" "', argument " "1"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Sequence_size"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   {
     try {
       result = (int)(arg1)->size();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Sequence___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Sequence___getitem__(PyObject *SWIGUNUSEDPARM(self),
+                                                PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = (Sequence *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  Mat *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Sequence___getitem__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Sequence, 0 |  0 );
+  Sequence *arg1 = (Sequence *)0;
+  int arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  Mat *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:Sequence___getitem__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Sequence___getitem__" "', argument " "1"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Sequence___getitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Sequence___getitem__" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Sequence___getitem__"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   {
     try {
-      result = (Mat *) &(arg1)->operator [](arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (Mat *)&(arg1)->operator[](arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mat, 0 |  0 );
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mat, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Sequence_length(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Sequence_length(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Sequence *arg1 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Sequence_length",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Sequence, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:Sequence_length", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Sequence_length" "', argument " "1"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Sequence_length"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   {
     try {
       result = (int)Sequence_length(arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Sequence_depth(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Sequence_depth(PyObject *SWIGUNUSEDPARM(self),
+                                          PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Sequence *arg1 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Sequence_depth",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Sequence, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:Sequence_depth", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Sequence_depth" "', argument " "1"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Sequence_depth"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   {
     try {
       result = (int)Sequence_depth(arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Sequence_batchsize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Sequence_batchsize(PyObject *SWIGUNUSEDPARM(self),
+                                              PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Sequence *arg1 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Sequence_batchsize",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Sequence, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:Sequence_batchsize", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Sequence_batchsize" "', argument " "1"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Sequence_batchsize"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   {
     try {
       result = (int)Sequence_batchsize(arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Sequence_assign(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Sequence_assign(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = (Sequence *) 0 ;
-  Sequence *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Sequence_assign",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Sequence, 0 |  0 );
+  Sequence *arg1 = (Sequence *)0;
+  Sequence *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:Sequence_assign", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Sequence_assign" "', argument " "1"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Sequence_assign"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  arg1 = reinterpret_cast<Sequence *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Sequence_assign" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "Sequence_assign"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Sequence_assign" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "Sequence_assign"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   {
     try {
-      Sequence_assign(arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      Sequence_assign(arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -7153,57 +7626,85 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_Sequence_resize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Sequence_resize(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = (Sequence *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  int arg4 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:Sequence_resize",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Sequence, 0 |  0 );
+  Sequence *arg1 = (Sequence *)0;
+  int arg2;
+  int arg3;
+  int arg4;
+  void *argp1 = 0;
+  int res1 = 0;
+  int val2;
+  int ecode2 = 0;
+  int val3;
+  int ecode3 = 0;
+  int val4;
+  int ecode4 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  PyObject *obj3 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOOO:Sequence_resize", &obj0, &obj1,
+                        &obj2, &obj3))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Sequence_resize" "', argument " "1"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "Sequence_resize"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Sequence_resize" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "Sequence_resize"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Sequence_resize" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "Sequence_resize"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   ecode4 = SWIG_AsVal_int(obj3, &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Sequence_resize" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
+    SWIG_exception_fail(SWIG_ArgError(ecode4),
+                        "in method '"
+                        "Sequence_resize"
+                        "', argument "
+                        "4"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg4 = static_cast<int>(val4);
   {
     try {
-      Sequence_resize(arg1,arg2,arg3,arg4);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      Sequence_resize(arg1, arg2, arg3, arg4);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -7213,49 +7714,57 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *Sequence_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *Sequence_swigregister(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  if (!PyArg_ParseTuple(args, (char *)"O:swigregister", &obj)) return NULL;
   SWIG_TypeNewClientData(SWIGTYPE_p_Sequence, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_delete_ITrainable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_ITrainable(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_ITrainable",&obj0)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:delete_ITrainable", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_ITrainable" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "delete_ITrainable"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
-      (void)arg1; delete smartarg1;
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (void)arg1;
+      delete smartarg1;
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -7265,43 +7774,67 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_name_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_name_set(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:ITrainable_name_set",&obj0,&obj1)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  string *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  int res2 = SWIG_OLDOBJ;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:ITrainable_name_set", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_name_set" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_name_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     res2 = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ITrainable_name_set" "', argument " "2"" of type '" "string const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2),
+                          "in method '"
+                          "ITrainable_name_set"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string const &"
+                          "'");
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ITrainable_name_set" "', argument " "2"" of type '" "string const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError,
+                          "invalid null reference "
+                          "in method '"
+                          "ITrainable_name_set"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string const &"
+                          "'");
     }
     arg2 = ptr;
   }
@@ -7314,75 +7847,101 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_name_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_name_get(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  string *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_name_get",&obj0)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  string *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_name_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_name_get" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_name_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (string *) & ((arg1)->name);
-  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
+  result = (string *)&((arg1)->name);
+  resultobj = SWIG_From_std_string(static_cast<std::string>(*result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_learning_rate_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_learning_rate_set(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  Float arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  float val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:ITrainable_learning_rate_set",&obj0,&obj1)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  Float arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  float val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:ITrainable_learning_rate_set", &obj0,
+                        &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_learning_rate_set" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_learning_rate_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_float(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ITrainable_learning_rate_set" "', argument " "2"" of type '" "Float""'");
-  } 
-  arg2 = static_cast< Float >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "ITrainable_learning_rate_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Float"
+                        "'");
+  }
+  arg2 = static_cast<Float>(val2);
   if (arg1) (arg1)->learning_rate = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -7390,75 +7949,101 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_learning_rate_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_learning_rate_get(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   Float result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_learning_rate_get",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_learning_rate_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_learning_rate_get" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_learning_rate_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (Float) ((arg1)->learning_rate);
-  resultobj = SWIG_From_float(static_cast< float >(result));
+  result = (Float)((arg1)->learning_rate);
+  resultobj = SWIG_From_float(static_cast<float>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_momentum_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_momentum_set(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  Float arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  float val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:ITrainable_momentum_set",&obj0,&obj1)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  Float arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  float val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:ITrainable_momentum_set", &obj0,
+                        &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_momentum_set" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_momentum_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_float(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ITrainable_momentum_set" "', argument " "2"" of type '" "Float""'");
-  } 
-  arg2 = static_cast< Float >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "ITrainable_momentum_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Float"
+                        "'");
+  }
+  arg2 = static_cast<Float>(val2);
   if (arg1) (arg1)->momentum = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -7466,75 +8051,101 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_momentum_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_momentum_get(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   Float result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_momentum_get",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_momentum_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_momentum_get" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_momentum_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (Float) ((arg1)->momentum);
-  resultobj = SWIG_From_float(static_cast< float >(result));
+  result = (Float)((arg1)->momentum);
+  resultobj = SWIG_From_float(static_cast<float>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_normalization_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_normalization_set(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  enum ITrainable::Normalization arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:ITrainable_normalization_set",&obj0,&obj1)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  enum ITrainable::Normalization arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  int val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:ITrainable_normalization_set", &obj0,
+                        &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_normalization_set" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_normalization_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ITrainable_normalization_set" "', argument " "2"" of type '" "enum ITrainable::Normalization""'");
-  } 
-  arg2 = static_cast< enum ITrainable::Normalization >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "ITrainable_normalization_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "enum ITrainable::Normalization"
+                        "'");
+  }
+  arg2 = static_cast<enum ITrainable::Normalization>(val2);
   if (arg1) (arg1)->normalization = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -7542,75 +8153,102 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_normalization_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_normalization_get(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   enum ITrainable::Normalization result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_normalization_get",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_normalization_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_normalization_get" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_normalization_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (enum ITrainable::Normalization) ((arg1)->normalization);
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  result = (enum ITrainable::Normalization)((arg1)->normalization);
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_attributes_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_attributes_set(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  map< string,string > *arg2 = (map< string,string > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:ITrainable_attributes_set",&obj0,&obj1)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  map<string, string> *arg2 = (map<string, string> *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:ITrainable_attributes_set", &obj0,
+                        &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_attributes_set" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_attributes_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_mapT_std__string_std__string_t, 0 |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2,
+                         SWIGTYPE_p_mapT_std__string_std__string_t, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ITrainable_attributes_set" "', argument " "2"" of type '" "map< string,string > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "ITrainable_attributes_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "map< string,string > *"
+                        "'");
   }
-  arg2 = reinterpret_cast< map< string,string > * >(argp2);
+  arg2 = reinterpret_cast<map<string, string> *>(argp2);
   if (arg1) (arg1)->attributes = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -7618,76 +8256,104 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_attributes_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_attributes_get(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  map< string,string > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_attributes_get",&obj0)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  map<string, string> *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_attributes_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_attributes_get" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_attributes_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (map< string,string > *)& ((arg1)->attributes);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_mapT_std__string_std__string_t, 0 |  0 );
+  result = (map<string, string> *)&((arg1)->attributes);
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                         SWIGTYPE_p_mapT_std__string_std__string_t, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_attr__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_attr__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string arg2 ;
-  string arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  string arg2;
+  string arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
   string result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ITrainable_attr",&obj0,&obj1,&obj2)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ITrainable_attr", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_attr" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_attr"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_attr" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_attr"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -7696,64 +8362,85 @@ SWIGINTERN PyObject *_wrap_ITrainable_attr__SWIG_0(PyObject *SWIGUNUSEDPARM(self
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj2, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_attr" "', argument " "3"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_attr"
+                          "', argument "
+                          "3"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg3 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   {
     try {
-      result = (arg1)->attr(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (arg1)->attr(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  resultobj = SWIG_From_std_string(static_cast<std::string>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_attr__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_attr__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  string arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   string result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:ITrainable_attr",&obj0,&obj1)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:ITrainable_attr", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_attr" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_attr"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_attr" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_attr"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -7761,39 +8448,37 @@ SWIGINTERN PyObject *_wrap_ITrainable_attr__SWIG_1(PyObject *SWIGUNUSEDPARM(self
   {
     try {
       result = (arg1)->attr(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  resultobj = SWIG_From_std_string(static_cast<std::string>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
 SWIGINTERN PyObject *_wrap_ITrainable_attr(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 3) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string **)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         return _wrap_ITrainable_attr__SWIG_1(self, args);
@@ -7802,13 +8487,14 @@ SWIGINTERN PyObject *_wrap_ITrainable_attr(PyObject *self, PyObject *args) {
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string **)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
-        int res = SWIG_AsPtr_std_string(argv[2], (std::string**)(0));
+        int res = SWIG_AsPtr_std_string(argv[2], (std::string **)(0));
         _v = SWIG_CheckState(res);
         if (_v) {
           return _wrap_ITrainable_attr__SWIG_0(self, args);
@@ -7816,115 +8502,155 @@ SWIGINTERN PyObject *_wrap_ITrainable_attr(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'ITrainable_attr'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    ITrainable::attr(string,string)\n"
-    "    ITrainable::attr(string)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'ITrainable_attr'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    ITrainable::attr(string,string)\n"
+                   "    ITrainable::attr(string)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_iattr__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_iattr__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string arg2 ;
-  int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  string arg2;
+  int arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  int val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ITrainable_iattr",&obj0,&obj1,&obj2)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ITrainable_iattr", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_iattr" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_iattr"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_iattr" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_iattr"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ITrainable_iattr" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "ITrainable_iattr"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   {
     try {
-      result = (int)(arg1)->iattr(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (int)(arg1)->iattr(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_iattr__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_iattr__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  string arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:ITrainable_iattr",&obj0,&obj1)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:ITrainable_iattr", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_iattr" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_iattr"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_iattr" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_iattr"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -7932,39 +8658,37 @@ SWIGINTERN PyObject *_wrap_ITrainable_iattr__SWIG_1(PyObject *SWIGUNUSEDPARM(sel
   {
     try {
       result = (int)(arg1)->iattr(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
 SWIGINTERN PyObject *_wrap_ITrainable_iattr(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 3) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string **)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         return _wrap_ITrainable_iattr__SWIG_1(self, args);
@@ -7973,10 +8697,11 @@ SWIGINTERN PyObject *_wrap_ITrainable_iattr(PyObject *self, PyObject *args) {
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string **)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         {
@@ -7989,49 +8714,67 @@ SWIGINTERN PyObject *_wrap_ITrainable_iattr(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'ITrainable_iattr'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    ITrainable::iattr(string,int)\n"
-    "    ITrainable::iattr(string)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'ITrainable_iattr'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    ITrainable::iattr(string,int)\n"
+                   "    ITrainable::iattr(string)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_irequire(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_irequire(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  string arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:ITrainable_irequire",&obj0,&obj1)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:ITrainable_irequire", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_irequire" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_irequire"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_irequire" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_irequire"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -8039,57 +8782,72 @@ SWIGINTERN PyObject *_wrap_ITrainable_irequire(PyObject *SWIGUNUSEDPARM(self), P
   {
     try {
       result = (int)(arg1)->irequire(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_set__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_set__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string arg2 ;
-  string arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ITrainable_set",&obj0,&obj1,&obj2)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  string arg2;
+  string arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ITrainable_set", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_set" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_set" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_set"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -8098,21 +8856,26 @@ SWIGINTERN PyObject *_wrap_ITrainable_set__SWIG_0(PyObject *SWIGUNUSEDPARM(self)
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj2, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_set" "', argument " "3"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_set"
+                          "', argument "
+                          "3"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg3 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   {
     try {
-      (arg1)->set(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->set(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8122,62 +8885,84 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_set__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_set__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string arg2 ;
-  int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ITrainable_set",&obj0,&obj1,&obj2)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  string arg2;
+  int arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  int val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ITrainable_set", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_set" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_set" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_set"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ITrainable_set" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "ITrainable_set"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   {
     try {
-      (arg1)->set(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->set(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8187,62 +8972,84 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_set__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_set__SWIG_2(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  string arg2 ;
-  double arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ITrainable_set",&obj0,&obj1,&obj2)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  string arg2;
+  double arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  double val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ITrainable_set", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_set" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "ITrainable_set" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "ITrainable_set"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ITrainable_set" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = static_cast< double >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "ITrainable_set"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "double"
+                        "'");
+  }
+  arg3 = static_cast<double>(val3);
   {
     try {
-      (arg1)->set(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->set(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8252,23 +9059,23 @@ fail:
   return NULL;
 }
 
-
 SWIGINTERN PyObject *_wrap_ITrainable_set(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 3) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string **)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         {
@@ -8283,10 +9090,11 @@ SWIGINTERN PyObject *_wrap_ITrainable_set(PyObject *self, PyObject *args) {
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string **)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         {
@@ -8301,13 +9109,14 @@ SWIGINTERN PyObject *_wrap_ITrainable_set(PyObject *self, PyObject *args) {
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string **)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
-        int res = SWIG_AsPtr_std_string(argv[2], (std::string**)(0));
+        int res = SWIG_AsPtr_std_string(argv[2], (std::string **)(0));
         _v = SWIG_CheckState(res);
         if (_v) {
           return _wrap_ITrainable_set__SWIG_0(self, args);
@@ -8315,70 +9124,94 @@ SWIGINTERN PyObject *_wrap_ITrainable_set(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'ITrainable_set'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    ITrainable::set(string,string)\n"
-    "    ITrainable::set(string,int)\n"
-    "    ITrainable::set(string,double)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'ITrainable_set'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    ITrainable::set(string,string)\n"
+                   "    ITrainable::set(string,int)\n"
+                   "    ITrainable::set(string,double)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_setLearningRate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_setLearningRate(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  Float arg2 ;
-  Float arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  float val2 ;
-  int ecode2 = 0 ;
-  float val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ITrainable_setLearningRate",&obj0,&obj1,&obj2)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  Float arg2;
+  Float arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  float val2;
+  int ecode2 = 0;
+  float val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ITrainable_setLearningRate", &obj0,
+                        &obj1, &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_setLearningRate" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_setLearningRate"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_float(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ITrainable_setLearningRate" "', argument " "2"" of type '" "Float""'");
-  } 
-  arg2 = static_cast< Float >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "ITrainable_setLearningRate"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Float"
+                        "'");
+  }
+  arg2 = static_cast<Float>(val2);
   ecode3 = SWIG_AsVal_float(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ITrainable_setLearningRate" "', argument " "3"" of type '" "Float""'");
-  } 
-  arg3 = static_cast< Float >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "ITrainable_setLearningRate"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Float"
+                        "'");
+  }
+  arg3 = static_cast<Float>(val3);
   {
     try {
-      (arg1)->setLearningRate(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->setLearningRate(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8388,42 +9221,48 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_forward(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_forward(PyObject *SWIGUNUSEDPARM(self),
+                                              PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_forward",&obj0)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_forward", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_forward" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_forward"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
       (arg1)->forward();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8433,42 +9272,49 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_backward(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_backward(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_backward",&obj0)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_backward", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_backward" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_backward"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
       (arg1)->backward();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8478,42 +9324,48 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_update(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_update(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_update",&obj0)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_update", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_update" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_update"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
       (arg1)->update();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8523,134 +9375,153 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_idepth(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_idepth(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_idepth",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_idepth", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_idepth" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_idepth"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
       result = (int)(arg1)->idepth();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_odepth(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_odepth(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_odepth",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_odepth", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_odepth" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_odepth"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
       result = (int)(arg1)->odepth();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_initialize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_initialize(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:ITrainable_initialize",&obj0)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:ITrainable_initialize", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_initialize" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_initialize"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
       (arg1)->initialize();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8660,60 +9531,82 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_init__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_init__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ITrainable_init",&obj0,&obj1,&obj2)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  int arg2;
+  int arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  int val2;
+  int ecode2 = 0;
+  int val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ITrainable_init", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_init" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_init"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ITrainable_init" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ITrainable_init" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   {
     try {
-      (arg1)->init(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->init(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8723,69 +9616,98 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_init__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_init__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  int arg4 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:ITrainable_init",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  int arg2;
+  int arg3;
+  int arg4;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  int val2;
+  int ecode2 = 0;
+  int val3;
+  int ecode3 = 0;
+  int val4;
+  int ecode4 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  PyObject *obj3 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOOO:ITrainable_init", &obj0, &obj1,
+                        &obj2, &obj3))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_init" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_init"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ITrainable_init" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ITrainable_init" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   ecode4 = SWIG_AsVal_int(obj3, &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "ITrainable_init" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
+    SWIG_exception_fail(SWIG_ArgError(ecode4),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "4"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg4 = static_cast<int>(val4);
   {
     try {
-      (arg1)->init(arg2,arg3,arg4);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->init(arg2, arg3, arg4);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8795,78 +9717,114 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ITrainable_init__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ITrainable_init__SWIG_2(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  ITrainable *arg1 = (ITrainable *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  int arg4 ;
-  int arg5 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< ITrainable > tempshared1 ;
-  std::shared_ptr< ITrainable > *smartarg1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
-  int val5 ;
-  int ecode5 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  PyObject * obj4 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOOO:ITrainable_init",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  ITrainable *arg1 = (ITrainable *)0;
+  int arg2;
+  int arg3;
+  int arg4;
+  int arg5;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<ITrainable> tempshared1;
+  std::shared_ptr<ITrainable> *smartarg1 = 0;
+  int val2;
+  int ecode2 = 0;
+  int val3;
+  int ecode3 = 0;
+  int val4;
+  int ecode4 = 0;
+  int val5;
+  int ecode5 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  PyObject *obj3 = 0;
+  PyObject *obj4 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOOOO:ITrainable_init", &obj0, &obj1,
+                        &obj2, &obj3, &obj4))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ITrainable_init" "', argument " "1"" of type '" "ITrainable *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ITrainable_init"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "ITrainable *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  ITrainable > * >(argp1);
-      arg1 = const_cast< ITrainable * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<ITrainable> *>(argp1);
+      arg1 = const_cast<ITrainable *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ITrainable_init" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg2 = static_cast<int>(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ITrainable_init" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   ecode4 = SWIG_AsVal_int(obj3, &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "ITrainable_init" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
+    SWIG_exception_fail(SWIG_ArgError(ecode4),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "4"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg4 = static_cast<int>(val4);
   ecode5 = SWIG_AsVal_int(obj4, &val5);
   if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "ITrainable_init" "', argument " "5"" of type '" "int""'");
-  } 
-  arg5 = static_cast< int >(val5);
+    SWIG_exception_fail(SWIG_ArgError(ecode5),
+                        "in method '"
+                        "ITrainable_init"
+                        "', argument "
+                        "5"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg5 = static_cast<int>(val5);
   {
     try {
-      (arg1)->init(arg2,arg3,arg4,arg5);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->init(arg2, arg3, arg4, arg5);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -8875,21 +9833,21 @@ SWIGINTERN PyObject *_wrap_ITrainable_init__SWIG_2(PyObject *SWIGUNUSEDPARM(self
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_ITrainable_init(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[6];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 5) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -8909,7 +9867,8 @@ SWIGINTERN PyObject *_wrap_ITrainable_init(PyObject *self, PyObject *args) {
   }
   if (argc == 4) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -8935,7 +9894,8 @@ SWIGINTERN PyObject *_wrap_ITrainable_init(PyObject *self, PyObject *args) {
   }
   if (argc == 5) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0,
+                              SWIGTYPE_p_std__shared_ptrT_ITrainable_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -8965,330 +9925,477 @@ SWIGINTERN PyObject *_wrap_ITrainable_init(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'ITrainable_init'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    ITrainable::init(int,int)\n"
-    "    ITrainable::init(int,int,int)\n"
-    "    ITrainable::init(int,int,int,int)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'ITrainable_init'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    ITrainable::init(int,int)\n"
+                   "    ITrainable::init(int,int,int)\n"
+                   "    ITrainable::init(int,int,int,int)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *ITrainable_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *ITrainable_swigregister(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_std__shared_ptrT_ITrainable_t, SWIG_NewClientData(obj));
+  if (!PyArg_ParseTuple(args, (char *)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_std__shared_ptrT_ITrainable_t,
+                         SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_vectornet_iterator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_iterator(PyObject *SWIGUNUSEDPARM(self),
+                                              PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  PyObject **arg2 = (PyObject **) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  swig::SwigPyIterator *result = 0 ;
-  
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  PyObject **arg2 = (PyObject **)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  swig::SwigPyIterator *result = 0;
+
   arg2 = &obj0;
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_iterator",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_iterator", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_iterator" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_iterator"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = (swig::SwigPyIterator *)std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__iterator(arg1,arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (swig::SwigPyIterator *)
+          std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__iterator(arg1, arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result),
+                         SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___nonzero__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___nonzero__(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet___nonzero__",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet___nonzero__", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___nonzero__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___nonzero__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = (bool)std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____nonzero__((std::vector< std::shared_ptr< INetwork > > const *)arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result =
+          (bool)std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____nonzero__(
+              (std::vector<std::shared_ptr<INetwork> > const *)arg1);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  resultobj = SWIG_From_bool(static_cast<bool>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___bool__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___bool__(PyObject *SWIGUNUSEDPARM(self),
+                                              PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet___bool__",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet___bool__", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___bool__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___bool__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = (bool)std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____bool__((std::vector< std::shared_ptr< INetwork > > const *)arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (bool)std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____bool__(
+          (std::vector<std::shared_ptr<INetwork> > const *)arg1);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  resultobj = SWIG_From_bool(static_cast<bool>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___len__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___len__(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::size_type result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet___len__",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::size_type result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet___len__", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___len__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___len__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____len__((std::vector< std::shared_ptr< INetwork > > const *)arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____len__(
+          (std::vector<std::shared_ptr<INetwork> > const *)arg1);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  resultobj = SWIG_From_size_t(static_cast<size_t>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_pop(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_pop(PyObject *SWIGUNUSEDPARM(self),
+                                         PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_pop",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_pop", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_pop" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_pop"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
       try {
         result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__pop(arg1);
-      }
-      catch(std::out_of_range &_e) {
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
   {
-    std::shared_ptr<  INetwork > *smartresult = result ? new std::shared_ptr<  INetwork >(result) : 0;
-    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_INetwork_t, SWIG_POINTER_OWN);
+    std::shared_ptr<INetwork> *smartresult =
+        result ? new std::shared_ptr<INetwork>(result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult),
+                                   SWIGTYPE_p_std__shared_ptrT_INetwork_t,
+                                   SWIG_POINTER_OWN);
   }
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___getslice__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___getslice__(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  ptrdiff_t val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet___getslice__",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg2;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  ptrdiff_t val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet___getslice__", &obj0,
+                        &obj1, &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___getslice__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___getslice__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet___getslice__" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val2);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode2),
+        "in method '"
+        "vectornet___getslice__"
+        "', argument "
+        "2"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val2);
   ecode3 = SWIG_AsVal_ptrdiff_t(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "vectornet___getslice__" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg3 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val3);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode3),
+        "in method '"
+        "vectornet___getslice__"
+        "', argument "
+        "3"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg3 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val3);
   {
     try {
       try {
-        result = (std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *)std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getslice__(arg1,arg2,arg3);
-      }
-      catch(std::out_of_range &_e) {
+        result = (std::vector<std::shared_ptr<INetwork>,
+                              std::allocator<std::shared_ptr<INetwork> > > *)
+            std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getslice__(
+                arg1, arg2, arg3);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
-      }
-      catch(std::invalid_argument &_e) {
+      } catch (std::invalid_argument &_e) {
         SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___setslice____SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___setslice____SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg3 ;
-  std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *arg4 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  ptrdiff_t val3 ;
-  int ecode3 = 0 ;
-  int res4 = SWIG_OLDOBJ ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:vectornet___setslice__",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg2;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg3;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > > *arg4 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  ptrdiff_t val3;
+  int ecode3 = 0;
+  int res4 = SWIG_OLDOBJ;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  PyObject *obj3 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOOO:vectornet___setslice__", &obj0,
+                        &obj1, &obj2, &obj3))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___setslice__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___setslice__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet___setslice__" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val2);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode2),
+        "in method '"
+        "vectornet___setslice__"
+        "', argument "
+        "2"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val2);
   ecode3 = SWIG_AsVal_ptrdiff_t(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "vectornet___setslice__" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg3 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val3);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode3),
+        "in method '"
+        "vectornet___setslice__"
+        "', argument "
+        "3"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg3 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val3);
   {
-    std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *ptr = (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *)0;
+    std::vector<std::shared_ptr<INetwork>,
+                std::allocator<std::shared_ptr<INetwork> > > *ptr =
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > *)0;
     res4 = swig::asptr(obj3, &ptr);
     if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "vectornet___setslice__" "', argument " "4"" of type '" "std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res4),
+                          "in method '"
+                          "vectornet___setslice__"
+                          "', argument "
+                          "4"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork "
+                          ">,std::allocator< std::shared_ptr< INetwork > > > "
+                          "const &"
+                          "'");
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "vectornet___setslice__" "', argument " "4"" of type '" "std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError,
+                          "invalid null reference "
+                          "in method '"
+                          "vectornet___setslice__"
+                          "', argument "
+                          "4"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork "
+                          ">,std::allocator< std::shared_ptr< INetwork > > > "
+                          "const &"
+                          "'");
     }
     arg4 = ptr;
   }
   {
     try {
       try {
-        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setslice____SWIG_0(arg1,arg2,arg3,(std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &)*arg4);
-      }
-      catch(std::out_of_range &_e) {
+        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setslice____SWIG_0(
+            arg1, arg2, arg3,
+            (std::vector<std::shared_ptr<INetwork>,
+                         std::allocator<std::shared_ptr<INetwork> > > const
+                 &)*arg4);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
-      }
-      catch(std::invalid_argument &_e) {
+      } catch (std::invalid_argument &_e) {
         SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -9300,57 +10407,85 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___setslice____SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___setslice____SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  ptrdiff_t val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet___setslice__",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg2;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  ptrdiff_t val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet___setslice__", &obj0,
+                        &obj1, &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___setslice__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___setslice__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet___setslice__" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val2);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode2),
+        "in method '"
+        "vectornet___setslice__"
+        "', argument "
+        "2"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val2);
   ecode3 = SWIG_AsVal_ptrdiff_t(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "vectornet___setslice__" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg3 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val3);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode3),
+        "in method '"
+        "vectornet___setslice__"
+        "', argument "
+        "3"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg3 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val3);
   {
     try {
       try {
-        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setslice____SWIG_0(arg1,arg2,arg3);
-      }
-      catch(std::out_of_range &_e) {
+        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setslice____SWIG_0(
+            arg1, arg2, arg3);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
-      }
-      catch(std::invalid_argument &_e) {
+      } catch (std::invalid_argument &_e) {
         SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -9360,20 +10495,23 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___setslice__(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___setslice__(PyObject *self,
+                                                  PyObject *args) {
   int argc;
   PyObject *argv[5];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 4) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 3) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -9393,7 +10531,10 @@ SWIGINTERN PyObject *_wrap_vectornet___setslice__(PyObject *self, PyObject *args
   }
   if (argc == 4) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -9406,7 +10547,10 @@ SWIGINTERN PyObject *_wrap_vectornet___setslice__(PyObject *self, PyObject *args
           _v = SWIG_CheckState(res);
         }
         if (_v) {
-          int res = swig::asptr(argv[3], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+          int res = swig::asptr(
+              argv[3],
+              (std::vector<std::shared_ptr<INetwork>,
+                           std::allocator<std::shared_ptr<INetwork> > > **)(0));
           _v = SWIG_CheckState(res);
           if (_v) {
             return _wrap_vectornet___setslice____SWIG_0(self, args);
@@ -9415,66 +10559,104 @@ SWIGINTERN PyObject *_wrap_vectornet___setslice__(PyObject *self, PyObject *args
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'vectornet___setslice__'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__setslice__(std::vector< std::shared_ptr< INetwork > >::difference_type,std::vector< std::shared_ptr< INetwork > >::difference_type,std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__setslice__(std::vector< std::shared_ptr< INetwork > >::difference_type,std::vector< std::shared_ptr< INetwork > >::difference_type)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'vectornet___setslice__'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__setslice__(std::vector< std::shared_ptr< INetwork > "
+                   ">::difference_type,std::vector< std::shared_ptr< INetwork "
+                   "> >::difference_type,std::vector< std::shared_ptr< "
+                   "INetwork >,std::allocator< std::shared_ptr< INetwork > > > "
+                   "const &)\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__setslice__(std::vector< std::shared_ptr< INetwork > "
+                   ">::difference_type,std::vector< std::shared_ptr< INetwork "
+                   "> >::difference_type)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___delslice__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___delslice__(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  ptrdiff_t val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet___delslice__",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg2;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  ptrdiff_t val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet___delslice__", &obj0,
+                        &obj1, &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___delslice__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___delslice__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet___delslice__" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val2);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode2),
+        "in method '"
+        "vectornet___delslice__"
+        "', argument "
+        "2"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val2);
   ecode3 = SWIG_AsVal_ptrdiff_t(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "vectornet___delslice__" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg3 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val3);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode3),
+        "in method '"
+        "vectornet___delslice__"
+        "', argument "
+        "3"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg3 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val3);
   {
     try {
       try {
-        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delslice__(arg1,arg2,arg3);
-      }
-      catch(std::out_of_range &_e) {
+        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delslice__(
+            arg1, arg2, arg3);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
-      }
-      catch(std::invalid_argument &_e) {
+      } catch (std::invalid_argument &_e) {
         SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -9484,45 +10666,64 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___delitem____SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___delitem____SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet___delitem__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet___delitem__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___delitem__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___delitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet___delitem__" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val2);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode2),
+        "in method '"
+        "vectornet___delitem__"
+        "', argument "
+        "2"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val2);
   {
     try {
       try {
-        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delitem____SWIG_0(arg1,arg2);
-      }
-      catch(std::out_of_range &_e) {
+        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delitem____SWIG_0(
+            arg1, arg2);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -9532,112 +10733,177 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___getitem____SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___getitem____SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  PySliceObject *arg2 = (PySliceObject *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet___getitem__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  PySliceObject *arg2 = (PySliceObject *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet___getitem__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___getitem__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___getitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     if (!PySlice_Check(obj1)) {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet___getitem__" "', argument " "2"" of type '" "PySliceObject *""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet___getitem__"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "PySliceObject *"
+                          "'");
     }
-    arg2 = (PySliceObject *) obj1;
+    arg2 = (PySliceObject *)obj1;
   }
   {
     try {
       try {
-        result = (std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *)std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getitem____SWIG_0(arg1,arg2);
-      }
-      catch(std::out_of_range &_e) {
+        result = (std::vector<std::shared_ptr<INetwork>,
+                              std::allocator<std::shared_ptr<INetwork> > > *)
+            std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getitem____SWIG_0(
+                arg1, arg2);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
-      }
-      catch(std::invalid_argument &_e) {
+      } catch (std::invalid_argument &_e) {
         SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___setitem____SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___setitem____SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  PySliceObject *arg2 = (PySliceObject *) 0 ;
-  std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res3 = SWIG_OLDOBJ ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet___setitem__",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  PySliceObject *arg2 = (PySliceObject *)0;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > > *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  int res3 = SWIG_OLDOBJ;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet___setitem__", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___setitem__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___setitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     if (!PySlice_Check(obj1)) {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet___setitem__" "', argument " "2"" of type '" "PySliceObject *""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet___setitem__"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "PySliceObject *"
+                          "'");
     }
-    arg2 = (PySliceObject *) obj1;
+    arg2 = (PySliceObject *)obj1;
   }
   {
-    std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *ptr = (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *)0;
+    std::vector<std::shared_ptr<INetwork>,
+                std::allocator<std::shared_ptr<INetwork> > > *ptr =
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > *)0;
     res3 = swig::asptr(obj2, &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "vectornet___setitem__" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res3),
+                          "in method '"
+                          "vectornet___setitem__"
+                          "', argument "
+                          "3"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork "
+                          ">,std::allocator< std::shared_ptr< INetwork > > > "
+                          "const &"
+                          "'");
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "vectornet___setitem__" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError,
+                          "invalid null reference "
+                          "in method '"
+                          "vectornet___setitem__"
+                          "', argument "
+                          "3"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork "
+                          ">,std::allocator< std::shared_ptr< INetwork > > > "
+                          "const &"
+                          "'");
     }
     arg3 = ptr;
   }
   {
     try {
       try {
-        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_0(arg1,arg2,(std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &)*arg3);
-      }
-      catch(std::out_of_range &_e) {
+        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_0(
+            arg1, arg2,
+            (std::vector<std::shared_ptr<INetwork>,
+                         std::allocator<std::shared_ptr<INetwork> > > const
+                 &)*arg3);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
-      }
-      catch(std::invalid_argument &_e) {
+      } catch (std::invalid_argument &_e) {
         SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -9649,47 +10915,63 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___setitem____SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___setitem____SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  PySliceObject *arg2 = (PySliceObject *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet___setitem__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  PySliceObject *arg2 = (PySliceObject *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet___setitem__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___setitem__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___setitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     if (!PySlice_Check(obj1)) {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet___setitem__" "', argument " "2"" of type '" "PySliceObject *""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet___setitem__"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "PySliceObject *"
+                          "'");
     }
-    arg2 = (PySliceObject *) obj1;
+    arg2 = (PySliceObject *)obj1;
   }
   {
     try {
       try {
-        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_1(arg1,arg2);
-      }
-      catch(std::out_of_range &_e) {
+        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_1(
+            arg1, arg2);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
-      }
-      catch(std::invalid_argument &_e) {
+      } catch (std::invalid_argument &_e) {
         SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -9699,47 +10981,63 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___delitem____SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___delitem____SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  PySliceObject *arg2 = (PySliceObject *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet___delitem__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  PySliceObject *arg2 = (PySliceObject *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet___delitem__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___delitem__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___delitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     if (!PySlice_Check(obj1)) {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet___delitem__" "', argument " "2"" of type '" "PySliceObject *""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet___delitem__"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "PySliceObject *"
+                          "'");
     }
-    arg2 = (PySliceObject *) obj1;
+    arg2 = (PySliceObject *)obj1;
   }
   {
     try {
       try {
-        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delitem____SWIG_1(arg1,arg2);
-      }
-      catch(std::out_of_range &_e) {
+        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____delitem____SWIG_1(
+            arg1, arg2);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
-      }
-      catch(std::invalid_argument &_e) {
+      } catch (std::invalid_argument &_e) {
         SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -9749,25 +11047,26 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___delitem__(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___delitem__(PyObject *self,
+                                                 PyObject *args) {
   int argc;
   PyObject *argv[3];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
-      {
-        _v = PySlice_Check(argv[1]);
-      }
+      { _v = PySlice_Check(argv[1]); }
       if (_v) {
         return _wrap_vectornet___delitem____SWIG_1(self, args);
       }
@@ -9775,7 +11074,10 @@ SWIGINTERN PyObject *_wrap_vectornet___delitem__(PyObject *self, PyObject *args)
   }
   if (argc == 2) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -9787,86 +11089,115 @@ SWIGINTERN PyObject *_wrap_vectornet___delitem__(PyObject *self, PyObject *args)
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'vectornet___delitem__'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__delitem__(std::vector< std::shared_ptr< INetwork > >::difference_type)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__delitem__(PySliceObject *)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'vectornet___delitem__'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__delitem__(std::vector< std::shared_ptr< INetwork > "
+                   ">::difference_type)\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__delitem__(PySliceObject *)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___getitem____SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___getitem____SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet___getitem__",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet___getitem__", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___getitem__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___getitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet___getitem__" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val2);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode2),
+        "in method '"
+        "vectornet___getitem__"
+        "', argument "
+        "2"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val2);
   {
     try {
       try {
-        result = (std::vector< std::shared_ptr< INetwork > >::value_type *) &std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getitem____SWIG_1((std::vector< std::shared_ptr< INetwork > > const *)arg1,arg2);
-      }
-      catch(std::out_of_range &_e) {
+        result =
+            (std::vector<std::shared_ptr<INetwork> >::value_type *)&std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____getitem____SWIG_1(
+                (std::vector<std::shared_ptr<INetwork> > const *)arg1, arg2);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
   {
-    std::shared_ptr<  INetwork > *smartresult = *result ? new std::shared_ptr<  INetwork >(*result) : 0;
-    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_INetwork_t, SWIG_POINTER_OWN);
+    std::shared_ptr<INetwork> *smartresult =
+        *result ? new std::shared_ptr<INetwork>(*result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult),
+                                   SWIGTYPE_p_std__shared_ptrT_INetwork_t,
+                                   SWIG_POINTER_OWN);
   }
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___getitem__(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___getitem__(PyObject *self,
+                                                 PyObject *args) {
   int argc;
   PyObject *argv[3];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
-      {
-        _v = PySlice_Check(argv[1]);
-      }
+      { _v = PySlice_Check(argv[1]); }
       if (_v) {
         return _wrap_vectornet___getitem____SWIG_0(self, args);
       }
@@ -9874,7 +11205,10 @@ SWIGINTERN PyObject *_wrap_vectornet___getitem__(PyObject *self, PyObject *args)
   }
   if (argc == 2) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -9886,73 +11220,114 @@ SWIGINTERN PyObject *_wrap_vectornet___getitem__(PyObject *self, PyObject *args)
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'vectornet___getitem__'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__getitem__(PySliceObject *)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__getitem__(std::vector< std::shared_ptr< INetwork > >::difference_type) const\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'vectornet___getitem__'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__getitem__(PySliceObject *)\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__getitem__(std::vector< std::shared_ptr< INetwork > "
+                   ">::difference_type) const\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___setitem____SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___setitem____SWIG_2(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::difference_type arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  ptrdiff_t val2 ;
-  int ecode2 = 0 ;
-  void *argp3 ;
-  int res3 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type tempshared3 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet___setitem__",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::difference_type arg2;
+  std::vector<std::shared_ptr<INetwork> >::value_type *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  ptrdiff_t val2;
+  int ecode2 = 0;
+  void *argp3;
+  int res3 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type tempshared3;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet___setitem__", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet___setitem__" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet___setitem__"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_ptrdiff_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet___setitem__" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::difference_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::difference_type >(val2);
+    SWIG_exception_fail(
+        SWIG_ArgError(ecode2),
+        "in method '"
+        "vectornet___setitem__"
+        "', argument "
+        "2"
+        " of type '"
+        "std::vector< std::shared_ptr< INetwork > >::difference_type"
+        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::difference_type>(
+      val2);
   {
     int newmem = 0;
-    res3 = SWIG_ConvertPtrAndOwn(obj2, &argp3, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res3 = SWIG_ConvertPtrAndOwn(
+        obj2, &argp3, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "vectornet___setitem__" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::value_type const &""'"); 
+      SWIG_exception_fail(
+          SWIG_ArgError(res3),
+          "in method '"
+          "vectornet___setitem__"
+          "', argument "
+          "3"
+          " of type '"
+          "std::vector< std::shared_ptr< INetwork > >::value_type const &"
+          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      if (argp3) tempshared3 = *reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3);
-      delete reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3);
+      if (argp3)
+        tempshared3 = *reinterpret_cast<
+            std::vector<std::shared_ptr<INetwork> >::value_type *>(argp3);
+      delete reinterpret_cast<
+          std::vector<std::shared_ptr<INetwork> >::value_type *>(argp3);
       arg3 = &tempshared3;
     } else {
-      arg3 = (argp3) ? reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3) : &tempshared3;
+      arg3 = (argp3)
+                 ? reinterpret_cast<
+                       std::vector<std::shared_ptr<INetwork> >::value_type *>(
+                       argp3)
+                 : &tempshared3;
     }
   }
   {
     try {
       try {
-        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_2(arg1,arg2,(std::shared_ptr< INetwork > const &)*arg3);
-      }
-      catch(std::out_of_range &_e) {
+        std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg____setitem____SWIG_2(
+            arg1, arg2, (std::shared_ptr<INetwork> const &)*arg3);
+      } catch (std::out_of_range &_e) {
         SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
       }
-      
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -9962,25 +11337,26 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet___setitem__(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet___setitem__(PyObject *self,
+                                                 PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 3) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
-      {
-        _v = PySlice_Check(argv[1]);
-      }
+      { _v = PySlice_Check(argv[1]); }
       if (_v) {
         return _wrap_vectornet___setitem____SWIG_1(self, args);
       }
@@ -9988,14 +11364,18 @@ SWIGINTERN PyObject *_wrap_vectornet___setitem__(PyObject *self, PyObject *args)
   }
   if (argc == 3) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
-      {
-        _v = PySlice_Check(argv[1]);
-      }
+      { _v = PySlice_Check(argv[1]); }
       if (_v) {
-        int res = swig::asptr(argv[2], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+        int res = swig::asptr(
+            argv[2],
+            (std::vector<std::shared_ptr<INetwork>,
+                         std::allocator<std::shared_ptr<INetwork> > > **)(0));
         _v = SWIG_CheckState(res);
         if (_v) {
           return _wrap_vectornet___setitem____SWIG_0(self, args);
@@ -10005,7 +11385,10 @@ SWIGINTERN PyObject *_wrap_vectornet___setitem__(PyObject *self, PyObject *args)
   }
   if (argc == 3) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -10013,7 +11396,8 @@ SWIGINTERN PyObject *_wrap_vectornet___setitem__(PyObject *self, PyObject *args)
         _v = SWIG_CheckState(res);
       }
       if (_v) {
-        int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
+        int res = SWIG_ConvertPtr(argv[2], 0,
+                                  SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
         _v = SWIG_CheckState(res);
         if (_v) {
           return _wrap_vectornet___setitem____SWIG_2(self, args);
@@ -10021,59 +11405,95 @@ SWIGINTERN PyObject *_wrap_vectornet___setitem__(PyObject *self, PyObject *args)
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'vectornet___setitem__'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__setitem__(PySliceObject *,std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > const &)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__setitem__(PySliceObject *)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::__setitem__(std::vector< std::shared_ptr< INetwork > >::difference_type,std::vector< std::shared_ptr< INetwork > >::value_type const &)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'vectornet___setitem__'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__setitem__(PySliceObject *,std::vector< "
+                   "std::shared_ptr< INetwork >,std::allocator< "
+                   "std::shared_ptr< INetwork > > > const &)\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__setitem__(PySliceObject *)\n"
+                   "    std::vector< std::shared_ptr< INetwork > "
+                   ">::__setitem__(std::vector< std::shared_ptr< INetwork > "
+                   ">::difference_type,std::vector< std::shared_ptr< INetwork "
+                   "> >::value_type const &)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_append(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_append(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 ;
-  int res2 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type tempshared2 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet_append",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::value_type *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2;
+  int res2 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type tempshared2;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet_append", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_append" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_append"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     int newmem = 0;
-    res2 = SWIG_ConvertPtrAndOwn(obj1, &argp2, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res2 = SWIG_ConvertPtrAndOwn(
+        obj1, &argp2, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "vectornet_append" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::value_type const &""'"); 
+      SWIG_exception_fail(
+          SWIG_ArgError(res2),
+          "in method '"
+          "vectornet_append"
+          "', argument "
+          "2"
+          " of type '"
+          "std::vector< std::shared_ptr< INetwork > >::value_type const &"
+          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      if (argp2) tempshared2 = *reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2);
-      delete reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2);
+      if (argp2)
+        tempshared2 = *reinterpret_cast<
+            std::vector<std::shared_ptr<INetwork> >::value_type *>(argp2);
+      delete reinterpret_cast<
+          std::vector<std::shared_ptr<INetwork> >::value_type *>(argp2);
       arg2 = &tempshared2;
     } else {
-      arg2 = (argp2) ? reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2) : &tempshared2;
+      arg2 = (argp2)
+                 ? reinterpret_cast<
+                       std::vector<std::shared_ptr<INetwork> >::value_type *>(
+                       argp2)
+                 : &tempshared2;
     }
   }
   {
     try {
-      std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__append(arg1,(std::shared_ptr< INetwork > const &)*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__append(
+          arg1, (std::shared_ptr<INetwork> const &)*arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -10083,65 +11503,88 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_new_vectornet__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_vectornet__SWIG_0(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":new_vectornet")) SWIG_fail;
+  std::vector<std::shared_ptr<INetwork> > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)":new_vectornet")) SWIG_fail;
   {
     try {
-      result = (std::vector< std::shared_ptr< INetwork > > *)new std::vector< std::shared_ptr< INetwork > >();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (std::vector<std::shared_ptr<INetwork> >
+                    *)new std::vector<std::shared_ptr<INetwork> >();
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_new_vectornet__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_vectornet__SWIG_1(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:new_vectornet",&obj0)) SWIG_fail;
+  std::vector<std::shared_ptr<INetwork> > *arg1 = 0;
+  int res1 = SWIG_OLDOBJ;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:new_vectornet", &obj0)) SWIG_fail;
   {
-    std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *ptr = (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *)0;
+    std::vector<std::shared_ptr<INetwork>,
+                std::allocator<std::shared_ptr<INetwork> > > *ptr =
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > *)0;
     res1 = swig::asptr(obj0, &ptr);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_vectornet" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "new_vectornet"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork > > const &"
+                          "'");
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_vectornet" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError,
+                          "invalid null reference "
+                          "in method '"
+                          "new_vectornet"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork > > const &"
+                          "'");
     }
     arg1 = ptr;
   }
   {
     try {
-      result = (std::vector< std::shared_ptr< INetwork > > *)new std::vector< std::shared_ptr< INetwork > >((std::vector< std::shared_ptr< INetwork > > const &)*arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (std::vector<std::shared_ptr<INetwork> > *)new std::vector<
+          std::shared_ptr<INetwork> >(
+          (std::vector<std::shared_ptr<INetwork> > const &)*arg1);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      SWIG_POINTER_NEW | 0);
   if (SWIG_IsNewObj(res1)) delete arg1;
   return resultobj;
 fail:
@@ -10149,98 +11592,126 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_empty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_empty(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_empty",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_empty", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_empty" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_empty"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = (bool)((std::vector< std::shared_ptr< INetwork > > const *)arg1)->empty();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (bool)((std::vector<std::shared_ptr<INetwork> > const *)arg1)
+                   ->empty();
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  resultobj = SWIG_From_bool(static_cast<bool>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_size(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_size(PyObject *SWIGUNUSEDPARM(self),
+                                          PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::size_type result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_size",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::size_type result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_size", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_size" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_size"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = ((std::vector< std::shared_ptr< INetwork > > const *)arg1)->size();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = ((std::vector<std::shared_ptr<INetwork> > const *)arg1)->size();
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  resultobj = SWIG_From_size_t(static_cast<size_t>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_clear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_clear(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_clear",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_clear", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_clear" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_clear"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
       (arg1)->clear();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -10250,42 +11721,70 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_swap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_swap(PyObject *SWIGUNUSEDPARM(self),
+                                          PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > > *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet_swap",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> > *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet_swap", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_swap" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_swap"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,  0 );
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
+  res2 = SWIG_ConvertPtr(
+      obj1, &argp2,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "vectornet_swap" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > > &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "vectornet_swap"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "vectornet_swap" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > > &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "vectornet_swap"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > &"
+                        "'");
   }
-  arg2 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp2);
+  arg2 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp2);
   {
     try {
       (arg1)->swap(*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -10295,238 +11794,321 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_get_allocator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_get_allocator(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  SwigValueWrapper< std::allocator< std::shared_ptr< INetwork > > > result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_get_allocator",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  SwigValueWrapper<std::allocator<std::shared_ptr<INetwork> > > result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_get_allocator", &obj0))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_get_allocator" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_get_allocator"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = ((std::vector< std::shared_ptr< INetwork > > const *)arg1)->get_allocator();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = ((std::vector<std::shared_ptr<INetwork> > const *)arg1)
+                   ->get_allocator();
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj((new std::vector< std::shared_ptr< INetwork > >::allocator_type(static_cast< const std::vector< std::shared_ptr< INetwork > >::allocator_type& >(result))), SWIGTYPE_p_std__allocatorT_std__shared_ptrT_INetwork_t_t, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj(
+      (new std::vector<std::shared_ptr<INetwork> >::allocator_type(
+          static_cast<
+              const std::vector<std::shared_ptr<INetwork> >::allocator_type &>(
+              result))),
+      SWIGTYPE_p_std__allocatorT_std__shared_ptrT_INetwork_t_t,
+      SWIG_POINTER_OWN | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_begin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_begin(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_begin",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::iterator result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_begin", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_begin" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_begin"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
       result = (arg1)->begin();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::vector< std::shared_ptr< INetwork > >::iterator & >(result)),
-    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  resultobj = SWIG_NewPointerObj(
+      swig::make_output_iterator(
+          static_cast<const std::vector<std::shared_ptr<INetwork> >::iterator
+                          &>(result)),
+      swig::SwigPyIterator::descriptor(), SWIG_POINTER_OWN);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_end(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_end(PyObject *SWIGUNUSEDPARM(self),
+                                         PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_end",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::iterator result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_end", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_end" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_end"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
       result = (arg1)->end();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::vector< std::shared_ptr< INetwork > >::iterator & >(result)),
-    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  resultobj = SWIG_NewPointerObj(
+      swig::make_output_iterator(
+          static_cast<const std::vector<std::shared_ptr<INetwork> >::iterator
+                          &>(result)),
+      swig::SwigPyIterator::descriptor(), SWIG_POINTER_OWN);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_rbegin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_rbegin(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::reverse_iterator result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_rbegin",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::reverse_iterator result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_rbegin", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_rbegin" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_rbegin"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
       result = (arg1)->rbegin();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::vector< std::shared_ptr< INetwork > >::reverse_iterator & >(result)),
-    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  resultobj = SWIG_NewPointerObj(
+      swig::make_output_iterator(
+          static_cast<const std::vector<
+              std::shared_ptr<INetwork> >::reverse_iterator &>(result)),
+      swig::SwigPyIterator::descriptor(), SWIG_POINTER_OWN);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_rend(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_rend(PyObject *SWIGUNUSEDPARM(self),
+                                          PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::reverse_iterator result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_rend",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::reverse_iterator result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_rend", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_rend" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_rend"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
       result = (arg1)->rend();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::vector< std::shared_ptr< INetwork > >::reverse_iterator & >(result)),
-    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  resultobj = SWIG_NewPointerObj(
+      swig::make_output_iterator(
+          static_cast<const std::vector<
+              std::shared_ptr<INetwork> >::reverse_iterator &>(result)),
+      swig::SwigPyIterator::descriptor(), SWIG_POINTER_OWN);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_new_vectornet__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_vectornet__SWIG_2(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > >::size_type arg1 ;
-  size_t val1 ;
-  int ecode1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:new_vectornet",&obj0)) SWIG_fail;
+  std::vector<std::shared_ptr<INetwork> >::size_type arg1;
+  size_t val1;
+  int ecode1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:new_vectornet", &obj0)) SWIG_fail;
   ecode1 = SWIG_AsVal_size_t(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_vectornet" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > >::size_type""'");
-  } 
-  arg1 = static_cast< std::vector< std::shared_ptr< INetwork > >::size_type >(val1);
+    SWIG_exception_fail(SWIG_ArgError(ecode1),
+                        "in method '"
+                        "new_vectornet"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::size_type"
+                        "'");
+  }
+  arg1 = static_cast<std::vector<std::shared_ptr<INetwork> >::size_type>(val1);
   {
     try {
-      result = (std::vector< std::shared_ptr< INetwork > > *)new std::vector< std::shared_ptr< INetwork > >(arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (std::vector<std::shared_ptr<INetwork> >
+                    *)new std::vector<std::shared_ptr<INetwork> >(arg1);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_pop_back(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_pop_back(PyObject *SWIGUNUSEDPARM(self),
+                                              PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_pop_back",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_pop_back", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_pop_back" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_pop_back"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
       (arg1)->pop_back();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -10536,39 +12118,56 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_resize__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_resize__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::size_type arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet_resize",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::size_type arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  size_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet_resize", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_resize" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_resize"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_size_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet_resize" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::size_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::size_type >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "vectornet_resize"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::size_type"
+                        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::size_type>(val2);
   {
     try {
       (arg1)->resize(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -10578,140 +12177,226 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_erase__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_erase__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  swig::SwigPyIterator *iter2 = 0 ;
-  int res2 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet_erase",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::iterator arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  swig::SwigPyIterator *iter2 = 0;
+  int res2;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  std::vector<std::shared_ptr<INetwork> >::iterator result;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet_erase", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_erase" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_erase"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2), swig::SwigPyIterator::descriptor(), 0);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2),
+                         swig::SwigPyIterator::descriptor(), 0);
   if (!SWIG_IsOK(res2) || !iter2) {
-    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_erase" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                        "in method '"
+                        "vectornet_erase"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::iterator"
+                        "'");
   } else {
-    swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *iter_t = dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter2);
+    swig::SwigPyIterator_T<std::vector<std::shared_ptr<INetwork> >::iterator>
+        *iter_t = dynamic_cast<swig::SwigPyIterator_T<
+            std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter2);
     if (iter_t) {
       arg2 = iter_t->get_current();
     } else {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_erase" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet_erase"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork > >::iterator"
+                          "'");
     }
   }
   {
     try {
-      result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__erase__SWIG_0(arg1,arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__erase__SWIG_0(
+          arg1, arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::vector< std::shared_ptr< INetwork > >::iterator & >(result)),
-    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  resultobj = SWIG_NewPointerObj(
+      swig::make_output_iterator(
+          static_cast<const std::vector<std::shared_ptr<INetwork> >::iterator
+                          &>(result)),
+      swig::SwigPyIterator::descriptor(), SWIG_POINTER_OWN);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_erase__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_erase__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  swig::SwigPyIterator *iter2 = 0 ;
-  int res2 ;
-  swig::SwigPyIterator *iter3 = 0 ;
-  int res3 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet_erase",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::iterator arg2;
+  std::vector<std::shared_ptr<INetwork> >::iterator arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  swig::SwigPyIterator *iter2 = 0;
+  int res2;
+  swig::SwigPyIterator *iter3 = 0;
+  int res3;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  std::vector<std::shared_ptr<INetwork> >::iterator result;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet_erase", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_erase" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_erase"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2), swig::SwigPyIterator::descriptor(), 0);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2),
+                         swig::SwigPyIterator::descriptor(), 0);
   if (!SWIG_IsOK(res2) || !iter2) {
-    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_erase" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                        "in method '"
+                        "vectornet_erase"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::iterator"
+                        "'");
   } else {
-    swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *iter_t = dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter2);
+    swig::SwigPyIterator_T<std::vector<std::shared_ptr<INetwork> >::iterator>
+        *iter_t = dynamic_cast<swig::SwigPyIterator_T<
+            std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter2);
     if (iter_t) {
       arg2 = iter_t->get_current();
     } else {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_erase" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet_erase"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork > >::iterator"
+                          "'");
     }
   }
-  res3 = SWIG_ConvertPtr(obj2, SWIG_as_voidptrptr(&iter3), swig::SwigPyIterator::descriptor(), 0);
+  res3 = SWIG_ConvertPtr(obj2, SWIG_as_voidptrptr(&iter3),
+                         swig::SwigPyIterator::descriptor(), 0);
   if (!SWIG_IsOK(res3) || !iter3) {
-    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_erase" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                        "in method '"
+                        "vectornet_erase"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::iterator"
+                        "'");
   } else {
-    swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *iter_t = dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter3);
+    swig::SwigPyIterator_T<std::vector<std::shared_ptr<INetwork> >::iterator>
+        *iter_t = dynamic_cast<swig::SwigPyIterator_T<
+            std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter3);
     if (iter_t) {
       arg3 = iter_t->get_current();
     } else {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_erase" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet_erase"
+                          "', argument "
+                          "3"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork > >::iterator"
+                          "'");
     }
   }
   {
     try {
-      result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__erase__SWIG_1(arg1,arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__erase__SWIG_1(
+          arg1, arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::vector< std::shared_ptr< INetwork > >::iterator & >(result)),
-    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  resultobj = SWIG_NewPointerObj(
+      swig::make_output_iterator(
+          static_cast<const std::vector<std::shared_ptr<INetwork> >::iterator
+                          &>(result)),
+      swig::SwigPyIterator::descriptor(), SWIG_POINTER_OWN);
   return resultobj;
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_vectornet_erase(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 3) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       swig::SwigPyIterator *iter = 0;
-      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), swig::SwigPyIterator::descriptor(), 0);
-      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter) != 0));
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter),
+                                swig::SwigPyIterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter &&
+            (dynamic_cast<swig::SwigPyIterator_T<
+                 std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter) !=
+             0));
       if (_v) {
         return _wrap_vectornet_erase__SWIG_0(self, args);
       }
@@ -10719,94 +12404,138 @@ SWIGINTERN PyObject *_wrap_vectornet_erase(PyObject *self, PyObject *args) {
   }
   if (argc == 3) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       swig::SwigPyIterator *iter = 0;
-      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), swig::SwigPyIterator::descriptor(), 0);
-      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter) != 0));
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter),
+                                swig::SwigPyIterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter &&
+            (dynamic_cast<swig::SwigPyIterator_T<
+                 std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter) !=
+             0));
       if (_v) {
         swig::SwigPyIterator *iter = 0;
-        int res = SWIG_ConvertPtr(argv[2], SWIG_as_voidptrptr(&iter), swig::SwigPyIterator::descriptor(), 0);
-        _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter) != 0));
+        int res = SWIG_ConvertPtr(argv[2], SWIG_as_voidptrptr(&iter),
+                                  swig::SwigPyIterator::descriptor(), 0);
+        _v = (SWIG_IsOK(res) && iter &&
+              (dynamic_cast<swig::SwigPyIterator_T<
+                   std::vector<std::shared_ptr<INetwork> >::iterator> *>(
+                   iter) != 0));
         if (_v) {
           return _wrap_vectornet_erase__SWIG_1(self, args);
         }
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'vectornet_erase'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    std::vector< std::shared_ptr< INetwork > >::erase(std::vector< std::shared_ptr< INetwork > >::iterator)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::erase(std::vector< std::shared_ptr< INetwork > >::iterator,std::vector< std::shared_ptr< INetwork > >::iterator)\n");
+  SWIG_SetErrorMsg(
+      PyExc_NotImplementedError,
+      "Wrong number or type of arguments for overloaded function "
+      "'vectornet_erase'.\n"
+      "  Possible C/C++ prototypes are:\n"
+      "    std::vector< std::shared_ptr< INetwork > >::erase(std::vector< "
+      "std::shared_ptr< INetwork > >::iterator)\n"
+      "    std::vector< std::shared_ptr< INetwork > >::erase(std::vector< "
+      "std::shared_ptr< INetwork > >::iterator,std::vector< std::shared_ptr< "
+      "INetwork > >::iterator)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_new_vectornet__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_vectornet__SWIG_3(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > >::size_type arg1 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *arg2 = 0 ;
-  size_t val1 ;
-  int ecode1 = 0 ;
-  void *argp2 ;
-  int res2 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type tempshared2 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  std::vector< std::shared_ptr< INetwork > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:new_vectornet",&obj0,&obj1)) SWIG_fail;
+  std::vector<std::shared_ptr<INetwork> >::size_type arg1;
+  std::vector<std::shared_ptr<INetwork> >::value_type *arg2 = 0;
+  size_t val1;
+  int ecode1 = 0;
+  void *argp2;
+  int res2 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type tempshared2;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  std::vector<std::shared_ptr<INetwork> > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:new_vectornet", &obj0, &obj1))
+    SWIG_fail;
   ecode1 = SWIG_AsVal_size_t(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_vectornet" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > >::size_type""'");
-  } 
-  arg1 = static_cast< std::vector< std::shared_ptr< INetwork > >::size_type >(val1);
+    SWIG_exception_fail(SWIG_ArgError(ecode1),
+                        "in method '"
+                        "new_vectornet"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::size_type"
+                        "'");
+  }
+  arg1 = static_cast<std::vector<std::shared_ptr<INetwork> >::size_type>(val1);
   {
     int newmem = 0;
-    res2 = SWIG_ConvertPtrAndOwn(obj1, &argp2, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res2 = SWIG_ConvertPtrAndOwn(
+        obj1, &argp2, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_vectornet" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::value_type const &""'"); 
+      SWIG_exception_fail(
+          SWIG_ArgError(res2),
+          "in method '"
+          "new_vectornet"
+          "', argument "
+          "2"
+          " of type '"
+          "std::vector< std::shared_ptr< INetwork > >::value_type const &"
+          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      if (argp2) tempshared2 = *reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2);
-      delete reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2);
+      if (argp2)
+        tempshared2 = *reinterpret_cast<
+            std::vector<std::shared_ptr<INetwork> >::value_type *>(argp2);
+      delete reinterpret_cast<
+          std::vector<std::shared_ptr<INetwork> >::value_type *>(argp2);
       arg2 = &tempshared2;
     } else {
-      arg2 = (argp2) ? reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2) : &tempshared2;
+      arg2 = (argp2)
+                 ? reinterpret_cast<
+                       std::vector<std::shared_ptr<INetwork> >::value_type *>(
+                       argp2)
+                 : &tempshared2;
     }
   }
   {
     try {
-      result = (std::vector< std::shared_ptr< INetwork > > *)new std::vector< std::shared_ptr< INetwork > >(arg1,(std::vector< std::shared_ptr< INetwork > >::value_type const &)*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (std::vector<std::shared_ptr<INetwork> > *)new std::vector<
+          std::shared_ptr<INetwork> >(
+          arg1,
+          (std::vector<std::shared_ptr<INetwork> >::value_type const &)*arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      SWIG_POINTER_NEW | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
 SWIGINTERN PyObject *_wrap_new_vectornet(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[3];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 0) {
     return _wrap_new_vectornet__SWIG_0(self, args);
@@ -10823,7 +12552,10 @@ SWIGINTERN PyObject *_wrap_new_vectornet(PyObject *self, PyObject *args) {
   }
   if (argc == 1) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       return _wrap_new_vectornet__SWIG_1(self, args);
@@ -10836,67 +12568,102 @@ SWIGINTERN PyObject *_wrap_new_vectornet(PyObject *self, PyObject *args) {
       _v = SWIG_CheckState(res);
     }
     if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
+      int res = SWIG_ConvertPtr(argv[1], 0,
+                                SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
       _v = SWIG_CheckState(res);
       if (_v) {
         return _wrap_new_vectornet__SWIG_3(self, args);
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_vectornet'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    std::vector< std::shared_ptr< INetwork > >::vector()\n"
-    "    std::vector< std::shared_ptr< INetwork > >::vector(std::vector< std::shared_ptr< INetwork > > const &)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::vector(std::vector< std::shared_ptr< INetwork > >::size_type)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::vector(std::vector< std::shared_ptr< INetwork > >::size_type,std::vector< std::shared_ptr< INetwork > >::value_type const &)\n");
+  SWIG_SetErrorMsg(
+      PyExc_NotImplementedError,
+      "Wrong number or type of arguments for overloaded function "
+      "'new_vectornet'.\n"
+      "  Possible C/C++ prototypes are:\n"
+      "    std::vector< std::shared_ptr< INetwork > >::vector()\n"
+      "    std::vector< std::shared_ptr< INetwork > >::vector(std::vector< "
+      "std::shared_ptr< INetwork > > const &)\n"
+      "    std::vector< std::shared_ptr< INetwork > >::vector(std::vector< "
+      "std::shared_ptr< INetwork > >::size_type)\n"
+      "    std::vector< std::shared_ptr< INetwork > >::vector(std::vector< "
+      "std::shared_ptr< INetwork > >::size_type,std::vector< std::shared_ptr< "
+      "INetwork > >::value_type const &)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_push_back(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_push_back(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 ;
-  int res2 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type tempshared2 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet_push_back",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::value_type *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2;
+  int res2 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type tempshared2;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet_push_back", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_push_back" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_push_back"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     int newmem = 0;
-    res2 = SWIG_ConvertPtrAndOwn(obj1, &argp2, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res2 = SWIG_ConvertPtrAndOwn(
+        obj1, &argp2, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "vectornet_push_back" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::value_type const &""'"); 
+      SWIG_exception_fail(
+          SWIG_ArgError(res2),
+          "in method '"
+          "vectornet_push_back"
+          "', argument "
+          "2"
+          " of type '"
+          "std::vector< std::shared_ptr< INetwork > >::value_type const &"
+          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      if (argp2) tempshared2 = *reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2);
-      delete reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2);
+      if (argp2)
+        tempshared2 = *reinterpret_cast<
+            std::vector<std::shared_ptr<INetwork> >::value_type *>(argp2);
+      delete reinterpret_cast<
+          std::vector<std::shared_ptr<INetwork> >::value_type *>(argp2);
       arg2 = &tempshared2;
     } else {
-      arg2 = (argp2) ? reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp2) : &tempshared2;
+      arg2 = (argp2)
+                 ? reinterpret_cast<
+                       std::vector<std::shared_ptr<INetwork> >::value_type *>(
+                       argp2)
+                 : &tempshared2;
     }
   }
   {
     try {
-      (arg1)->push_back((std::vector< std::shared_ptr< INetwork > >::value_type const &)*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->push_back(
+          (std::vector<std::shared_ptr<INetwork> >::value_type const &)*arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -10906,132 +12673,196 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_front(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_front(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_front",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_front", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_front" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_front"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = (std::vector< std::shared_ptr< INetwork > >::value_type *) &((std::vector< std::shared_ptr< INetwork > > const *)arg1)->front();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (std::vector<std::shared_ptr<INetwork> >::value_type *)&(
+                   (std::vector<std::shared_ptr<INetwork> > const *)arg1)
+                   ->front();
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
   {
-    std::shared_ptr<  INetwork > *smartresult = *result ? new std::shared_ptr<  INetwork >(*result) : 0;
-    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_INetwork_t, SWIG_POINTER_OWN);
+    std::shared_ptr<INetwork> *smartresult =
+        *result ? new std::shared_ptr<INetwork>(*result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult),
+                                   SWIGTYPE_p_std__shared_ptrT_INetwork_t,
+                                   SWIG_POINTER_OWN);
   }
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_back(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_back(PyObject *SWIGUNUSEDPARM(self),
+                                          PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_back",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_back", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_back" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_back"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = (std::vector< std::shared_ptr< INetwork > >::value_type *) &((std::vector< std::shared_ptr< INetwork > > const *)arg1)->back();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (std::vector<std::shared_ptr<INetwork> >::value_type *)&(
+                   (std::vector<std::shared_ptr<INetwork> > const *)arg1)
+                   ->back();
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
   {
-    std::shared_ptr<  INetwork > *smartresult = *result ? new std::shared_ptr<  INetwork >(*result) : 0;
-    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_INetwork_t, SWIG_POINTER_OWN);
+    std::shared_ptr<INetwork> *smartresult =
+        *result ? new std::shared_ptr<INetwork>(*result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult),
+                                   SWIGTYPE_p_std__shared_ptrT_INetwork_t,
+                                   SWIG_POINTER_OWN);
   }
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_assign(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_assign(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::size_type arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  void *argp3 ;
-  int res3 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type tempshared3 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet_assign",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::size_type arg2;
+  std::vector<std::shared_ptr<INetwork> >::value_type *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  size_t val2;
+  int ecode2 = 0;
+  void *argp3;
+  int res3 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type tempshared3;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet_assign", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_assign" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_assign"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_size_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet_assign" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::size_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::size_type >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "vectornet_assign"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::size_type"
+                        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::size_type>(val2);
   {
     int newmem = 0;
-    res3 = SWIG_ConvertPtrAndOwn(obj2, &argp3, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res3 = SWIG_ConvertPtrAndOwn(
+        obj2, &argp3, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "vectornet_assign" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::value_type const &""'"); 
+      SWIG_exception_fail(
+          SWIG_ArgError(res3),
+          "in method '"
+          "vectornet_assign"
+          "', argument "
+          "3"
+          " of type '"
+          "std::vector< std::shared_ptr< INetwork > >::value_type const &"
+          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      if (argp3) tempshared3 = *reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3);
-      delete reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3);
+      if (argp3)
+        tempshared3 = *reinterpret_cast<
+            std::vector<std::shared_ptr<INetwork> >::value_type *>(argp3);
+      delete reinterpret_cast<
+          std::vector<std::shared_ptr<INetwork> >::value_type *>(argp3);
       arg3 = &tempshared3;
     } else {
-      arg3 = (argp3) ? reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3) : &tempshared3;
+      arg3 = (argp3)
+                 ? reinterpret_cast<
+                       std::vector<std::shared_ptr<INetwork> >::value_type *>(
+                       argp3)
+                 : &tempshared3;
     }
   }
   {
     try {
-      (arg1)->assign(arg2,(std::vector< std::shared_ptr< INetwork > >::value_type const &)*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->assign(
+          arg2,
+          (std::vector<std::shared_ptr<INetwork> >::value_type const &)*arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -11041,58 +12872,94 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_resize__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_resize__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::size_type arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  void *argp3 ;
-  int res3 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type tempshared3 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet_resize",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::size_type arg2;
+  std::vector<std::shared_ptr<INetwork> >::value_type *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  size_t val2;
+  int ecode2 = 0;
+  void *argp3;
+  int res3 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type tempshared3;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet_resize", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_resize" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_resize"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_size_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet_resize" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::size_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::size_type >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "vectornet_resize"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::size_type"
+                        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::size_type>(val2);
   {
     int newmem = 0;
-    res3 = SWIG_ConvertPtrAndOwn(obj2, &argp3, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res3 = SWIG_ConvertPtrAndOwn(
+        obj2, &argp3, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "vectornet_resize" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::value_type const &""'"); 
+      SWIG_exception_fail(
+          SWIG_ArgError(res3),
+          "in method '"
+          "vectornet_resize"
+          "', argument "
+          "3"
+          " of type '"
+          "std::vector< std::shared_ptr< INetwork > >::value_type const &"
+          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      if (argp3) tempshared3 = *reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3);
-      delete reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3);
+      if (argp3)
+        tempshared3 = *reinterpret_cast<
+            std::vector<std::shared_ptr<INetwork> >::value_type *>(argp3);
+      delete reinterpret_cast<
+          std::vector<std::shared_ptr<INetwork> >::value_type *>(argp3);
       arg3 = &tempshared3;
     } else {
-      arg3 = (argp3) ? reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3) : &tempshared3;
+      arg3 = (argp3)
+                 ? reinterpret_cast<
+                       std::vector<std::shared_ptr<INetwork> >::value_type *>(
+                       argp3)
+                 : &tempshared3;
     }
   }
   {
     try {
-      (arg1)->resize(arg2,(std::vector< std::shared_ptr< INetwork > >::value_type const &)*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->resize(
+          arg2,
+          (std::vector<std::shared_ptr<INetwork> >::value_type const &)*arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -11101,21 +12968,23 @@ SWIGINTERN PyObject *_wrap_vectornet_resize__SWIG_1(PyObject *SWIGUNUSEDPARM(sel
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_vectornet_resize(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 3) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -11129,7 +12998,10 @@ SWIGINTERN PyObject *_wrap_vectornet_resize(PyObject *self, PyObject *args) {
   }
   if (argc == 3) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -11137,7 +13009,8 @@ SWIGINTERN PyObject *_wrap_vectornet_resize(PyObject *self, PyObject *args) {
         _v = SWIG_CheckState(res);
       }
       if (_v) {
-        int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
+        int res = SWIG_ConvertPtr(argv[2], 0,
+                                  SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
         _v = SWIG_CheckState(res);
         if (_v) {
           return _wrap_vectornet_resize__SWIG_1(self, args);
@@ -11145,151 +13018,257 @@ SWIGINTERN PyObject *_wrap_vectornet_resize(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'vectornet_resize'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    std::vector< std::shared_ptr< INetwork > >::resize(std::vector< std::shared_ptr< INetwork > >::size_type)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::resize(std::vector< std::shared_ptr< INetwork > >::size_type,std::vector< std::shared_ptr< INetwork > >::value_type const &)\n");
+  SWIG_SetErrorMsg(
+      PyExc_NotImplementedError,
+      "Wrong number or type of arguments for overloaded function "
+      "'vectornet_resize'.\n"
+      "  Possible C/C++ prototypes are:\n"
+      "    std::vector< std::shared_ptr< INetwork > >::resize(std::vector< "
+      "std::shared_ptr< INetwork > >::size_type)\n"
+      "    std::vector< std::shared_ptr< INetwork > >::resize(std::vector< "
+      "std::shared_ptr< INetwork > >::size_type,std::vector< std::shared_ptr< "
+      "INetwork > >::value_type const &)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_insert__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_insert__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  swig::SwigPyIterator *iter2 = 0 ;
-  int res2 ;
-  void *argp3 ;
-  int res3 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type tempshared3 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:vectornet_insert",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::iterator arg2;
+  std::vector<std::shared_ptr<INetwork> >::value_type *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  swig::SwigPyIterator *iter2 = 0;
+  int res2;
+  void *argp3;
+  int res3 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type tempshared3;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  std::vector<std::shared_ptr<INetwork> >::iterator result;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:vectornet_insert", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_insert" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_insert"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2), swig::SwigPyIterator::descriptor(), 0);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2),
+                         swig::SwigPyIterator::descriptor(), 0);
   if (!SWIG_IsOK(res2) || !iter2) {
-    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_insert" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                        "in method '"
+                        "vectornet_insert"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::iterator"
+                        "'");
   } else {
-    swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *iter_t = dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter2);
+    swig::SwigPyIterator_T<std::vector<std::shared_ptr<INetwork> >::iterator>
+        *iter_t = dynamic_cast<swig::SwigPyIterator_T<
+            std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter2);
     if (iter_t) {
       arg2 = iter_t->get_current();
     } else {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_insert" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet_insert"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork > >::iterator"
+                          "'");
     }
   }
   {
     int newmem = 0;
-    res3 = SWIG_ConvertPtrAndOwn(obj2, &argp3, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res3 = SWIG_ConvertPtrAndOwn(
+        obj2, &argp3, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "vectornet_insert" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::value_type const &""'"); 
+      SWIG_exception_fail(
+          SWIG_ArgError(res3),
+          "in method '"
+          "vectornet_insert"
+          "', argument "
+          "3"
+          " of type '"
+          "std::vector< std::shared_ptr< INetwork > >::value_type const &"
+          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      if (argp3) tempshared3 = *reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3);
-      delete reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3);
+      if (argp3)
+        tempshared3 = *reinterpret_cast<
+            std::vector<std::shared_ptr<INetwork> >::value_type *>(argp3);
+      delete reinterpret_cast<
+          std::vector<std::shared_ptr<INetwork> >::value_type *>(argp3);
       arg3 = &tempshared3;
     } else {
-      arg3 = (argp3) ? reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp3) : &tempshared3;
+      arg3 = (argp3)
+                 ? reinterpret_cast<
+                       std::vector<std::shared_ptr<INetwork> >::value_type *>(
+                       argp3)
+                 : &tempshared3;
     }
   }
   {
     try {
-      result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__insert__SWIG_0(arg1,arg2,(std::shared_ptr< INetwork > const &)*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__insert__SWIG_0(
+          arg1, arg2, (std::shared_ptr<INetwork> const &)*arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::vector< std::shared_ptr< INetwork > >::iterator & >(result)),
-    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  resultobj = SWIG_NewPointerObj(
+      swig::make_output_iterator(
+          static_cast<const std::vector<std::shared_ptr<INetwork> >::iterator
+                          &>(result)),
+      swig::SwigPyIterator::descriptor(), SWIG_POINTER_OWN);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_insert__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_insert__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::iterator arg2 ;
-  std::vector< std::shared_ptr< INetwork > >::size_type arg3 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type *arg4 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  swig::SwigPyIterator *iter2 = 0 ;
-  int res2 ;
-  size_t val3 ;
-  int ecode3 = 0 ;
-  void *argp4 ;
-  int res4 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::value_type tempshared4 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:vectornet_insert",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::iterator arg2;
+  std::vector<std::shared_ptr<INetwork> >::size_type arg3;
+  std::vector<std::shared_ptr<INetwork> >::value_type *arg4 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  swig::SwigPyIterator *iter2 = 0;
+  int res2;
+  size_t val3;
+  int ecode3 = 0;
+  void *argp4;
+  int res4 = 0;
+  std::vector<std::shared_ptr<INetwork> >::value_type tempshared4;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  PyObject *obj3 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOOO:vectornet_insert", &obj0, &obj1,
+                        &obj2, &obj3))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_insert" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_insert"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2), swig::SwigPyIterator::descriptor(), 0);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2),
+                         swig::SwigPyIterator::descriptor(), 0);
   if (!SWIG_IsOK(res2) || !iter2) {
-    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_insert" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                        "in method '"
+                        "vectornet_insert"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::iterator"
+                        "'");
   } else {
-    swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *iter_t = dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter2);
+    swig::SwigPyIterator_T<std::vector<std::shared_ptr<INetwork> >::iterator>
+        *iter_t = dynamic_cast<swig::SwigPyIterator_T<
+            std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter2);
     if (iter_t) {
       arg2 = iter_t->get_current();
     } else {
-      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "vectornet_insert" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::iterator""'");
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError),
+                          "in method '"
+                          "vectornet_insert"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "std::vector< std::shared_ptr< INetwork > >::iterator"
+                          "'");
     }
   }
   ecode3 = SWIG_AsVal_size_t(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "vectornet_insert" "', argument " "3"" of type '" "std::vector< std::shared_ptr< INetwork > >::size_type""'");
-  } 
-  arg3 = static_cast< std::vector< std::shared_ptr< INetwork > >::size_type >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "vectornet_insert"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::size_type"
+                        "'");
+  }
+  arg3 = static_cast<std::vector<std::shared_ptr<INetwork> >::size_type>(val3);
   {
     int newmem = 0;
-    res4 = SWIG_ConvertPtrAndOwn(obj3, &argp4, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res4 = SWIG_ConvertPtrAndOwn(
+        obj3, &argp4, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "vectornet_insert" "', argument " "4"" of type '" "std::vector< std::shared_ptr< INetwork > >::value_type const &""'"); 
+      SWIG_exception_fail(
+          SWIG_ArgError(res4),
+          "in method '"
+          "vectornet_insert"
+          "', argument "
+          "4"
+          " of type '"
+          "std::vector< std::shared_ptr< INetwork > >::value_type const &"
+          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      if (argp4) tempshared4 = *reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp4);
-      delete reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp4);
+      if (argp4)
+        tempshared4 = *reinterpret_cast<
+            std::vector<std::shared_ptr<INetwork> >::value_type *>(argp4);
+      delete reinterpret_cast<
+          std::vector<std::shared_ptr<INetwork> >::value_type *>(argp4);
       arg4 = &tempshared4;
     } else {
-      arg4 = (argp4) ? reinterpret_cast< std::vector< std::shared_ptr< INetwork > >::value_type * >(argp4) : &tempshared4;
+      arg4 = (argp4)
+                 ? reinterpret_cast<
+                       std::vector<std::shared_ptr<INetwork> >::value_type *>(
+                       argp4)
+                 : &tempshared4;
     }
   }
   {
     try {
-      std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__insert__SWIG_1(arg1,arg2,arg3,(std::shared_ptr< INetwork > const &)*arg4);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      std_vector_Sl_std_shared_ptr_Sl_INetwork_Sg__Sg__insert__SWIG_1(
+          arg1, arg2, arg3, (std::shared_ptr<INetwork> const &)*arg4);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -11299,27 +13278,34 @@ fail:
   return NULL;
 }
 
-
 SWIGINTERN PyObject *_wrap_vectornet_insert(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[5];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 4) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 3) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       swig::SwigPyIterator *iter = 0;
-      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), swig::SwigPyIterator::descriptor(), 0);
-      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter) != 0));
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter),
+                                swig::SwigPyIterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter &&
+            (dynamic_cast<swig::SwigPyIterator_T<
+                 std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter) !=
+             0));
       if (_v) {
-        int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
+        int res = SWIG_ConvertPtr(argv[2], 0,
+                                  SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
         _v = SWIG_CheckState(res);
         if (_v) {
           return _wrap_vectornet_insert__SWIG_0(self, args);
@@ -11329,19 +13315,27 @@ SWIGINTERN PyObject *_wrap_vectornet_insert(PyObject *self, PyObject *args) {
   }
   if (argc == 4) {
     int _v;
-    int res = swig::asptr(argv[0], (std::vector<std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >**)(0));
+    int res = swig::asptr(
+        argv[0],
+        (std::vector<std::shared_ptr<INetwork>,
+                     std::allocator<std::shared_ptr<INetwork> > > **)(0));
     _v = SWIG_CheckState(res);
     if (_v) {
       swig::SwigPyIterator *iter = 0;
-      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), swig::SwigPyIterator::descriptor(), 0);
-      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::SwigPyIterator_T<std::vector< std::shared_ptr< INetwork > >::iterator > *>(iter) != 0));
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter),
+                                swig::SwigPyIterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter &&
+            (dynamic_cast<swig::SwigPyIterator_T<
+                 std::vector<std::shared_ptr<INetwork> >::iterator> *>(iter) !=
+             0));
       if (_v) {
         {
           int res = SWIG_AsVal_size_t(argv[2], NULL);
           _v = SWIG_CheckState(res);
         }
         if (_v) {
-          int res = SWIG_ConvertPtr(argv[3], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
+          int res = SWIG_ConvertPtr(argv[3], 0,
+                                    SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
           _v = SWIG_CheckState(res);
           if (_v) {
             return _wrap_vectornet_insert__SWIG_1(self, args);
@@ -11350,48 +13344,73 @@ SWIGINTERN PyObject *_wrap_vectornet_insert(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'vectornet_insert'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    std::vector< std::shared_ptr< INetwork > >::insert(std::vector< std::shared_ptr< INetwork > >::iterator,std::vector< std::shared_ptr< INetwork > >::value_type const &)\n"
-    "    std::vector< std::shared_ptr< INetwork > >::insert(std::vector< std::shared_ptr< INetwork > >::iterator,std::vector< std::shared_ptr< INetwork > >::size_type,std::vector< std::shared_ptr< INetwork > >::value_type const &)\n");
+  SWIG_SetErrorMsg(
+      PyExc_NotImplementedError,
+      "Wrong number or type of arguments for overloaded function "
+      "'vectornet_insert'.\n"
+      "  Possible C/C++ prototypes are:\n"
+      "    std::vector< std::shared_ptr< INetwork > >::insert(std::vector< "
+      "std::shared_ptr< INetwork > >::iterator,std::vector< std::shared_ptr< "
+      "INetwork > >::value_type const &)\n"
+      "    std::vector< std::shared_ptr< INetwork > >::insert(std::vector< "
+      "std::shared_ptr< INetwork > >::iterator,std::vector< std::shared_ptr< "
+      "INetwork > >::size_type,std::vector< std::shared_ptr< INetwork > "
+      ">::value_type const &)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_reserve(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_reserve(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  std::vector< std::shared_ptr< INetwork > >::size_type arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:vectornet_reserve",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  std::vector<std::shared_ptr<INetwork> >::size_type arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  size_t val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:vectornet_reserve", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_reserve" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_reserve"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   ecode2 = SWIG_AsVal_size_t(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "vectornet_reserve" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork > >::size_type""'");
-  } 
-  arg2 = static_cast< std::vector< std::shared_ptr< INetwork > >::size_type >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "vectornet_reserve"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > >::size_type"
+                        "'");
+  }
+  arg2 = static_cast<std::vector<std::shared_ptr<INetwork> >::size_type>(val2);
   {
     try {
       (arg1)->reserve(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -11401,64 +13420,83 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_vectornet_capacity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_vectornet_capacity(PyObject *SWIGUNUSEDPARM(self),
+                                              PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork > >::size_type result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:vectornet_capacity",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork> >::size_type result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:vectornet_capacity", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectornet_capacity" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "vectornet_capacity"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > const *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
-      result = ((std::vector< std::shared_ptr< INetwork > > const *)arg1)->capacity();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result =
+          ((std::vector<std::shared_ptr<INetwork> > const *)arg1)->capacity();
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  resultobj = SWIG_From_size_t(static_cast<size_t>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_delete_vectornet(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_vectornet(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  std::vector< std::shared_ptr< INetwork > > *arg1 = (std::vector< std::shared_ptr< INetwork > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_vectornet",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, SWIG_POINTER_DISOWN |  0 );
+  std::vector<std::shared_ptr<INetwork> > *arg1 =
+      (std::vector<std::shared_ptr<INetwork> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:delete_vectornet", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(
+      obj0, &argp1,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      SWIG_POINTER_DISOWN | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_vectornet" "', argument " "1"" of type '" "std::vector< std::shared_ptr< INetwork > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "delete_vectornet"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork > > *"
+                        "'");
   }
-  arg1 = reinterpret_cast< std::vector< std::shared_ptr< INetwork > > * >(argp1);
+  arg1 = reinterpret_cast<std::vector<std::shared_ptr<INetwork> > *>(argp1);
   {
     try {
       delete arg1;
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -11468,49 +13506,59 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *vectornet_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *vectornet_swigregister(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, SWIG_NewClientData(obj));
+  if (!PyArg_ParseTuple(args, (char *)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_delete_INetwork(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_INetwork(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_INetwork",&obj0)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:delete_INetwork", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_INetwork" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "delete_INetwork"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
-      (void)arg1; delete smartarg1;
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (void)arg1;
+      delete smartarg1;
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -11520,41 +13568,57 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_inputs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_inputs_set(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_inputs_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_inputs_set", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_inputs_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_inputs_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Sequence, 0 |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_inputs_set" "', argument " "2"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_inputs_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   if (arg1) (arg1)->inputs = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -11562,75 +13626,101 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_inputs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_inputs_get(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  Sequence *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_inputs_get",&obj0)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  Sequence *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_inputs_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_inputs_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_inputs_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (Sequence *)& ((arg1)->inputs);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 |  0 );
+  result = (Sequence *)&((arg1)->inputs);
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_d_inputs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_d_inputs_set(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_d_inputs_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_d_inputs_set", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_d_inputs_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_d_inputs_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Sequence, 0 |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_d_inputs_set" "', argument " "2"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_d_inputs_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   if (arg1) (arg1)->d_inputs = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -11638,75 +13728,101 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_d_inputs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_d_inputs_get(PyObject *SWIGUNUSEDPARM(self),
+                                                 PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  Sequence *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_d_inputs_get",&obj0)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  Sequence *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_d_inputs_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_d_inputs_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_d_inputs_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (Sequence *)& ((arg1)->d_inputs);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 |  0 );
+  result = (Sequence *)&((arg1)->d_inputs);
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_outputs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_outputs_set(PyObject *SWIGUNUSEDPARM(self),
+                                                PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_outputs_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_outputs_set", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_outputs_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_outputs_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Sequence, 0 |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_outputs_set" "', argument " "2"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_outputs_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   if (arg1) (arg1)->outputs = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -11714,75 +13830,102 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_outputs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_outputs_get(PyObject *SWIGUNUSEDPARM(self),
+                                                PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  Sequence *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_outputs_get",&obj0)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  Sequence *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_outputs_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_outputs_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_outputs_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (Sequence *)& ((arg1)->outputs);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 |  0 );
+  result = (Sequence *)&((arg1)->outputs);
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_d_outputs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_d_outputs_set(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = (Sequence *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_d_outputs_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = (Sequence *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_d_outputs_set", &obj0,
+                        &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_d_outputs_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_d_outputs_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Sequence, 0 |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_d_outputs_set" "', argument " "2"" of type '" "Sequence *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_d_outputs_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence *"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   if (arg1) (arg1)->d_outputs = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -11790,75 +13933,110 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_d_outputs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_d_outputs_get(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  Sequence *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_d_outputs_get",&obj0)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  Sequence *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_d_outputs_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_d_outputs_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_d_outputs_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (Sequence *)& ((arg1)->d_outputs);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 |  0 );
+  result = (Sequence *)&((arg1)->d_outputs);
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_sub_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_sub_set(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *arg2 = (std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_sub_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > > *arg2 =
+      (std::vector<std::shared_ptr<INetwork>,
+                   std::allocator<std::shared_ptr<INetwork> > > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_sub_set", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_sub_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_sub_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  res2 = SWIG_ConvertPtr(
+      obj1, &argp2,
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_sub_set" "', argument " "2"" of type '" "std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_sub_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< std::shared_ptr< INetwork "
+                        ">,std::allocator< std::shared_ptr< INetwork > > > *"
+                        "'");
   }
-  arg2 = reinterpret_cast< std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > * >(argp2);
+  arg2 = reinterpret_cast<
+      std::vector<std::shared_ptr<INetwork>,
+                  std::allocator<std::shared_ptr<INetwork> > > *>(argp2);
   if (arg1) (arg1)->sub = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -11866,75 +14044,108 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_sub_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_sub_get(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_sub_get",&obj0)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<std::shared_ptr<INetwork>,
+              std::allocator<std::shared_ptr<INetwork> > > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_sub_get", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_sub_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_sub_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *)& ((arg1)->sub);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0 |  0 );
+  result =
+      (std::vector<std::shared_ptr<INetwork>,
+                   std::allocator<std::shared_ptr<INetwork> > > *)&((arg1)
+                                                                        ->sub);
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+      0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_codec_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_codec_set(PyObject *SWIGUNUSEDPARM(self),
+                                              PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_codec_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  std::vector<int, std::allocator<int> > *arg2 =
+      (std::vector<int, std::allocator<int> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_codec_set", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_codec_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_codec_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  res2 = SWIG_ConvertPtr(
+      obj1, &argp2, SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_codec_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_codec_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< int,std::allocator< int > > *"
+                        "'");
   }
-  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  arg2 = reinterpret_cast<std::vector<int, std::allocator<int> > *>(argp2);
   if (arg1) (arg1)->codec = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -11942,75 +14153,103 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_codec_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_codec_get(PyObject *SWIGUNUSEDPARM(self),
+                                              PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< int,std::allocator< int > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_codec_get",&obj0)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<int, std::allocator<int> > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_codec_get", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_codec_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_codec_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->codec);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  result = (std::vector<int, std::allocator<int> > *)&((arg1)->codec);
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_icodec_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_icodec_set(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_icodec_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  std::vector<int, std::allocator<int> > *arg2 =
+      (std::vector<int, std::allocator<int> > *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_icodec_set", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_icodec_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_icodec_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  res2 = SWIG_ConvertPtr(
+      obj1, &argp2, SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_icodec_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_icodec_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "std::vector< int,std::allocator< int > > *"
+                        "'");
   }
-  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  arg2 = reinterpret_cast<std::vector<int, std::allocator<int> > *>(argp2);
   if (arg1) (arg1)->icodec = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -12018,216 +14257,309 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_icodec_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_icodec_get(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< int,std::allocator< int > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_icodec_get",&obj0)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  std::vector<int, std::allocator<int> > *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_icodec_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_icodec_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_icodec_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->icodec);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  result = (std::vector<int, std::allocator<int> > *)&((arg1)->icodec);
+  resultobj = SWIG_NewPointerObj(
+      SWIG_as_voidptr(result),
+      SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_decode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_decode(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Classes *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  INetwork *arg1 = (INetwork *)0;
+  Classes *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   std::wstring result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_decode",&obj0,&obj1)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_decode", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_decode" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_decode"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_decode" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_decode"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "INetwork_decode" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "INetwork_decode"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Classes * >(argp2);
+  arg2 = reinterpret_cast<Classes *>(argp2);
   {
     try {
       result = (arg1)->decode(*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_std_wstring(static_cast< std::wstring >(result));
+  resultobj = SWIG_From_std_wstring(static_cast<std::wstring>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_idecode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_idecode(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Classes *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  INetwork *arg1 = (INetwork *)0;
+  Classes *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   std::wstring result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_idecode",&obj0,&obj1)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_idecode", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_idecode" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_idecode"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_idecode" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_idecode"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "INetwork_idecode" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "INetwork_idecode"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Classes * >(argp2);
+  arg2 = reinterpret_cast<Classes *>(argp2);
   {
     try {
       result = (arg1)->idecode(*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_std_wstring(static_cast< std::wstring >(result));
+  resultobj = SWIG_From_std_wstring(static_cast<std::wstring>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_encode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_encode(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Classes *arg2 = 0 ;
-  std::wstring *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:INetwork_encode",&obj0,&obj1,&obj2)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Classes *arg2 = 0;
+  std::wstring *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  void *argp3 = 0;
+  int res3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:INetwork_encode", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_encode" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_encode"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_encode" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_encode"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "INetwork_encode" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "INetwork_encode"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Classes * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_std__wstring,  0 );
+  arg2 = reinterpret_cast<Classes *>(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_std__wstring, 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "INetwork_encode" "', argument " "3"" of type '" "std::wstring &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3),
+                        "in method '"
+                        "INetwork_encode"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "std::wstring &"
+                        "'");
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "INetwork_encode" "', argument " "3"" of type '" "std::wstring &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "INetwork_encode"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "std::wstring &"
+                        "'");
   }
-  arg3 = reinterpret_cast< std::wstring * >(argp3);
+  arg3 = reinterpret_cast<std::wstring *>(argp3);
   {
     try {
-      (arg1)->encode(*arg2,*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->encode(*arg2, *arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -12237,66 +14569,104 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_iencode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_iencode(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Classes *arg2 = 0 ;
-  std::wstring *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:INetwork_iencode",&obj0,&obj1,&obj2)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Classes *arg2 = 0;
+  std::wstring *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  void *argp3 = 0;
+  int res3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:INetwork_iencode", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_iencode" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_iencode"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_iencode" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "INetwork_iencode"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "INetwork_iencode" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "INetwork_iencode"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Classes * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_std__wstring,  0 );
+  arg2 = reinterpret_cast<Classes *>(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_std__wstring, 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "INetwork_iencode" "', argument " "3"" of type '" "std::wstring &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3),
+                        "in method '"
+                        "INetwork_iencode"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "std::wstring &"
+                        "'");
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "INetwork_iencode" "', argument " "3"" of type '" "std::wstring &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "INetwork_iencode"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "std::wstring &"
+                        "'");
   }
-  arg3 = reinterpret_cast< std::wstring * >(argp3);
+  arg3 = reinterpret_cast<std::wstring *>(argp3);
   {
     try {
-      (arg1)->iencode(*arg2,*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->iencode(*arg2, *arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -12306,41 +14676,58 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_softmax_floor_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_softmax_floor_set(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Float arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  float val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_softmax_floor_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Float arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  float val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_softmax_floor_set", &obj0,
+                        &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_softmax_floor_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_softmax_floor_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_float(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "INetwork_softmax_floor_set" "', argument " "2"" of type '" "Float""'");
-  } 
-  arg2 = static_cast< Float >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "INetwork_softmax_floor_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Float"
+                        "'");
+  }
+  arg2 = static_cast<Float>(val2);
   if (arg1) (arg1)->softmax_floor = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -12348,75 +14735,101 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_softmax_floor_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_softmax_floor_get(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   Float result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_softmax_floor_get",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_softmax_floor_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_softmax_floor_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_softmax_floor_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (Float) ((arg1)->softmax_floor);
-  resultobj = SWIG_From_float(static_cast< float >(result));
+  result = (Float)((arg1)->softmax_floor);
+  resultobj = SWIG_From_float(static_cast<float>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_softmax_accel_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_softmax_accel_set(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  bool arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  bool val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_softmax_accel_set",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  bool arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  bool val2;
+  int ecode2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_softmax_accel_set", &obj0,
+                        &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_softmax_accel_set" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_softmax_accel_set"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_bool(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "INetwork_softmax_accel_set" "', argument " "2"" of type '" "bool""'");
-  } 
-  arg2 = static_cast< bool >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "INetwork_softmax_accel_set"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "bool"
+                        "'");
+  }
+  arg2 = static_cast<bool>(val2);
   if (arg1) (arg1)->softmax_accel = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -12424,181 +14837,218 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_softmax_accel_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_softmax_accel_get(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_softmax_accel_get",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_softmax_accel_get", &obj0))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_softmax_accel_get" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_softmax_accel_get"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  result = (bool) ((arg1)->softmax_accel);
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  result = (bool)((arg1)->softmax_accel);
+  resultobj = SWIG_From_bool(static_cast<bool>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_ninput(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_ninput(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_ninput",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_ninput", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_ninput" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_ninput"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
       result = (int)(arg1)->ninput();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_noutput(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_noutput(PyObject *SWIGUNUSEDPARM(self),
+                                            PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
+  INetwork *arg1 = (INetwork *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:INetwork_noutput",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:INetwork_noutput", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_noutput" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_noutput"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     try {
       result = (int)(arg1)->noutput();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_add(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_add(PyObject *SWIGUNUSEDPARM(self),
+                                        PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  std::shared_ptr< INetwork > arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_add",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  std::shared_ptr<INetwork> arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_add", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_add" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_add"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     int newmem = 0;
-    res2 = SWIG_ConvertPtrAndOwn(obj1, &argp2, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res2 = SWIG_ConvertPtrAndOwn(
+        obj1, &argp2, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "INetwork_add" "', argument " "2"" of type '" "std::shared_ptr< INetwork >""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2),
+                          "in method '"
+                          "INetwork_add"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "std::shared_ptr< INetwork >"
+                          "'");
     }
-    if (argp2) arg2 = *(reinterpret_cast< std::shared_ptr< INetwork > * >(argp2));
-    if (newmem & SWIG_CAST_NEW_MEMORY) delete reinterpret_cast< std::shared_ptr< INetwork > * >(argp2);
+    if (argp2) arg2 = *(reinterpret_cast<std::shared_ptr<INetwork> *>(argp2));
+    if (newmem & SWIG_CAST_NEW_MEMORY)
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp2);
   }
   {
     try {
       (arg1)->add(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -12608,60 +15058,82 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_setLearningRate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_setLearningRate(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Float arg2 ;
-  Float arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  float val2 ;
-  int ecode2 = 0 ;
-  float val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:INetwork_setLearningRate",&obj0,&obj1,&obj2)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Float arg2;
+  Float arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  float val2;
+  int ecode2 = 0;
+  float val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:INetwork_setLearningRate", &obj0,
+                        &obj1, &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_setLearningRate" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_setLearningRate"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   ecode2 = SWIG_AsVal_float(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "INetwork_setLearningRate" "', argument " "2"" of type '" "Float""'");
-  } 
-  arg2 = static_cast< Float >(val2);
+    SWIG_exception_fail(SWIG_ArgError(ecode2),
+                        "in method '"
+                        "INetwork_setLearningRate"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Float"
+                        "'");
+  }
+  arg2 = static_cast<Float>(val2);
   ecode3 = SWIG_AsVal_float(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "INetwork_setLearningRate" "', argument " "3"" of type '" "Float""'");
-  } 
-  arg3 = static_cast< Float >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "INetwork_setLearningRate"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Float"
+                        "'");
+  }
+  arg3 = static_cast<Float>(val3);
   {
     try {
-      (arg1)->setLearningRate(arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      (arg1)->setLearningRate(arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -12671,39 +15143,55 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_info(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_info(PyObject *SWIGUNUSEDPARM(self),
+                                         PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  string arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_info",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  string arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_info", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_info" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_info"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "INetwork_info" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "INetwork_info"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -12711,13 +15199,11 @@ SWIGINTERN PyObject *_wrap_INetwork_info(PyObject *SWIGUNUSEDPARM(self), PyObjec
   {
     try {
       (arg1)->info(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -12727,40 +15213,56 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_INetwork_getState(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_INetwork_getState(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  string arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  Sequence *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:INetwork_getState",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  string arg2;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  Sequence *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:INetwork_getState", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INetwork_getState" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "INetwork_getState"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "INetwork_getState" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "INetwork_getState"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -12768,77 +15270,99 @@ SWIGINTERN PyObject *_wrap_INetwork_getState(PyObject *SWIGUNUSEDPARM(self), PyO
   {
     try {
       result = (Sequence *)(arg1)->getState(arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 |  0 );
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Sequence, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *INetwork_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *INetwork_swigregister(PyObject *SWIGUNUSEDPARM(self),
+                                           PyObject *args) {
   PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_std__shared_ptrT_INetwork_t, SWIG_NewClientData(obj));
+  if (!PyArg_ParseTuple(args, (char *)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_std__shared_ptrT_INetwork_t,
+                         SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_set_inputs(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_inputs(PyObject *SWIGUNUSEDPARM(self),
+                                      PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:set_inputs",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:set_inputs", &obj0, &obj1)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_inputs" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "set_inputs"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "set_inputs" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "set_inputs"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "set_inputs" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "set_inputs"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   {
     try {
-      set_inputs(arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      set_inputs(arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -12848,54 +15372,76 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_set_targets(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_targets(PyObject *SWIGUNUSEDPARM(self),
+                                       PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:set_targets",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:set_targets", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_targets" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "set_targets"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "set_targets" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "set_targets"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "set_targets" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "set_targets"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   {
     try {
-      set_targets(arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      set_targets(arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -12905,54 +15451,77 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_set_targets_accelerated(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_targets_accelerated(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:set_targets_accelerated",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:set_targets_accelerated", &obj0,
+                        &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_targets_accelerated" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "set_targets_accelerated"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "set_targets_accelerated" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "set_targets_accelerated"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "set_targets_accelerated" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "set_targets_accelerated"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   {
     try {
-      set_targets_accelerated(arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      set_targets_accelerated(arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -12962,54 +15531,76 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_set_classes(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_classes(PyObject *SWIGUNUSEDPARM(self),
+                                       PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Classes *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:set_classes",&obj0,&obj1)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Classes *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:set_classes", &obj0, &obj1))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_classes" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "set_classes"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "set_classes" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "set_classes"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "set_classes" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "set_classes"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Classes * >(argp2);
+  arg2 = reinterpret_cast<Classes *>(argp2);
   {
     try {
-      set_classes(arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      set_classes(arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13019,66 +15610,103 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_train(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_train(PyObject *SWIGUNUSEDPARM(self),
+                                 PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = 0 ;
-  Sequence *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:train",&obj0,&obj1,&obj2)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = 0;
+  Sequence *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  void *argp3 = 0;
+  int res3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:train", &obj0, &obj1, &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "train" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "train"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "train" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "train"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "train" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "train"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Sequence,  0 );
+  arg2 = reinterpret_cast<Sequence *>(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "train" "', argument " "3"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3),
+                        "in method '"
+                        "train"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "train" "', argument " "3"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "train"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg3 = reinterpret_cast< Sequence * >(argp3);
+  arg3 = reinterpret_cast<Sequence *>(argp3);
   {
     try {
-      train(arg1,*arg2,*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      train(arg1, *arg2, *arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13088,66 +15716,103 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ctrain(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ctrain(PyObject *SWIGUNUSEDPARM(self),
+                                  PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = 0 ;
-  Classes *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ctrain",&obj0,&obj1,&obj2)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = 0;
+  Classes *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  void *argp3 = 0;
+  int res3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ctrain", &obj0, &obj1, &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ctrain" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ctrain"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ctrain" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "ctrain"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ctrain" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "ctrain"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Classes,  0 );
+  arg2 = reinterpret_cast<Sequence *>(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "ctrain" "', argument " "3"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3),
+                        "in method '"
+                        "ctrain"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ctrain" "', argument " "3"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "ctrain"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg3 = reinterpret_cast< Classes * >(argp3);
+  arg3 = reinterpret_cast<Classes *>(argp3);
   {
     try {
-      ctrain(arg1,*arg2,*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      ctrain(arg1, *arg2, *arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13157,75 +15822,120 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ctrain_accelerated__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ctrain_accelerated__SWIG_0(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = 0 ;
-  Classes *arg3 = 0 ;
-  Float arg4 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  float val4 ;
-  int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:ctrain_accelerated",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = 0;
+  Classes *arg3 = 0;
+  Float arg4;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  void *argp3 = 0;
+  int res3 = 0;
+  float val4;
+  int ecode4 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+  PyObject *obj3 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOOO:ctrain_accelerated", &obj0, &obj1,
+                        &obj2, &obj3))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ctrain_accelerated" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ctrain_accelerated"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ctrain_accelerated" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ctrain_accelerated" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Classes,  0 );
+  arg2 = reinterpret_cast<Sequence *>(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "ctrain_accelerated" "', argument " "3"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3),
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ctrain_accelerated" "', argument " "3"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg3 = reinterpret_cast< Classes * >(argp3);
+  arg3 = reinterpret_cast<Classes *>(argp3);
   ecode4 = SWIG_AsVal_float(obj3, &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "ctrain_accelerated" "', argument " "4"" of type '" "Float""'");
-  } 
-  arg4 = static_cast< Float >(val4);
+    SWIG_exception_fail(SWIG_ArgError(ecode4),
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "4"
+                        " of type '"
+                        "Float"
+                        "'");
+  }
+  arg4 = static_cast<Float>(val4);
   {
     try {
-      ctrain_accelerated(arg1,*arg2,*arg3,arg4);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      ctrain_accelerated(arg1, *arg2, *arg3, arg4);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13235,66 +15945,104 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_ctrain_accelerated__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ctrain_accelerated__SWIG_1(
+    PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Sequence *arg2 = 0 ;
-  Classes *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:ctrain_accelerated",&obj0,&obj1,&obj2)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Sequence *arg2 = 0;
+  Classes *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  void *argp3 = 0;
+  int res3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:ctrain_accelerated", &obj0, &obj1,
+                        &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ctrain_accelerated" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "ctrain_accelerated"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ctrain_accelerated" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ctrain_accelerated" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Classes,  0 );
+  arg2 = reinterpret_cast<Sequence *>(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "ctrain_accelerated" "', argument " "3"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3),
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ctrain_accelerated" "', argument " "3"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "ctrain_accelerated"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg3 = reinterpret_cast< Classes * >(argp3);
+  arg3 = reinterpret_cast<Classes *>(argp3);
   {
     try {
-      ctrain_accelerated(arg1,*arg2,*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      ctrain_accelerated(arg1, *arg2, *arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13303,21 +16051,21 @@ SWIGINTERN PyObject *_wrap_ctrain_accelerated__SWIG_1(PyObject *SWIGUNUSEDPARM(s
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_ctrain_accelerated(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[5];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 4) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 3) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
+    int res =
+        SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       void *vptr = 0;
@@ -13335,7 +16083,8 @@ SWIGINTERN PyObject *_wrap_ctrain_accelerated(PyObject *self, PyObject *args) {
   }
   if (argc == 4) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
+    int res =
+        SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       void *vptr = 0;
@@ -13357,75 +16106,115 @@ SWIGINTERN PyObject *_wrap_ctrain_accelerated(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'ctrain_accelerated'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    ctrain_accelerated(INetwork *,Sequence &,Classes &,Float)\n"
-    "    ctrain_accelerated(INetwork *,Sequence &,Classes &)\n");
+  SWIG_SetErrorMsg(
+      PyExc_NotImplementedError,
+      "Wrong number or type of arguments for overloaded function "
+      "'ctrain_accelerated'.\n"
+      "  Possible C/C++ prototypes are:\n"
+      "    ctrain_accelerated(INetwork *,Sequence &,Classes &,Float)\n"
+      "    ctrain_accelerated(INetwork *,Sequence &,Classes &)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_cpred(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_cpred(PyObject *SWIGUNUSEDPARM(self),
+                                 PyObject *args) {
   PyObject *resultobj = 0;
-  INetwork *arg1 = (INetwork *) 0 ;
-  Classes *arg2 = 0 ;
-  Sequence *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< INetwork > tempshared1 ;
-  std::shared_ptr< INetwork > *smartarg1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:cpred",&obj0,&obj1,&obj2)) SWIG_fail;
+  INetwork *arg1 = (INetwork *)0;
+  Classes *arg2 = 0;
+  Sequence *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  std::shared_ptr<INetwork> tempshared1;
+  std::shared_ptr<INetwork> *smartarg1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  void *argp3 = 0;
+  int res3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:cpred", &obj0, &obj1, &obj2))
+    SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 |  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0 | 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cpred" "', argument " "1"" of type '" "INetwork *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "cpred"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "INetwork *"
+                          "'");
     }
     if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >(tempshared1.get());
+      tempshared1 = *reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>(tempshared1.get());
     } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  INetwork > * >(argp1);
-      arg1 = const_cast< INetwork * >((smartarg1 ? smartarg1->get() : 0));
+      smartarg1 = reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
+      arg1 = const_cast<INetwork *>((smartarg1 ? smartarg1->get() : 0));
     }
   }
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "cpred" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "cpred"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "cpred" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "cpred"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Classes * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Sequence,  0 );
+  arg2 = reinterpret_cast<Classes *>(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "cpred" "', argument " "3"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3),
+                        "in method '"
+                        "cpred"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "cpred" "', argument " "3"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "cpred"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg3 = reinterpret_cast< Sequence * >(argp3);
+  arg3 = reinterpret_cast<Sequence *>(argp3);
   {
     try {
-      cpred(arg1,*arg2,*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      cpred(arg1, *arg2, *arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13435,54 +16224,90 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_mktargets(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_mktargets(PyObject *SWIGUNUSEDPARM(self),
+                                     PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = 0 ;
-  Classes *arg2 = 0 ;
-  int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:mktargets",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence,  0 );
+  Sequence *arg1 = 0;
+  Classes *arg2 = 0;
+  int arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  int val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:mktargets", &obj0, &obj1, &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mktargets" "', argument " "1"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "mktargets"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "mktargets" "', argument " "1"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "mktargets"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes,  0 );
+  arg1 = reinterpret_cast<Sequence *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Classes, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "mktargets" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "mktargets"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "mktargets" "', argument " "2"" of type '" "Classes &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "mktargets"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Classes &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Classes * >(argp2);
+  arg2 = reinterpret_cast<Classes *>(argp2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "mktargets" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "mktargets"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "int"
+                        "'");
+  }
+  arg3 = static_cast<int>(val3);
   {
     try {
-      mktargets(*arg1,*arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      mktargets(*arg1, *arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13492,54 +16317,90 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_seq_forward__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_seq_forward__SWIG_0(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = 0 ;
-  Mat *arg2 = 0 ;
-  double arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:seq_forward",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat,  0 );
+  Mat *arg1 = 0;
+  Mat *arg2 = 0;
+  double arg3;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  double val3;
+  int ecode3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:seq_forward", &obj0, &obj1, &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "seq_forward" "', argument " "1"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_forward" "', argument " "1"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Mat,  0 );
+  arg1 = reinterpret_cast<Mat *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Mat, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "seq_forward" "', argument " "2"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_forward" "', argument " "2"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Mat * >(argp2);
+  arg2 = reinterpret_cast<Mat *>(argp2);
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "seq_forward" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = static_cast< double >(val3);
+    SWIG_exception_fail(SWIG_ArgError(ecode3),
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "double"
+                        "'");
+  }
+  arg3 = static_cast<double>(val3);
   {
     try {
-      forward_algorithm(*arg1,*arg2,arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      forward_algorithm(*arg1, *arg2, arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13549,45 +16410,74 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_seq_forward__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_seq_forward__SWIG_1(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = 0 ;
-  Mat *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:seq_forward",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat,  0 );
+  Mat *arg1 = 0;
+  Mat *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:seq_forward", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "seq_forward" "', argument " "1"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_forward" "', argument " "1"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Mat,  0 );
+  arg1 = reinterpret_cast<Mat *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Mat, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "seq_forward" "', argument " "2"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_forward" "', argument " "2"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_forward"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Mat * >(argp2);
+  arg2 = reinterpret_cast<Mat *>(argp2);
   {
     try {
-      forward_algorithm(*arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      forward_algorithm(*arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13596,17 +16486,16 @@ SWIGINTERN PyObject *_wrap_seq_forward__SWIG_1(PyObject *SWIGUNUSEDPARM(self), P
 fail:
   return NULL;
 }
-
 
 SWIGINTERN PyObject *_wrap_seq_forward(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[4];
   int ii;
-  
+
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? (int)PyObject_Length(args) : 0;
   for (ii = 0; (ii < 3) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
+    argv[ii] = PyTuple_GET_ITEM(args, ii);
   }
   if (argc == 2) {
     int _v;
@@ -13642,54 +16531,85 @@ SWIGINTERN PyObject *_wrap_seq_forward(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'seq_forward'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    forward_algorithm(Mat &,Mat &,double)\n"
-    "    forward_algorithm(Mat &,Mat &)\n");
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,
+                   "Wrong number or type of arguments for overloaded function "
+                   "'seq_forward'.\n"
+                   "  Possible C/C++ prototypes are:\n"
+                   "    forward_algorithm(Mat &,Mat &,double)\n"
+                   "    forward_algorithm(Mat &,Mat &)\n");
   return 0;
 }
 
-
-SWIGINTERN PyObject *_wrap_seq_forwardbackward(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_seq_forwardbackward(PyObject *SWIGUNUSEDPARM(self),
+                                               PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = 0 ;
-  Mat *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:seq_forwardbackward",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat,  0 );
+  Mat *arg1 = 0;
+  Mat *arg2 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:seq_forwardbackward", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "seq_forwardbackward" "', argument " "1"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "seq_forwardbackward"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_forwardbackward" "', argument " "1"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_forwardbackward"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Mat,  0 );
+  arg1 = reinterpret_cast<Mat *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Mat, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "seq_forwardbackward" "', argument " "2"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "seq_forwardbackward"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_forwardbackward" "', argument " "2"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_forwardbackward"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Mat * >(argp2);
+  arg2 = reinterpret_cast<Mat *>(argp2);
   {
     try {
-      forwardbackward(*arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      forwardbackward(*arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13699,57 +16619,101 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_seq_ctc_align(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_seq_ctc_align(PyObject *SWIGUNUSEDPARM(self),
+                                         PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = 0 ;
-  Sequence *arg2 = 0 ;
-  Sequence *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:seq_ctc_align",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence,  0 );
+  Sequence *arg1 = 0;
+  Sequence *arg2 = 0;
+  Sequence *arg3 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  void *argp3 = 0;
+  int res3 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+  PyObject *obj2 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OOO:seq_ctc_align", &obj0, &obj1, &obj2))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "seq_ctc_align" "', argument " "1"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "seq_ctc_align"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_ctc_align" "', argument " "1"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_ctc_align"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  arg1 = reinterpret_cast<Sequence *>(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "seq_ctc_align" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "seq_ctc_align"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_ctc_align" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_ctc_align"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Sequence,  0 );
+  arg2 = reinterpret_cast<Sequence *>(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "seq_ctc_align" "', argument " "3"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3),
+                        "in method '"
+                        "seq_ctc_align"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "seq_ctc_align" "', argument " "3"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "seq_ctc_align"
+                        "', argument "
+                        "3"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg3 = reinterpret_cast< Sequence * >(argp3);
+  arg3 = reinterpret_cast<Sequence *>(argp3);
   {
     try {
-      ctc_align_targets(*arg1,*arg2,*arg3);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      ctc_align_targets(*arg1, *arg2, *arg3);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13759,19 +16723,26 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_make_net(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_make_net(PyObject *SWIGUNUSEDPARM(self),
+                                    PyObject *args) {
   PyObject *resultobj = 0;
-  string arg1 ;
-  PyObject * obj0 = 0 ;
-  std::shared_ptr< INetwork > result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:make_net",&obj0)) SWIG_fail;
+  string arg1;
+  PyObject *obj0 = 0;
+  std::shared_ptr<INetwork> result;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:make_net", &obj0)) SWIG_fail;
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj0, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "make_net" "', argument " "1"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "make_net"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg1 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -13779,65 +16750,73 @@ SWIGINTERN PyObject *_wrap_make_net(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
   {
     try {
       result = make_net(arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
   {
-    std::shared_ptr<  INetwork > *smartresult = result ? new std::shared_ptr<  INetwork >(result) : 0;
-    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_INetwork_t, SWIG_POINTER_OWN);
+    std::shared_ptr<INetwork> *smartresult =
+        result ? new std::shared_ptr<INetwork>(result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult),
+                                   SWIGTYPE_p_std__shared_ptrT_INetwork_t,
+                                   SWIG_POINTER_OWN);
   }
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_getdebugmat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_getdebugmat(PyObject *SWIGUNUSEDPARM(self),
+                                       PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":getdebugmat")) SWIG_fail;
+  Mat *result = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)":getdebugmat")) SWIG_fail;
   {
     try {
-      result = (Mat *) &getdebugmat();
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (Mat *)&getdebugmat();
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mat, 0 |  0 );
+  resultobj =
+      SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mat, 0 | 0);
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_string_edit_distance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_string_edit_distance(PyObject *SWIGUNUSEDPARM(self),
+                                                PyObject *args) {
   PyObject *resultobj = 0;
-  string arg1 ;
-  string arg2 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  string arg1;
+  string arg2;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
   int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:string_edit_distance",&obj0,&obj1)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:string_edit_distance", &obj0, &obj1))
+    SWIG_fail;
   {
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj0, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "string_edit_distance" "', argument " "1"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "string_edit_distance"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg1 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
@@ -13846,135 +16825,174 @@ SWIGINTERN PyObject *_wrap_string_edit_distance(PyObject *SWIGUNUSEDPARM(self), 
     std::string *ptr = (std::string *)0;
     int res = SWIG_AsPtr_std_string(obj1, &ptr);
     if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "string_edit_distance" "', argument " "2"" of type '" "string""'"); 
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)),
+                          "in method '"
+                          "string_edit_distance"
+                          "', argument "
+                          "2"
+                          " of type '"
+                          "string"
+                          "'");
     }
     arg2 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   {
     try {
-      result = (int)string_edit_distance(arg1,arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      result = (int)string_edit_distance(arg1, arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  resultobj = SWIG_From_int(static_cast<int>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_network_info(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_network_info(PyObject *SWIGUNUSEDPARM(self),
+                                        PyObject *args) {
   PyObject *resultobj = 0;
-  std::shared_ptr< INetwork > arg1 ;
-  void *argp1 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  std::shared_ptr<INetwork> arg1;
+  void *argp1;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   string result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:network_info",&obj0)) SWIG_fail;
+
+  if (!PyArg_ParseTuple(args, (char *)"O:network_info", &obj0)) SWIG_fail;
   {
     int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t,  0 , &newmem);
+    res1 = SWIG_ConvertPtrAndOwn(
+        obj0, &argp1, SWIGTYPE_p_std__shared_ptrT_INetwork_t, 0, &newmem);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "network_info" "', argument " "1"" of type '" "std::shared_ptr< INetwork >""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1),
+                          "in method '"
+                          "network_info"
+                          "', argument "
+                          "1"
+                          " of type '"
+                          "std::shared_ptr< INetwork >"
+                          "'");
     }
-    if (argp1) arg1 = *(reinterpret_cast< std::shared_ptr< INetwork > * >(argp1));
-    if (newmem & SWIG_CAST_NEW_MEMORY) delete reinterpret_cast< std::shared_ptr< INetwork > * >(argp1);
+    if (argp1) arg1 = *(reinterpret_cast<std::shared_ptr<INetwork> *>(argp1));
+    if (newmem & SWIG_CAST_NEW_MEMORY)
+      delete reinterpret_cast<std::shared_ptr<INetwork> *>(argp1);
   }
   {
     try {
       result = network_info(arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  resultobj = SWIG_From_std_string(static_cast<std::string>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_sequence_info(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_sequence_info(PyObject *SWIGUNUSEDPARM(self),
+                                         PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  Sequence *arg1 = 0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
   string result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:sequence_info",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence,  0 );
+
+  if (!PyArg_ParseTuple(args, (char *)"O:sequence_info", &obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "sequence_info" "', argument " "1"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "sequence_info"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "sequence_info" "', argument " "1"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "sequence_info"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   {
     try {
       result = sequence_info(*arg1);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  resultobj = SWIG_From_std_string(static_cast<std::string>(result));
   return resultobj;
 fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_mat_of_array(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_mat_of_array(PyObject *SWIGUNUSEDPARM(self),
+                                        PyObject *args) {
   PyObject *resultobj = 0;
-  Mat *arg1 = 0 ;
-  PyObject *arg2 = (PyObject *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:mat_of_array",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat,  0 );
+  Mat *arg1 = 0;
+  PyObject *arg2 = (PyObject *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:mat_of_array", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Mat, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mat_of_array" "', argument " "1"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "mat_of_array"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "mat_of_array" "', argument " "1"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "mat_of_array"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
-  arg1 = reinterpret_cast< Mat * >(argp1);
+  arg1 = reinterpret_cast<Mat *>(argp1);
   arg2 = obj1;
   {
     try {
-      mat_of_array(*arg1,arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      mat_of_array(*arg1, arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -13984,36 +17002,50 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_array_of_mat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_array_of_mat(PyObject *SWIGUNUSEDPARM(self),
+                                        PyObject *args) {
   PyObject *resultobj = 0;
-  PyObject *arg1 = (PyObject *) 0 ;
-  Mat *arg2 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:array_of_mat",&obj0,&obj1)) SWIG_fail;
+  PyObject *arg1 = (PyObject *)0;
+  Mat *arg2 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:array_of_mat", &obj0, &obj1))
+    SWIG_fail;
   arg1 = obj0;
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Mat,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Mat, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "array_of_mat" "', argument " "2"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "array_of_mat"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "array_of_mat" "', argument " "2"" of type '" "Mat &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "array_of_mat"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Mat &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Mat * >(argp2);
+  arg2 = reinterpret_cast<Mat *>(argp2);
   {
     try {
-      array_of_mat(arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      array_of_mat(arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -14023,36 +17055,50 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_sequence_of_array(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_sequence_of_array(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  Sequence *arg1 = 0 ;
-  PyObject *arg2 = (PyObject *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:sequence_of_array",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence,  0 );
+  Sequence *arg1 = 0;
+  PyObject *arg2 = (PyObject *)0;
+  void *argp1 = 0;
+  int res1 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:sequence_of_array", &obj0, &obj1))
+    SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "sequence_of_array" "', argument " "1"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1),
+                        "in method '"
+                        "sequence_of_array"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "sequence_of_array" "', argument " "1"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "sequence_of_array"
+                        "', argument "
+                        "1"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg1 = reinterpret_cast< Sequence * >(argp1);
+  arg1 = reinterpret_cast<Sequence *>(argp1);
   arg2 = obj1;
   {
     try {
-      sequence_of_array(*arg1,arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      sequence_of_array(*arg1, arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -14062,36 +17108,50 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_array_of_sequence(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_array_of_sequence(PyObject *SWIGUNUSEDPARM(self),
+                                             PyObject *args) {
   PyObject *resultobj = 0;
-  PyObject *arg1 = (PyObject *) 0 ;
-  Sequence *arg2 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:array_of_sequence",&obj0,&obj1)) SWIG_fail;
+  PyObject *arg1 = (PyObject *)0;
+  Sequence *arg2 = 0;
+  void *argp2 = 0;
+  int res2 = 0;
+  PyObject *obj0 = 0;
+  PyObject *obj1 = 0;
+
+  if (!PyArg_ParseTuple(args, (char *)"OO:array_of_sequence", &obj0, &obj1))
+    SWIG_fail;
   arg1 = obj0;
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence,  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Sequence, 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "array_of_sequence" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2),
+                        "in method '"
+                        "array_of_sequence"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "array_of_sequence" "', argument " "2"" of type '" "Sequence &""'"); 
+    SWIG_exception_fail(SWIG_ValueError,
+                        "invalid null reference "
+                        "in method '"
+                        "array_of_sequence"
+                        "', argument "
+                        "2"
+                        " of type '"
+                        "Sequence &"
+                        "'");
   }
-  arg2 = reinterpret_cast< Sequence * >(argp2);
+  arg2 = reinterpret_cast<Sequence *>(argp2);
   {
     try {
-      array_of_sequence(arg1,*arg2);
-    }
-    catch(const char *s) {
-      PyErr_SetString(PyExc_IndexError,s);
+      array_of_sequence(arg1, *arg2);
+    } catch (const char *s) {
+      PyErr_SetString(PyExc_IndexError, s);
       return NULL;
-    }
-    catch(...) {
-      PyErr_SetString(PyExc_IndexError,"unknown exception in iulib");
+    } catch (...) {
+      PyErr_SetString(PyExc_IndexError, "unknown exception in iulib");
       return NULL;
     }
   }
@@ -14100,353 +17160,662 @@ SWIGINTERN PyObject *_wrap_array_of_sequence(PyObject *SWIGUNUSEDPARM(self), PyO
 fail:
   return NULL;
 }
-
 
 static PyMethodDef SwigMethods[] = {
-	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
-	 { (char *)"delete_SwigPyIterator", _wrap_delete_SwigPyIterator, METH_VARARGS, (char *)"delete_SwigPyIterator(SwigPyIterator self)"},
-	 { (char *)"SwigPyIterator_value", _wrap_SwigPyIterator_value, METH_VARARGS, (char *)"SwigPyIterator_value(SwigPyIterator self) -> PyObject *"},
-	 { (char *)"SwigPyIterator_incr", _wrap_SwigPyIterator_incr, METH_VARARGS, (char *)"\n"
-		"incr(size_t n=1) -> SwigPyIterator\n"
-		"SwigPyIterator_incr(SwigPyIterator self) -> SwigPyIterator\n"
-		""},
-	 { (char *)"SwigPyIterator_decr", _wrap_SwigPyIterator_decr, METH_VARARGS, (char *)"\n"
-		"decr(size_t n=1) -> SwigPyIterator\n"
-		"SwigPyIterator_decr(SwigPyIterator self) -> SwigPyIterator\n"
-		""},
-	 { (char *)"SwigPyIterator_distance", _wrap_SwigPyIterator_distance, METH_VARARGS, (char *)"SwigPyIterator_distance(SwigPyIterator self, SwigPyIterator x) -> ptrdiff_t"},
-	 { (char *)"SwigPyIterator_equal", _wrap_SwigPyIterator_equal, METH_VARARGS, (char *)"SwigPyIterator_equal(SwigPyIterator self, SwigPyIterator x) -> bool"},
-	 { (char *)"SwigPyIterator_copy", _wrap_SwigPyIterator_copy, METH_VARARGS, (char *)"SwigPyIterator_copy(SwigPyIterator self) -> SwigPyIterator"},
-	 { (char *)"SwigPyIterator_next", _wrap_SwigPyIterator_next, METH_VARARGS, (char *)"SwigPyIterator_next(SwigPyIterator self) -> PyObject *"},
-	 { (char *)"SwigPyIterator___next__", _wrap_SwigPyIterator___next__, METH_VARARGS, (char *)"SwigPyIterator___next__(SwigPyIterator self) -> PyObject *"},
-	 { (char *)"SwigPyIterator_previous", _wrap_SwigPyIterator_previous, METH_VARARGS, (char *)"SwigPyIterator_previous(SwigPyIterator self) -> PyObject *"},
-	 { (char *)"SwigPyIterator_advance", _wrap_SwigPyIterator_advance, METH_VARARGS, (char *)"SwigPyIterator_advance(SwigPyIterator self, ptrdiff_t n) -> SwigPyIterator"},
-	 { (char *)"SwigPyIterator___eq__", _wrap_SwigPyIterator___eq__, METH_VARARGS, (char *)"SwigPyIterator___eq__(SwigPyIterator self, SwigPyIterator x) -> bool"},
-	 { (char *)"SwigPyIterator___ne__", _wrap_SwigPyIterator___ne__, METH_VARARGS, (char *)"SwigPyIterator___ne__(SwigPyIterator self, SwigPyIterator x) -> bool"},
-	 { (char *)"SwigPyIterator___iadd__", _wrap_SwigPyIterator___iadd__, METH_VARARGS, (char *)"SwigPyIterator___iadd__(SwigPyIterator self, ptrdiff_t n) -> SwigPyIterator"},
-	 { (char *)"SwigPyIterator___isub__", _wrap_SwigPyIterator___isub__, METH_VARARGS, (char *)"SwigPyIterator___isub__(SwigPyIterator self, ptrdiff_t n) -> SwigPyIterator"},
-	 { (char *)"SwigPyIterator___add__", _wrap_SwigPyIterator___add__, METH_VARARGS, (char *)"SwigPyIterator___add__(SwigPyIterator self, ptrdiff_t n) -> SwigPyIterator"},
-	 { (char *)"SwigPyIterator___sub__", _wrap_SwigPyIterator___sub__, METH_VARARGS, (char *)"\n"
-		"__sub__(ptrdiff_t n) -> SwigPyIterator\n"
-		"SwigPyIterator___sub__(SwigPyIterator self, SwigPyIterator x) -> ptrdiff_t\n"
-		""},
-	 { (char *)"SwigPyIterator_swigregister", SwigPyIterator_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Classes", _wrap_new_Classes, METH_VARARGS, (char *)"new_Classes() -> Classes"},
-	 { (char *)"delete_Classes", _wrap_delete_Classes, METH_VARARGS, (char *)"delete_Classes(Classes self)"},
-	 { (char *)"Classes___getitem__", _wrap_Classes___getitem__, METH_VARARGS, (char *)"Classes___getitem__(Classes self, int i) -> int"},
-	 { (char *)"Classes_size", _wrap_Classes_size, METH_VARARGS, (char *)"Classes_size(Classes self) -> int"},
-	 { (char *)"Classes_resize", _wrap_Classes_resize, METH_VARARGS, (char *)"Classes_resize(Classes self, int arg2)"},
-	 { (char *)"Classes___setitem__", _wrap_Classes___setitem__, METH_VARARGS, (char *)"Classes___setitem__(Classes self, int i, int value)"},
-	 { (char *)"Classes_swigregister", Classes_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Vec", _wrap_new_Vec, METH_VARARGS, (char *)"\n"
-		"Vec()\n"
-		"new_Vec(int arg1) -> Vec\n"
-		""},
-	 { (char *)"Vec___getitem__", _wrap_Vec___getitem__, METH_VARARGS, (char *)"Vec___getitem__(Vec self, int i) -> float"},
-	 { (char *)"Vec_size", _wrap_Vec_size, METH_VARARGS, (char *)"Vec_size(Vec self) -> int"},
-	 { (char *)"Vec___setitem__", _wrap_Vec___setitem__, METH_VARARGS, (char *)"Vec___setitem__(Vec self, int i, float value)"},
-	 { (char *)"delete_Vec", _wrap_delete_Vec, METH_VARARGS, (char *)"delete_Vec(Vec self)"},
-	 { (char *)"Vec_swigregister", Vec_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Mat", _wrap_new_Mat, METH_VARARGS, (char *)"\n"
-		"Mat()\n"
-		"new_Mat(int arg1, int arg2) -> Mat\n"
-		""},
-	 { (char *)"Mat___getitem__", _wrap_Mat___getitem__, METH_VARARGS, (char *)"Mat___getitem__(Mat self, int i, int j) -> float"},
-	 { (char *)"Mat_rows", _wrap_Mat_rows, METH_VARARGS, (char *)"Mat_rows(Mat self) -> int"},
-	 { (char *)"Mat_cols", _wrap_Mat_cols, METH_VARARGS, (char *)"Mat_cols(Mat self) -> int"},
-	 { (char *)"Mat_setValue", _wrap_Mat_setValue, METH_VARARGS, (char *)"Mat_setValue(Mat self, int i, int j, float value)"},
-	 { (char *)"delete_Mat", _wrap_delete_Mat, METH_VARARGS, (char *)"delete_Mat(Mat self)"},
-	 { (char *)"Mat_swigregister", Mat_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Sequence", _wrap_new_Sequence, METH_VARARGS, (char *)"new_Sequence() -> Sequence"},
-	 { (char *)"delete_Sequence", _wrap_delete_Sequence, METH_VARARGS, (char *)"delete_Sequence(Sequence self)"},
-	 { (char *)"Sequence_size", _wrap_Sequence_size, METH_VARARGS, (char *)"Sequence_size(Sequence self) -> int"},
-	 { (char *)"Sequence___getitem__", _wrap_Sequence___getitem__, METH_VARARGS, (char *)"Sequence___getitem__(Sequence self, int i) -> Mat"},
-	 { (char *)"Sequence_length", _wrap_Sequence_length, METH_VARARGS, (char *)"Sequence_length(Sequence self) -> int"},
-	 { (char *)"Sequence_depth", _wrap_Sequence_depth, METH_VARARGS, (char *)"Sequence_depth(Sequence self) -> int"},
-	 { (char *)"Sequence_batchsize", _wrap_Sequence_batchsize, METH_VARARGS, (char *)"Sequence_batchsize(Sequence self) -> int"},
-	 { (char *)"Sequence_assign", _wrap_Sequence_assign, METH_VARARGS, (char *)"Sequence_assign(Sequence self, Sequence other)"},
-	 { (char *)"Sequence_resize", _wrap_Sequence_resize, METH_VARARGS, (char *)"Sequence_resize(Sequence self, int len, int depth, int batchsize)"},
-	 { (char *)"Sequence_swigregister", Sequence_swigregister, METH_VARARGS, NULL},
-	 { (char *)"delete_ITrainable", _wrap_delete_ITrainable, METH_VARARGS, (char *)"delete_ITrainable(ITrainable self)"},
-	 { (char *)"ITrainable_name_set", _wrap_ITrainable_name_set, METH_VARARGS, (char *)"ITrainable_name_set(ITrainable self, string const & name)"},
-	 { (char *)"ITrainable_name_get", _wrap_ITrainable_name_get, METH_VARARGS, (char *)"ITrainable_name_get(ITrainable self) -> string const &"},
-	 { (char *)"ITrainable_learning_rate_set", _wrap_ITrainable_learning_rate_set, METH_VARARGS, (char *)"ITrainable_learning_rate_set(ITrainable self, Float learning_rate)"},
-	 { (char *)"ITrainable_learning_rate_get", _wrap_ITrainable_learning_rate_get, METH_VARARGS, (char *)"ITrainable_learning_rate_get(ITrainable self) -> Float"},
-	 { (char *)"ITrainable_momentum_set", _wrap_ITrainable_momentum_set, METH_VARARGS, (char *)"ITrainable_momentum_set(ITrainable self, Float momentum)"},
-	 { (char *)"ITrainable_momentum_get", _wrap_ITrainable_momentum_get, METH_VARARGS, (char *)"ITrainable_momentum_get(ITrainable self) -> Float"},
-	 { (char *)"ITrainable_normalization_set", _wrap_ITrainable_normalization_set, METH_VARARGS, (char *)"ITrainable_normalization_set(ITrainable self, enum ITrainable::Normalization normalization)"},
-	 { (char *)"ITrainable_normalization_get", _wrap_ITrainable_normalization_get, METH_VARARGS, (char *)"ITrainable_normalization_get(ITrainable self) -> enum ITrainable::Normalization"},
-	 { (char *)"ITrainable_attributes_set", _wrap_ITrainable_attributes_set, METH_VARARGS, (char *)"ITrainable_attributes_set(ITrainable self, map< string,string > * attributes)"},
-	 { (char *)"ITrainable_attributes_get", _wrap_ITrainable_attributes_get, METH_VARARGS, (char *)"ITrainable_attributes_get(ITrainable self) -> map< string,string > *"},
-	 { (char *)"ITrainable_attr", _wrap_ITrainable_attr, METH_VARARGS, (char *)"\n"
-		"attr(string key, string dflt=\"\") -> string\n"
-		"ITrainable_attr(ITrainable self, string key) -> string\n"
-		""},
-	 { (char *)"ITrainable_iattr", _wrap_ITrainable_iattr, METH_VARARGS, (char *)"\n"
-		"iattr(string key, int dflt=-1) -> int\n"
-		"ITrainable_iattr(ITrainable self, string key) -> int\n"
-		""},
-	 { (char *)"ITrainable_irequire", _wrap_ITrainable_irequire, METH_VARARGS, (char *)"ITrainable_irequire(ITrainable self, string key) -> int"},
-	 { (char *)"ITrainable_set", _wrap_ITrainable_set, METH_VARARGS, (char *)"\n"
-		"set(string key, string value)\n"
-		"set(string key, int value)\n"
-		"ITrainable_set(ITrainable self, string key, double value)\n"
-		""},
-	 { (char *)"ITrainable_setLearningRate", _wrap_ITrainable_setLearningRate, METH_VARARGS, (char *)"ITrainable_setLearningRate(ITrainable self, Float lr, Float momentum)"},
-	 { (char *)"ITrainable_forward", _wrap_ITrainable_forward, METH_VARARGS, (char *)"ITrainable_forward(ITrainable self)"},
-	 { (char *)"ITrainable_backward", _wrap_ITrainable_backward, METH_VARARGS, (char *)"ITrainable_backward(ITrainable self)"},
-	 { (char *)"ITrainable_update", _wrap_ITrainable_update, METH_VARARGS, (char *)"ITrainable_update(ITrainable self)"},
-	 { (char *)"ITrainable_idepth", _wrap_ITrainable_idepth, METH_VARARGS, (char *)"ITrainable_idepth(ITrainable self) -> int"},
-	 { (char *)"ITrainable_odepth", _wrap_ITrainable_odepth, METH_VARARGS, (char *)"ITrainable_odepth(ITrainable self) -> int"},
-	 { (char *)"ITrainable_initialize", _wrap_ITrainable_initialize, METH_VARARGS, (char *)"ITrainable_initialize(ITrainable self)"},
-	 { (char *)"ITrainable_init", _wrap_ITrainable_init, METH_VARARGS, (char *)"\n"
-		"init(int no, int ni)\n"
-		"init(int no, int nh, int ni)\n"
-		"ITrainable_init(ITrainable self, int no, int nh2, int nh, int ni)\n"
-		""},
-	 { (char *)"ITrainable_swigregister", ITrainable_swigregister, METH_VARARGS, NULL},
-	 { (char *)"vectornet_iterator", _wrap_vectornet_iterator, METH_VARARGS, (char *)"vectornet_iterator(vectornet self) -> SwigPyIterator"},
-	 { (char *)"vectornet___nonzero__", _wrap_vectornet___nonzero__, METH_VARARGS, (char *)"vectornet___nonzero__(vectornet self) -> bool"},
-	 { (char *)"vectornet___bool__", _wrap_vectornet___bool__, METH_VARARGS, (char *)"vectornet___bool__(vectornet self) -> bool"},
-	 { (char *)"vectornet___len__", _wrap_vectornet___len__, METH_VARARGS, (char *)"vectornet___len__(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::size_type"},
-	 { (char *)"vectornet_pop", _wrap_vectornet_pop, METH_VARARGS, (char *)"vectornet_pop(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::value_type"},
-	 { (char *)"vectornet___getslice__", _wrap_vectornet___getslice__, METH_VARARGS, (char *)"vectornet___getslice__(vectornet self, std::vector< std::shared_ptr< INetwork > >::difference_type i, std::vector< std::shared_ptr< INetwork > >::difference_type j) -> vectornet"},
-	 { (char *)"vectornet___setslice__", _wrap_vectornet___setslice__, METH_VARARGS, (char *)"\n"
-		"__setslice__(std::vector< std::shared_ptr< INetwork > >::difference_type i, std::vector< std::shared_ptr< INetwork > >::difference_type j, \n"
-		"    vectornet v=std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > >())\n"
-		"vectornet___setslice__(vectornet self, std::vector< std::shared_ptr< INetwork > >::difference_type i, std::vector< std::shared_ptr< INetwork > >::difference_type j)\n"
-		""},
-	 { (char *)"vectornet___delslice__", _wrap_vectornet___delslice__, METH_VARARGS, (char *)"vectornet___delslice__(vectornet self, std::vector< std::shared_ptr< INetwork > >::difference_type i, std::vector< std::shared_ptr< INetwork > >::difference_type j)"},
-	 { (char *)"vectornet___delitem__", _wrap_vectornet___delitem__, METH_VARARGS, (char *)"\n"
-		"__delitem__(std::vector< std::shared_ptr< INetwork > >::difference_type i)\n"
-		"vectornet___delitem__(vectornet self, PySliceObject * slice)\n"
-		""},
-	 { (char *)"vectornet___getitem__", _wrap_vectornet___getitem__, METH_VARARGS, (char *)"\n"
-		"__getitem__(PySliceObject * slice) -> vectornet\n"
-		"vectornet___getitem__(vectornet self, std::vector< std::shared_ptr< INetwork > >::difference_type i) -> std::vector< std::shared_ptr< INetwork > >::value_type const &\n"
-		""},
-	 { (char *)"vectornet___setitem__", _wrap_vectornet___setitem__, METH_VARARGS, (char *)"\n"
-		"__setitem__(PySliceObject * slice, vectornet v)\n"
-		"__setitem__(PySliceObject * slice)\n"
-		"vectornet___setitem__(vectornet self, std::vector< std::shared_ptr< INetwork > >::difference_type i, std::vector< std::shared_ptr< INetwork > >::value_type const & x)\n"
-		""},
-	 { (char *)"vectornet_append", _wrap_vectornet_append, METH_VARARGS, (char *)"vectornet_append(vectornet self, std::vector< std::shared_ptr< INetwork > >::value_type const & x)"},
-	 { (char *)"vectornet_empty", _wrap_vectornet_empty, METH_VARARGS, (char *)"vectornet_empty(vectornet self) -> bool"},
-	 { (char *)"vectornet_size", _wrap_vectornet_size, METH_VARARGS, (char *)"vectornet_size(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::size_type"},
-	 { (char *)"vectornet_clear", _wrap_vectornet_clear, METH_VARARGS, (char *)"vectornet_clear(vectornet self)"},
-	 { (char *)"vectornet_swap", _wrap_vectornet_swap, METH_VARARGS, (char *)"vectornet_swap(vectornet self, vectornet v)"},
-	 { (char *)"vectornet_get_allocator", _wrap_vectornet_get_allocator, METH_VARARGS, (char *)"vectornet_get_allocator(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::allocator_type"},
-	 { (char *)"vectornet_begin", _wrap_vectornet_begin, METH_VARARGS, (char *)"vectornet_begin(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::iterator"},
-	 { (char *)"vectornet_end", _wrap_vectornet_end, METH_VARARGS, (char *)"vectornet_end(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::iterator"},
-	 { (char *)"vectornet_rbegin", _wrap_vectornet_rbegin, METH_VARARGS, (char *)"vectornet_rbegin(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::reverse_iterator"},
-	 { (char *)"vectornet_rend", _wrap_vectornet_rend, METH_VARARGS, (char *)"vectornet_rend(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::reverse_iterator"},
-	 { (char *)"vectornet_pop_back", _wrap_vectornet_pop_back, METH_VARARGS, (char *)"vectornet_pop_back(vectornet self)"},
-	 { (char *)"vectornet_erase", _wrap_vectornet_erase, METH_VARARGS, (char *)"\n"
-		"erase(std::vector< std::shared_ptr< INetwork > >::iterator pos) -> std::vector< std::shared_ptr< INetwork > >::iterator\n"
-		"vectornet_erase(vectornet self, std::vector< std::shared_ptr< INetwork > >::iterator first, std::vector< std::shared_ptr< INetwork > >::iterator last) -> std::vector< std::shared_ptr< INetwork > >::iterator\n"
-		""},
-	 { (char *)"new_vectornet", _wrap_new_vectornet, METH_VARARGS, (char *)"\n"
-		"vectornet()\n"
-		"vectornet(vectornet arg2)\n"
-		"vectornet(std::vector< std::shared_ptr< INetwork > >::size_type size)\n"
-		"new_vectornet(std::vector< std::shared_ptr< INetwork > >::size_type size, std::vector< std::shared_ptr< INetwork > >::value_type const & value) -> vectornet\n"
-		""},
-	 { (char *)"vectornet_push_back", _wrap_vectornet_push_back, METH_VARARGS, (char *)"vectornet_push_back(vectornet self, std::vector< std::shared_ptr< INetwork > >::value_type const & x)"},
-	 { (char *)"vectornet_front", _wrap_vectornet_front, METH_VARARGS, (char *)"vectornet_front(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::value_type const &"},
-	 { (char *)"vectornet_back", _wrap_vectornet_back, METH_VARARGS, (char *)"vectornet_back(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::value_type const &"},
-	 { (char *)"vectornet_assign", _wrap_vectornet_assign, METH_VARARGS, (char *)"vectornet_assign(vectornet self, std::vector< std::shared_ptr< INetwork > >::size_type n, std::vector< std::shared_ptr< INetwork > >::value_type const & x)"},
-	 { (char *)"vectornet_resize", _wrap_vectornet_resize, METH_VARARGS, (char *)"\n"
-		"resize(std::vector< std::shared_ptr< INetwork > >::size_type new_size)\n"
-		"vectornet_resize(vectornet self, std::vector< std::shared_ptr< INetwork > >::size_type new_size, std::vector< std::shared_ptr< INetwork > >::value_type const & x)\n"
-		""},
-	 { (char *)"vectornet_insert", _wrap_vectornet_insert, METH_VARARGS, (char *)"\n"
-		"insert(std::vector< std::shared_ptr< INetwork > >::iterator pos, std::vector< std::shared_ptr< INetwork > >::value_type const & x) -> std::vector< std::shared_ptr< INetwork > >::iterator\n"
-		"vectornet_insert(vectornet self, std::vector< std::shared_ptr< INetwork > >::iterator pos, std::vector< std::shared_ptr< INetwork > >::size_type n, \n"
-		"    std::vector< std::shared_ptr< INetwork > >::value_type const & x)\n"
-		""},
-	 { (char *)"vectornet_reserve", _wrap_vectornet_reserve, METH_VARARGS, (char *)"vectornet_reserve(vectornet self, std::vector< std::shared_ptr< INetwork > >::size_type n)"},
-	 { (char *)"vectornet_capacity", _wrap_vectornet_capacity, METH_VARARGS, (char *)"vectornet_capacity(vectornet self) -> std::vector< std::shared_ptr< INetwork > >::size_type"},
-	 { (char *)"delete_vectornet", _wrap_delete_vectornet, METH_VARARGS, (char *)"delete_vectornet(vectornet self)"},
-	 { (char *)"vectornet_swigregister", vectornet_swigregister, METH_VARARGS, NULL},
-	 { (char *)"delete_INetwork", _wrap_delete_INetwork, METH_VARARGS, (char *)"delete_INetwork(INetwork self)"},
-	 { (char *)"INetwork_inputs_set", _wrap_INetwork_inputs_set, METH_VARARGS, (char *)"INetwork_inputs_set(INetwork self, Sequence inputs)"},
-	 { (char *)"INetwork_inputs_get", _wrap_INetwork_inputs_get, METH_VARARGS, (char *)"INetwork_inputs_get(INetwork self) -> Sequence"},
-	 { (char *)"INetwork_d_inputs_set", _wrap_INetwork_d_inputs_set, METH_VARARGS, (char *)"INetwork_d_inputs_set(INetwork self, Sequence d_inputs)"},
-	 { (char *)"INetwork_d_inputs_get", _wrap_INetwork_d_inputs_get, METH_VARARGS, (char *)"INetwork_d_inputs_get(INetwork self) -> Sequence"},
-	 { (char *)"INetwork_outputs_set", _wrap_INetwork_outputs_set, METH_VARARGS, (char *)"INetwork_outputs_set(INetwork self, Sequence outputs)"},
-	 { (char *)"INetwork_outputs_get", _wrap_INetwork_outputs_get, METH_VARARGS, (char *)"INetwork_outputs_get(INetwork self) -> Sequence"},
-	 { (char *)"INetwork_d_outputs_set", _wrap_INetwork_d_outputs_set, METH_VARARGS, (char *)"INetwork_d_outputs_set(INetwork self, Sequence d_outputs)"},
-	 { (char *)"INetwork_d_outputs_get", _wrap_INetwork_d_outputs_get, METH_VARARGS, (char *)"INetwork_d_outputs_get(INetwork self) -> Sequence"},
-	 { (char *)"INetwork_sub_set", _wrap_INetwork_sub_set, METH_VARARGS, (char *)"INetwork_sub_set(INetwork self, vectornet sub)"},
-	 { (char *)"INetwork_sub_get", _wrap_INetwork_sub_get, METH_VARARGS, (char *)"INetwork_sub_get(INetwork self) -> vectornet"},
-	 { (char *)"INetwork_codec_set", _wrap_INetwork_codec_set, METH_VARARGS, (char *)"INetwork_codec_set(INetwork self, std::vector< int,std::allocator< int > > * codec)"},
-	 { (char *)"INetwork_codec_get", _wrap_INetwork_codec_get, METH_VARARGS, (char *)"INetwork_codec_get(INetwork self) -> std::vector< int,std::allocator< int > > *"},
-	 { (char *)"INetwork_icodec_set", _wrap_INetwork_icodec_set, METH_VARARGS, (char *)"INetwork_icodec_set(INetwork self, std::vector< int,std::allocator< int > > * icodec)"},
-	 { (char *)"INetwork_icodec_get", _wrap_INetwork_icodec_get, METH_VARARGS, (char *)"INetwork_icodec_get(INetwork self) -> std::vector< int,std::allocator< int > > *"},
-	 { (char *)"INetwork_decode", _wrap_INetwork_decode, METH_VARARGS, (char *)"INetwork_decode(INetwork self, Classes cs) -> std::wstring"},
-	 { (char *)"INetwork_idecode", _wrap_INetwork_idecode, METH_VARARGS, (char *)"INetwork_idecode(INetwork self, Classes cs) -> std::wstring"},
-	 { (char *)"INetwork_encode", _wrap_INetwork_encode, METH_VARARGS, (char *)"INetwork_encode(INetwork self, Classes cs, std::wstring & s)"},
-	 { (char *)"INetwork_iencode", _wrap_INetwork_iencode, METH_VARARGS, (char *)"INetwork_iencode(INetwork self, Classes cs, std::wstring & s)"},
-	 { (char *)"INetwork_softmax_floor_set", _wrap_INetwork_softmax_floor_set, METH_VARARGS, (char *)"INetwork_softmax_floor_set(INetwork self, Float softmax_floor)"},
-	 { (char *)"INetwork_softmax_floor_get", _wrap_INetwork_softmax_floor_get, METH_VARARGS, (char *)"INetwork_softmax_floor_get(INetwork self) -> Float"},
-	 { (char *)"INetwork_softmax_accel_set", _wrap_INetwork_softmax_accel_set, METH_VARARGS, (char *)"INetwork_softmax_accel_set(INetwork self, bool softmax_accel)"},
-	 { (char *)"INetwork_softmax_accel_get", _wrap_INetwork_softmax_accel_get, METH_VARARGS, (char *)"INetwork_softmax_accel_get(INetwork self) -> bool"},
-	 { (char *)"INetwork_ninput", _wrap_INetwork_ninput, METH_VARARGS, (char *)"INetwork_ninput(INetwork self) -> int"},
-	 { (char *)"INetwork_noutput", _wrap_INetwork_noutput, METH_VARARGS, (char *)"INetwork_noutput(INetwork self) -> int"},
-	 { (char *)"INetwork_add", _wrap_INetwork_add, METH_VARARGS, (char *)"INetwork_add(INetwork self, std::shared_ptr< INetwork > net)"},
-	 { (char *)"INetwork_setLearningRate", _wrap_INetwork_setLearningRate, METH_VARARGS, (char *)"INetwork_setLearningRate(INetwork self, Float lr, Float momentum)"},
-	 { (char *)"INetwork_info", _wrap_INetwork_info, METH_VARARGS, (char *)"INetwork_info(INetwork self, string prefix)"},
-	 { (char *)"INetwork_getState", _wrap_INetwork_getState, METH_VARARGS, (char *)"INetwork_getState(INetwork self, string name) -> Sequence"},
-	 { (char *)"INetwork_swigregister", INetwork_swigregister, METH_VARARGS, NULL},
-	 { (char *)"set_inputs", _wrap_set_inputs, METH_VARARGS, (char *)"set_inputs(INetwork net, Sequence inputs)"},
-	 { (char *)"set_targets", _wrap_set_targets, METH_VARARGS, (char *)"set_targets(INetwork net, Sequence targets)"},
-	 { (char *)"set_targets_accelerated", _wrap_set_targets_accelerated, METH_VARARGS, (char *)"set_targets_accelerated(INetwork net, Sequence targets)"},
-	 { (char *)"set_classes", _wrap_set_classes, METH_VARARGS, (char *)"set_classes(INetwork net, Classes classes)"},
-	 { (char *)"train", _wrap_train, METH_VARARGS, (char *)"train(INetwork net, Sequence xs, Sequence targets)"},
-	 { (char *)"ctrain", _wrap_ctrain, METH_VARARGS, (char *)"ctrain(INetwork net, Sequence xs, Classes cs)"},
-	 { (char *)"ctrain_accelerated", _wrap_ctrain_accelerated, METH_VARARGS, (char *)"\n"
-		"ctrain_accelerated(INetwork net, Sequence xs, Classes cs, Float lo=1e-5)\n"
-		"ctrain_accelerated(INetwork net, Sequence xs, Classes cs)\n"
-		""},
-	 { (char *)"cpred", _wrap_cpred, METH_VARARGS, (char *)"cpred(INetwork net, Classes preds, Sequence xs)"},
-	 { (char *)"mktargets", _wrap_mktargets, METH_VARARGS, (char *)"mktargets(Sequence seq, Classes targets, int ndim)"},
-	 { (char *)"seq_forward", _wrap_seq_forward, METH_VARARGS, (char *)"\n"
-		"seq_forward(Mat lr, Mat lmatch, double skip=-5.0)\n"
-		"seq_forward(Mat lr, Mat lmatch)\n"
-		""},
-	 { (char *)"seq_forwardbackward", _wrap_seq_forwardbackward, METH_VARARGS, (char *)"seq_forwardbackward(Mat both, Mat lmatch)"},
-	 { (char *)"seq_ctc_align", _wrap_seq_ctc_align, METH_VARARGS, (char *)"seq_ctc_align(Sequence posteriors, Sequence outputs, Sequence targets)"},
-	 { (char *)"make_net", _wrap_make_net, METH_VARARGS, (char *)"make_net(string kind) -> std::shared_ptr< INetwork >"},
-	 { (char *)"getdebugmat", _wrap_getdebugmat, METH_VARARGS, (char *)"getdebugmat() -> Mat"},
-	 { (char *)"string_edit_distance", _wrap_string_edit_distance, METH_VARARGS, (char *)"string_edit_distance(string a, string b) -> int"},
-	 { (char *)"network_info", _wrap_network_info, METH_VARARGS, (char *)"network_info(std::shared_ptr< INetwork > net) -> string"},
-	 { (char *)"sequence_info", _wrap_sequence_info, METH_VARARGS, (char *)"sequence_info(Sequence seq) -> string"},
-	 { (char *)"mat_of_array", _wrap_mat_of_array, METH_VARARGS, (char *)"mat_of_array(Mat a, PyObject * object_)"},
-	 { (char *)"array_of_mat", _wrap_array_of_mat, METH_VARARGS, (char *)"array_of_mat(PyObject * object_, Mat a)"},
-	 { (char *)"sequence_of_array", _wrap_sequence_of_array, METH_VARARGS, (char *)"sequence_of_array(Sequence a, PyObject * object_)"},
-	 { (char *)"array_of_sequence", _wrap_array_of_sequence, METH_VARARGS, (char *)"array_of_sequence(PyObject * object_, Sequence a)"},
-	 { NULL, NULL, 0, NULL }
-};
-
+    {(char *)"SWIG_PyInstanceMethod_New",
+     (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
+    {(char *)"delete_SwigPyIterator", _wrap_delete_SwigPyIterator, METH_VARARGS,
+     (char *) "delete_SwigPyIterator(SwigPyIterator self)"},
+    {(char *)"SwigPyIterator_value", _wrap_SwigPyIterator_value, METH_VARARGS,
+     (char *) "SwigPyIterator_value(SwigPyIterator self) -> PyObject *"},
+    {(char *)"SwigPyIterator_incr", _wrap_SwigPyIterator_incr, METH_VARARGS,
+     (char *) "\n"
+              "incr(size_t n=1) -> SwigPyIterator\n"
+              "SwigPyIterator_incr(SwigPyIterator self) -> SwigPyIterator\n"
+              ""},
+    {(char *)"SwigPyIterator_decr", _wrap_SwigPyIterator_decr, METH_VARARGS,
+     (char *) "\n"
+              "decr(size_t n=1) -> SwigPyIterator\n"
+              "SwigPyIterator_decr(SwigPyIterator self) -> SwigPyIterator\n"
+              ""},
+    {(char *)"SwigPyIterator_distance", _wrap_SwigPyIterator_distance,
+     METH_VARARGS, (char *) "SwigPyIterator_distance(SwigPyIterator self, "
+                            "SwigPyIterator x) -> ptrdiff_t"},
+    {(char *)"SwigPyIterator_equal", _wrap_SwigPyIterator_equal, METH_VARARGS,
+     (char *) "SwigPyIterator_equal(SwigPyIterator self, SwigPyIterator x) -> "
+              "bool"},
+    {(char *)"SwigPyIterator_copy", _wrap_SwigPyIterator_copy, METH_VARARGS,
+     (char *) "SwigPyIterator_copy(SwigPyIterator self) -> SwigPyIterator"},
+    {(char *)"SwigPyIterator_next", _wrap_SwigPyIterator_next, METH_VARARGS,
+     (char *) "SwigPyIterator_next(SwigPyIterator self) -> PyObject *"},
+    {(char *)"SwigPyIterator___next__", _wrap_SwigPyIterator___next__,
+     METH_VARARGS,
+     (char *) "SwigPyIterator___next__(SwigPyIterator self) -> PyObject *"},
+    {(char *)"SwigPyIterator_previous", _wrap_SwigPyIterator_previous,
+     METH_VARARGS,
+     (char *) "SwigPyIterator_previous(SwigPyIterator self) -> PyObject *"},
+    {(char *)"SwigPyIterator_advance", _wrap_SwigPyIterator_advance,
+     METH_VARARGS, (char *) "SwigPyIterator_advance(SwigPyIterator self, "
+                            "ptrdiff_t n) -> SwigPyIterator"},
+    {(char *)"SwigPyIterator___eq__", _wrap_SwigPyIterator___eq__, METH_VARARGS,
+     (char *) "SwigPyIterator___eq__(SwigPyIterator self, SwigPyIterator x) -> "
+              "bool"},
+    {(char *)"SwigPyIterator___ne__", _wrap_SwigPyIterator___ne__, METH_VARARGS,
+     (char *) "SwigPyIterator___ne__(SwigPyIterator self, SwigPyIterator x) -> "
+              "bool"},
+    {(char *)"SwigPyIterator___iadd__", _wrap_SwigPyIterator___iadd__,
+     METH_VARARGS, (char *) "SwigPyIterator___iadd__(SwigPyIterator self, "
+                            "ptrdiff_t n) -> SwigPyIterator"},
+    {(char *)"SwigPyIterator___isub__", _wrap_SwigPyIterator___isub__,
+     METH_VARARGS, (char *) "SwigPyIterator___isub__(SwigPyIterator self, "
+                            "ptrdiff_t n) -> SwigPyIterator"},
+    {(char *)"SwigPyIterator___add__", _wrap_SwigPyIterator___add__,
+     METH_VARARGS, (char *) "SwigPyIterator___add__(SwigPyIterator self, "
+                            "ptrdiff_t n) -> SwigPyIterator"},
+    {(char *)"SwigPyIterator___sub__", _wrap_SwigPyIterator___sub__,
+     METH_VARARGS, (char *) "\n"
+                            "__sub__(ptrdiff_t n) -> SwigPyIterator\n"
+                            "SwigPyIterator___sub__(SwigPyIterator self, "
+                            "SwigPyIterator x) -> ptrdiff_t\n"
+                            ""},
+    {(char *)"SwigPyIterator_swigregister", SwigPyIterator_swigregister,
+     METH_VARARGS, NULL},
+    {(char *)"new_Classes", _wrap_new_Classes, METH_VARARGS,
+     (char *) "new_Classes() -> Classes"},
+    {(char *)"delete_Classes", _wrap_delete_Classes, METH_VARARGS,
+     (char *) "delete_Classes(Classes self)"},
+    {(char *)"Classes___getitem__", _wrap_Classes___getitem__, METH_VARARGS,
+     (char *) "Classes___getitem__(Classes self, int i) -> int"},
+    {(char *)"Classes_size", _wrap_Classes_size, METH_VARARGS,
+     (char *) "Classes_size(Classes self) -> int"},
+    {(char *)"Classes_resize", _wrap_Classes_resize, METH_VARARGS,
+     (char *) "Classes_resize(Classes self, int arg2)"},
+    {(char *)"Classes___setitem__", _wrap_Classes___setitem__, METH_VARARGS,
+     (char *) "Classes___setitem__(Classes self, int i, int value)"},
+    {(char *)"Classes_swigregister", Classes_swigregister, METH_VARARGS, NULL},
+    {(char *)"new_Vec", _wrap_new_Vec, METH_VARARGS,
+     (char *) "\n"
+              "Vec()\n"
+              "new_Vec(int arg1) -> Vec\n"
+              ""},
+    {(char *)"Vec___getitem__", _wrap_Vec___getitem__, METH_VARARGS,
+     (char *) "Vec___getitem__(Vec self, int i) -> float"},
+    {(char *)"Vec_size", _wrap_Vec_size, METH_VARARGS,
+     (char *) "Vec_size(Vec self) -> int"},
+    {(char *)"Vec___setitem__", _wrap_Vec___setitem__, METH_VARARGS,
+     (char *) "Vec___setitem__(Vec self, int i, float value)"},
+    {(char *)"delete_Vec", _wrap_delete_Vec, METH_VARARGS,
+     (char *) "delete_Vec(Vec self)"},
+    {(char *)"Vec_swigregister", Vec_swigregister, METH_VARARGS, NULL},
+    {(char *)"new_Mat", _wrap_new_Mat, METH_VARARGS,
+     (char *) "\n"
+              "Mat()\n"
+              "new_Mat(int arg1, int arg2) -> Mat\n"
+              ""},
+    {(char *)"Mat___getitem__", _wrap_Mat___getitem__, METH_VARARGS,
+     (char *) "Mat___getitem__(Mat self, int i, int j) -> float"},
+    {(char *)"Mat_rows", _wrap_Mat_rows, METH_VARARGS,
+     (char *) "Mat_rows(Mat self) -> int"},
+    {(char *)"Mat_cols", _wrap_Mat_cols, METH_VARARGS,
+     (char *) "Mat_cols(Mat self) -> int"},
+    {(char *)"Mat_setValue", _wrap_Mat_setValue, METH_VARARGS,
+     (char *) "Mat_setValue(Mat self, int i, int j, float value)"},
+    {(char *)"delete_Mat", _wrap_delete_Mat, METH_VARARGS,
+     (char *) "delete_Mat(Mat self)"},
+    {(char *)"Mat_swigregister", Mat_swigregister, METH_VARARGS, NULL},
+    {(char *)"new_Sequence", _wrap_new_Sequence, METH_VARARGS,
+     (char *) "new_Sequence() -> Sequence"},
+    {(char *)"delete_Sequence", _wrap_delete_Sequence, METH_VARARGS,
+     (char *) "delete_Sequence(Sequence self)"},
+    {(char *)"Sequence_size", _wrap_Sequence_size, METH_VARARGS,
+     (char *) "Sequence_size(Sequence self) -> int"},
+    {(char *)"Sequence___getitem__", _wrap_Sequence___getitem__, METH_VARARGS,
+     (char *) "Sequence___getitem__(Sequence self, int i) -> Mat"},
+    {(char *)"Sequence_length", _wrap_Sequence_length, METH_VARARGS,
+     (char *) "Sequence_length(Sequence self) -> int"},
+    {(char *)"Sequence_depth", _wrap_Sequence_depth, METH_VARARGS,
+     (char *) "Sequence_depth(Sequence self) -> int"},
+    {(char *)"Sequence_batchsize", _wrap_Sequence_batchsize, METH_VARARGS,
+     (char *) "Sequence_batchsize(Sequence self) -> int"},
+    {(char *)"Sequence_assign", _wrap_Sequence_assign, METH_VARARGS,
+     (char *) "Sequence_assign(Sequence self, Sequence other)"},
+    {(char *)"Sequence_resize", _wrap_Sequence_resize, METH_VARARGS,
+     (char *) "Sequence_resize(Sequence self, int len, int depth, int "
+              "batchsize)"},
+    {(char *)"Sequence_swigregister", Sequence_swigregister, METH_VARARGS,
+     NULL},
+    {(char *)"delete_ITrainable", _wrap_delete_ITrainable, METH_VARARGS,
+     (char *) "delete_ITrainable(ITrainable self)"},
+    {(char *)"ITrainable_name_set", _wrap_ITrainable_name_set, METH_VARARGS,
+     (char *) "ITrainable_name_set(ITrainable self, string const & name)"},
+    {(char *)"ITrainable_name_get", _wrap_ITrainable_name_get, METH_VARARGS,
+     (char *) "ITrainable_name_get(ITrainable self) -> string const &"},
+    {(char *)"ITrainable_learning_rate_set", _wrap_ITrainable_learning_rate_set,
+     METH_VARARGS, (char *) "ITrainable_learning_rate_set(ITrainable self, "
+                            "Float learning_rate)"},
+    {(char *)"ITrainable_learning_rate_get", _wrap_ITrainable_learning_rate_get,
+     METH_VARARGS,
+     (char *) "ITrainable_learning_rate_get(ITrainable self) -> Float"},
+    {(char *)"ITrainable_momentum_set", _wrap_ITrainable_momentum_set,
+     METH_VARARGS,
+     (char *) "ITrainable_momentum_set(ITrainable self, Float momentum)"},
+    {(char *)"ITrainable_momentum_get", _wrap_ITrainable_momentum_get,
+     METH_VARARGS,
+     (char *) "ITrainable_momentum_get(ITrainable self) -> Float"},
+    {(char *)"ITrainable_normalization_set", _wrap_ITrainable_normalization_set,
+     METH_VARARGS, (char *) "ITrainable_normalization_set(ITrainable self, "
+                            "enum ITrainable::Normalization normalization)"},
+    {(char *)"ITrainable_normalization_get", _wrap_ITrainable_normalization_get,
+     METH_VARARGS, (char *) "ITrainable_normalization_get(ITrainable self) -> "
+                            "enum ITrainable::Normalization"},
+    {(char *)"ITrainable_attributes_set", _wrap_ITrainable_attributes_set,
+     METH_VARARGS, (char *) "ITrainable_attributes_set(ITrainable self, map< "
+                            "string,string > * attributes)"},
+    {(char *)"ITrainable_attributes_get", _wrap_ITrainable_attributes_get,
+     METH_VARARGS, (char *) "ITrainable_attributes_get(ITrainable self) -> "
+                            "map< string,string > *"},
+    {(char *)"ITrainable_attr", _wrap_ITrainable_attr, METH_VARARGS,
+     (char *) "\n"
+              "attr(string key, string dflt=\"\") -> string\n"
+              "ITrainable_attr(ITrainable self, string key) -> string\n"
+              ""},
+    {(char *)"ITrainable_iattr", _wrap_ITrainable_iattr, METH_VARARGS,
+     (char *) "\n"
+              "iattr(string key, int dflt=-1) -> int\n"
+              "ITrainable_iattr(ITrainable self, string key) -> int\n"
+              ""},
+    {(char *)"ITrainable_irequire", _wrap_ITrainable_irequire, METH_VARARGS,
+     (char *) "ITrainable_irequire(ITrainable self, string key) -> int"},
+    {(char *)"ITrainable_set", _wrap_ITrainable_set, METH_VARARGS,
+     (char *) "\n"
+              "set(string key, string value)\n"
+              "set(string key, int value)\n"
+              "ITrainable_set(ITrainable self, string key, double value)\n"
+              ""},
+    {(char *)"ITrainable_setLearningRate", _wrap_ITrainable_setLearningRate,
+     METH_VARARGS, (char *) "ITrainable_setLearningRate(ITrainable self, Float "
+                            "lr, Float momentum)"},
+    {(char *)"ITrainable_forward", _wrap_ITrainable_forward, METH_VARARGS,
+     (char *) "ITrainable_forward(ITrainable self)"},
+    {(char *)"ITrainable_backward", _wrap_ITrainable_backward, METH_VARARGS,
+     (char *) "ITrainable_backward(ITrainable self)"},
+    {(char *)"ITrainable_update", _wrap_ITrainable_update, METH_VARARGS,
+     (char *) "ITrainable_update(ITrainable self)"},
+    {(char *)"ITrainable_idepth", _wrap_ITrainable_idepth, METH_VARARGS,
+     (char *) "ITrainable_idepth(ITrainable self) -> int"},
+    {(char *)"ITrainable_odepth", _wrap_ITrainable_odepth, METH_VARARGS,
+     (char *) "ITrainable_odepth(ITrainable self) -> int"},
+    {(char *)"ITrainable_initialize", _wrap_ITrainable_initialize, METH_VARARGS,
+     (char *) "ITrainable_initialize(ITrainable self)"},
+    {(char *)"ITrainable_init", _wrap_ITrainable_init, METH_VARARGS,
+     (char *) "\n"
+              "init(int no, int ni)\n"
+              "init(int no, int nh, int ni)\n"
+              "ITrainable_init(ITrainable self, int no, int nh2, int nh, int "
+              "ni)\n"
+              ""},
+    {(char *)"ITrainable_swigregister", ITrainable_swigregister, METH_VARARGS,
+     NULL},
+    {(char *)"vectornet_iterator", _wrap_vectornet_iterator, METH_VARARGS,
+     (char *) "vectornet_iterator(vectornet self) -> SwigPyIterator"},
+    {(char *)"vectornet___nonzero__", _wrap_vectornet___nonzero__, METH_VARARGS,
+     (char *) "vectornet___nonzero__(vectornet self) -> bool"},
+    {(char *)"vectornet___bool__", _wrap_vectornet___bool__, METH_VARARGS,
+     (char *) "vectornet___bool__(vectornet self) -> bool"},
+    {(char *)"vectornet___len__", _wrap_vectornet___len__, METH_VARARGS,
+     (char *) "vectornet___len__(vectornet self) -> std::vector< "
+              "std::shared_ptr< INetwork > >::size_type"},
+    {(char *)"vectornet_pop", _wrap_vectornet_pop, METH_VARARGS,
+     (char *) "vectornet_pop(vectornet self) -> std::vector< std::shared_ptr< "
+              "INetwork > >::value_type"},
+    {(char *)"vectornet___getslice__", _wrap_vectornet___getslice__,
+     METH_VARARGS,
+     (char *) "vectornet___getslice__(vectornet self, std::vector< "
+              "std::shared_ptr< INetwork > >::difference_type i, std::vector< "
+              "std::shared_ptr< INetwork > >::difference_type j) -> vectornet"},
+    {(char *)"vectornet___setslice__", _wrap_vectornet___setslice__,
+     METH_VARARGS,
+     (char *) "\n"
+              "__setslice__(std::vector< std::shared_ptr< INetwork > "
+              ">::difference_type i, std::vector< std::shared_ptr< INetwork > "
+              ">::difference_type j, \n"
+              "    vectornet v=std::vector< std::shared_ptr< INetwork "
+              ">,std::allocator< std::shared_ptr< INetwork > > >())\n"
+              "vectornet___setslice__(vectornet self, std::vector< "
+              "std::shared_ptr< INetwork > >::difference_type i, std::vector< "
+              "std::shared_ptr< INetwork > >::difference_type j)\n"
+              ""},
+    {(char *)"vectornet___delslice__", _wrap_vectornet___delslice__,
+     METH_VARARGS,
+     (char *) "vectornet___delslice__(vectornet self, std::vector< "
+              "std::shared_ptr< INetwork > >::difference_type i, std::vector< "
+              "std::shared_ptr< INetwork > >::difference_type j)"},
+    {(char *)"vectornet___delitem__", _wrap_vectornet___delitem__, METH_VARARGS,
+     (char *) "\n"
+              "__delitem__(std::vector< std::shared_ptr< INetwork > "
+              ">::difference_type i)\n"
+              "vectornet___delitem__(vectornet self, PySliceObject * slice)\n"
+              ""},
+    {(char *)"vectornet___getitem__", _wrap_vectornet___getitem__, METH_VARARGS,
+     (char *) "\n"
+              "__getitem__(PySliceObject * slice) -> vectornet\n"
+              "vectornet___getitem__(vectornet self, std::vector< "
+              "std::shared_ptr< INetwork > >::difference_type i) -> "
+              "std::vector< std::shared_ptr< INetwork > >::value_type const &\n"
+              ""},
+    {(char *)"vectornet___setitem__", _wrap_vectornet___setitem__, METH_VARARGS,
+     (char *) "\n"
+              "__setitem__(PySliceObject * slice, vectornet v)\n"
+              "__setitem__(PySliceObject * slice)\n"
+              "vectornet___setitem__(vectornet self, std::vector< "
+              "std::shared_ptr< INetwork > >::difference_type i, std::vector< "
+              "std::shared_ptr< INetwork > >::value_type const & x)\n"
+              ""},
+    {(char *)"vectornet_append", _wrap_vectornet_append, METH_VARARGS,
+     (char *) "vectornet_append(vectornet self, std::vector< std::shared_ptr< "
+              "INetwork > >::value_type const & x)"},
+    {(char *)"vectornet_empty", _wrap_vectornet_empty, METH_VARARGS,
+     (char *) "vectornet_empty(vectornet self) -> bool"},
+    {(char *)"vectornet_size", _wrap_vectornet_size, METH_VARARGS,
+     (char *) "vectornet_size(vectornet self) -> std::vector< std::shared_ptr< "
+              "INetwork > >::size_type"},
+    {(char *)"vectornet_clear", _wrap_vectornet_clear, METH_VARARGS,
+     (char *) "vectornet_clear(vectornet self)"},
+    {(char *)"vectornet_swap", _wrap_vectornet_swap, METH_VARARGS,
+     (char *) "vectornet_swap(vectornet self, vectornet v)"},
+    {(char *)"vectornet_get_allocator", _wrap_vectornet_get_allocator,
+     METH_VARARGS,
+     (char *) "vectornet_get_allocator(vectornet self) -> std::vector< "
+              "std::shared_ptr< INetwork > >::allocator_type"},
+    {(char *)"vectornet_begin", _wrap_vectornet_begin, METH_VARARGS,
+     (char *) "vectornet_begin(vectornet self) -> std::vector< "
+              "std::shared_ptr< INetwork > >::iterator"},
+    {(char *)"vectornet_end", _wrap_vectornet_end, METH_VARARGS,
+     (char *) "vectornet_end(vectornet self) -> std::vector< std::shared_ptr< "
+              "INetwork > >::iterator"},
+    {(char *)"vectornet_rbegin", _wrap_vectornet_rbegin, METH_VARARGS,
+     (char *) "vectornet_rbegin(vectornet self) -> std::vector< "
+              "std::shared_ptr< INetwork > >::reverse_iterator"},
+    {(char *)"vectornet_rend", _wrap_vectornet_rend, METH_VARARGS,
+     (char *) "vectornet_rend(vectornet self) -> std::vector< std::shared_ptr< "
+              "INetwork > >::reverse_iterator"},
+    {(char *)"vectornet_pop_back", _wrap_vectornet_pop_back, METH_VARARGS,
+     (char *) "vectornet_pop_back(vectornet self)"},
+    {(char *)"vectornet_erase", _wrap_vectornet_erase, METH_VARARGS,
+     (char *) "\n"
+              "erase(std::vector< std::shared_ptr< INetwork > >::iterator pos) "
+              "-> std::vector< std::shared_ptr< INetwork > >::iterator\n"
+              "vectornet_erase(vectornet self, std::vector< std::shared_ptr< "
+              "INetwork > >::iterator first, std::vector< std::shared_ptr< "
+              "INetwork > >::iterator last) -> std::vector< std::shared_ptr< "
+              "INetwork > >::iterator\n"
+              ""},
+    {(char *)"new_vectornet", _wrap_new_vectornet, METH_VARARGS,
+     (char *) "\n"
+              "vectornet()\n"
+              "vectornet(vectornet arg2)\n"
+              "vectornet(std::vector< std::shared_ptr< INetwork > >::size_type "
+              "size)\n"
+              "new_vectornet(std::vector< std::shared_ptr< INetwork > "
+              ">::size_type size, std::vector< std::shared_ptr< INetwork > "
+              ">::value_type const & value) -> vectornet\n"
+              ""},
+    {(char *)"vectornet_push_back", _wrap_vectornet_push_back, METH_VARARGS,
+     (char *) "vectornet_push_back(vectornet self, std::vector< "
+              "std::shared_ptr< INetwork > >::value_type const & x)"},
+    {(char *)"vectornet_front", _wrap_vectornet_front, METH_VARARGS,
+     (char *) "vectornet_front(vectornet self) -> std::vector< "
+              "std::shared_ptr< INetwork > >::value_type const &"},
+    {(char *)"vectornet_back", _wrap_vectornet_back, METH_VARARGS,
+     (char *) "vectornet_back(vectornet self) -> std::vector< std::shared_ptr< "
+              "INetwork > >::value_type const &"},
+    {(char *)"vectornet_assign", _wrap_vectornet_assign, METH_VARARGS,
+     (char *) "vectornet_assign(vectornet self, std::vector< std::shared_ptr< "
+              "INetwork > >::size_type n, std::vector< std::shared_ptr< "
+              "INetwork > >::value_type const & x)"},
+    {(char *)"vectornet_resize", _wrap_vectornet_resize, METH_VARARGS,
+     (char *) "\n"
+              "resize(std::vector< std::shared_ptr< INetwork > >::size_type "
+              "new_size)\n"
+              "vectornet_resize(vectornet self, std::vector< std::shared_ptr< "
+              "INetwork > >::size_type new_size, std::vector< std::shared_ptr< "
+              "INetwork > >::value_type const & x)\n"
+              ""},
+    {(char *)"vectornet_insert", _wrap_vectornet_insert, METH_VARARGS,
+     (char *) "\n"
+              "insert(std::vector< std::shared_ptr< INetwork > >::iterator "
+              "pos, std::vector< std::shared_ptr< INetwork > >::value_type "
+              "const & x) -> std::vector< std::shared_ptr< INetwork > "
+              ">::iterator\n"
+              "vectornet_insert(vectornet self, std::vector< std::shared_ptr< "
+              "INetwork > >::iterator pos, std::vector< std::shared_ptr< "
+              "INetwork > >::size_type n, \n"
+              "    std::vector< std::shared_ptr< INetwork > >::value_type "
+              "const & x)\n"
+              ""},
+    {(char *)"vectornet_reserve", _wrap_vectornet_reserve, METH_VARARGS,
+     (char *) "vectornet_reserve(vectornet self, std::vector< std::shared_ptr< "
+              "INetwork > >::size_type n)"},
+    {(char *)"vectornet_capacity", _wrap_vectornet_capacity, METH_VARARGS,
+     (char *) "vectornet_capacity(vectornet self) -> std::vector< "
+              "std::shared_ptr< INetwork > >::size_type"},
+    {(char *)"delete_vectornet", _wrap_delete_vectornet, METH_VARARGS,
+     (char *) "delete_vectornet(vectornet self)"},
+    {(char *)"vectornet_swigregister", vectornet_swigregister, METH_VARARGS,
+     NULL},
+    {(char *)"delete_INetwork", _wrap_delete_INetwork, METH_VARARGS,
+     (char *) "delete_INetwork(INetwork self)"},
+    {(char *)"INetwork_inputs_set", _wrap_INetwork_inputs_set, METH_VARARGS,
+     (char *) "INetwork_inputs_set(INetwork self, Sequence inputs)"},
+    {(char *)"INetwork_inputs_get", _wrap_INetwork_inputs_get, METH_VARARGS,
+     (char *) "INetwork_inputs_get(INetwork self) -> Sequence"},
+    {(char *)"INetwork_d_inputs_set", _wrap_INetwork_d_inputs_set, METH_VARARGS,
+     (char *) "INetwork_d_inputs_set(INetwork self, Sequence d_inputs)"},
+    {(char *)"INetwork_d_inputs_get", _wrap_INetwork_d_inputs_get, METH_VARARGS,
+     (char *) "INetwork_d_inputs_get(INetwork self) -> Sequence"},
+    {(char *)"INetwork_outputs_set", _wrap_INetwork_outputs_set, METH_VARARGS,
+     (char *) "INetwork_outputs_set(INetwork self, Sequence outputs)"},
+    {(char *)"INetwork_outputs_get", _wrap_INetwork_outputs_get, METH_VARARGS,
+     (char *) "INetwork_outputs_get(INetwork self) -> Sequence"},
+    {(char *)"INetwork_d_outputs_set", _wrap_INetwork_d_outputs_set,
+     METH_VARARGS,
+     (char *) "INetwork_d_outputs_set(INetwork self, Sequence d_outputs)"},
+    {(char *)"INetwork_d_outputs_get", _wrap_INetwork_d_outputs_get,
+     METH_VARARGS,
+     (char *) "INetwork_d_outputs_get(INetwork self) -> Sequence"},
+    {(char *)"INetwork_sub_set", _wrap_INetwork_sub_set, METH_VARARGS,
+     (char *) "INetwork_sub_set(INetwork self, vectornet sub)"},
+    {(char *)"INetwork_sub_get", _wrap_INetwork_sub_get, METH_VARARGS,
+     (char *) "INetwork_sub_get(INetwork self) -> vectornet"},
+    {(char *)"INetwork_codec_set", _wrap_INetwork_codec_set, METH_VARARGS,
+     (char *) "INetwork_codec_set(INetwork self, std::vector< "
+              "int,std::allocator< int > > * codec)"},
+    {(char *)"INetwork_codec_get", _wrap_INetwork_codec_get, METH_VARARGS,
+     (char *) "INetwork_codec_get(INetwork self) -> std::vector< "
+              "int,std::allocator< int > > *"},
+    {(char *)"INetwork_icodec_set", _wrap_INetwork_icodec_set, METH_VARARGS,
+     (char *) "INetwork_icodec_set(INetwork self, std::vector< "
+              "int,std::allocator< int > > * icodec)"},
+    {(char *)"INetwork_icodec_get", _wrap_INetwork_icodec_get, METH_VARARGS,
+     (char *) "INetwork_icodec_get(INetwork self) -> std::vector< "
+              "int,std::allocator< int > > *"},
+    {(char *)"INetwork_decode", _wrap_INetwork_decode, METH_VARARGS,
+     (char *) "INetwork_decode(INetwork self, Classes cs) -> std::wstring"},
+    {(char *)"INetwork_idecode", _wrap_INetwork_idecode, METH_VARARGS,
+     (char *) "INetwork_idecode(INetwork self, Classes cs) -> std::wstring"},
+    {(char *)"INetwork_encode", _wrap_INetwork_encode, METH_VARARGS,
+     (char *) "INetwork_encode(INetwork self, Classes cs, std::wstring & s)"},
+    {(char *)"INetwork_iencode", _wrap_INetwork_iencode, METH_VARARGS,
+     (char *) "INetwork_iencode(INetwork self, Classes cs, std::wstring & s)"},
+    {(char *)"INetwork_softmax_floor_set", _wrap_INetwork_softmax_floor_set,
+     METH_VARARGS,
+     (char *) "INetwork_softmax_floor_set(INetwork self, Float softmax_floor)"},
+    {(char *)"INetwork_softmax_floor_get", _wrap_INetwork_softmax_floor_get,
+     METH_VARARGS,
+     (char *) "INetwork_softmax_floor_get(INetwork self) -> Float"},
+    {(char *)"INetwork_softmax_accel_set", _wrap_INetwork_softmax_accel_set,
+     METH_VARARGS,
+     (char *) "INetwork_softmax_accel_set(INetwork self, bool softmax_accel)"},
+    {(char *)"INetwork_softmax_accel_get", _wrap_INetwork_softmax_accel_get,
+     METH_VARARGS,
+     (char *) "INetwork_softmax_accel_get(INetwork self) -> bool"},
+    {(char *)"INetwork_ninput", _wrap_INetwork_ninput, METH_VARARGS,
+     (char *) "INetwork_ninput(INetwork self) -> int"},
+    {(char *)"INetwork_noutput", _wrap_INetwork_noutput, METH_VARARGS,
+     (char *) "INetwork_noutput(INetwork self) -> int"},
+    {(char *)"INetwork_add", _wrap_INetwork_add, METH_VARARGS,
+     (char *) "INetwork_add(INetwork self, std::shared_ptr< INetwork > net)"},
+    {(char *)"INetwork_setLearningRate", _wrap_INetwork_setLearningRate,
+     METH_VARARGS, (char *) "INetwork_setLearningRate(INetwork self, Float lr, "
+                            "Float momentum)"},
+    {(char *)"INetwork_info", _wrap_INetwork_info, METH_VARARGS,
+     (char *) "INetwork_info(INetwork self, string prefix)"},
+    {(char *)"INetwork_getState", _wrap_INetwork_getState, METH_VARARGS,
+     (char *) "INetwork_getState(INetwork self, string name) -> Sequence"},
+    {(char *)"INetwork_swigregister", INetwork_swigregister, METH_VARARGS,
+     NULL},
+    {(char *)"set_inputs", _wrap_set_inputs, METH_VARARGS,
+     (char *) "set_inputs(INetwork net, Sequence inputs)"},
+    {(char *)"set_targets", _wrap_set_targets, METH_VARARGS,
+     (char *) "set_targets(INetwork net, Sequence targets)"},
+    {(char *)"set_targets_accelerated", _wrap_set_targets_accelerated,
+     METH_VARARGS,
+     (char *) "set_targets_accelerated(INetwork net, Sequence targets)"},
+    {(char *)"set_classes", _wrap_set_classes, METH_VARARGS,
+     (char *) "set_classes(INetwork net, Classes classes)"},
+    {(char *)"train", _wrap_train, METH_VARARGS,
+     (char *) "train(INetwork net, Sequence xs, Sequence targets)"},
+    {(char *)"ctrain", _wrap_ctrain, METH_VARARGS,
+     (char *) "ctrain(INetwork net, Sequence xs, Classes cs)"},
+    {(char *)"ctrain_accelerated", _wrap_ctrain_accelerated, METH_VARARGS,
+     (char *) "\n"
+              "ctrain_accelerated(INetwork net, Sequence xs, Classes cs, Float "
+              "lo=1e-5)\n"
+              "ctrain_accelerated(INetwork net, Sequence xs, Classes cs)\n"
+              ""},
+    {(char *)"cpred", _wrap_cpred, METH_VARARGS,
+     (char *) "cpred(INetwork net, Classes preds, Sequence xs)"},
+    {(char *)"mktargets", _wrap_mktargets, METH_VARARGS,
+     (char *) "mktargets(Sequence seq, Classes targets, int ndim)"},
+    {(char *)"seq_forward", _wrap_seq_forward, METH_VARARGS,
+     (char *) "\n"
+              "seq_forward(Mat lr, Mat lmatch, double skip=-5.0)\n"
+              "seq_forward(Mat lr, Mat lmatch)\n"
+              ""},
+    {(char *)"seq_forwardbackward", _wrap_seq_forwardbackward, METH_VARARGS,
+     (char *) "seq_forwardbackward(Mat both, Mat lmatch)"},
+    {(char *)"seq_ctc_align", _wrap_seq_ctc_align, METH_VARARGS,
+     (char *) "seq_ctc_align(Sequence posteriors, Sequence outputs, Sequence "
+              "targets)"},
+    {(char *)"make_net", _wrap_make_net, METH_VARARGS,
+     (char *) "make_net(string kind) -> std::shared_ptr< INetwork >"},
+    {(char *)"getdebugmat", _wrap_getdebugmat, METH_VARARGS,
+     (char *) "getdebugmat() -> Mat"},
+    {(char *)"string_edit_distance", _wrap_string_edit_distance, METH_VARARGS,
+     (char *) "string_edit_distance(string a, string b) -> int"},
+    {(char *)"network_info", _wrap_network_info, METH_VARARGS,
+     (char *) "network_info(std::shared_ptr< INetwork > net) -> string"},
+    {(char *)"sequence_info", _wrap_sequence_info, METH_VARARGS,
+     (char *) "sequence_info(Sequence seq) -> string"},
+    {(char *)"mat_of_array", _wrap_mat_of_array, METH_VARARGS,
+     (char *) "mat_of_array(Mat a, PyObject * object_)"},
+    {(char *)"array_of_mat", _wrap_array_of_mat, METH_VARARGS,
+     (char *) "array_of_mat(PyObject * object_, Mat a)"},
+    {(char *)"sequence_of_array", _wrap_sequence_of_array, METH_VARARGS,
+     (char *) "sequence_of_array(Sequence a, PyObject * object_)"},
+    {(char *)"array_of_sequence", _wrap_array_of_sequence, METH_VARARGS,
+     (char *) "array_of_sequence(PyObject * object_, Sequence a)"},
+    {NULL, NULL, 0, NULL}};
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
-static void *_p_INetworkTo_p_ITrainable(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((ITrainable *)  ((INetwork *) x));
+static void *_p_INetworkTo_p_ITrainable(void *x,
+                                        int *SWIGUNUSEDPARM(newmemory)) {
+  return (void *)((ITrainable *)((INetwork *)x));
 }
-static void *_p_std__shared_ptrT_INetwork_tTo_p_std__shared_ptrT_ITrainable_t(void *x, int *newmemory) {
-    *newmemory = SWIG_CAST_NEW_MEMORY;
-    return (void *) new std::shared_ptr< ITrainable >(*(std::shared_ptr< INetwork > *)x);
+static void *_p_std__shared_ptrT_INetwork_tTo_p_std__shared_ptrT_ITrainable_t(
+    void *x, int *newmemory) {
+  *newmemory = SWIG_CAST_NEW_MEMORY;
+  return (void *)new std::shared_ptr<ITrainable>(
+      *(std::shared_ptr<INetwork> *)x);
 }
-static swig_type_info _swigt__p_Classes = {"_p_Classes", "Classes *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_INetwork = {"_p_INetwork", "INetwork *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_ITrainable = {"_p_ITrainable", "ITrainable *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Mat = {"_p_Mat", "Mat *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Sequence = {"_p_Sequence", "Sequence *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Vec = {"_p_Vec", "Vec *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_allocator_type = {"_p_allocator_type", "allocator_type *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_difference_type = {"_p_difference_type", "difference_type *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_float = {"_p_float", "float *|Float *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_mapT_std__string_std__string_t = {"_p_mapT_std__string_std__string_t", "map< std::string,std::string > *|map< string,string > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_p_PyObject = {"_p_p_PyObject", "PyObject **", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__allocatorT_std__shared_ptrT_INetwork_t_t = {"_p_std__allocatorT_std__shared_ptrT_INetwork_t_t", "std::allocator< std::shared_ptr< INetwork > > *|std::vector< std::shared_ptr< INetwork > >::allocator_type *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__invalid_argument = {"_p_std__invalid_argument", "std::invalid_argument *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__shared_ptrT_INetwork_t = {"_p_std__shared_ptrT_INetwork_t", "std::shared_ptr< INetwork > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__shared_ptrT_ITrainable_t = {"_p_std__shared_ptrT_ITrainable_t", "std::shared_ptr< ITrainable > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__vectorT__Tp__Alloc_t = {"_p_std__vectorT__Tp__Alloc_t", "std::vector< _Tp,_Alloc > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__vectorT_int_std__allocatorT_int_t_t = {"_p_std__vectorT_int_std__allocatorT_int_t_t", "std::vector< int,std::allocator< int > > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t = {"_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t", "std::vector< std::shared_ptr< INetwork > > *|std::vector< std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< INetwork > > > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__wstring = {"_p_std__wstring", "std::wstring *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_swig__SwigPyIterator = {"_p_swig__SwigPyIterator", "swig::SwigPyIterator *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_value_type = {"_p_value_type", "value_type *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_wchar_t = {"_p_wchar_t", "wchar_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Classes = {
+    "_p_Classes", "Classes *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_INetwork = {
+    "_p_INetwork", "INetwork *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_ITrainable = {
+    "_p_ITrainable", "ITrainable *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_Mat = {"_p_Mat", "Mat *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_Sequence = {
+    "_p_Sequence", "Sequence *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_Vec = {"_p_Vec", "Vec *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_allocator_type = {
+    "_p_allocator_type", "allocator_type *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_char = {"_p_char", "char *",  0,
+                                        0,         (void *)0, 0};
+static swig_type_info _swigt__p_difference_type = {
+    "_p_difference_type", "difference_type *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_float = {"_p_float", "float *|Float *", 0,
+                                         0,          (void *)0,         0};
+static swig_type_info _swigt__p_mapT_std__string_std__string_t = {
+    "_p_mapT_std__string_std__string_t",
+    "map< std::string,std::string > *|map< string,string > *",
+    0,
+    0,
+    (void *)0,
+    0};
+static swig_type_info _swigt__p_p_PyObject = {
+    "_p_p_PyObject", "PyObject **", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_size_type = {
+    "_p_size_type", "size_type *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_std__allocatorT_std__shared_ptrT_INetwork_t_t =
+    {"_p_std__allocatorT_std__shared_ptrT_INetwork_t_t",
+     "std::allocator< std::shared_ptr< INetwork > > *|std::vector< "
+     "std::shared_ptr< INetwork > >::allocator_type *",
+     0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_std__invalid_argument = {
+    "_p_std__invalid_argument", "std::invalid_argument *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_std__shared_ptrT_INetwork_t = {
+    "_p_std__shared_ptrT_INetwork_t",
+    "std::shared_ptr< INetwork > *",
+    0,
+    0,
+    (void *)0,
+    0};
+static swig_type_info _swigt__p_std__shared_ptrT_ITrainable_t = {
+    "_p_std__shared_ptrT_ITrainable_t",
+    "std::shared_ptr< ITrainable > *",
+    0,
+    0,
+    (void *)0,
+    0};
+static swig_type_info _swigt__p_std__vectorT__Tp__Alloc_t = {
+    "_p_std__vectorT__Tp__Alloc_t",
+    "std::vector< _Tp,_Alloc > *",
+    0,
+    0,
+    (void *)0,
+    0};
+static swig_type_info _swigt__p_std__vectorT_int_std__allocatorT_int_t_t = {
+    "_p_std__vectorT_int_std__allocatorT_int_t_t",
+    "std::vector< int,std::allocator< int > > *",
+    0,
+    0,
+    (void *)0,
+    0};
+static swig_type_info
+    _swigt__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t =
+        {"_p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__"
+         "shared_ptrT_INetwork_t_t_t",
+         "std::vector< std::shared_ptr< INetwork > > *|std::vector< "
+         "std::shared_ptr< INetwork >,std::allocator< std::shared_ptr< "
+         "INetwork > > > *",
+         0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_std__wstring = {
+    "_p_std__wstring", "std::wstring *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_swig__SwigPyIterator = {
+    "_p_swig__SwigPyIterator", "swig::SwigPyIterator *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_value_type = {
+    "_p_value_type", "value_type *", 0, 0, (void *)0, 0};
+static swig_type_info _swigt__p_wchar_t = {
+    "_p_wchar_t", "wchar_t *", 0, 0, (void *)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
-  &_swigt__p_Classes,
-  &_swigt__p_INetwork,
-  &_swigt__p_ITrainable,
-  &_swigt__p_Mat,
-  &_swigt__p_Sequence,
-  &_swigt__p_Vec,
-  &_swigt__p_allocator_type,
-  &_swigt__p_char,
-  &_swigt__p_difference_type,
-  &_swigt__p_float,
-  &_swigt__p_mapT_std__string_std__string_t,
-  &_swigt__p_p_PyObject,
-  &_swigt__p_size_type,
-  &_swigt__p_std__allocatorT_std__shared_ptrT_INetwork_t_t,
-  &_swigt__p_std__invalid_argument,
-  &_swigt__p_std__shared_ptrT_INetwork_t,
-  &_swigt__p_std__shared_ptrT_ITrainable_t,
-  &_swigt__p_std__vectorT__Tp__Alloc_t,
-  &_swigt__p_std__vectorT_int_std__allocatorT_int_t_t,
-  &_swigt__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
-  &_swigt__p_std__wstring,
-  &_swigt__p_swig__SwigPyIterator,
-  &_swigt__p_value_type,
-  &_swigt__p_wchar_t,
+    &_swigt__p_Classes, &_swigt__p_INetwork, &_swigt__p_ITrainable,
+    &_swigt__p_Mat, &_swigt__p_Sequence, &_swigt__p_Vec,
+    &_swigt__p_allocator_type, &_swigt__p_char, &_swigt__p_difference_type,
+    &_swigt__p_float, &_swigt__p_mapT_std__string_std__string_t,
+    &_swigt__p_p_PyObject, &_swigt__p_size_type,
+    &_swigt__p_std__allocatorT_std__shared_ptrT_INetwork_t_t,
+    &_swigt__p_std__invalid_argument, &_swigt__p_std__shared_ptrT_INetwork_t,
+    &_swigt__p_std__shared_ptrT_ITrainable_t,
+    &_swigt__p_std__vectorT__Tp__Alloc_t,
+    &_swigt__p_std__vectorT_int_std__allocatorT_int_t_t,
+    &_swigt__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+    &_swigt__p_std__wstring, &_swigt__p_swig__SwigPyIterator,
+    &_swigt__p_value_type, &_swigt__p_wchar_t,
 };
 
-static swig_cast_info _swigc__p_Classes[] = {  {&_swigt__p_Classes, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_INetwork[] = {  {&_swigt__p_INetwork, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_ITrainable[] = {  {&_swigt__p_INetwork, _p_INetworkTo_p_ITrainable, 0, 0},  {&_swigt__p_ITrainable, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_Mat[] = {  {&_swigt__p_Mat, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_Sequence[] = {  {&_swigt__p_Sequence, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_Vec[] = {  {&_swigt__p_Vec, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_difference_type[] = {  {&_swigt__p_difference_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_float[] = {  {&_swigt__p_float, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_mapT_std__string_std__string_t[] = {  {&_swigt__p_mapT_std__string_std__string_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_p_PyObject[] = {  {&_swigt__p_p_PyObject, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__allocatorT_std__shared_ptrT_INetwork_t_t[] = {  {&_swigt__p_std__allocatorT_std__shared_ptrT_INetwork_t_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__invalid_argument[] = {  {&_swigt__p_std__invalid_argument, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__shared_ptrT_INetwork_t[] = {  {&_swigt__p_std__shared_ptrT_INetwork_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__shared_ptrT_ITrainable_t[] = {  {&_swigt__p_std__shared_ptrT_ITrainable_t, 0, 0, 0},  {&_swigt__p_std__shared_ptrT_INetwork_t, _p_std__shared_ptrT_INetwork_tTo_p_std__shared_ptrT_ITrainable_t, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__vectorT__Tp__Alloc_t[] = {  {&_swigt__p_std__vectorT__Tp__Alloc_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__vectorT_int_std__allocatorT_int_t_t[] = {  {&_swigt__p_std__vectorT_int_std__allocatorT_int_t_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t[] = {  {&_swigt__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__wstring[] = {  {&_swigt__p_std__wstring, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_swig__SwigPyIterator[] = {  {&_swigt__p_swig__SwigPyIterator, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_value_type[] = {  {&_swigt__p_value_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_wchar_t[] = {  {&_swigt__p_wchar_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Classes[] = {{&_swigt__p_Classes, 0, 0, 0},
+                                             {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_INetwork[] = {{&_swigt__p_INetwork, 0, 0, 0},
+                                              {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ITrainable[] = {
+    {&_swigt__p_INetwork, _p_INetworkTo_p_ITrainable, 0, 0},
+    {&_swigt__p_ITrainable, 0, 0, 0},
+    {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Mat[] = {{&_swigt__p_Mat, 0, 0, 0},
+                                         {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Sequence[] = {{&_swigt__p_Sequence, 0, 0, 0},
+                                              {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Vec[] = {{&_swigt__p_Vec, 0, 0, 0},
+                                         {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_allocator_type[] = {
+    {&_swigt__p_allocator_type, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_char[] = {{&_swigt__p_char, 0, 0, 0},
+                                          {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_difference_type[] = {
+    {&_swigt__p_difference_type, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_float[] = {{&_swigt__p_float, 0, 0, 0},
+                                           {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_mapT_std__string_std__string_t[] = {
+    {&_swigt__p_mapT_std__string_std__string_t, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_PyObject[] = {
+    {&_swigt__p_p_PyObject, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_size_type[] = {{&_swigt__p_size_type, 0, 0, 0},
+                                               {0, 0, 0, 0}};
+static swig_cast_info
+    _swigc__p_std__allocatorT_std__shared_ptrT_INetwork_t_t[] = {
+        {&_swigt__p_std__allocatorT_std__shared_ptrT_INetwork_t_t, 0, 0, 0},
+        {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__invalid_argument[] = {
+    {&_swigt__p_std__invalid_argument, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__shared_ptrT_INetwork_t[] = {
+    {&_swigt__p_std__shared_ptrT_INetwork_t, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__shared_ptrT_ITrainable_t[] = {
+    {&_swigt__p_std__shared_ptrT_ITrainable_t, 0, 0, 0},
+    {&_swigt__p_std__shared_ptrT_INetwork_t,
+     _p_std__shared_ptrT_INetwork_tTo_p_std__shared_ptrT_ITrainable_t, 0, 0},
+    {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT__Tp__Alloc_t[] = {
+    {&_swigt__p_std__vectorT__Tp__Alloc_t, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_int_std__allocatorT_int_t_t[] = {
+    {&_swigt__p_std__vectorT_int_std__allocatorT_int_t_t, 0, 0, 0},
+    {0, 0, 0, 0}};
+static swig_cast_info
+    _swigc__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t
+        [] = {
+            {&_swigt__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+             0, 0, 0},
+            {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__wstring[] = {
+    {&_swigt__p_std__wstring, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_swig__SwigPyIterator[] = {
+    {&_swigt__p_swig__SwigPyIterator, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_value_type[] = {
+    {&_swigt__p_value_type, 0, 0, 0}, {0, 0, 0, 0}};
+static swig_cast_info _swigc__p_wchar_t[] = {{&_swigt__p_wchar_t, 0, 0, 0},
+                                             {0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
-  _swigc__p_Classes,
-  _swigc__p_INetwork,
-  _swigc__p_ITrainable,
-  _swigc__p_Mat,
-  _swigc__p_Sequence,
-  _swigc__p_Vec,
-  _swigc__p_allocator_type,
-  _swigc__p_char,
-  _swigc__p_difference_type,
-  _swigc__p_float,
-  _swigc__p_mapT_std__string_std__string_t,
-  _swigc__p_p_PyObject,
-  _swigc__p_size_type,
-  _swigc__p_std__allocatorT_std__shared_ptrT_INetwork_t_t,
-  _swigc__p_std__invalid_argument,
-  _swigc__p_std__shared_ptrT_INetwork_t,
-  _swigc__p_std__shared_ptrT_ITrainable_t,
-  _swigc__p_std__vectorT__Tp__Alloc_t,
-  _swigc__p_std__vectorT_int_std__allocatorT_int_t_t,
-  _swigc__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
-  _swigc__p_std__wstring,
-  _swigc__p_swig__SwigPyIterator,
-  _swigc__p_value_type,
-  _swigc__p_wchar_t,
+    _swigc__p_Classes, _swigc__p_INetwork, _swigc__p_ITrainable, _swigc__p_Mat,
+    _swigc__p_Sequence, _swigc__p_Vec, _swigc__p_allocator_type, _swigc__p_char,
+    _swigc__p_difference_type, _swigc__p_float,
+    _swigc__p_mapT_std__string_std__string_t, _swigc__p_p_PyObject,
+    _swigc__p_size_type,
+    _swigc__p_std__allocatorT_std__shared_ptrT_INetwork_t_t,
+    _swigc__p_std__invalid_argument, _swigc__p_std__shared_ptrT_INetwork_t,
+    _swigc__p_std__shared_ptrT_ITrainable_t,
+    _swigc__p_std__vectorT__Tp__Alloc_t,
+    _swigc__p_std__vectorT_int_std__allocatorT_int_t_t,
+    _swigc__p_std__vectorT_std__shared_ptrT_INetwork_t_std__allocatorT_std__shared_ptrT_INetwork_t_t_t,
+    _swigc__p_std__wstring, _swigc__p_swig__SwigPyIterator,
+    _swigc__p_value_type, _swigc__p_wchar_t,
 };
-
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (END) -------- */
 
-static swig_const_info swig_const_table[] = {
-{0, 0, 0, 0.0, 0, 0}};
+static swig_const_info swig_const_table[] = {{0, 0, 0, 0.0, 0, 0}};
 
 #ifdef __cplusplus
 }
@@ -14490,7 +17859,8 @@ static swig_const_info swig_const_table[] = {
  *  3) Finally, if cast->type has not already been loaded, then we add that
  *     swig_cast_info to the linked list (because the cast->type) pointer will
  *     be correct.
- * ----------------------------------------------------------------------------- */
+ * -----------------------------------------------------------------------------
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -14503,15 +17873,13 @@ extern "C" {
 #define SWIGRUNTIME_DEBUG
 #endif
 
-
-SWIGRUNTIME void
-SWIG_InitializeModule(void *clientdata) {
+SWIGRUNTIME void SWIG_InitializeModule(void *clientdata) {
   size_t i;
   swig_module_info *module_head, *iter;
   int found, init;
-  
+
   /* check to see if the circular list has been setup, if not, set it up */
-  if (swig_module.next==0) {
+  if (swig_module.next == 0) {
     /* Initialize the swig_module */
     swig_module.type_initial = swig_type_initial;
     swig_module.cast_initial = swig_cast_initial;
@@ -14520,7 +17888,7 @@ SWIG_InitializeModule(void *clientdata) {
   } else {
     init = 0;
   }
-  
+
   /* Try and load any already created modules */
   module_head = SWIG_GetModule(clientdata);
   if (!module_head) {
@@ -14530,30 +17898,32 @@ SWIG_InitializeModule(void *clientdata) {
     module_head = &swig_module;
   } else {
     /* the interpreter has loaded a SWIG module, but has it loaded this one? */
-    found=0;
-    iter=module_head;
+    found = 0;
+    iter = module_head;
     do {
-      if (iter==&swig_module) {
-        found=1;
+      if (iter == &swig_module) {
+        found = 1;
         break;
       }
-      iter=iter->next;
-    } while (iter!= module_head);
-    
+      iter = iter->next;
+    } while (iter != module_head);
+
     /* if the is found in the list, then all is done and we may leave */
     if (found) return;
     /* otherwise we must add out module into the list */
     swig_module.next = module_head->next;
     module_head->next = &swig_module;
   }
-  
-  /* When multiple interpreters are used, a module could have already been initialized in
+
+  /* When multiple interpreters are used, a module could have already been
+     initialized in
        a different interpreter, but not yet have a pointer in this interpreter.
-       In this case, we do not want to continue adding types... everything should be
+       In this case, we do not want to continue adding types... everything
+     should be
        set up already */
   if (init == 0) return;
-  
-  /* Now work on filling in swig_module.types */
+
+/* Now work on filling in swig_module.types */
 #ifdef SWIGRUNTIME_DEBUG
   printf("SWIG_InitializeModule: size %d\n", swig_module.size);
 #endif
@@ -14561,30 +17931,33 @@ SWIG_InitializeModule(void *clientdata) {
     swig_type_info *type = 0;
     swig_type_info *ret;
     swig_cast_info *cast;
-    
+
 #ifdef SWIGRUNTIME_DEBUG
-    printf("SWIG_InitializeModule: type %d %s\n", i, swig_module.type_initial[i]->name);
+    printf("SWIG_InitializeModule: type %d %s\n", i,
+           swig_module.type_initial[i]->name);
 #endif
-    
+
     /* if there is another module already loaded */
     if (swig_module.next != &swig_module) {
-      type = SWIG_MangledTypeQueryModule(swig_module.next, &swig_module, swig_module.type_initial[i]->name);
+      type = SWIG_MangledTypeQueryModule(swig_module.next, &swig_module,
+                                         swig_module.type_initial[i]->name);
     }
     if (type) {
-      /* Overwrite clientdata field */
+/* Overwrite clientdata field */
 #ifdef SWIGRUNTIME_DEBUG
       printf("SWIG_InitializeModule: found type %s\n", type->name);
 #endif
       if (swig_module.type_initial[i]->clientdata) {
         type->clientdata = swig_module.type_initial[i]->clientdata;
 #ifdef SWIGRUNTIME_DEBUG
-        printf("SWIG_InitializeModule: found and overwrite type %s \n", type->name);
+        printf("SWIG_InitializeModule: found and overwrite type %s \n",
+               type->name);
 #endif
       }
     } else {
       type = swig_module.type_initial[i];
     }
-    
+
     /* Insert casting types */
     cast = swig_module.cast_initial[i];
     while (cast->type) {
@@ -14594,7 +17967,8 @@ SWIG_InitializeModule(void *clientdata) {
       printf("SWIG_InitializeModule: look cast %s\n", cast->type->name);
 #endif
       if (swig_module.next != &swig_module) {
-        ret = SWIG_MangledTypeQueryModule(swig_module.next, &swig_module, cast->type->name);
+        ret = SWIG_MangledTypeQueryModule(swig_module.next, &swig_module,
+                                          cast->type->name);
 #ifdef SWIGRUNTIME_DEBUG
         if (ret) printf("SWIG_InitializeModule: found cast %s\n", ret->name);
 #endif
@@ -14610,12 +17984,13 @@ SWIG_InitializeModule(void *clientdata) {
           /* Check for casting already in the list */
           swig_cast_info *ocast = SWIG_TypeCheck(ret->name, type);
 #ifdef SWIGRUNTIME_DEBUG
-          if (ocast) printf("SWIG_InitializeModule: skip old cast %s\n", ret->name);
+          if (ocast)
+            printf("SWIG_InitializeModule: skip old cast %s\n", ret->name);
 #endif
           if (!ocast) ret = 0;
         }
       }
-      
+
       if (!ret) {
 #ifdef SWIGRUNTIME_DEBUG
         printf("SWIG_InitializeModule: adding cast %s\n", cast->type->name);
@@ -14632,19 +18007,20 @@ SWIG_InitializeModule(void *clientdata) {
     swig_module.types[i] = type;
   }
   swig_module.types[i] = 0;
-  
+
 #ifdef SWIGRUNTIME_DEBUG
   printf("**** SWIG_InitializeModule: Cast List ******\n");
   for (i = 0; i < swig_module.size; ++i) {
     int j = 0;
     swig_cast_info *cast = swig_module.cast_initial[i];
-    printf("SWIG_InitializeModule: type %d %s\n", i, swig_module.type_initial[i]->name);
+    printf("SWIG_InitializeModule: type %d %s\n", i,
+           swig_module.type_initial[i]->name);
     while (cast->type) {
       printf("SWIG_InitializeModule: cast type %s\n", cast->type->name);
       cast++;
       ++j;
     }
-    printf("---- Total casts: %d\n",j);
+    printf("---- Total casts: %d\n", j);
   }
   printf("**** SWIG_InitializeModule: Cast List ******\n");
 #endif
@@ -14655,22 +18031,21 @@ SWIG_InitializeModule(void *clientdata) {
 * of equivalent types.  It is like calling
 * SWIG_TypeClientData(type, clientdata) a second time.
 */
-SWIGRUNTIME void
-SWIG_PropagateClientData(void) {
+SWIGRUNTIME void SWIG_PropagateClientData(void) {
   size_t i;
   swig_cast_info *equiv;
   static int init_run = 0;
-  
+
   if (init_run) return;
   init_run = 1;
-  
+
   for (i = 0; i < swig_module.size; i++) {
     if (swig_module.types[i]->clientdata) {
       equiv = swig_module.types[i]->cast;
       while (equiv) {
         if (!equiv->converter) {
           if (equiv->type && !equiv->type->clientdata)
-          SWIG_TypeClientData(equiv->type, swig_module.types[i]->clientdata);
+            SWIG_TypeClientData(equiv->type, swig_module.types[i]->clientdata);
         }
         equiv = equiv->next;
       }
@@ -14686,307 +18061,324 @@ SWIG_PropagateClientData(void) {
 }
 #endif
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
-  /* Python-specific SWIG API */
-#define SWIG_newvarlink()                             SWIG_Python_newvarlink()
-#define SWIG_addvarlink(p, name, get_attr, set_attr)  SWIG_Python_addvarlink(p, name, get_attr, set_attr)
-#define SWIG_InstallConstants(d, constants)           SWIG_Python_InstallConstants(d, constants)
-  
-  /* -----------------------------------------------------------------------------
-   * global variable support code.
-   * ----------------------------------------------------------------------------- */
-  
-  typedef struct swig_globalvar {
-    char       *name;                  /* Name of global variable */
-    PyObject *(*get_attr)(void);       /* Return the current value */
-    int       (*set_attr)(PyObject *); /* Set the value */
-    struct swig_globalvar *next;
-  } swig_globalvar;
-  
-  typedef struct swig_varlinkobject {
-    PyObject_HEAD
-    swig_globalvar *vars;
-  } swig_varlinkobject;
-  
-  SWIGINTERN PyObject *
-  swig_varlink_repr(swig_varlinkobject *SWIGUNUSEDPARM(v)) {
+
+/* Python-specific SWIG API */
+#define SWIG_newvarlink() SWIG_Python_newvarlink()
+#define SWIG_addvarlink(p, name, get_attr, set_attr) \
+  SWIG_Python_addvarlink(p, name, get_attr, set_attr)
+#define SWIG_InstallConstants(d, constants) \
+  SWIG_Python_InstallConstants(d, constants)
+
+/* -----------------------------------------------------------------------------
+ * global variable support code.
+ * -----------------------------------------------------------------------------
+ */
+
+typedef struct swig_globalvar {
+  char *name;                  /* Name of global variable */
+  PyObject *(*get_attr)(void); /* Return the current value */
+  int (*set_attr)(PyObject *); /* Set the value */
+  struct swig_globalvar *next;
+} swig_globalvar;
+
+typedef struct swig_varlinkobject {
+  PyObject_HEAD swig_globalvar *vars;
+} swig_varlinkobject;
+
+SWIGINTERN PyObject *swig_varlink_repr(swig_varlinkobject *SWIGUNUSEDPARM(v)) {
 #if PY_VERSION_HEX >= 0x03000000
-    return PyUnicode_InternFromString("<Swig global variables>");
+  return PyUnicode_InternFromString("<Swig global variables>");
 #else
-    return PyString_FromString("<Swig global variables>");
+  return PyString_FromString("<Swig global variables>");
 #endif
-  }
-  
-  SWIGINTERN PyObject *
-  swig_varlink_str(swig_varlinkobject *v) {
+}
+
+SWIGINTERN PyObject *swig_varlink_str(swig_varlinkobject *v) {
 #if PY_VERSION_HEX >= 0x03000000
-    PyObject *str = PyUnicode_InternFromString("(");
-    PyObject *tail;
-    PyObject *joined;
-    swig_globalvar *var;
-    for (var = v->vars; var; var=var->next) {
-      tail = PyUnicode_FromString(var->name);
-      joined = PyUnicode_Concat(str, tail);
-      Py_DecRef(str);
-      Py_DecRef(tail);
-      str = joined;
-      if (var->next) {
-        tail = PyUnicode_InternFromString(", ");
-        joined = PyUnicode_Concat(str, tail);
-        Py_DecRef(str);
-        Py_DecRef(tail);
-        str = joined;
-      }
-    }
-    tail = PyUnicode_InternFromString(")");
+  PyObject *str = PyUnicode_InternFromString("(");
+  PyObject *tail;
+  PyObject *joined;
+  swig_globalvar *var;
+  for (var = v->vars; var; var = var->next) {
+    tail = PyUnicode_FromString(var->name);
     joined = PyUnicode_Concat(str, tail);
     Py_DecRef(str);
     Py_DecRef(tail);
     str = joined;
+    if (var->next) {
+      tail = PyUnicode_InternFromString(", ");
+      joined = PyUnicode_Concat(str, tail);
+      Py_DecRef(str);
+      Py_DecRef(tail);
+      str = joined;
+    }
+  }
+  tail = PyUnicode_InternFromString(")");
+  joined = PyUnicode_Concat(str, tail);
+  Py_DecRef(str);
+  Py_DecRef(tail);
+  str = joined;
 #else
-    PyObject *str = PyString_FromString("(");
-    swig_globalvar *var;
-    for (var = v->vars; var; var=var->next) {
-      PyString_ConcatAndDel(&str,PyString_FromString(var->name));
-      if (var->next) PyString_ConcatAndDel(&str,PyString_FromString(", "));
-    }
-    PyString_ConcatAndDel(&str,PyString_FromString(")"));
+  PyObject *str = PyString_FromString("(");
+  swig_globalvar *var;
+  for (var = v->vars; var; var = var->next) {
+    PyString_ConcatAndDel(&str, PyString_FromString(var->name));
+    if (var->next) PyString_ConcatAndDel(&str, PyString_FromString(", "));
+  }
+  PyString_ConcatAndDel(&str, PyString_FromString(")"));
 #endif
-    return str;
+  return str;
+}
+
+SWIGINTERN int swig_varlink_print(swig_varlinkobject *v, FILE *fp,
+                                  int SWIGUNUSEDPARM(flags)) {
+  char *tmp;
+  PyObject *str = swig_varlink_str(v);
+  fprintf(fp, "Swig global variables ");
+  fprintf(fp, "%s\n", tmp = SWIG_Python_str_AsChar(str));
+  SWIG_Python_str_DelForPy3(tmp);
+  Py_DECREF(str);
+  return 0;
+}
+
+SWIGINTERN void swig_varlink_dealloc(swig_varlinkobject *v) {
+  swig_globalvar *var = v->vars;
+  while (var) {
+    swig_globalvar *n = var->next;
+    free(var->name);
+    free(var);
+    var = n;
   }
-  
-  SWIGINTERN int
-  swig_varlink_print(swig_varlinkobject *v, FILE *fp, int SWIGUNUSEDPARM(flags)) {
-    char *tmp;
-    PyObject *str = swig_varlink_str(v);
-    fprintf(fp,"Swig global variables ");
-    fprintf(fp,"%s\n", tmp = SWIG_Python_str_AsChar(str));
-    SWIG_Python_str_DelForPy3(tmp);
-    Py_DECREF(str);
-    return 0;
+}
+
+SWIGINTERN PyObject *swig_varlink_getattr(swig_varlinkobject *v, char *n) {
+  PyObject *res = NULL;
+  swig_globalvar *var = v->vars;
+  while (var) {
+    if (strcmp(var->name, n) == 0) {
+      res = (*var->get_attr)();
+      break;
+    }
+    var = var->next;
   }
-  
-  SWIGINTERN void
-  swig_varlink_dealloc(swig_varlinkobject *v) {
-    swig_globalvar *var = v->vars;
-    while (var) {
-      swig_globalvar *n = var->next;
-      free(var->name);
-      free(var);
-      var = n;
-    }
+  if (res == NULL && !PyErr_Occurred()) {
+    PyErr_Format(PyExc_AttributeError, "Unknown C global variable '%s'", n);
   }
-  
-  SWIGINTERN PyObject *
-  swig_varlink_getattr(swig_varlinkobject *v, char *n) {
-    PyObject *res = NULL;
-    swig_globalvar *var = v->vars;
-    while (var) {
-      if (strcmp(var->name,n) == 0) {
-        res = (*var->get_attr)();
-        break;
-      }
-      var = var->next;
+  return res;
+}
+
+SWIGINTERN int swig_varlink_setattr(swig_varlinkobject *v, char *n,
+                                    PyObject *p) {
+  int res = 1;
+  swig_globalvar *var = v->vars;
+  while (var) {
+    if (strcmp(var->name, n) == 0) {
+      res = (*var->set_attr)(p);
+      break;
     }
-    if (res == NULL && !PyErr_Occurred()) {
-      PyErr_Format(PyExc_AttributeError, "Unknown C global variable '%s'", n);
-    }
-    return res;
+    var = var->next;
   }
-  
-  SWIGINTERN int
-  swig_varlink_setattr(swig_varlinkobject *v, char *n, PyObject *p) {
-    int res = 1;
-    swig_globalvar *var = v->vars;
-    while (var) {
-      if (strcmp(var->name,n) == 0) {
-        res = (*var->set_attr)(p);
-        break;
-      }
-      var = var->next;
-    }
-    if (res == 1 && !PyErr_Occurred()) {
-      PyErr_Format(PyExc_AttributeError, "Unknown C global variable '%s'", n);
-    }
-    return res;
+  if (res == 1 && !PyErr_Occurred()) {
+    PyErr_Format(PyExc_AttributeError, "Unknown C global variable '%s'", n);
   }
-  
-  SWIGINTERN PyTypeObject*
-  swig_varlink_type(void) {
-    static char varlink__doc__[] = "Swig var link object";
-    static PyTypeObject varlink_type;
-    static int type_init = 0;
-    if (!type_init) {
-      const PyTypeObject tmp = {
-        /* PyObject header changed in Python 3 */
+  return res;
+}
+
+SWIGINTERN PyTypeObject *swig_varlink_type(void) {
+  static char varlink__doc__[] = "Swig var link object";
+  static PyTypeObject varlink_type;
+  static int type_init = 0;
+  if (!type_init) {
+    const PyTypeObject tmp = {
+/* PyObject header changed in Python 3 */
 #if PY_VERSION_HEX >= 0x03000000
-        PyVarObject_HEAD_INIT(NULL, 0)
+      PyVarObject_HEAD_INIT(NULL, 0)
 #else
-        PyObject_HEAD_INIT(NULL)
-        0,                                  /* ob_size */
+      PyObject_HEAD_INIT(NULL)0, /* ob_size */
 #endif
-        (char *)"swigvarlink",              /* tp_name */
-        sizeof(swig_varlinkobject),         /* tp_basicsize */
-        0,                                  /* tp_itemsize */
-        (destructor) swig_varlink_dealloc,  /* tp_dealloc */
-        (printfunc) swig_varlink_print,     /* tp_print */
-        (getattrfunc) swig_varlink_getattr, /* tp_getattr */
-        (setattrfunc) swig_varlink_setattr, /* tp_setattr */
-        0,                                  /* tp_compare */
-        (reprfunc) swig_varlink_repr,       /* tp_repr */
-        0,                                  /* tp_as_number */
-        0,                                  /* tp_as_sequence */
-        0,                                  /* tp_as_mapping */
-        0,                                  /* tp_hash */
-        0,                                  /* tp_call */
-        (reprfunc) swig_varlink_str,        /* tp_str */
-        0,                                  /* tp_getattro */
-        0,                                  /* tp_setattro */
-        0,                                  /* tp_as_buffer */
-        0,                                  /* tp_flags */
-        varlink__doc__,                     /* tp_doc */
-        0,                                  /* tp_traverse */
-        0,                                  /* tp_clear */
-        0,                                  /* tp_richcompare */
-        0,                                  /* tp_weaklistoffset */
+          (char *)"swigvarlink",         /* tp_name */
+      sizeof(swig_varlinkobject),        /* tp_basicsize */
+      0,                                 /* tp_itemsize */
+      (destructor)swig_varlink_dealloc,  /* tp_dealloc */
+      (printfunc)swig_varlink_print,     /* tp_print */
+      (getattrfunc)swig_varlink_getattr, /* tp_getattr */
+      (setattrfunc)swig_varlink_setattr, /* tp_setattr */
+      0,                                 /* tp_compare */
+      (reprfunc)swig_varlink_repr,       /* tp_repr */
+      0,                                 /* tp_as_number */
+      0,                                 /* tp_as_sequence */
+      0,                                 /* tp_as_mapping */
+      0,                                 /* tp_hash */
+      0,                                 /* tp_call */
+      (reprfunc)swig_varlink_str,        /* tp_str */
+      0,                                 /* tp_getattro */
+      0,                                 /* tp_setattro */
+      0,                                 /* tp_as_buffer */
+      0,                                 /* tp_flags */
+      varlink__doc__,                    /* tp_doc */
+      0,                                 /* tp_traverse */
+      0,                                 /* tp_clear */
+      0,                                 /* tp_richcompare */
+      0,                                 /* tp_weaklistoffset */
 #if PY_VERSION_HEX >= 0x02020000
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* tp_iter -> tp_weaklist */
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0, /* tp_iter -> tp_weaklist */
 #endif
 #if PY_VERSION_HEX >= 0x02030000
-        0,                                  /* tp_del */
+      0, /* tp_del */
 #endif
 #if PY_VERSION_HEX >= 0x02060000
-        0,                                  /* tp_version */
+      0, /* tp_version */
 #endif
 #ifdef COUNT_ALLOCS
-        0,0,0,0                             /* tp_alloc -> tp_next */
+      0,
+      0,
+      0,
+      0 /* tp_alloc -> tp_next */
 #endif
-      };
-      varlink_type = tmp;
-      type_init = 1;
+    };
+    varlink_type = tmp;
+    type_init = 1;
 #if PY_VERSION_HEX < 0x02020000
-      varlink_type.ob_type = &PyType_Type;
+    varlink_type.ob_type = &PyType_Type;
 #else
-      if (PyType_Ready(&varlink_type) < 0)
-      return NULL;
+    if (PyType_Ready(&varlink_type) < 0) return NULL;
 #endif
+  }
+  return &varlink_type;
+}
+
+/* Create a variable linking object for use later */
+SWIGINTERN PyObject *SWIG_Python_newvarlink(void) {
+  swig_varlinkobject *result =
+      PyObject_NEW(swig_varlinkobject, swig_varlink_type());
+  if (result) {
+    result->vars = 0;
+  }
+  return ((PyObject *)result);
+}
+
+SWIGINTERN void SWIG_Python_addvarlink(PyObject *p, char *name,
+                                       PyObject *(*get_attr)(void),
+                                       int (*set_attr)(PyObject *p)) {
+  swig_varlinkobject *v = (swig_varlinkobject *)p;
+  swig_globalvar *gv = (swig_globalvar *)malloc(sizeof(swig_globalvar));
+  if (gv) {
+    size_t size = strlen(name) + 1;
+    gv->name = (char *)malloc(size);
+    if (gv->name) {
+      strncpy(gv->name, name, size);
+      gv->get_attr = get_attr;
+      gv->set_attr = set_attr;
+      gv->next = v->vars;
     }
-    return &varlink_type;
   }
-  
-  /* Create a variable linking object for use later */
-  SWIGINTERN PyObject *
-  SWIG_Python_newvarlink(void) {
-    swig_varlinkobject *result = PyObject_NEW(swig_varlinkobject, swig_varlink_type());
-    if (result) {
-      result->vars = 0;
-    }
-    return ((PyObject*) result);
-  }
-  
-  SWIGINTERN void 
-  SWIG_Python_addvarlink(PyObject *p, char *name, PyObject *(*get_attr)(void), int (*set_attr)(PyObject *p)) {
-    swig_varlinkobject *v = (swig_varlinkobject *) p;
-    swig_globalvar *gv = (swig_globalvar *) malloc(sizeof(swig_globalvar));
-    if (gv) {
-      size_t size = strlen(name)+1;
-      gv->name = (char *)malloc(size);
-      if (gv->name) {
-        strncpy(gv->name,name,size);
-        gv->get_attr = get_attr;
-        gv->set_attr = set_attr;
-        gv->next = v->vars;
-      }
-    }
-    v->vars = gv;
-  }
-  
-  SWIGINTERN PyObject *
-  SWIG_globals(void) {
-    static PyObject *_SWIG_globals = 0; 
-    if (!_SWIG_globals) _SWIG_globals = SWIG_newvarlink();  
-    return _SWIG_globals;
-  }
-  
-  /* -----------------------------------------------------------------------------
-   * constants/methods manipulation
-   * ----------------------------------------------------------------------------- */
-  
-  /* Install Constants */
-  SWIGINTERN void
-  SWIG_Python_InstallConstants(PyObject *d, swig_const_info constants[]) {
-    PyObject *obj = 0;
-    size_t i;
-    for (i = 0; constants[i].type; ++i) {
-      switch(constants[i].type) {
+  v->vars = gv;
+}
+
+SWIGINTERN PyObject *SWIG_globals(void) {
+  static PyObject *_SWIG_globals = 0;
+  if (!_SWIG_globals) _SWIG_globals = SWIG_newvarlink();
+  return _SWIG_globals;
+}
+
+/* -----------------------------------------------------------------------------
+ * constants/methods manipulation
+ * -----------------------------------------------------------------------------
+ */
+
+/* Install Constants */
+SWIGINTERN void SWIG_Python_InstallConstants(PyObject *d,
+                                             swig_const_info constants[]) {
+  PyObject *obj = 0;
+  size_t i;
+  for (i = 0; constants[i].type; ++i) {
+    switch (constants[i].type) {
       case SWIG_PY_POINTER:
-        obj = SWIG_InternalNewPointerObj(constants[i].pvalue, *(constants[i]).ptype,0);
+        obj = SWIG_InternalNewPointerObj(constants[i].pvalue,
+                                         *(constants[i]).ptype, 0);
         break;
       case SWIG_PY_BINARY:
-        obj = SWIG_NewPackedObj(constants[i].pvalue, constants[i].lvalue, *(constants[i].ptype));
+        obj = SWIG_NewPackedObj(constants[i].pvalue, constants[i].lvalue,
+                                *(constants[i].ptype));
         break;
       default:
         obj = 0;
         break;
+    }
+    if (obj) {
+      PyDict_SetItemString(d, constants[i].name, obj);
+      Py_DECREF(obj);
+    }
+  }
+}
+
+/* -----------------------------------------------------------------------------*/
+/* Fix SwigMethods to carry the callback ptrs when needed */
+/* -----------------------------------------------------------------------------*/
+
+SWIGINTERN void SWIG_Python_FixMethods(PyMethodDef *methods,
+                                       swig_const_info *const_table,
+                                       swig_type_info **types,
+                                       swig_type_info **types_initial) {
+  size_t i;
+  for (i = 0; methods[i].ml_name; ++i) {
+    const char *c = methods[i].ml_doc;
+    if (c && (c = strstr(c, "swig_ptr: "))) {
+      int j;
+      swig_const_info *ci = 0;
+      const char *name = c + 10;
+      for (j = 0; const_table[j].type; ++j) {
+        if (strncmp(const_table[j].name, name, strlen(const_table[j].name)) ==
+            0) {
+          ci = &(const_table[j]);
+          break;
+        }
       }
-      if (obj) {
-        PyDict_SetItemString(d, constants[i].name, obj);
-        Py_DECREF(obj);
+      if (ci) {
+        void *ptr = (ci->type == SWIG_PY_POINTER) ? ci->pvalue : 0;
+        if (ptr) {
+          size_t shift = (ci->ptype) - types;
+          swig_type_info *ty = types_initial[shift];
+          size_t ldoc = (c - methods[i].ml_doc);
+          size_t lptr = strlen(ty->name) + 2 * sizeof(void *) + 2;
+          char *ndoc = (char *)malloc(ldoc + lptr + 10);
+          if (ndoc) {
+            char *buff = ndoc;
+            strncpy(buff, methods[i].ml_doc, ldoc);
+            buff += ldoc;
+            strncpy(buff, "swig_ptr: ", 10);
+            buff += 10;
+            SWIG_PackVoidPtr(buff, ptr, ty->name, lptr);
+            methods[i].ml_doc = ndoc;
+          }
+        }
       }
     }
   }
-  
-  /* -----------------------------------------------------------------------------*/
-  /* Fix SwigMethods to carry the callback ptrs when needed */
-  /* -----------------------------------------------------------------------------*/
-  
-  SWIGINTERN void
-  SWIG_Python_FixMethods(PyMethodDef *methods,
-    swig_const_info *const_table,
-    swig_type_info **types,
-    swig_type_info **types_initial) {
-    size_t i;
-    for (i = 0; methods[i].ml_name; ++i) {
-      const char *c = methods[i].ml_doc;
-      if (c && (c = strstr(c, "swig_ptr: "))) {
-        int j;
-        swig_const_info *ci = 0;
-        const char *name = c + 10;
-        for (j = 0; const_table[j].type; ++j) {
-          if (strncmp(const_table[j].name, name, 
-              strlen(const_table[j].name)) == 0) {
-            ci = &(const_table[j]);
-            break;
-          }
-        }
-        if (ci) {
-          void *ptr = (ci->type == SWIG_PY_POINTER) ? ci->pvalue : 0;
-          if (ptr) {
-            size_t shift = (ci->ptype) - types;
-            swig_type_info *ty = types_initial[shift];
-            size_t ldoc = (c - methods[i].ml_doc);
-            size_t lptr = strlen(ty->name)+2*sizeof(void*)+2;
-            char *ndoc = (char*)malloc(ldoc + lptr + 10);
-            if (ndoc) {
-              char *buff = ndoc;
-              strncpy(buff, methods[i].ml_doc, ldoc);
-              buff += ldoc;
-              strncpy(buff, "swig_ptr: ", 10);
-              buff += 10;
-              SWIG_PackVoidPtr(buff, ptr, ty->name, lptr);
-              methods[i].ml_doc = ndoc;
-            }
-          }
-        }
-      }
-    }
-  } 
-  
+}
+
 #ifdef __cplusplus
 }
 #endif
@@ -14999,27 +18391,26 @@ extern "C" {
 extern "C"
 #endif
 
-SWIGEXPORT 
+    SWIGEXPORT
 #if PY_VERSION_HEX >= 0x03000000
-PyObject*
+        PyObject *
 #else
 void
 #endif
-SWIG_init(void) {
+        SWIG_init(void) {
   PyObject *m, *d, *md;
 #if PY_VERSION_HEX >= 0x03000000
   static struct PyModuleDef SWIG_module = {
-# if PY_VERSION_HEX >= 0x03020000
+#if PY_VERSION_HEX >= 0x03020000
     PyModuleDef_HEAD_INIT,
-# else
+#else
     {
-      PyObject_HEAD_INIT(NULL)
-      NULL, /* m_init */
-      0,    /* m_index */
-      NULL, /* m_copy */
+        PyObject_HEAD_INIT(NULL) NULL, /* m_init */
+        0,                             /* m_index */
+        NULL,                          /* m_copy */
     },
-# endif
-    (char *) SWIG_name,
+#endif
+    (char *)SWIG_name,
     NULL,
     -1,
     SwigMethods,
@@ -15029,21 +18420,16 @@ SWIG_init(void) {
     NULL
   };
 #endif
-  
+
 #if defined(SWIGPYTHON_BUILTIN)
-  static SwigPyClientData SwigPyObject_clientdata = {
-    0, 0, 0, 0, 0, 0, 0
-  };
+  static SwigPyClientData SwigPyObject_clientdata = {0, 0, 0, 0, 0, 0, 0};
   static PyGetSetDef this_getset_def = {
-    (char *)"this", &SwigPyBuiltin_ThisClosure, NULL, NULL, NULL
-  };
-  static SwigPyGetSet thisown_getset_closure = {
-    (PyCFunction) SwigPyObject_own,
-    (PyCFunction) SwigPyObject_own
-  };
+      (char *)"this", &SwigPyBuiltin_ThisClosure, NULL, NULL, NULL};
+  static SwigPyGetSet thisown_getset_closure = {(PyCFunction)SwigPyObject_own,
+                                                (PyCFunction)SwigPyObject_own};
   static PyGetSetDef thisown_getset_def = {
-    (char *)"thisown", SwigPyBuiltin_GetterClosure, SwigPyBuiltin_SetterClosure, NULL, &thisown_getset_closure
-  };
+      (char *)"thisown", SwigPyBuiltin_GetterClosure,
+      SwigPyBuiltin_SetterClosure, NULL, &thisown_getset_closure};
   PyObject *metatype_args;
   PyTypeObject *builtin_pytype;
   int builtin_base_count;
@@ -15056,86 +18442,99 @@ SWIG_init(void) {
   PyObject *this_descr;
   PyObject *thisown_descr;
   int i;
-  
+
   (void)builtin_pytype;
   (void)builtin_base_count;
   (void)builtin_basetype;
   (void)tuple;
   (void)static_getset;
-  
+
   /* metatype is used to implement static member variables. */
   metatype_args = Py_BuildValue("(s(O){})", "SwigPyObjectType", &PyType_Type);
   assert(metatype_args);
-  metatype = (PyTypeObject *) PyType_Type.tp_call((PyObject *) &PyType_Type, metatype_args, NULL);
+  metatype = (PyTypeObject *)PyType_Type.tp_call((PyObject *)&PyType_Type,
+                                                 metatype_args, NULL);
   assert(metatype);
   Py_DECREF(metatype_args);
-  metatype->tp_setattro = (setattrofunc) &SwigPyObjectType_setattro;
+  metatype->tp_setattro = (setattrofunc)&SwigPyObjectType_setattro;
   assert(PyType_Ready(metatype) >= 0);
 #endif
-  
+
   /* Fix SwigMethods to carry the callback ptrs when needed */
-  SWIG_Python_FixMethods(SwigMethods, swig_const_table, swig_types, swig_type_initial);
-  
+  SWIG_Python_FixMethods(SwigMethods, swig_const_table, swig_types,
+                         swig_type_initial);
+
 #if PY_VERSION_HEX >= 0x03000000
   m = PyModule_Create(&SWIG_module);
 #else
-  m = Py_InitModule((char *) SWIG_name, SwigMethods);
+  m = Py_InitModule((char *)SWIG_name, SwigMethods);
 #endif
   md = d = PyModule_GetDict(m);
   (void)md;
-  
+
   SWIG_InitializeModule(0);
-  
+
 #ifdef SWIGPYTHON_BUILTIN
   SwigPyObject_stype = SWIG_MangledTypeQuery("_p_SwigPyObject");
   assert(SwigPyObject_stype);
-  cd = (SwigPyClientData*) SwigPyObject_stype->clientdata;
+  cd = (SwigPyClientData *)SwigPyObject_stype->clientdata;
   if (!cd) {
     SwigPyObject_stype->clientdata = &SwigPyObject_clientdata;
     SwigPyObject_clientdata.pytype = SwigPyObject_TypeOnce();
-  } else if (SwigPyObject_TypeOnce()->tp_basicsize != cd->pytype->tp_basicsize) {
-    PyErr_SetString(PyExc_RuntimeError, "Import error: attempted to load two incompatible swig-generated modules.");
-# if PY_VERSION_HEX >= 0x03000000
+  } else if (SwigPyObject_TypeOnce()->tp_basicsize !=
+             cd->pytype->tp_basicsize) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    "Import error: attempted to load two incompatible "
+                    "swig-generated modules.");
+#if PY_VERSION_HEX >= 0x03000000
     return NULL;
-# else
+#else
     return;
-# endif
+#endif
   }
-  
+
   /* All objects have a 'this' attribute */
   this_descr = PyDescr_NewGetSet(SwigPyObject_type(), &this_getset_def);
   (void)this_descr;
-  
+
   /* All objects have a 'thisown' attribute */
   thisown_descr = PyDescr_NewGetSet(SwigPyObject_type(), &thisown_getset_def);
   (void)thisown_descr;
-  
+
   public_interface = PyList_New(0);
   public_symbol = 0;
   (void)public_symbol;
-  
+
   PyDict_SetItemString(md, "__all__", public_interface);
   Py_DECREF(public_interface);
   for (i = 0; SwigMethods[i].ml_name != NULL; ++i)
-  SwigPyBuiltin_AddPublicSymbol(public_interface, SwigMethods[i].ml_name);
+    SwigPyBuiltin_AddPublicSymbol(public_interface, SwigMethods[i].ml_name);
   for (i = 0; swig_const_table[i].name != 0; ++i)
-  SwigPyBuiltin_AddPublicSymbol(public_interface, swig_const_table[i].name);
+    SwigPyBuiltin_AddPublicSymbol(public_interface, swig_const_table[i].name);
 #endif
-  
-  SWIG_InstallConstants(d,swig_const_table);
-  
-  SWIG_Python_SetConstant(d, "SHARED_PTR_DISOWN",SWIG_From_int(static_cast< int >(0)));
-  
+
+  SWIG_InstallConstants(d, swig_const_table);
+
+  SWIG_Python_SetConstant(d, "SHARED_PTR_DISOWN",
+                          SWIG_From_int(static_cast<int>(0)));
+
   import_array();
-  
-  SWIG_Python_SetConstant(d, "ITrainable_NORM_NONE",SWIG_From_int(static_cast< int >(ITrainable::NORM_NONE)));
-  SWIG_Python_SetConstant(d, "ITrainable_NORM_LEN",SWIG_From_int(static_cast< int >(ITrainable::NORM_LEN)));
-  SWIG_Python_SetConstant(d, "ITrainable_NORM_BATCH",SWIG_From_int(static_cast< int >(ITrainable::NORM_BATCH)));
-  SWIG_Python_SetConstant(d, "ITrainable_NORM_DFLT",SWIG_From_int(static_cast< int >(ITrainable::NORM_DFLT)));
+
+  SWIG_Python_SetConstant(
+      d, "ITrainable_NORM_NONE",
+      SWIG_From_int(static_cast<int>(ITrainable::NORM_NONE)));
+  SWIG_Python_SetConstant(
+      d, "ITrainable_NORM_LEN",
+      SWIG_From_int(static_cast<int>(ITrainable::NORM_LEN)));
+  SWIG_Python_SetConstant(
+      d, "ITrainable_NORM_BATCH",
+      SWIG_From_int(static_cast<int>(ITrainable::NORM_BATCH)));
+  SWIG_Python_SetConstant(
+      d, "ITrainable_NORM_DFLT",
+      SWIG_From_int(static_cast<int>(ITrainable::NORM_DFLT)));
 #if PY_VERSION_HEX >= 0x03000000
   return m;
 #else
   return;
 #endif
 }
-
