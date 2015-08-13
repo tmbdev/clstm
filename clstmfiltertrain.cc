@@ -113,13 +113,13 @@ int main1(int argc, char **argv) {
         best_error = test_error;
         print("saving best performing network so far", save_name,
               "error rate: ", best_error);
-        string fname = save_name + ".h5";
+        string fname = save_name + ".clstm";
         clstm.save(fname);
       }
       if (after_test != "") system(after_test.c_str());
     }
     if (trial > 0 && save_every > 0 && trial % save_every == 0) {
-      string fname = save_name + "-" + to_string(trial) + ".h5";
+      string fname = save_name + "-" + to_string(trial) + ".clstm";
       clstm.save(fname);
     }
     wstring pred = clstm.train(samples[sample].in, samples[sample].out);
