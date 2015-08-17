@@ -98,6 +98,8 @@ programs = """clstmtext clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".s
 for program in programs:
     env.Program(program,[program+".cc"],LIBS=[libclstm]+libs)
 
+# env.Program("fstfun", "fstfun.cc", LIBS=[libclstm]+libs+["fst","dl"])
+
 Alias('install-lib',
       Install(os.path.join(prefix,"lib"), libclstm))
 Alias('install-include',
@@ -112,11 +114,11 @@ Alias('install',
 if option("hdf5lib", "")!="":
     h5env = env.Clone()
     inc = findonpath("hdf5.h","""
-        /usr/include
-        /usr/local/include/hdf5/serial
-        /usr/local/include/hdf5
-        /usr/include/hdf5/serial
-        /usr/include/hdf5""".split())
+    /usr/include
+    /usr/local/include/hdf5/serial
+    /usr/local/include/hdf5
+    /usr/include/hdf5/serial
+    /usr/include/hdf5""".split())
     h5env.Append(CPPPATH=[inc])
     h5env.Append(LIBS=["hdf5_cpp"])
     h5env.Append(LIBS=[option("hdf5lib", "hdf5_serial")])
@@ -136,7 +138,7 @@ if option("pyswig", 0):
                           LIBS=libs)
 
 
-destlib = distutils.sysconfig.get_config_var("DESTLIB")
-Alias('pyinstall',
-      Install(os.path.join(destlib, "site-packages"),
-              ["_clstm.so", "clstm.py"]))
+    destlib = distutils.sysconfig.get_config_var("DESTLIB")
+    Alias('pyinstall',
+          Install(os.path.join(destlib, "site-packages"),
+                  ["_clstm.so", "clstm.py"]))

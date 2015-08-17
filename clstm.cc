@@ -889,6 +889,13 @@ INetwork *make_Parallel() { return new Parallel(); }
 INetwork *make_LSTM() { return new NPLSTM(); }
 INetwork *make_NPLSTM() { return new NPLSTM(); }
 
+void save_net(const string &file, Network net) {
+  save_as_proto(file, net.get());
+}
+Network load_net(const string &file) {
+  return load_as_proto(file);
+}
+
 }  // namespace ocropus
 
 #ifdef CLSTM_EXTRAS

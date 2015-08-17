@@ -209,6 +209,9 @@ void forwardbackward(Mat &both,Mat &lmatch);
 void ctc_align_targets(Sequence &posteriors,Sequence &outputs,Sequence &targets);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
 
+void save_net(const string &file, Network net);
+Network load_net(const string &file);
+
 %inline %{
 Mat &getdebugmat() {
     return debugmat;
@@ -218,7 +221,7 @@ int string_edit_distance(string a, string b) {
     return levenshtein(a, b);
 }
 
-string network_info(std::shared_ptr<INetwork> net) {
+string network_info(Network net) {
     string result = "";
     net->networks("", [&result] (string s, INetwork *net) {
         result += s + ": " + to_string(net->learning_rate);
