@@ -394,10 +394,8 @@ void write_as_proto(std::ostream &output, INetwork *net);
 void save_as_proto(const string &fname, INetwork *net);
 Network load_as_proto(const string &fname);
 
-inline void save_net(const string &file, Network net) {
-  save_as_proto(file, net.get());
-}
-inline Network load_net(const string &file) { return load_as_proto(file); }
+void save_net(const string &file, Network net);
+Network load_net(const string &file);
 
 // training with CTC
 void forward_algorithm(Mat &lr, Mat &lmatch, double skip = -5.0);
