@@ -97,6 +97,9 @@ libclstm = env.StaticLibrary("clstm", source = libsrc)
 programs = """clstmtext clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".split()
 for program in programs:
     env.Program(program,[program+".cc"],LIBS=[libclstm]+libs)
+    Default(program)
+
+env.Program("test-forward",["test-forward.cc"],LIBS=[libclstm]+libs)
 
 # env.Program("fstfun", "fstfun.cc", LIBS=[libclstm]+libs+["fst","dl"])
 

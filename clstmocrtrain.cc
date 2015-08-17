@@ -141,7 +141,7 @@ int main1(int argc, char **argv) {
     }
     int sample = irandom() % fnames.size();
     if (trial > 0 && save_every > 0 && trial % save_every == 0) {
-      string fname = save_name + "-" + to_string(trial) + ".model.proto";
+      string fname = save_name + "-" + to_string(trial) + ".clstm";
       clstm.save(fname);
     }
     string fname = fnames[sample];

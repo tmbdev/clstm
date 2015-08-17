@@ -162,9 +162,9 @@ int main_train(int argc, char **argv) {
   string save_name = getsenv("save_name", "");
   if (save_every >= 0 && save_name == "") THROW("must give save_name=");
   if (save_every > 0 && save_name.find('%') == string::npos)
-    save_name += "-%08d.h5";
+    save_name += "-%08d.clstm";
   else
-    save_name += ".h5";
+    save_name += ".clstm";
   string after_save = getsenv("after_save", "");
 
   int ntrain = getienv("ntrain", 1000000);
