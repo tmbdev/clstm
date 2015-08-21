@@ -27,7 +27,15 @@ def findonpath(fname,path):
 
 def protoc(target, source, env):
     os.system("protoc %s --cpp_out=." % source[0])
-protoc_builder = Builder(action=protoc, src_suffix=".proto", suffix=".pb.cc")
+def protoemitter(target, source, env):
+    for s in source:
+        base,_ = os.path.splitext(str(s))
+        target.extend([base+".pb.cc", base+".pb.h"])
+    return target, source
+
+protoc_builder = Builder(action=protoc, 
+                         emitter=protoemitter, 
+                         src_suffix=".proto")
 
 # CLSTM requires C++11, and installes in /usr/local by default
 
