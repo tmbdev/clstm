@@ -18,5 +18,6 @@ testset=uw3-test.h5
 hidden=100
 lrate=1e-4
 save_name=test
+report_time=1
 # gdb --ex run --args \
 clstmocrtrain uw3-train uw3-test

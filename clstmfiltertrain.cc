@@ -111,9 +111,9 @@ int main1(int argc, char **argv) {
       print("ERROR", trial, test_error, "   ", errors, count);
       if (save_every == 0 && test_error < best_error) {
         best_error = test_error;
-        print("saving best performing network so far", save_name,
-              "error rate: ", best_error);
         string fname = save_name + ".clstm";
+        print("saving best performing network so far", fname,
+              "error rate: ", best_error);
         clstm.save(fname);
       }
       if (after_test != "") system(after_test.c_str());

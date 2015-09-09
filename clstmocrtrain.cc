@@ -115,11 +115,13 @@ int main1(int argc, char **argv) {
   string save_name = getsenv("save_name", "_ocr");
   int report_every = getienv("report_every", 100);
   int display_every = getienv("display_every", 0);
+  int report_time = getienv("report_time", 0);
   int test_every = getienv("test_every", 10000);
   double test_error = 9999.0;
 
   PyServer py;
   if (display_every > 0) py.open();
+  double start = now();
   for (int trial = 0; trial < maxtrain; trial++) {
     if (trial > 0 && test_fnames.size() > 0 && test_every > 0 &&
         trial % test_every == 0) {
@@ -164,6 +166,9 @@ int main1(int argc, char **argv) {
       print("TRU", gt);
       print("ALN", clstm.aligned_utf8());
       print("OUT", pred);
+      if (trial > 0 && report_time)
+        print("steptime", (now()-start) / report_every);
+      start = now();
     }
   }
 

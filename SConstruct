@@ -33,8 +33,8 @@ def protoemitter(target, source, env):
         target.extend([base+".pb.cc", base+".pb.h"])
     return target, source
 
-protoc_builder = Builder(action=protoc, 
-                         emitter=protoemitter, 
+protoc_builder = Builder(action=protoc,
+                         emitter=protoemitter,
                          src_suffix=".proto")
 
 # CLSTM requires C++11, and installes in /usr/local by default
