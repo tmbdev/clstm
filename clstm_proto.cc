@@ -191,7 +191,9 @@ void write_as_proto(ostream &output, INetwork *net) {
   unique_ptr<clstm::NetworkProto> proto;
   proto.reset(new clstm::NetworkProto());
   proto_of_net(proto.get(), net);
-  proto->SerializeToOstream(&output);
+  if (proto->SerializeToOstream(&output) == false) {
+    THROW("Serializing failed.");
+  }
 }
 
 void save_as_proto(const string &fname, INetwork *net) {
@@ -205,7 +207,9 @@ Network load_as_proto(const string &fname) {
   stream.open(fname, ios::binary);
   unique_ptr<clstm::NetworkProto> proto;
   proto.reset(new clstm::NetworkProto());
-  proto->ParseFromIstream(&stream);
+  if (proto->ParseFromIstream(&stream) == false) {
+    THROW("Invalid message");
+  }
   return net_of_proto(proto.get());
 }
 }
