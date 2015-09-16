@@ -20,4 +20,4 @@ lrate=1e-4
 save_name=test
 report_time=1
 # gdb --ex run --args \
-clstmocrtrain uw3-train uw3-test
+./clstmocrtrain uw3-train uw3-test
