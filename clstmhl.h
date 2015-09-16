@@ -103,7 +103,14 @@ struct CLSTMText {
   std::string predict_utf8(const std::string &in) {
     return utf32_to_utf8(predict(utf8_to_utf32(in)));
   }
-};
+  void get_outputs(mdarray<float> &outputs) {
+    Sequence &o = net->outputs;
+    outputs.resize(int(o.size()), int(o[0].rows()));
+    for (int t=0; t < outputs.dim(0); t++)
+      for (int c=0; t < outputs.dim(1); c++)
+        outputs(t,c) = net->outputs[t](c,0);
+  }
+  };
 
 struct CLSTMOCR {
   unique_ptr<INormalizer> normalizer;
@@ -188,7 +195,14 @@ struct CLSTMOCR {
   std::string predict_utf8(mdarray<float> &raw) {
     return utf32_to_utf8(predict(raw));
   }
-};
+  void get_outputs(mdarray<float> &outputs) {
+    Sequence &o = net->outputs;
+    outputs.resize(int(o.size()), int(o[0].rows()));
+    for (int t=0; t < outputs.dim(0); t++)
+      for (int c=0; t < outputs.dim(1); c++)
+        outputs(t,c) = net->outputs[t](c,0);
+  }
+  };
 }
 
 #endif

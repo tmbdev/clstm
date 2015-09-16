@@ -6,9 +6,9 @@
 #include <memory>
 #include <math.h>
 #include <Eigen/Dense>
+#include <iostream>
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include <set>
 
 #include "multidim.h"

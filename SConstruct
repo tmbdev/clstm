@@ -53,9 +53,14 @@ if option("omp",0):
 else:
     env["CXX"] = option("CXX", "g++") + " --std=c++11 -Wno-unused-result"
 
+# With profile=1, the code will be compiled suitable for profiling and debug.
 # With debug=1, the code will be compiled suitable for debugging.
 
-if option("debug",0):
+if option("profile",0):
+    env.Append(CXXFLAGS="-g -pg -fno-inline".split())
+    env.Append(CCFLAGS="-g -pg".split())
+    env.Append(LINKFLAGS="-g -pg".split())
+elif option("debug",0):
     env.Append(CXXFLAGS="-g -fno-inline".split())
     env.Append(CCFLAGS="-g".split())
     env.Append(LINKFLAGS="-g".split())

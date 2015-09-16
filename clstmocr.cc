@@ -33,6 +33,15 @@ using std_wstring = std::wstring;
 #define string std_string
 #define wstring std_wstring
 
+inline float scaled_log(float x) {
+  const float thresh = 10.0;
+  if (x <= 0.0) return 0.0;
+  float l = log(x);
+  if (l < -thresh) return 0.0;
+  if (l > 0) return 1.0;
+  return (l + thresh) / thresh;
+}
+
 int main1(int argc, char **argv) {
   if (argc != 2) THROW("give text file as an argument");
   const char *fname = argv[1];
@@ -43,28 +52,49 @@ int main1(int argc, char **argv) {
   clstm.load(load_name);
 
   bool conf = getienv("conf", 0);
+  bool long_output = getienv("long_output", 0);
+  string output = getsenv("output", "text");
 
   ifstream stream(fname);
   string line;
   while (getline(stream, line)) {
     mdarray<float> raw;
-    read_png(raw, line.c_str(), true);
+    string fname = line;
+    string basename = fname.substr(0, fname.find_last_of("."));
+    read_png(raw, fname.c_str(), true);
     for (int i = 0; i < raw.size(); i++) raw[i] = 1 - raw[i];
     if (!conf) {
       string out = clstm.predict_utf8(raw);
       cout << line << "\t" << out << endl;
-    } else {
-      cout << "file " << line << endl;
-      vector<CharPrediction> preds;
-      clstm.predict(preds, raw);
-      for (int i = 0; i < preds.size(); i++) {
-        CharPrediction p = preds[i];
-        const char *sep = "\t";
-        cout << p.i << sep << p.x << sep << p.c << sep << p.p << endl;
+      if (output == "text" ) {
+        // nothing else to do
+      if (output == "logs") {
+        mdarray<float> outputs;
+        clstm.get_outputs(outputs);
+        for (int t=0; t<outputs.dim(0); t++)
+          for (int c=0; c<outputs.dim(1); c++)
+            outputs(t,c) = scaled_log(outputs(t,c));
+        write_png((basename+".lp.png").c_str(), outputs);
+      } else if (output == "posteriors") {
+        mdarray<float> outputs;
+        clstm.get_outputs(outputs);
+        write_png((basename+".p.png").c_str(), outputs);
+      } else {
+        THROW("unknown output format");
+      }
+      if (long_output) {
+        cout << "file " << line << endl;
+        vector<CharPrediction> preds;
+        clstm.predict(preds, raw);
+        for (int i = 0; i < preds.size(); i++) {
+          CharPrediction p = preds[i];
+          const char *sep = "\t";
+          cout << p.i << sep << p.x << sep << p.c << sep << p.p << endl;
+        }
       }
     }
+    return 0;
   }
-  return 0;
 }
 
 int main(int argc, char **argv) {

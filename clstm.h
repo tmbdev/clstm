@@ -415,7 +415,6 @@ extern Mat debugmat;
 
 // loading and saving networks (using HDF5)
 void load_attributes(map<string, string> &attrs, const string &file);
-}
 
 namespace {
 inline bool anynan(ocropus::Sequence &a) {

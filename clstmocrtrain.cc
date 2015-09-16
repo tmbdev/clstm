@@ -59,15 +59,25 @@ string read_text(string fname, int maxsize = 65536) {
   return string(buf, n);
 }
 
-void get_codec(vector<int> &codec, const vector<string> &fnames) {
+wstring read_text32(string fname, int maxsize = 65536) {
+  char buf[maxsize];
+  buf[maxsize - 1] = 0;
+  ifstream stream(fname);
+  int n = stream.readsome(buf, maxsize - 1);
+  while (n > 0 && buf[n - 1] == '\n') n--;
+  return utf8_to_utf32(string(buf, n));
+}
+
+void get_codec(vector<int> &codec,
+               const vector<string> &fnames,
+               const wstring extra = L"") {
   set<int> codes;
   codes.insert(0);
+  for (auto c : extra) codes.insert(int(c));
   for (int i = 0; i < fnames.size(); i++) {
     string fname = fnames[i];
     string base = basename(fname);
-    string text = read_text(base + ".gt.txt");
-    // print(base,":",text);
-    wstring text32 = utf8_to_utf32(text);
+    wstring text32 = read_text32(base + ".gt.txt");
     for (auto c : text32) codes.insert(int(c));
   }
   codec.clear();
@@ -91,24 +101,18 @@ void read_lines(vector<string> &lines, string fname) {
   }
 }
 
+wstring separate_chars(const wstring &s, const wstring &charsep) {
+  if (charsep == L"") return s;
+  wstring result;
+  for (int i=0; i<s.size(); i++) {
+    if (i > 0) result.push_back(charsep[0]);
+    result.push_back(s[i]);
+  }
+  return result;
+}
+
 int main1(int argc, char **argv) {
   srandomize();
-
-  if (argc < 2 || argc > 3) THROW("... training [testing]");
-  vector<string> fnames, test_fnames;
-  read_lines(fnames, argv[1]);
-  if (argc > 2) read_lines(test_fnames, argv[2]);
-  print("got", fnames.size(), "files,", test_fnames.size(), "tests");
-
-  vector<int> codec;
-  get_codec(codec, fnames);
-  print("got", codec.size(), "classes");
-
-  CLSTMOCR clstm;
-  clstm.target_height = int(getrenv("target_height", 48));
-  clstm.createBidi(codec, getienv("nhidden", 100));
-  clstm.setLearningRate(getdenv("rate", 1e-4), getdenv("momentum", 0.9));
-  clstm.net->info("");
 
   int maxtrain = getienv("maxtrain", 10000000);
   int save_every = getienv("save_every", 10000);
@@ -117,6 +121,25 @@ int main1(int argc, char **argv) {
   int display_every = getienv("display_every", 0);
   int report_time = getienv("report_time", 0);
   int test_every = getienv("test_every", 10000);
+  wstring charsep = utf8_to_utf32(getsenv("charsep", ""));
+  print("*** charsep", charsep);
+
+  if (argc < 2 || argc > 3) THROW("... training [testing]");
+  vector<string> fnames, test_fnames;
+  read_lines(fnames, argv[1]);
+  if (argc > 2) read_lines(test_fnames, argv[2]);
+  print("got", fnames.size(), "files,", test_fnames.size(), "tests");
+
+  vector<int> codec;
+  get_codec(codec, fnames, charsep);
+  print("got", codec.size(), "classes");
+
+  CLSTMOCR clstm;
+  clstm.target_height = int(getrenv("target_height", 48));
+  clstm.createBidi(codec, getienv("nhidden", 100));
+  clstm.setLearningRate(getdenv("rate", 1e-4), getdenv("momentum", 0.9));
+  clstm.net->info("");
+
   double test_error = 9999.0;
 
   PyServer py;
@@ -130,7 +153,7 @@ int main1(int argc, char **argv) {
       for (int test = 0; test < test_fnames.size(); test++) {
         string fname = test_fnames[test];
         string base = basename(fname);
-        string gt = read_text(base + ".gt.txt");
+        wstring gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
         mdarray<float> raw;
         read_png(raw, fname.c_str(), true);
         for (int i = 0; i < raw.size(); i++) raw[i] = 1 - raw[i];
@@ -148,11 +171,11 @@ int main1(int argc, char **argv) {
     }
     string fname = fnames[sample];
     string base = basename(fname);
-    string gt = read_text(base + ".gt.txt");
+    wstring gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
     mdarray<float> raw;
     read_png(raw, fname.c_str(), true);
     for (int i = 0; i < raw.size(); i++) raw[i] = 1 - raw[i];
-    string pred = clstm.train_utf8(raw, gt);
+    wstring pred = clstm.train(raw, gt);
     if (trial % display_every == 0) {
       py.evalf("clf");
       show(py, clstm.net->inputs, 411);
@@ -165,7 +188,7 @@ int main1(int argc, char **argv) {
       print(trial);
       print("TRU", gt);
       print("ALN", clstm.aligned_utf8());
-      print("OUT", pred);
+      print("OUT", utf32_to_utf8(pred));
       if (trial > 0 && report_time)
         print("steptime", (now()-start) / report_every);
       start = now();
