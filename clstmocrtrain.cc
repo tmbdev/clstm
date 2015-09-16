@@ -114,7 +114,7 @@ wstring separate_chars(const wstring &s, const wstring &charsep) {
 int main1(int argc, char **argv) {
   srandomize();
 
-  int maxtrain = getienv("maxtrain", 10000000);
+  int ntrain = getienv("ntrain", 10000000);
   int save_every = getienv("save_every", 10000);
   string save_name = getsenv("save_name", "_ocr");
   int report_every = getienv("report_every", 100);
@@ -145,7 +145,7 @@ int main1(int argc, char **argv) {
   PyServer py;
   if (display_every > 0) py.open();
   double start = now();
-  for (int trial = 0; trial < maxtrain; trial++) {
+  for (int trial = 0; trial < ntrain; trial++) {
     if (trial > 0 && test_fnames.size() > 0 && test_every > 0 &&
         trial % test_every == 0) {
       double errors = 0.0;
