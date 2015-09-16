@@ -26,6 +26,7 @@ using std::shared_ptr;
 using std::unique_ptr;
 using std::cout;
 using std::ifstream;
+using std::ofstream;
 using std::set;
 using std::to_string;
 using std_string = std::string;
@@ -42,6 +43,17 @@ inline float scaled_log(float x) {
   return (l + thresh) / thresh;
 }
 
+void write_text(const string fname, const wstring &data) {
+  string utf8 = utf32_to_utf8(data);
+  ofstream stream(fname);
+  stream << utf8 << endl;
+}
+
+void write_text(const string fname, const string &data) {
+  ofstream stream(fname);
+  stream << data << endl;
+}
+
 int main1(int argc, char **argv) {
   if (argc != 2) THROW("give text file as an argument");
   const char *fname = argv[1];
@@ -52,8 +64,8 @@ int main1(int argc, char **argv) {
   clstm.load(load_name);
 
   bool conf = getienv("conf", 0);
-  bool long_output = getienv("long_output", 0);
   string output = getsenv("output", "text");
+  bool save_text = getienv("save_text", 1);
 
   ifstream stream(fname);
   string line;
@@ -66,35 +78,37 @@ int main1(int argc, char **argv) {
     if (!conf) {
       string out = clstm.predict_utf8(raw);
       cout << line << "\t" << out << endl;
-      if (output == "text" ) {
-        // nothing else to do
-      if (output == "logs") {
-        mdarray<float> outputs;
-        clstm.get_outputs(outputs);
-        for (int t=0; t<outputs.dim(0); t++)
-          for (int c=0; c<outputs.dim(1); c++)
-            outputs(t,c) = scaled_log(outputs(t,c));
-        write_png((basename+".lp.png").c_str(), outputs);
-      } else if (output == "posteriors") {
-        mdarray<float> outputs;
-        clstm.get_outputs(outputs);
-        write_png((basename+".p.png").c_str(), outputs);
-      } else {
-        THROW("unknown output format");
+      if (save_text) {
+        write_text(basename+".txt", out);
       }
-      if (long_output) {
-        cout << "file " << line << endl;
-        vector<CharPrediction> preds;
-        clstm.predict(preds, raw);
-        for (int i = 0; i < preds.size(); i++) {
-          CharPrediction p = preds[i];
-          const char *sep = "\t";
-          cout << p.i << sep << p.x << sep << p.c << sep << p.p << endl;
-        }
+    } else {
+      cout << "file " << line << endl;
+      vector<CharPrediction> preds;
+      clstm.predict(preds, raw);
+      for (int i = 0; i < preds.size(); i++) {
+        CharPrediction p = preds[i];
+        const char *sep = "\t";
+        cout << p.i << sep << p.x << sep << p.c << sep << p.p << endl;
       }
     }
-    return 0;
+    if (output == "text" ) {
+      // nothing else to do
+    } else if (output == "logs") {
+      mdarray<float> outputs;
+      clstm.get_outputs(outputs);
+      for (int t=0; t<outputs.dim(0); t++)
+        for (int c=0; c<outputs.dim(1); c++)
+          outputs(t,c) = scaled_log(outputs(t,c));
+      write_png((basename+".lp.png").c_str(), outputs);
+    } else if (output == "posteriors") {
+      mdarray<float> outputs;
+      clstm.get_outputs(outputs);
+      write_png((basename+".p.png").c_str(), outputs);
+    } else {
+      THROW("unknown output format");
+    }
   }
+  return 0;
 }
 
 int main(int argc, char **argv) {

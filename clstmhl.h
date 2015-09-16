@@ -107,7 +107,7 @@ struct CLSTMText {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
     for (int t=0; t < outputs.dim(0); t++)
-      for (int c=0; t < outputs.dim(1); c++)
+      for (int c=0; c < outputs.dim(1); c++)
         outputs(t,c) = net->outputs[t](c,0);
   }
   };
@@ -199,7 +199,7 @@ struct CLSTMOCR {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
     for (int t=0; t < outputs.dim(0); t++)
-      for (int c=0; t < outputs.dim(1); c++)
+      for (int c=0; c < outputs.dim(1); c++)
         outputs(t,c) = net->outputs[t](c,0);
   }
   };

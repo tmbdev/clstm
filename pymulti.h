@@ -9,6 +9,7 @@
 #include <string>
 #include <stdarg.h>
 #include <iostream>
+#include <memory>
 #include "multidim.h"
 
 namespace pymulti {
