@@ -54,7 +54,8 @@ string read_text(string fname, int maxsize = 65536) {
   char buf[maxsize];
   buf[maxsize - 1] = 0;
   ifstream stream(fname);
-  int n = stream.readsome(buf, maxsize - 1);
+  stream.read(buf, maxsize - 1);
+  int n = stream.gcount();
   while (n > 0 && buf[n - 1] == '\n') n--;
   return string(buf, n);
 }
@@ -63,7 +64,8 @@ wstring read_text32(string fname, int maxsize = 65536) {
   char buf[maxsize];
   buf[maxsize - 1] = 0;
   ifstream stream(fname);
-  int n = stream.readsome(buf, maxsize - 1);
+  stream.read(buf, maxsize - 1);
+  int n = stream.gcount();
   while (n > 0 && buf[n - 1] == '\n') n--;
   return utf8_to_utf32(string(buf, n));
 }
