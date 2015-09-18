@@ -84,7 +84,7 @@ int main1(int argc, char **argv) {
   clstm.setLearningRate(getdenv("rate", 1e-4), getdenv("momentum", 0.9));
   clstm.net->info("");
 
-  int maxtrain = getienv("maxtrain", 10000000);
+  int ntrain = getienv("ntrain", 10000000);
   int save_every = getienv("save_every", 10000);
   string save_name = getsenv("save_name", "_filter");
   int report_every = getienv("report_every", 100);
@@ -95,7 +95,7 @@ int main1(int argc, char **argv) {
 
   double best_error = 1e38;
   double test_error = 9999.0;
-  for (int trial = 0; trial < maxtrain; trial++) {
+  for (int trial = 0; trial < ntrain; trial++) {
     int sample = irandom() % samples.size();
     if (trial > 0 && test_samples.size() > 0 && test_every > 0 &&
         trial % test_every == 0) {
