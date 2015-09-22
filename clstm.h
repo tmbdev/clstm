@@ -28,16 +28,49 @@ void throwf(const char *format, ...);
 extern char exception_message[256];
 
 #ifdef LSTM_DOUBLE
+#if 0
 typedef double Float;
 typedef Eigen::VectorXi iVec;
 typedef Eigen::VectorXd Vec;
 typedef Eigen::MatrixXd Mat;
+#endif
 #else
 typedef float Float;
 typedef Eigen::VectorXi iVec;
 typedef Eigen::VectorXf Vec;
 typedef Eigen::MatrixXf Mat;
+struct Batch : Mat {
+  using Mat::Mat;
+  Mat d;
+};
 #endif
+
+// typedef vector<Mat> Sequence;
+struct Sequence {
+  vector<Batch> steps;
+  Sequence() {}
+  Sequence(int n) : steps(n) {}
+  void clear() {
+    steps.clear();
+  }
+  int size() const {
+    return steps.size();
+  }
+  void resize(int n) {
+    steps.resize(n);
+  }
+  void resize(int n, int rows, int cols) {
+    steps.resize(n);
+    for(int t=0; t<n; t++)
+      steps[t].resize(rows, cols);
+  }
+  Batch &operator[](int i) {
+    return steps[i];
+  }
+  const Batch &operator[](int i) const {
+    return steps[i];
+  }
+};
 
 // These macros define the major matrix operations used
 // in CLSTM. They are here for eventually converting the
@@ -116,8 +149,6 @@ inline void zeroinit(Vec &m, int no) {
   m.resize(no);
   m.setZero();
 }
-
-typedef vector<Mat> Sequence;
 
 inline void resize(Sequence &seq, int nsteps, int dims, int bs) {
   seq.resize(nsteps);
@@ -241,8 +272,8 @@ struct INetwork : virtual ITrainable {
   // Networks have input and output "ports" for sequences
   // and derivatives. These are propagated in forward()
   // and backward() methods.
-  Sequence inputs, d_inputs;
-  Sequence outputs, d_outputs;
+  Sequence inputs;
+  Sequence outputs;
 
   // Some networks have subnetworks. They should be
   // stored in the `sub` vector. That way, functions
