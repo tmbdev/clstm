@@ -774,9 +774,9 @@ struct GenericNPLSTM : NetworkBase {
       gf[t] = nonlin<F>(MATMUL(WGF, source[t]));
       go[t] = nonlin<F>(MATMUL(WGO, source[t]));
       ci[t] = nonlin<G>(MATMUL(WCI, source[t]));
-      state[t] = ci[t].A * gi[t].A;
+      state[t] = EMUL(ci[t], gi[t]);
       if (t > 0) state[t] += EMUL(gf[t], state[t - 1]);
-      outputs[t] = nonlin<H>(state[t]).A * go[t].A;
+      outputs[t] = EMUL(nonlin<H>(state[t]), go[t]);
     }
   }
   void backward() {
@@ -787,7 +787,7 @@ struct GenericNPLSTM : NetworkBase {
       outerr[t] = d_outputs[t];
       if (t < N - 1) outerr[t] += BLOCK(sourceerr[t + 1], 1 + ni, 0, no, bs);
       goerr[t] = EMUL(EMUL(yprime<F>(go[t]), nonlin<H>(state[t])), outerr[t]);
-      stateerr[t] = EMUL(EMUL(xprime<H>(state[t]), go[t].A), outerr[t]);
+      stateerr[t] = EMUL(EMUL(xprime<H>(state[t]), go[t]), outerr[t]);
       if (t < N - 1) stateerr[t] += EMUL(stateerr[t + 1], gf[t + 1]);
       if (t > 0)
         gferr[t] = EMUL(EMUL(yprime<F>(gf[t]), stateerr[t]), state[t - 1]);
