@@ -143,6 +143,7 @@ int main1(int argc, char **argv) {
   clstm.net->info("");
 
   double test_error = 9999.0;
+  double best_error = 1e38;
 
   PyServer py;
   if (display_every > 0) py.open();
@@ -166,11 +167,18 @@ int main1(int argc, char **argv) {
       test_error = errors / count;
       print("ERROR", trial, test_error, "   ", errors, count);
     }
-    int sample = irandom() % fnames.size();
+    if (save_every == 0 && test_error < best_error) {
+      best_error = test_error;
+      string fname = save_name + ".clstm";
+      print("saving best performing network so far", fname,
+            "error rate: ", best_error);
+      clstm.save(fname);
+    }
     if (trial > 0 && save_every > 0 && trial % save_every == 0) {
       string fname = save_name + "-" + to_string(trial) + ".clstm";
       clstm.save(fname);
     }
+    int sample = irandom() % fnames.size();
     string fname = fnames[sample];
     string base = basename(fname);
     wstring gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
