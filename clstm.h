@@ -43,6 +43,11 @@ struct Batch : Mat {
   using Mat::Mat;
   Mat d;
 };
+struct Params : Mat {
+  using Mat::Mat;
+  Mat d;
+  bool is_params() { return true; }
+};
 #endif
 
 // typedef vector<Mat> Sequence;

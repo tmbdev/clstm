@@ -19,5 +19,5 @@ hidden=100
 lrate=1e-4
 save_name=uw3-500
 report_time=1
-gdb --ex run --args \
+# gdb --ex run --args \
 ./clstmocrtrain uw3-train uw3-test
