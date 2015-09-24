@@ -315,9 +315,15 @@ int main_ocr(int argc, char **argv) {
       double erate = error_rate(net, testset);
       net->attributes["trial"] = to_string(trial);
       net->attributes["last_err"] = to_string(best_erate);
+#ifdef OLD_TESTERR
+      // old output format
       print("TESTERR", now() - start_time, save_name, trial, erate, "lrate",
             lrate, "hidden", nhidden, nhidden2, "pseudo_batch", pseudo_batch,
             "momentum", momentum);
+#else
+      print("TESTERR", erate, "@", trial, ":", now() - start_time,  trial, "lrate",
+            lrate, "hidden", nhidden, nhidden2, "momentum", momentum);
+#endif
       if (save_every == 0 && erate < best_erate) {
         best_erate = erate;
         print("saving", save_name, "at", erate);
@@ -353,9 +359,8 @@ int main_ocr(int argc, char **argv) {
       break;
     }
     assert(saligned.size() == net->outputs.size());
-    net->d_outputs.resize(net->outputs.size());
     for (int t = 0; t < saligned.size(); t++)
-      net->d_outputs[t] = saligned[t] - net->outputs[t];
+      net->outputs[t].d = saligned[t] - net->outputs[t];
     net->backward();
     if (trial % pseudo_batch == 0) net->update();
     Classes output_classes, aligned_classes;
@@ -372,7 +377,6 @@ int main_ocr(int argc, char **argv) {
     }
 
     if (display_every > 0 && trial % display_every == 0) {
-      net->d_outputs.resize(saligned.size());
       py->eval("clf()");
       py->subplot(4, 1, 1);
       py->evalf("title('%s')", gt.c_str());

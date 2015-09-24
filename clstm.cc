@@ -590,11 +590,11 @@ struct Reversed : NetworkBase {
     INetwork *net = sub[0].get();
     int N = inputs.size();
     net->inputs.resize(N);
-    for(int t=0; t<N; t++) net->inputs[t] = inputs[t];
+    for(int t=0; t<N; t++) net->inputs[t] = inputs[N-t-1];
     net->forward();
     int M = net->outputs.size();
     outputs.resize(M);
-    for(int t=0; t<M; t++) outputs[t] = net->outputs[t];
+    for(int t=0; t<M; t++) outputs[t] = net->outputs[N-t-1];
   }
   void backward() {
     assert(sub.size() == 1);
