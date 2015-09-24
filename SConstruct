@@ -5,7 +5,7 @@ import distutils.sysconfig
 if os.path.isdir(".hg"):
     hgversion = os.popen("hg -q id").read().strip()
 elif os.path.isdir(".git"):
-    hgversion = os.popen("git rev-list --short=8 HEAD | sed 1q").read().strip()
+    hgversion = os.popen("git rev-list HEAD | sed 1q").read().strip()
 else:
     hgversion = os.popen("date").read().strip()
 print "version",hgversion

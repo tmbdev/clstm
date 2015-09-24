@@ -706,15 +706,18 @@ void each(F f, T &a, Args &&... args) {
 
 // stack the delayed output on the input
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int t) {
-  int bs = inp.cols();
   assert(inp.cols() == out.cols());
+  int bs = inp.cols();
   int ni = inp.rows();
   int no = out.rows();
   int nf = ni+no+1;
   all.resize(nf, bs);
   BLOCK(all, 0, 0, 1, bs).setConstant(1);
   BLOCK(all, 1, 0, ni, bs) = inp;
-  if (t>0) BLOCK(all, 1 + ni, 0, no, bs) = out[t-1];
+  if (t<0)
+    BLOCK(all, 1 + ni, 0, no, bs).setConstant(0);
+  else
+    BLOCK(all, 1 + ni, 0, no, bs) = out[t];
 }
 
 // compute non-linear full layers
@@ -726,7 +729,7 @@ void forward_full(Batch &y, Params &W, Batch &x) {
 // combine the delayed gated state with the gated input
 void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int t, Batch &gf) {
   state = EMUL(ci, gi);
-  if (t>0) state += EMUL(gf, states[t]);
+  if (t>=0) state += EMUL(gf, states[t]);
 }
 
 // nonlinear gated output
@@ -794,28 +797,24 @@ struct GenericNPLSTM : NetworkBase {
   }
   void forward() {
     int N = inputs.size();
+    int bs = inputs.cols();
     resize(N);
+    outputs.resize(N,no,bs);
     for (int t = 0; t < N; t++) {
       int bs = COLS(inputs[t]);
-      source[t].resize(nf, bs);
-      BLOCK(source[t], 0, 0, 1, bs).setConstant(1);
-      BLOCK(source[t], 1, 0, ni, bs) = inputs[t];
-      if (t == 0)
-        BLOCK(source[t], 1 + ni, 0, no, bs).setConstant(0);
-      else
-        BLOCK(source[t], 1 + ni, 0, no, bs) = outputs[t - 1];
-      gi[t] = nonlin<F>(MATMUL(WGI, source[t]));
-      gf[t] = nonlin<F>(MATMUL(WGF, source[t]));
-      go[t] = nonlin<F>(MATMUL(WGO, source[t]));
-      ci[t] = nonlin<G>(MATMUL(WCI, source[t]));
-      state[t] = EMUL(ci[t], gi[t]);
-      if (t > 0) state[t] += EMUL(gf[t], state[t - 1]);
-      outputs[t] = EMUL(nonlin<H>(state[t]), go[t]);
+      forward_stack1(source[t], inputs[t], outputs, t-1);
+      forward_full<F>(gi[t], WGI, source[t]);
+      forward_full<F>(gf[t], WGF, source[t]);
+      forward_full<F>(go[t], WGO, source[t]);
+      forward_full<G>(ci[t], WCI, source[t]);
+      forward_statemem(state[t], ci[t], gi[t], state, t-1, gf[t]);
+      forward_nonlingate<H>(outputs[t], state[t], go[t]);
     }
   }
   void backward() {
     int N = inputs.size();
-    Sequence out(N);
+    Sequence out;
+    out.copy(outputs);
     for (int t = N - 1; t >= 0; t--) {
       int bs = COLS(outputs[t].d);
       out[t].d = outputs[t].d;

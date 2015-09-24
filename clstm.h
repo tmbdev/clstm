@@ -75,6 +75,10 @@ struct Sequence {
     for(int t=0; t<n; t++)
       steps[t].resize(rows, cols);
   }
+  void copy(const Sequence &other) {
+    resize(other.size());
+    for (int t=0; t<other.size(); t++) steps[t] = other[t];
+  }
   Batch &operator[](int i) {
     return steps[i];
   }
