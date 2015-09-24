@@ -704,6 +704,37 @@ void each(F f, T &a, Args &&... args) {
 }
 }
 
+// stack the delayed output on the input
+void forward_stack1(Batch &all, Batch &inp, Sequence &out, int t) {
+  int bs = inp.cols();
+  assert(inp.cols() == out.cols());
+  int ni = inp.rows();
+  int no = out.rows();
+  int nf = ni+no+1;
+  all.resize(nf, bs);
+  BLOCK(all, 0, 0, 1, bs).setConstant(1);
+  BLOCK(all, 1, 0, ni, bs) = inp;
+  if (t>0) BLOCK(all, 1 + ni, 0, no, bs) = out[t-1];
+}
+
+// compute non-linear full layers
+template <class F>
+void forward_full(Batch &y, Params &W, Batch &x) {
+  y = nonlin<F>(MATMUL(W, x));
+}
+
+// combine the delayed gated state with the gated input
+void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int t, Batch &gf) {
+  state = EMUL(ci, gi);
+  if (t>0) state += EMUL(gf, states[t]);
+}
+
+// nonlinear gated output
+template <class H>
+void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
+  out = EMUL(nonlin<H>(state), go);
+}
+
 template <class F = SigmoidNonlin, class G = TanhNonlin, class H = TanhNonlin>
 struct GenericNPLSTM : NetworkBase {
 #define WEIGHTS WGI, WGF, WGO, WCI

@@ -64,6 +64,12 @@ struct Sequence {
   void resize(int n) {
     steps.resize(n);
   }
+  int rows() {
+    return steps[0].rows();
+  }
+  int cols() {
+    return steps[0].cols();
+  }
   void resize(int n, int rows, int cols) {
     steps.resize(n);
     for(int t=0; t<n; t++)
