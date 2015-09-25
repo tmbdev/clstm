@@ -22,6 +22,14 @@ inline double now() {
 namespace ocropus {
 char exception_message[256];
 
+void gradient_clip(Sequence &s, Float m = 1.0) {
+  for (int t = 0; t < s.size(); t++) {
+    s[t].d =
+        MAPFUNC(s[t].d,
+                [m](Float x) { return x > m ? m : x < -m ? -m : x; });
+  }
+}
+
 void throwf(const char *format, ...) {
   va_list arglist;
   va_start(arglist, format);
@@ -829,29 +837,32 @@ struct GenericNPLSTM : NetworkBase {
       if (t < N - 1) out[t].d += BLOCK(source[t + 1].d, 1 + ni, 0, no, bs);
 
       go[t].d.A = nonlin<H>(state[t]).A * out[t].d.A;
-      go[t].d.A *= yprime<F>(go[t]).A;
 
       state[t].d = xprime<H>(state[t]).A * go[t].A * out[t].d.A;
       if (t < N - 1) state[t].d.A += state[t + 1].d.A * gf[t + 1].A;
-      if (t > 0) {
-        gf[t].d = state[t].d.A * state[t - 1].A;
-        gf[t].d.A *= yprime<F>(gf[t]).A;
-      }
+      if (t > 0) gf[t].d = state[t].d.A * state[t - 1].A;
+      else gf[t].d.setZero(gf[t].rows(), gf[t].cols());
       gi[t].d = state[t].d.A * ci[t].A;
-      gi[t].d.A *= yprime<F>(gi[t]).A;
       ci[t].d = state[t].d.A * gi[t].A;
-      ci[t].d.A *= yprime<G>(ci[t]).A;
+
+      gi[t].d.A *= yprime<F>(gi[t]).A;
       source[t].d = MATMUL_TR(WGI, gi[t].d);
+
+      gf[t].d.A *= yprime<F>(gf[t]).A;
       if (t > 0) source[t].d += MATMUL_TR(WGF, gf[t].d);
+
+      go[t].d.A *= yprime<F>(go[t]).A;
       source[t].d += MATMUL_TR(WGO, go[t].d);
+
+      ci[t].d.A *= yprime<G>(ci[t]).A;
       source[t].d += MATMUL_TR(WCI, ci[t].d);
+
       inputs[t].d.resize(ni, bs);
       inputs[t].d = BLOCK(source[t].d, 1, 0, ni, bs);
     }
     if (gradient_clipping >= 0) {
-      each([gradient_clipping](Batch &b){
-          gradient_clip(b,gradient_clipping);
-        }, gi, gf, go, ci, state);
+      Float g = gradient_clipping;
+      each([g](Sequence &s){gradient_clip(s,g);}, gi, gf, go, ci, state);
     }
     for (int t = 0; t < N; t++) {
       WGI.d += MATMUL_RT(gi[t].d, source[t]);
@@ -863,13 +874,6 @@ struct GenericNPLSTM : NetworkBase {
     nseq += 1;
   }
 #undef A
-  void gradient_clip(Sequence &s, Float m = 1.0) {
-    for (int t = 0; t < s.size(); t++) {
-      s[t].d =
-          MAPFUNC(s[t].d,
-                  [m](Float x) { return x > m ? m : x < -m ? -m : x; });
-    }
-  }
   void update() {
     float lr = learning_rate;
     if (normalization == NORM_BATCH)
