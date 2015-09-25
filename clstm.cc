@@ -12,6 +12,13 @@
 #define MAXEXP 30
 #endif
 
+#include <sys/time.h>
+inline double now() {
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  return tv.tv_sec + 1e-6 * tv.tv_usec;
+}
+
 namespace ocropus {
 char exception_message[256];
 
@@ -811,6 +818,7 @@ struct GenericNPLSTM : NetworkBase {
       forward_nonlingate<H>(outputs[t], state[t], go[t]);
     }
   }
+#define A array()
   void backward() {
     int N = inputs.size();
     Sequence out;
@@ -819,13 +827,20 @@ struct GenericNPLSTM : NetworkBase {
       int bs = COLS(outputs[t].d);
       out[t].d = outputs[t].d;
       if (t < N - 1) out[t].d += BLOCK(source[t + 1].d, 1 + ni, 0, no, bs);
-      go[t].d = EMUL(EMUL(yprime<F>(go[t]), nonlin<H>(state[t])), out[t].d);
-      state[t].d = EMUL(EMUL(xprime<H>(state[t]), go[t]), out[t].d);
-      if (t < N - 1) state[t].d += EMUL(state[t + 1].d, gf[t + 1]);
-      if (t > 0)
-        gf[t].d = EMUL(EMUL(yprime<F>(gf[t]), state[t].d), state[t - 1]);
-      gi[t].d = EMUL(EMUL(yprime<F>(gi[t]), state[t].d), ci[t]);
-      ci[t].d = EMUL(EMUL(yprime<G>(ci[t]), state[t].d), gi[t]);
+
+      go[t].d.A = nonlin<H>(state[t]).A * out[t].d.A;
+      go[t].d.A *= yprime<F>(go[t]).A;
+
+      state[t].d = xprime<H>(state[t]).A * go[t].A * out[t].d.A;
+      if (t < N - 1) state[t].d.A += state[t + 1].d.A * gf[t + 1].A;
+      if (t > 0) {
+        gf[t].d = state[t].d.A * state[t - 1].A;
+        gf[t].d.A *= yprime<F>(gf[t]).A;
+      }
+      gi[t].d = state[t].d.A * ci[t].A;
+      gi[t].d.A *= yprime<F>(gi[t]).A;
+      ci[t].d = state[t].d.A * gi[t].A;
+      ci[t].d.A *= yprime<G>(ci[t]).A;
       source[t].d = MATMUL_TR(WGI, gi[t].d);
       if (t > 0) source[t].d += MATMUL_TR(WGF, gf[t].d);
       source[t].d += MATMUL_TR(WGO, go[t].d);
@@ -833,12 +848,10 @@ struct GenericNPLSTM : NetworkBase {
       inputs[t].d.resize(ni, bs);
       inputs[t].d = BLOCK(source[t].d, 1, 0, ni, bs);
     }
-    if (gradient_clipping > 0 || gradient_clipping < 999) {
-      gradient_clip(gi, gradient_clipping);
-      gradient_clip(gf, gradient_clipping);
-      gradient_clip(go, gradient_clipping);
-      gradient_clip(ci, gradient_clipping);
-      gradient_clip(state, gradient_clipping);
+    if (gradient_clipping >= 0) {
+      each([gradient_clipping](Batch &b){
+          gradient_clip(b,gradient_clipping);
+        }, gi, gf, go, ci, state);
     }
     for (int t = 0; t < N; t++) {
       WGI.d += MATMUL_RT(gi[t].d, source[t]);

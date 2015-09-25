@@ -28,27 +28,25 @@ void throwf(const char *format, ...);
 extern char exception_message[256];
 
 #ifdef LSTM_DOUBLE
-#if 0
 typedef double Float;
 typedef Eigen::VectorXi iVec;
 typedef Eigen::VectorXd Vec;
 typedef Eigen::MatrixXd Mat;
-#endif
 #else
 typedef float Float;
 typedef Eigen::VectorXi iVec;
 typedef Eigen::VectorXf Vec;
 typedef Eigen::MatrixXf Mat;
-struct Batch : Mat {
-  using Mat::Mat;
-  Mat d;
-};
-struct Params : Mat {
-  using Mat::Mat;
-  Mat d;
-  bool is_params() { return true; }
-};
 #endif
+
+struct Batch : Mat {
+  Mat d;
+  template <class T> void operator=(T other) {
+    (Mat&)*this = other;
+    d.setZero(2,3);  // invalidate it
+  }
+};
+typedef Batch Params;
 
 // typedef vector<Mat> Sequence;
 struct Sequence {

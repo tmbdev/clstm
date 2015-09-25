@@ -321,8 +321,7 @@ int main_ocr(int argc, char **argv) {
             lrate, "hidden", nhidden, nhidden2, "pseudo_batch", pseudo_batch,
             "momentum", momentum);
 #else
-      print("TESTERR", erate, "@", trial, ":", now() - start_time,  trial, "lrate",
-            lrate, "hidden", nhidden, nhidden2, "momentum", momentum);
+      print("TESTERR", erate, "@", trial, ":", now() - start_time);
 #endif
       if (save_every == 0 && erate < best_erate) {
         best_erate = erate;

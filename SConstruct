@@ -46,6 +46,9 @@ env.Append(CPPDEFINES={"HGVERSION" : '\\"'+hgversion+'\\"'})
 env.Append(CPPDEFINES={'THROW' : 'throw'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
+if option("double",0):
+    env.Append(CPPDEFINES={'LSTM_DOUBLE' : '1'})
+
 # With omp=1 support, Eigen and other parts of the code may use multi-threading.
 
 if option("omp",0):
