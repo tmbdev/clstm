@@ -23,11 +23,17 @@ namespace ocropus {
 char exception_message[256];
 
 void gradient_clip(Sequence &s, Float m = 1.0) {
+  if (m<0) return;
   for (int t = 0; t < s.size(); t++) {
     s[t].d =
         MAPFUNC(s[t].d,
                 [m](Float x) { return x > m ? m : x < -m ? -m : x; });
   }
+}
+
+void gradient_clip(Mat &d, Float m = 1.0) {
+  if (m<0) return;
+  d = MAPFUNC(d, [m](Float x) { return x > m ? m : x < -m ? -m : x; });
 }
 
 void throwf(const char *format, ...) {
@@ -845,30 +851,34 @@ struct GenericNPLSTM : NetworkBase {
       gi[t].d = state[t].d.A * ci[t].A;
       ci[t].d = state[t].d.A * gi[t].A;
 
-      gi[t].d.A *= yprime<F>(gi[t]).A;
-      source[t].d = MATMUL_TR(WGI, gi[t].d);
+      gradient_clip(state[t].d, gradient_clipping);
 
-      gf[t].d.A *= yprime<F>(gf[t]).A;
-      if (t > 0) source[t].d += MATMUL_TR(WGF, gf[t].d);
+      Mat gid = EMUL(yprime<F>(gi[t]), gi[t].d);
+      gradient_clip(gid, gradient_clipping);
+      source[t].d = MATMUL_TR(WGI, gid);
+      WGI.d += MATMUL_RT(gid, source[t]);
 
-      go[t].d.A *= yprime<F>(go[t]).A;
-      source[t].d += MATMUL_TR(WGO, go[t].d);
+      if(t>0) {
+        Mat gfd = EMUL(yprime<F>(gf[t]), gf[t].d);
+        gradient_clip(gfd, gradient_clipping);
+        source[t].d += MATMUL_TR(WGF, gfd);
+        WGF.d += MATMUL_RT(gfd, source[t]);
+      }
 
-      ci[t].d.A *= yprime<G>(ci[t]).A;
-      source[t].d += MATMUL_TR(WCI, ci[t].d);
+      Mat god = EMUL(yprime<F>(go[t]).A, go[t].d);
+      gradient_clip(god, gradient_clipping);
+      source[t].d += MATMUL_TR(WGO, god);
+      WGO.d += MATMUL_RT(god, source[t]);
+
+      Mat cid = EMUL(yprime<G>(ci[t]).A, ci[t].d);
+      gradient_clip(cid, gradient_clipping);
+      source[t].d += MATMUL_TR(WCI, cid);
+      WCI.d += MATMUL_RT(cid, source[t]);
+
+      gradient_clip(state[t].d, gradient_clipping);
 
       inputs[t].d.resize(ni, bs);
       inputs[t].d = BLOCK(source[t].d, 1, 0, ni, bs);
-    }
-    if (gradient_clipping >= 0) {
-      Float g = gradient_clipping;
-      each([g](Sequence &s){gradient_clip(s,g);}, gi, gf, go, ci, state);
-    }
-    for (int t = 0; t < N; t++) {
-      WGI.d += MATMUL_RT(gi[t].d, source[t]);
-      if (t > 0) WGF.d += MATMUL_RT(gf[t].d, source[t]);
-      WGO.d += MATMUL_RT(go[t].d, source[t]);
-      WCI.d += MATMUL_RT(ci[t].d, source[t]);
     }
     nsteps += N;
     nseq += 1;
