@@ -43,7 +43,7 @@ struct Batch : Mat {
   Mat d;
   template <class T> void operator=(T other) {
     (Mat&)*this = other;
-    d.setZero(2,3);  // invalidate it
+    //d.setZero(2,3);  // invalidate it
   }
   void zeroGrad() {
     d.setZero(rows(), cols());

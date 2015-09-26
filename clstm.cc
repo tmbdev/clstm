@@ -847,8 +847,6 @@ struct GenericNPLSTM : NetworkBase {
     out.copy(outputs);
     for (int t = N - 1; t >= 0; t--) {
       int bs = COLS(outputs[t].d);
-      out[t].d = outputs[t].d;
-      if (t < N - 1) out[t].d += BLOCK(source[t + 1].d, 1 + ni, 0, no, bs);
 
       go[t].d.A = nonlin<H>(state[t]).A * out[t].d.A;
 
@@ -869,6 +867,7 @@ struct GenericNPLSTM : NetworkBase {
 
       inputs[t].d.resize(ni, bs);
       inputs[t].d = BLOCK(source[t].d, 1, 0, ni, bs);
+      if (t > 0) out[t-1].d += BLOCK(source[t].d, 1 + ni, 0, no, bs);
     }
     nsteps += N;
     nseq += 1;
