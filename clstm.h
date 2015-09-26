@@ -45,6 +45,9 @@ struct Batch : Mat {
     (Mat&)*this = other;
     d.setZero(2,3);  // invalidate it
   }
+  void zeroGrad() {
+    d.setZero(rows(), cols());
+  }
 };
 typedef Batch Params;
 
@@ -82,6 +85,10 @@ struct Sequence {
   }
   const Batch &operator[](int i) const {
     return steps[i];
+  }
+  void zeroGrad() {
+    for(int t=0; t<steps.size(); t++)
+      steps[t].zeroGrad();
   }
 };
 

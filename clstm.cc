@@ -747,6 +747,14 @@ void forward_full(Batch &y, Params &W, Batch &x) {
   y = nonlin<F>(MATMUL(W, x));
 }
 
+template <class F>
+void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
+  Mat temp = EMUL(yprime<F>(y), y.d);
+  gradient_clip(temp, gc);
+  x.d += MATMUL_TR(W, temp);
+  W.d += MATMUL_RT(temp, x);
+}
+
 // combine the delayed gated state with the gated input
 void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int t, Batch &gf) {
   state = EMUL(ci, gi);
@@ -853,16 +861,15 @@ struct GenericNPLSTM : NetworkBase {
 
       gradient_clip(state[t].d, gradient_clipping);
 
-      Mat gid = EMUL(yprime<F>(gi[t]), gi[t].d);
-      gradient_clip(gid, gradient_clipping);
-      source[t].d = MATMUL_TR(WGI, gid);
-      WGI.d += MATMUL_RT(gid, source[t]);
+      source[t].zeroGrad();
+      backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
 
       if(t>0) {
-        Mat gfd = EMUL(yprime<F>(gf[t]), gf[t].d);
-        gradient_clip(gfd, gradient_clipping);
-        source[t].d += MATMUL_TR(WGF, gfd);
-        WGF.d += MATMUL_RT(gfd, source[t]);
+        backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
+        // Mat gfd = EMUL(yprime<F>(gf[t]), gf[t].d);
+        // gradient_clip(gfd, gradient_clipping);
+        // source[t].d += MATMUL_TR(WGF, gfd);
+        // WGF.d += MATMUL_RT(gfd, source[t]);
       }
 
       Mat god = EMUL(yprime<F>(go[t]).A, go[t].d);
