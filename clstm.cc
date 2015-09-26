@@ -863,26 +863,9 @@ struct GenericNPLSTM : NetworkBase {
 
       source[t].zeroGrad();
       backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
-
-      if(t>0) {
-        backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
-        // Mat gfd = EMUL(yprime<F>(gf[t]), gf[t].d);
-        // gradient_clip(gfd, gradient_clipping);
-        // source[t].d += MATMUL_TR(WGF, gfd);
-        // WGF.d += MATMUL_RT(gfd, source[t]);
-      }
-
-      Mat god = EMUL(yprime<F>(go[t]).A, go[t].d);
-      gradient_clip(god, gradient_clipping);
-      source[t].d += MATMUL_TR(WGO, god);
-      WGO.d += MATMUL_RT(god, source[t]);
-
-      Mat cid = EMUL(yprime<G>(ci[t]).A, ci[t].d);
-      gradient_clip(cid, gradient_clipping);
-      source[t].d += MATMUL_TR(WCI, cid);
-      WCI.d += MATMUL_RT(cid, source[t]);
-
-      gradient_clip(state[t].d, gradient_clipping);
+      if (t>0) backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
+      backward_full<F>(go[t], WGO, source[t], gradient_clipping);
+      backward_full<G>(ci[t], WCI, source[t], gradient_clipping);
 
       inputs[t].d.resize(ni, bs);
       inputs[t].d = BLOCK(source[t].d, 1, 0, ni, bs);
