@@ -843,31 +843,27 @@ struct GenericNPLSTM : NetworkBase {
 #define A array()
   void backward() {
     int N = inputs.size();
+    int bs = outputs.cols();
     Sequence out;
     out.copy(outputs);
+    each([](Sequence &s) {s.zeroGrad();},
+         source, inputs, state, gi, go, gf, ci);
+
     for (int t = N - 1; t >= 0; t--) {
-      int bs = COLS(outputs[t].d);
-
-      go[t].d.A = nonlin<H>(state[t]).A * out[t].d.A;
-
-      state[t].d = xprime<H>(state[t]).A * go[t].A * out[t].d.A;
+      go[t].d.A += nonlin<H>(state[t]).A * out[t].d.A;
+      state[t].d.A += xprime<H>(state[t]).A * go[t].A * out[t].d.A;
       if (t < N - 1) state[t].d.A += state[t + 1].d.A * gf[t + 1].A;
-      if (t > 0) gf[t].d = state[t].d.A * state[t - 1].A;
+      if (t > 0) gf[t].d.A += state[t].d.A * state[t - 1].A;
       else gf[t].d.setZero(gf[t].rows(), gf[t].cols());
-      gi[t].d = state[t].d.A * ci[t].A;
-      ci[t].d = state[t].d.A * gi[t].A;
-
+      gi[t].d.A += state[t].d.A * ci[t].A;
+      ci[t].d.A += state[t].d.A * gi[t].A;
       gradient_clip(state[t].d, gradient_clipping);
-
-      source[t].zeroGrad();
       backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
       if (t>0) backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
       backward_full<F>(go[t], WGO, source[t], gradient_clipping);
       backward_full<G>(ci[t], WCI, source[t], gradient_clipping);
-
-      inputs[t].d.resize(ni, bs);
-      inputs[t].d = BLOCK(source[t].d, 1, 0, ni, bs);
-      if (t > 0) out[t-1].d += BLOCK(source[t].d, 1 + ni, 0, no, bs);
+      inputs[t].d.A += BLOCK(source[t].d, 1, 0, ni, bs).A;
+      if (t > 0) out[t-1].d.A += BLOCK(source[t].d, 1 + ni, 0, no, bs).A;
     }
     nsteps += N;
     nseq += 1;
