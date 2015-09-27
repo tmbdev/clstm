@@ -784,6 +784,11 @@ template <class H>
 void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
   out = EMUL(nonlin<H>(state), go);
 }
+template <class H>
+void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
+  go.d.A += nonlin<H>(state).A * out.d.A;
+  state.d.A += xprime<H>(state).A * go.A * out.d.A;
+}
 
 template <class F = SigmoidNonlin, class G = TanhNonlin, class H = TanhNonlin>
 struct GenericNPLSTM : NetworkBase {
@@ -863,12 +868,12 @@ struct GenericNPLSTM : NetworkBase {
     int bs = outputs.cols();
     Sequence out;
     out.copy(outputs);
-    each([](Sequence &s) {s.zeroGrad();},
-         source, inputs, state, gi, go, gf, ci);
+    each([](Sequence &s) {
+        s.zeroGrad();
+      }, source, inputs, state, gi, go, gf, ci);
 
     for (int t = N - 1; t >= 0; t--) {
-      go[t].d.A += nonlin<H>(state[t]).A * out[t].d.A;
-      state[t].d.A += xprime<H>(state[t]).A * go[t].A * out[t].d.A;
+      backward_nonlingate<H>(out[t], state[t], go[t]);
       backward_statemem(state[t], ci[t], gi[t], state, t-1, gf[t]);
       gradient_clip(state[t].d, gradient_clipping);
       backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
@@ -890,14 +895,9 @@ struct GenericNPLSTM : NetworkBase {
       ;
     else
       THROW("unknown normalization");
-    WGI += lr * WGI.d;
-    WGF += lr * WGF.d;
-    WGO += lr * WGO.d;
-    WCI += lr * WCI.d;
-    WGI.d *= momentum;
-    WGF.d *= momentum;
-    WGO.d *= momentum;
-    WCI.d *= momentum;
+    each([this,lr](Params &W) {
+        W += lr * W.d; W.d *= momentum;
+      }, WGI, WGF, WGO, WCI);
   }
   void myweights(const string &prefix, WeightFun f) {
     f(prefix + ".WGI", &WGI, &WGI.d);
