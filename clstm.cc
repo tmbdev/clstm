@@ -725,6 +725,8 @@ void each(F f, T &a, Args &&... args) {
 }
 }
 
+#define A array()
+
 // stack the delayed output on the input
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int t) {
   assert(inp.cols() == out.cols());
@@ -739,6 +741,16 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int t) {
     BLOCK(all, 1 + ni, 0, no, bs).setConstant(0);
   else
     BLOCK(all, 1 + ni, 0, no, bs) = out[t];
+}
+
+void backward_stack1(Batch &all, Batch &inp, Sequence &out, int t) {
+  assert(inp.cols() == out.cols());
+  int bs = inp.cols();
+  int ni = inp.rows();
+  int no = out.rows();
+  int nf = ni+no+1;
+  inp.d += BLOCK(all.d, 1, 0, ni, bs);
+  if (t>=0) out[t].d += BLOCK(all.d, 1 + ni, 0, no, bs);
 }
 
 // compute non-linear full layers
@@ -759,6 +771,12 @@ void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
 void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int t, Batch &gf) {
   state = EMUL(ci, gi);
   if (t>=0) state += EMUL(gf, states[t]);
+}
+void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int last, Batch &gf) {
+  if (last >= 0) states[last].d.A += state.d.A * gf.A;
+  if (last >= 0) gf.d.A += state.d.A * states[last].A;
+  gi.d.A += state.d.A * ci.A;
+  ci.d.A += state.d.A * gi.A;
 }
 
 // nonlinear gated output
@@ -840,7 +858,6 @@ struct GenericNPLSTM : NetworkBase {
       forward_nonlingate<H>(outputs[t], state[t], go[t]);
     }
   }
-#define A array()
   void backward() {
     int N = inputs.size();
     int bs = outputs.cols();
@@ -852,23 +869,17 @@ struct GenericNPLSTM : NetworkBase {
     for (int t = N - 1; t >= 0; t--) {
       go[t].d.A += nonlin<H>(state[t]).A * out[t].d.A;
       state[t].d.A += xprime<H>(state[t]).A * go[t].A * out[t].d.A;
-      if (t < N - 1) state[t].d.A += state[t + 1].d.A * gf[t + 1].A;
-      if (t > 0) gf[t].d.A += state[t].d.A * state[t - 1].A;
-      else gf[t].d.setZero(gf[t].rows(), gf[t].cols());
-      gi[t].d.A += state[t].d.A * ci[t].A;
-      ci[t].d.A += state[t].d.A * gi[t].A;
+      backward_statemem(state[t], ci[t], gi[t], state, t-1, gf[t]);
       gradient_clip(state[t].d, gradient_clipping);
       backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
       if (t>0) backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
       backward_full<F>(go[t], WGO, source[t], gradient_clipping);
       backward_full<G>(ci[t], WCI, source[t], gradient_clipping);
-      inputs[t].d.A += BLOCK(source[t].d, 1, 0, ni, bs).A;
-      if (t > 0) out[t-1].d.A += BLOCK(source[t].d, 1 + ni, 0, no, bs).A;
+      backward_stack1(source[t], inputs[t], out, t-1);
     }
     nsteps += N;
     nseq += 1;
   }
-#undef A
   void update() {
     float lr = learning_rate;
     if (normalization == NORM_BATCH)
