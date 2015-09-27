@@ -728,7 +728,7 @@ void each(F f, T &a, Args &&... args) {
 #define A array()
 
 // stack the delayed output on the input
-void forward_stack1(Batch &all, Batch &inp, Sequence &out, int t) {
+void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   assert(inp.cols() == out.cols());
   int bs = inp.cols();
   int ni = inp.rows();
@@ -737,20 +737,19 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int t) {
   all.resize(nf, bs);
   BLOCK(all, 0, 0, 1, bs).setConstant(1);
   BLOCK(all, 1, 0, ni, bs) = inp;
-  if (t<0)
+  if (last<0)
     BLOCK(all, 1 + ni, 0, no, bs).setConstant(0);
   else
-    BLOCK(all, 1 + ni, 0, no, bs) = out[t];
+    BLOCK(all, 1 + ni, 0, no, bs) = out[last];
 }
-
-void backward_stack1(Batch &all, Batch &inp, Sequence &out, int t) {
+void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   assert(inp.cols() == out.cols());
   int bs = inp.cols();
   int ni = inp.rows();
   int no = out.rows();
   int nf = ni+no+1;
   inp.d += BLOCK(all.d, 1, 0, ni, bs);
-  if (t>=0) out[t].d += BLOCK(all.d, 1 + ni, 0, no, bs);
+  if (last>=0) out[last].d += BLOCK(all.d, 1 + ni, 0, no, bs);
 }
 
 // compute non-linear full layers
@@ -758,7 +757,6 @@ template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
   y = nonlin<F>(MATMUL(W, x));
 }
-
 template <class F>
 void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
   Mat temp = EMUL(yprime<F>(y), y.d);
@@ -768,11 +766,13 @@ void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
 }
 
 // combine the delayed gated state with the gated input
-void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int t, Batch &gf) {
+void forward_statemem(Batch &state, Batch &ci, Batch &gi,
+                      Sequence &states, int last, Batch &gf) {
   state = EMUL(ci, gi);
-  if (t>=0) state += EMUL(gf, states[t]);
+  if (last>=0) state += EMUL(gf, states[last]);
 }
-void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int last, Batch &gf) {
+void backward_statemem(Batch &state, Batch &ci, Batch &gi,
+                       Sequence &states, int last, Batch &gf) {
   if (last >= 0) states[last].d.A += state.d.A * gf.A;
   if (last >= 0) gf.d.A += state.d.A * states[last].A;
   gi.d.A += state.d.A * ci.A;
