@@ -475,40 +475,39 @@ struct ReluNonlin {
 typedef Full<ReluNonlin> ReluLayer;
 REGISTER(ReluLayer);
 
+#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols()-1)
+#define CFIRST(M) COL(M, 0)
+#define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
+
 struct SoftmaxLayer : NetworkBase {
-  Mat W, d_W;
-  Vec w, d_w;
+  Params W1;
   int nsteps = 0;
   int nseq = 0;
   SoftmaxLayer() { name = "softmax"; }
   const char *kind() { return "SoftmaxLayer"; }
-  int noutput() { return ROWS(W); }
-  int ninput() { return COLS(W); }
+  int noutput() { return ROWS(W1); }
+  int ninput() { return COLS(W1)-1; }
   void initialize() {
     int no = irequire("noutput");
     int ni = irequire("ninput");
     if (no < 2) THROW("Softmax requires no>=2");
-    randinit(W, no, ni, 0.01);
-    randinit(w, no, 0.01);
+    randinit(W1, no, ni+1, 0.01);
     clearUpdates();
   }
   void clearUpdates() {
-    int no = ROWS(W);
-    int ni = COLS(W);
-    zeroinit(d_W, no, ni);
-    zeroinit(d_w, no);
+    W1.zeroGrad();
   }
   void postLoad() {
-    clearUpdates();
+    W1.zeroGrad();
     makeEncoders();
   }
   void forward() {
-    outputs.resize(inputs.size());
-    int no = ROWS(W), bs = COLS(inputs[0]);
+    int nsteps = inputs.size();
+    int no = ROWS(W1), bs = COLS(inputs[0]);
+    outputs.resize(nsteps, no, bs);
     for (int t = 0; t < inputs.size(); t++) {
-      outputs[t].resize(no, bs);
+      outputs[t] = MAPFUN(HOMDOT(W1, inputs[t]), limexp);
       for (int b = 0; b < COLS(outputs[t]); b++) {
-        COL(outputs[t], b) = MAPFUN(DOT(W, COL(inputs[t], b)) + w, limexp);
         Float total = fmax(SUMREDUCE(COL(outputs[t], b)), 1e-9);
         COL(outputs[t], b) /= total;
       }
@@ -516,11 +515,13 @@ struct SoftmaxLayer : NetworkBase {
   }
   void backward() {
     for (int t = outputs.size() - 1; t >= 0; t--) {
-      inputs[t].d = MATMUL_TR(W, outputs[t].d);
+      inputs[t].d = MATMUL_TR(CBUTFIRST(W1), outputs[t].d);
     }
     int bs = COLS(inputs[0]);
     for (int t = 0; t < outputs.size(); t++) {
+      auto d_W = CBUTFIRST(W1.d);
       d_W += MATMUL_RT(outputs[t].d, inputs[t]);
+      auto d_w = CFIRST(W1.d);
       for (int b = 0; b < bs; b++) d_w += COL(outputs[t].d, b);
     }
     nsteps += outputs.size();
@@ -536,16 +537,13 @@ struct SoftmaxLayer : NetworkBase {
       ;
     else
       THROW("unknown normalization");
-    W += lr * d_W;
-    w += lr * d_w;
+    W1 += lr * W1.d;
+    W1.d *= momentum;
     nsteps = 0;
     nseq = 0;
-    d_W *= momentum;
-    d_w *= momentum;
   }
   void myweights(const string &prefix, WeightFun f) {
-    f(prefix + ".W", &W, &d_W);
-    f(prefix + ".w", &w, &d_w);
+    f(prefix + ".W1", &W1, &W1.d);
   }
 };
 REGISTER(SoftmaxLayer);
