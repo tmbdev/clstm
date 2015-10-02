@@ -354,43 +354,43 @@ inline Float sigmoid(Float x) {
 
 template <class NONLIN>
 struct Full : NetworkBase {
-  Params W, w;
+  Params W1;
   int nseq = 0;
   int nsteps = 0;
   string mykind = string("Full_") + NONLIN::kind;
   Full() { name = string("full_") + NONLIN::name; }
   const char *kind() { return mykind.c_str(); }
-  int noutput() { return ROWS(W); }
-  int ninput() { return COLS(W); }
+  int noutput() { return ROWS(W1); }
+  int ninput() { return COLS(W1)-1; }
   void initialize() {
     int no = irequire("noutput");
     int ni = irequire("ninput");
-    randinit(W, no, ni, 0.01);
-    randinit(w, no, 1, 0.01);
-    zeroinit(W.d, no, ni);
-    zeroinit(w.d, no, 1);
+    randinit(W1, no, ni+1, 0.01);
+    W1.zeroGrad();
   }
   void forward() {
-    outputs.resize(inputs.size());
+    int nsteps = inputs.size();
+    int no = ROWS(W1), bs = COLS(inputs[0]);
+    outputs.resize(nsteps, no, bs);
     for (int t = 0; t < inputs.size(); t++) {
-      outputs[t] = MATMUL(W, inputs[t]);
-      Vec v = COL(w, 0);
-      ADDCOLS(outputs[t], v);
+      outputs[t] = HOMDOT(W1, inputs[t]);
       NONLIN::f(outputs[t]);
     }
   }
   void backward() {
     for (int t = outputs.size() - 1; t >= 0; t--) {
       NONLIN::df(outputs[t].d, outputs[t]);
-      inputs[t].d = MATMUL_TR(W.d, outputs[t].d);
+      inputs[t].d = MATMUL_TR(CBUTFIRST(W1), outputs[t].d);
     }
     int bs = COLS(inputs[0]);
     for (int t = 0; t < outputs.size(); t++) {
-      W.d += MATMUL_RT(outputs[t].d, inputs[t]);
-      for (int b = 0; b < bs; b++) w.d += COL(outputs[t].d, b);
+      auto d_W = CBUTFIRST(W1.d);
+      d_W += MATMUL_RT(outputs[t].d, inputs[t]);
+      auto d_w = CFIRST(W1.d);
+      for (int b = 0; b < bs; b++) d_w += COL(outputs[t].d, b);
     }
-    nseq += 1;
     nsteps += outputs.size();
+    nseq += 1;
     outputs[0].d(0, 0) = NAN;  // invalidate it, since we have changed it
   }
   void update() {
@@ -403,16 +403,13 @@ struct Full : NetworkBase {
       ;
     else
       THROW("unknown normalization");
-    W += lr * W.d;
-    w += lr * w.d;
+    W1 += lr * W1.d;
+    W1.d *= momentum;
     nsteps = 0;
     nseq = 0;
-    W.d *= momentum;
-    w.d *= momentum;
   }
   void myweights(const string &prefix, WeightFun f) {
-    f(prefix + ".W", &W, (Mat *)0);
-    f(prefix + ".w", &w, (Vec *)0);
+    f(prefix + ".W1", &W1, (Mat *)0);
   }
 };
 
@@ -474,10 +471,6 @@ struct ReluNonlin {
 };
 typedef Full<ReluNonlin> ReluLayer;
 REGISTER(ReluLayer);
-
-#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols()-1)
-#define CFIRST(M) COL(M, 0)
-#define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
 
 struct SoftmaxLayer : NetworkBase {
   Params W1;

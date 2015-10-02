@@ -96,6 +96,12 @@ struct Sequence {
 // in CLSTM. They are here for eventually converting the
 // inner loops of CLSTM from Eigen::Matrix to Eigen::Tensor
 // (which uses different and incompatible notation)
+//
+// NB: In C++ 14, we can write Eigen functions more easily like this:
+// auto HOMDOT(Mat &A1, Mat &B) {return (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1));}
+//
+// All of this will be cleaned up when we're switching to Eigen::Tensor
+
 #define DOT(M, V) ((M) * (V))
 #define MATMUL(A, B) ((A) * (B))
 #define MATMUL_TR(A, B) ((A).transpose() * (B))
@@ -110,6 +116,10 @@ struct Sequence {
 #define MAPFUNC(M, F) ((M).unaryExpr(F))
 #define SUMREDUCE(M) float(M.sum())
 #define BLOCK(A, i, j, n, m) (A).block(i, j, n, m)
+#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols()-1)
+#define CFIRST(M) COL(M, 0)
+#define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
+
 
 inline void ADDCOLS(Mat &m, Vec &v) {
   for (int i = 0; i < COLS(m); i++)
