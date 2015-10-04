@@ -12,7 +12,7 @@ swig_opts = ["-c++"] + ["-I" + d for d in include_dirs]
 swiglib = os.popen("swig -swiglib").read()[:-1]
 
 print "making proto file"
-os.system("protoc clstm.proto")
+os.system("protoc clstm.proto --cpp_out=.")
 
 clstm = Extension('_clstm',
         libraries = ['png','protobuf'],
