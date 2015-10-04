@@ -161,3 +161,7 @@ destlib = distutils.sysconfig.get_config_var("DESTLIB")
 Alias('pyinstall',
       Install(os.path.join(destlib, "site-packages"),
               ["_clstm.so", "clstm.py"]))
+
+program = env.Program("test-lstm",["test-lstm.cc"],LIBS=[libclstm]+libs)
+test_alias = Alias('test', [program], program[0].abspath)
+AlwaysBuild(test_alias)

@@ -86,6 +86,10 @@ struct Sequence {
   const Batch &operator[](int i) const {
     return steps[i];
   }
+  void zero() {
+    for(int t=0; t<steps.size(); t++)
+      steps[t].setZero();
+  }
   void zeroGrad() {
     for(int t=0; t<steps.size(); t++)
       steps[t].zeroGrad();
