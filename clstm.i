@@ -103,13 +103,18 @@ struct Mat {
     }
 }
 
+struct Batch : Mat {
+  Mat d;
+};
+typedef Batch Params;
+
 
 struct Sequence {
     Sequence();
     ~Sequence();
     int size();
     %rename(__getitem__) operator[];
-    Mat &operator[](int i);
+    Batch &operator[](int i);
 };
 %extend Sequence {
     int length() {
@@ -127,9 +132,6 @@ struct Sequence {
         $self->resize(other.size());
         for(int t=0;t<$self->size();t++)
             (*$self)[t] = other[t];
-    }
-    void resize(int len, int depth, int batchsize) {
-        throw "unimplemented";
     }
 }
 
@@ -166,8 +168,8 @@ typedef std::shared_ptr<INetwork> Network;
 
 struct INetwork : virtual ITrainable {
     virtual ~INetwork();
-    Sequence inputs, d_inputs;
-    Sequence outputs, d_outputs;
+    Sequence inputs;
+    Sequence outputs;
     std::vector<std::shared_ptr<INetwork> > sub;
     std::vector<int> codec;
     std::vector<int> icodec;
@@ -396,6 +398,21 @@ void sequence_of_array(Sequence &a,PyObject *object_) {
     }
 }
 
+void d_sequence_of_array(Sequence &a,PyObject *object_) {
+    npa_float np(object_);
+    if(np.rank()!=3) throw "rank must be 3";
+    int N = np.dim(0);
+    int d = np.dim(1);
+    int bs = np.dim(2);
+    if (a.size() != N) throw "size mismatch";
+    for(int t=0;t<N;t++) {
+        a[t].d.resize(d,bs);
+        for(int i=0; i<d; i++)
+            for(int b=0; b<bs; b++)
+                a[t].d(i,b) = np(t,i,b);
+    }
+}
+
 void array_of_sequence(PyObject *object_,Sequence &a) {
     npa_float np(object_);
     int N = a.size();
@@ -409,6 +426,22 @@ void array_of_sequence(PyObject *object_,Sequence &a) {
         for(int i=0; i<d; i++)
             for(int b=0; b<bs; b++)
                 np(t,i,b) = a[t](i,b);
+    }
+}
+
+void array_of_d_sequence(PyObject *object_,Sequence &a) {
+    npa_float np(object_);
+    int N = a.size();
+    if (N==0) throw "empty sequence";
+    int d = a[0].rows();
+    if (d==0) throw "empty feature vector";
+    int bs = a[0].cols();
+    if (bs==0) throw "empty batch";
+    np.resize(N,d,bs);
+    for(int t=0; t<N; t++) {
+        for(int i=0; i<d; i++)
+            for(int b=0; b<bs; b++)
+                np(t,i,b) = a[t].d(i,b);
     }
 }
 %}
@@ -425,6 +458,16 @@ Sequence.array = Sequence_array
 def Sequence_aset(self, a):
     sequence_of_array(self, a)
 Sequence.aset = Sequence_aset
+
+def Sequence_darray(self):
+    a = numpy.zeros(1,'f')
+    array_of_d_sequence(a, self)
+    return a
+Sequence.darray = Sequence_darray
+
+def Sequence_dset(self, a):
+    d_sequence_of_array(self, a)
+Sequence.dset = Sequence_dset
 
 def ctcalign(outputs_,targets_):
     outputs = Sequence()
