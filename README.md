@@ -1,6 +1,8 @@
 # clstm
 
-[![Join the chat at https://gitter.im/tmbdev/clstm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tmbdev/clstm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<font color="red" size=+2>
+This is the `separate-derivs` branch, an older, maintenance version of CLSTM.
+</font>
 
 To build a standalone C library, run
 
