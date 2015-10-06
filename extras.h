@@ -108,6 +108,26 @@ inline string getdef(std::map<string, string> &m, const string &key,
 
 // print the arguments to cerr
 
+inline void debug(Mat &b, string prefix="") {
+  for(int i=0; i<b.rows(); i++) {
+    cerr << prefix;
+    for(int j=0; j<b.cols(); j++) {
+      cerr << " " << b(i,j);
+    }
+    cerr << endl;
+  }
+}
+
+inline void debugT(Mat &b, string prefix="") {
+  for(int j=0; j<b.cols(); j++) {
+    cerr << prefix << ".T";
+    for(int i=0; i<b.rows(); i++) {
+      cerr << " " << b(i,j);
+    }
+    cerr << endl;
+  }
+}
+
 inline void dprint() { cerr << endl; }
 
 template <class T>

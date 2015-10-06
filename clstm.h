@@ -16,6 +16,16 @@
 #include <Eigen/Dense>
 #include <random>
 
+#ifndef NOEXCEPTIONS
+#define THROW(X) throw
+#define TRY try
+#define CATCH(X) catch(X)
+#else
+#define THROW(X) abort()
+#define TRY /*nothing*/
+#define CATCH(X) while(0)
+#endif
+
 namespace ocropus {
 using std::string;
 using std::vector;
@@ -351,8 +361,10 @@ struct INetwork : virtual ITrainable {
 
   // Hooks to iterate over the weights and states of this network.
   typedef function<void(const string &, VecMat, VecMat)> WeightFun;
+  typedef function<void(const string &, Params *)> ParamsFun;
   typedef function<void(const string &, Sequence *)> StateFun;
   virtual void myweights(const string &prefix, WeightFun f) {}
+  virtual void myparams(const string &prefix, ParamsFun f) {}
   virtual void mystates(const string &prefix, StateFun f) {}
 
   // Hooks executed prior to saving and after loading.
@@ -372,6 +384,7 @@ struct INetwork : virtual ITrainable {
 
   void info(string prefix);
   void weights(const string &prefix, WeightFun f);
+  void params(const string &prefix, ParamsFun f);
   void states(const string &prefix, StateFun f);
   void networks(const string &prefix, function<void(string, INetwork *)>);
   Sequence *getState(string name);

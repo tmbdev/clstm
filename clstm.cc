@@ -123,7 +123,10 @@ bool verbose = false;
 
 void set_inputs(INetwork *net, Sequence &inputs) {
   net->inputs.resize(inputs.size());
-  for (int t = 0; t < net->inputs.size(); t++) net->inputs[t] = inputs[t];
+  for (int t = 0; t < net->inputs.size(); t++) {
+    net->inputs[t] = inputs[t];
+    net->inputs[t].zeroGrad();
+  }
 }
 void set_targets(INetwork *net, Sequence &targets) {
   int N = net->outputs.size();
@@ -291,6 +294,14 @@ void INetwork::weights(const string &prefix, WeightFun f) {
   }
 }
 
+void INetwork::params(const string &prefix, ParamsFun f) {
+  string nprefix = prefix + "." + name;
+  myparams(nprefix, f);
+  for (int i = 0; i < sub.size(); i++) {
+    sub[i]->params(nprefix + "." + to_string(i), f);
+  }
+}
+
 void INetwork::states(const string &prefix, StateFun f) {
   string nprefix = prefix + "." + name;
   f(nprefix + ".inputs", &inputs);
@@ -410,6 +421,9 @@ struct Full : NetworkBase {
   }
   void myweights(const string &prefix, WeightFun f) {
     f(prefix + ".W1", &W1, (Mat *)0);
+  }
+  void myparams(const string &prefix, ParamsFun f) {
+    f(prefix + ".W1", &W1);
   }
 };
 
@@ -537,6 +551,9 @@ struct SoftmaxLayer : NetworkBase {
   }
   void myweights(const string &prefix, WeightFun f) {
     f(prefix + ".W1", &W1, &W1.d);
+  }
+  void myparams(const string &prefix, ParamsFun f) {
+    f(prefix + ".W1", &W1);
   }
 };
 REGISTER(SoftmaxLayer);
@@ -896,6 +913,12 @@ struct GenericNPLSTM : NetworkBase {
     f(prefix + ".WGF", &WGF, &WGF.d);
     f(prefix + ".WGO", &WGO, &WGO.d);
     f(prefix + ".WCI", &WCI, &WCI.d);
+  }
+  void myparams(const string &prefix, ParamsFun f) {
+    f(prefix + ".WGI", &WGI);
+    f(prefix + ".WGF", &WGF);
+    f(prefix + ".WGO", &WGO);
+    f(prefix + ".WCI", &WCI);
   }
   virtual void mystates(const string &prefix, StateFun f) {
     f(prefix + ".inputs", &inputs);

@@ -7,10 +7,14 @@
 
 #define MDSTR(X) #X
 #define MDSTR1(X) MDSTR(X)
+#ifndef NOEXCEPTIONS
 #define MDCHECK(X)                                          \
   while (!(X)) {                                            \
-    THROW("FAILED: " __FILE__ ":" MDSTR1(__LINE__) ":" #X); \
+    throw("FAILED: " __FILE__ ":" MDSTR1(__LINE__) ":" #X); \
   }
+#else
+  while (!(X)) abort();
+#endif
 
 #include <stdlib.h>
 
@@ -97,7 +101,7 @@ struct mdarray {
   int rank() {
     for (int i = 0; i < MAXRANK + 1; i++)
       if (!dims[i]) return i;
-    THROW("bad rank");
+    MDCHECK(MAXRANK<MAXRANK);
   }
 
   // total number of elements in linearized array

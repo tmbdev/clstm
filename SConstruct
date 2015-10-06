@@ -2,6 +2,10 @@
 import os,sys,os.path
 import distutils.sysconfig
 
+if "deriv" in COMMAND_LINE_TARGETS:
+  ARGUMENTS["double"] = "1"
+  ARGUMENTS["debug"] = "1"
+
 if os.path.isdir(".hg"):
     hgversion = os.popen("hg -q id").read().strip()
 elif os.path.isdir(".git"):
@@ -43,7 +47,7 @@ prefix = option('prefix', "/usr/local")
 
 env = Environment()
 env.Append(CPPDEFINES={"HGVERSION" : '\\"'+hgversion+'\\"'})
-env.Append(CPPDEFINES={'THROW' : 'throw'})
+env.Append(CPPDEFINES={'EXCEPTIONS' : '1'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
 if option("double",0):
@@ -165,3 +169,7 @@ Alias('pyinstall',
 program = env.Program("test-lstm",["test-lstm.cc"],LIBS=[libclstm]+libs)
 test_alias = Alias('test', [program], program[0].abspath)
 AlwaysBuild(test_alias)
+
+deriv = env.Program("test-deriv",["test-deriv.cc"],LIBS=[libclstm]+libs)
+deriv_alias = Alias('deriv', [deriv], deriv[0].abspath)
+AlwaysBuild(deriv_alias)
