@@ -22,19 +22,6 @@ inline double now() {
 namespace ocropus {
 char exception_message[256];
 
-void gradient_clip(Sequence &s, Float m = 1.0) {
-  if (m < 0) return;
-  for (int t = 0; t < s.size(); t++) {
-    s[t].d =
-        MAPFUNC(s[t].d, [m](Float x) { return x > m ? m : x < -m ? -m : x; });
-  }
-}
-
-void gradient_clip(Mat &d, Float m = 1.0) {
-  if (m < 0) return;
-  d = MAPFUNC(d, [m](Float x) { return x > m ? m : x < -m ? -m : x; });
-}
-
 void throwf(const char *format, ...) {
   va_list arglist;
   va_start(arglist, format);
@@ -344,24 +331,6 @@ struct NetworkBase : INetwork {
   }
 };
 
-inline Float limexp(Float x) {
-#if 1
-  if (x < -MAXEXP) return exp(-MAXEXP);
-  if (x > MAXEXP) return exp(MAXEXP);
-  return exp(x);
-#else
-  return exp(x);
-#endif
-}
-
-inline Float sigmoid(Float x) {
-#if 1
-  return 1.0 / (1.0 + limexp(-x));
-#else
-  return 1.0 / (1.0 + exp(-x));
-#endif
-}
-
 template <class NONLIN>
 struct Full : NetworkBase {
   Params W1;
@@ -424,62 +393,12 @@ struct Full : NetworkBase {
   void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
 
-struct NoNonlin {
-  static constexpr const char *kind = "Linear";
-  static constexpr const char *name = "linear";
-  template <class T>
-  static void f(T &x) {}
-  template <class T, class U>
-  static void df(T &dx, U &y) {}
-};
 typedef Full<NoNonlin> LinearLayer;
 REGISTER(LinearLayer);
-
-struct SigmoidNonlin {
-  static constexpr const char *kind = "Sigmoid";
-  static constexpr const char *name = "sigmoid";
-  template <class T>
-  static void f(T &x) {
-    x = MAPFUN(x, sigmoid);
-  }
-  template <class T, class U>
-  static void df(T &dx, U &y) {
-    dx.array() *= y.array() * (1 - y.array());
-  }
-};
 typedef Full<SigmoidNonlin> SigmoidLayer;
 REGISTER(SigmoidLayer);
-
-Float tanh_(Float x) { return tanh(x); }
-struct TanhNonlin {
-  static constexpr const char *kind = "Tanh";
-  static constexpr const char *name = "tanh";
-  template <class T>
-  static void f(T &x) {
-    x = MAPFUN(x, tanh_);
-  }
-  template <class T, class U>
-  static void df(T &dx, U &y) {
-    dx.array() *= (1 - y.array().square());
-  }
-};
 typedef Full<TanhNonlin> TanhLayer;
 REGISTER(TanhLayer);
-
-inline Float relu_(Float x) { return x <= 0 ? 0 : x; }
-inline Float heavi_(Float x) { return x <= 0 ? 0 : 1; }
-struct ReluNonlin {
-  static constexpr const char *kind = "Relu";
-  static constexpr const char *name = "relu";
-  template <class T>
-  static void f(T &x) {
-    x = MAPFUN(x, relu_);
-  }
-  template <class T, class U>
-  static void df(T &dx, U &y) {
-    dx.array() *= MAPFUN(y, heavi_).array();
-  }
-};
 typedef Full<ReluNonlin> ReluLayer;
 REGISTER(ReluLayer);
 
@@ -690,103 +609,6 @@ struct Parallel : NetworkBase {
   }
 };
 REGISTER(Parallel);
-
-namespace {
-template <class NONLIN, class T>
-inline Mat nonlin(T &a) {
-  Mat result = a;
-  NONLIN::f(result);
-  return result;
-}
-template <class NONLIN, class T>
-inline Mat yprime(T &a) {
-  Mat result = Mat::Ones(ROWS(a), COLS(a));
-  NONLIN::df(result, a);
-  return result;
-}
-template <class NONLIN, class T>
-inline Mat xprime(T &a) {
-  Mat result = Mat::Ones(ROWS(a), COLS(a));
-  Mat temp = a;
-  NONLIN::f(temp);
-  NONLIN::df(result, temp);
-  return result;
-}
-template <typename F, typename T>
-void each(F f, T &a) {
-  f(a);
-}
-template <typename F, typename T, typename... Args>
-void each(F f, T &a, Args &&... args) {
-  f(a);
-  each(f, args...);
-}
-}
-
-#define A array()
-
-// stack the delayed output on the input
-void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
-  assert(inp.cols() == out.cols());
-  int bs = inp.cols();
-  int ni = inp.rows();
-  int no = out.rows();
-  int nf = ni + no + 1;
-  all.resize(nf, bs);
-  BLOCK(all, 0, 0, 1, bs).setConstant(1);
-  BLOCK(all, 1, 0, ni, bs) = inp;
-  if (last < 0)
-    BLOCK(all, 1 + ni, 0, no, bs).setConstant(0);
-  else
-    BLOCK(all, 1 + ni, 0, no, bs) = out[last];
-}
-void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
-  assert(inp.cols() == out.cols());
-  int bs = inp.cols();
-  int ni = inp.rows();
-  int no = out.rows();
-  int nf = ni + no + 1;
-  inp.d += BLOCK(all.d, 1, 0, ni, bs);
-  if (last >= 0) out[last].d += BLOCK(all.d, 1 + ni, 0, no, bs);
-}
-
-// compute non-linear full layers
-template <class F>
-void forward_full(Batch &y, Params &W, Batch &x) {
-  y = nonlin<F>(MATMUL(W, x));
-}
-template <class F>
-void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
-  Mat temp = EMUL(yprime<F>(y), y.d);
-  gradient_clip(temp, gc);
-  x.d += MATMUL_TR(W, temp);
-  W.d += MATMUL_RT(temp, x);
-}
-
-// combine the delayed gated state with the gated input
-void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
-                      int last, Batch &gf) {
-  state = EMUL(ci, gi);
-  if (last >= 0) state += EMUL(gf, states[last]);
-}
-void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
-                       int last, Batch &gf) {
-  if (last >= 0) states[last].d.A += state.d.A * gf.A;
-  if (last >= 0) gf.d.A += state.d.A * states[last].A;
-  gi.d.A += state.d.A * ci.A;
-  ci.d.A += state.d.A * gi.A;
-}
-
-// nonlinear gated output
-template <class H>
-void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
-  out = EMUL(nonlin<H>(state), go);
-}
-template <class H>
-void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
-  go.d.A += nonlin<H>(state).A * out.d.A;
-  state.d.A += xprime<H>(state).A * go.A * out.d.A;
-}
 
 template <class F = SigmoidNonlin, class G = TanhNonlin, class H = TanhNonlin>
 struct GenericNPLSTM : NetworkBase {

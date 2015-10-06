@@ -122,8 +122,8 @@ env.Protoc("clstm.proto")
 
 libs = env["LIBS"]
 libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
-          "extras.cc", "clstm.pb.cc"]
-libclstm = env.StaticLibrary("clstm", source=libsrc)
+          "extras.cc", "clstm.pb.cc", "clstm_compute.cc"]
+libclstm = env.StaticLibrary("clstm", source = libsrc)
 
 programs = """clstmtext clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".split(
 )
@@ -161,6 +161,18 @@ if option("hdf5lib", "") != "":
     for program in "clstmctc clstmseq clstmconv".split():
         h5env.Program(program, [program + ".cc"])
 
+# A simple test of the C++ LSTM implementation.
+
+program = env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)
+test_alias = Alias('test', [program], program[0].abspath)
+AlwaysBuild(test_alias)
+
+# Derivative checking for the major layer types. This recompiles the
+# entire library with Float=double
+
+deriv = env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)
+deriv_alias = Alias('deriv', [deriv], deriv[0].abspath)
+AlwaysBuild(deriv_alias)
 
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"
@@ -169,22 +181,18 @@ swigenv = env.Clone(SWIGFLAGS=["-python", "-c++"], SHLIBPREFIX="")
 swigenv.Append(CPPPATH=[distutils.sysconfig.get_python_inc()])
 pyswig = swigenv.SharedLibrary("_clstm.so",
                                ["clstm.i", "clstm.cc", "clstm_proto.cc", "extras.cc",
-                                "clstm.pb.cc", "clstm_prefab.cc", "ctc.cc"],
+                                "clstm.pb.cc", "clstm_compute.cc",
+                               "clstm_prefab.cc", "ctc.cc"],
                                LIBS=libs)
-Alias('pyswig', [pyswig])
-pytest = Alias('pytest', [pyswig], 'python test-lstm.py')
-AlwaysBuild(pytest)
-
 
 destlib = distutils.sysconfig.get_config_var("DESTLIB")
 Alias('pyinstall',
       Install(os.path.join(destlib, "site-packages"),
               ["_clstm.so", "clstm.py"]))
 
-program = env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)
-test_alias = Alias('test', [program], program[0].abspath)
-AlwaysBuild(test_alias)
 
-deriv = env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)
-deriv_alias = Alias('deriv', [deriv], deriv[0].abspath)
-AlwaysBuild(deriv_alias)
+# A simple test of the Python extension.
+
+Alias('pyswig', [pyswig])
+pytest = Alias('pytest', [pyswig], 'python test-lstm.py')
+AlwaysBuild(pytest)

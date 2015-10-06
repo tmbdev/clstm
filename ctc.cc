@@ -16,25 +16,6 @@ namespace ocropus {
 using namespace std;
 using Eigen::Ref;
 
-namespace {
-inline Float limexp(Float x) {
-#if 1
-  if (x < -MAXEXP) return exp(-MAXEXP);
-  if (x > MAXEXP) return exp(MAXEXP);
-  return exp(x);
-#else
-  return exp(x);
-#endif
-}
-
-inline Float log_add(Float x, Float y) {
-  if (abs(x - y) > 10) return fmax(x, y);
-  return log(exp(x - y) + 1) + y;
-}
-
-inline Float log_mul(Float x, Float y) { return x + y; }
-}
-
 void forward_algorithm(Mat &lr, Mat &lmatch, double skip) {
   int n = ROWS(lmatch), m = COLS(lmatch);
   lr.resize(n, m);
