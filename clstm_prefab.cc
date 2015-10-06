@@ -54,15 +54,14 @@ Network make_bidi(const Assoc &params) {
   string lstm_type = get(params, "lstm_type", "NPLSTM");
   string output_type = get(params, "output_type",
                            noutput == 1 ? "SigmoidLayer" : "SoftmaxLayer");
-  return layer(
-      "Stacked", ninput, noutput, {},
-      {layer("Parallel", ninput, 2 * nhidden, {},
-             {
-                 layer(lstm_type, ninput, nhidden, params, {}),
-                 layer("Reversed", ninput, ninput, {},
-                       {layer(lstm_type, ninput, nhidden, params, {})}),
-             }),
-       layer(output_type, 2 * nhidden, noutput, params, {})});
+  return layer("Stacked", ninput, noutput, {},
+               {layer("Parallel", ninput, 2 * nhidden, {},
+                      {
+                       layer(lstm_type, ninput, nhidden, params, {}),
+                       layer("Reversed", ninput, ninput, {},
+                             {layer(lstm_type, ninput, nhidden, params, {})}),
+                      }),
+                layer(output_type, 2 * nhidden, noutput, params, {})});
 }
 
 // Two stacked 1D bidirectional LSTM with Softmax/Sigmoid output layer.
@@ -79,15 +78,15 @@ Network make_bidi2(const Assoc &params) {
       "Stacked", ninput, noutput, {},
       {layer("Parallel", ninput, 2 * nhidden, {},
              {
-                 layer(lstm_type, ninput, nhidden, params, {}),
-                 layer("Reversed", ninput, ninput, {},
-                       {layer(lstm_type, ninput, nhidden, params, {})}),
+              layer(lstm_type, ninput, nhidden, params, {}),
+              layer("Reversed", ninput, ninput, {},
+                    {layer(lstm_type, ninput, nhidden, params, {})}),
              }),
        layer("Parallel", 2 * nhidden, 2 * nhidden2, {},
              {
-                 layer(lstm_type, 2 * nhidden, nhidden2, params, {}),
-                 layer("Reversed", 2 * nhidden, 2 * nhidden, {},
-                       {layer(lstm_type, 2 * nhidden, nhidden2, params, {})}),
+              layer(lstm_type, 2 * nhidden, nhidden2, params, {}),
+              layer("Reversed", 2 * nhidden, 2 * nhidden, {},
+                    {layer(lstm_type, 2 * nhidden, nhidden2, params, {})}),
              }),
        layer(output_type, 2 * nhidden2, noutput, params, {})});
 }

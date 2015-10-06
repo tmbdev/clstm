@@ -135,10 +135,10 @@ int main_seq(int argc, char **argv) {
   int nhidden = getrenv("nhidden", getrenv("hidden", 100));
   int nhidden2 = getrenv("nhidden2", getrenv("hidden2", -1));
   net = make_net(net_type, {
-                               {"ninput", dataset.nin},
-                               {"noutput", dataset.nout},
-                               {"nhidden", nhidden},
-                               {"nhidden2", nhidden2},
+                            {"ninput", dataset.nin},
+                            {"noutput", dataset.nout},
+                            {"nhidden", nhidden},
+                            {"nhidden2", nhidden2},
                            });
 
   double lrate = getdenv("lrate", 1e-4);

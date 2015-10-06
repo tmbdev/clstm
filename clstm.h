@@ -19,11 +19,11 @@
 #ifndef NOEXCEPTIONS
 #define THROW(X) throw
 #define TRY try
-#define CATCH(X) catch(X)
+#define CATCH(X) catch (X)
 #else
 #define THROW(X) abort()
 #define TRY /*nothing*/
-#define CATCH(X) while(0)
+#define CATCH(X) while (0)
 #endif
 
 namespace ocropus {
@@ -51,13 +51,12 @@ typedef Eigen::MatrixXf Mat;
 
 struct Batch : Mat {
   Mat d;
-  template <class T> void operator=(T other) {
-    (Mat&)*this = other;
-    //d.setZero(2,3);  // invalidate it
+  template <class T>
+  void operator=(T other) {
+    (Mat &)*this = other;
+    // d.setZero(2,3);  // invalidate it
   }
-  void zeroGrad() {
-    d.setZero(rows(), cols());
-  }
+  void zeroGrad() { d.setZero(rows(), cols()); }
 };
 typedef Batch Params;
 
@@ -66,43 +65,26 @@ struct Sequence {
   vector<Batch> steps;
   Sequence() {}
   Sequence(int n) : steps(n) {}
-  void clear() {
-    steps.clear();
-  }
-  int size() const {
-    return steps.size();
-  }
-  void resize(int n) {
-    steps.resize(n);
-  }
-  int rows() {
-    return steps[0].rows();
-  }
-  int cols() {
-    return steps[0].cols();
-  }
+  void clear() { steps.clear(); }
+  int size() const { return steps.size(); }
+  void resize(int n) { steps.resize(n); }
+  int rows() { return steps[0].rows(); }
+  int cols() { return steps[0].cols(); }
   void resize(int n, int rows, int cols) {
     steps.resize(n);
-    for(int t=0; t<n; t++)
-      steps[t].resize(rows, cols);
+    for (int t = 0; t < n; t++) steps[t].resize(rows, cols);
   }
   void copy(const Sequence &other) {
     resize(other.size());
-    for (int t=0; t<other.size(); t++) steps[t] = other[t];
+    for (int t = 0; t < other.size(); t++) steps[t] = other[t];
   }
-  Batch &operator[](int i) {
-    return steps[i];
-  }
-  const Batch &operator[](int i) const {
-    return steps[i];
-  }
+  Batch &operator[](int i) { return steps[i]; }
+  const Batch &operator[](int i) const { return steps[i]; }
   void zero() {
-    for(int t=0; t<steps.size(); t++)
-      steps[t].setZero();
+    for (int t = 0; t < steps.size(); t++) steps[t].setZero();
   }
   void zeroGrad() {
-    for(int t=0; t<steps.size(); t++)
-      steps[t].zeroGrad();
+    for (int t = 0; t < steps.size(); t++) steps[t].zeroGrad();
   }
 };
 
@@ -112,7 +94,8 @@ struct Sequence {
 // (which uses different and incompatible notation)
 //
 // NB: In C++ 14, we can write Eigen functions more easily like this:
-// auto HOMDOT(Mat &A1, Mat &B) {return (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1));}
+// auto HOMDOT(Mat &A1, Mat &B) {return (DOT(CBUTFIRST(A1), B).colwise() +
+// CFIRST(A1));}
 //
 // All of this will be cleaned up when we're switching to Eigen::Tensor
 
@@ -130,10 +113,9 @@ struct Sequence {
 #define MAPFUNC(M, F) ((M).unaryExpr(F))
 #define SUMREDUCE(M) float(M.sum())
 #define BLOCK(A, i, j, n, m) (A).block(i, j, n, m)
-#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols()-1)
+#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols() - 1)
 #define CFIRST(M) COL(M, 0)
 #define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
-
 
 inline void ADDCOLS(Mat &m, Vec &v) {
   for (int i = 0; i < COLS(m); i++)
@@ -233,10 +215,10 @@ struct ITrainable {
   Float momentum = 0.9;
   enum Normalization : int {
     NORM_NONE,
-        NORM_LEN,
-        NORM_BATCH,
-        NORM_DFLT = NORM_NONE,
-        } normalization = NORM_DFLT;
+    NORM_LEN,
+    NORM_BATCH,
+    NORM_DFLT = NORM_NONE,
+  } normalization = NORM_DFLT;
 
   // The attributes array contains parameters for constructing the
   // network, as well as information necessary for loading and saving

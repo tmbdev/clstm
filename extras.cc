@@ -345,9 +345,8 @@ void set_inputs(INetwork *net, mdarray<float> &inputs) {
 void set_targets(INetwork *net, mdarray<float> &targets) {
   int N = targets.dim(0);
   int d = targets.dim(1);
-  for (int t=0; t<N; t++)
-    for (int i=0; i<d; i++)
-      net->outputs[t].d(i,0) = targets(t,i);
+  for (int t = 0; t < N; t++)
+    for (int i = 0; i < d; i++) net->outputs[t].d(i, 0) = targets(t, i);
   for (int t = 0; t < net->outputs.size(); t++)
     net->outputs[t].d -= net->outputs[t];
 }

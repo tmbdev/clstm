@@ -106,12 +106,12 @@ void set_inputs_with_eps(INetwork *net, wstring &s, int neps) {
   Sequence &seq = net->inputs;
   int d = net->ninput();
   seq.clear();
-  seq.resize(cs.size() * (neps+1) + neps);
+  seq.resize(cs.size() * (neps + 1) + neps);
   for (int i = 0; i < neps; i++) seq[i].setZero(d, 1);
   for (int pos = 0; pos < cs.size(); pos++) {
     seq[pos].setZero(d, 1);
     seq[pos](cs[pos], 0) = 1.0;
-    for (int i = 0; i < neps; i++) seq[pos+1+i].setZero(d, 1);
+    for (int i = 0; i < neps; i++) seq[pos + 1 + i].setZero(d, 1);
   }
 }
 

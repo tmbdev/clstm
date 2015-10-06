@@ -59,12 +59,12 @@ struct CLSTMText {
     Sequence &seq = net->inputs;
     int d = net->ninput();
     seq.clear();
-    seq.resize(cs.size() * (neps+1) + neps);
+    seq.resize(cs.size() * (neps + 1) + neps);
     for (int i = 0; i < neps; i++) seq[i].setZero(d, 1);
     for (int pos = 0; pos < cs.size(); pos++) {
       seq[pos].setZero(d, 1);
       seq[pos](cs[pos], 0) = 1.0;
-      for (int i = 0; i < neps; i++) seq[pos+1+i].setZero(d, 1);
+      for (int i = 0; i < neps; i++) seq[pos + 1 + i].setZero(d, 1);
     }
   }
   std::wstring train(const std::wstring &in, const std::wstring &target) {
@@ -104,11 +104,11 @@ struct CLSTMText {
   void get_outputs(mdarray<float> &outputs) {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
-    for (int t=0; t < outputs.dim(0); t++)
-      for (int c=0; c < outputs.dim(1); c++)
-        outputs(t,c) = net->outputs[t](c,0);
+    for (int t = 0; t < outputs.dim(0); t++)
+      for (int c = 0; c < outputs.dim(1); c++)
+        outputs(t, c) = net->outputs[t](c, 0);
   }
-  };
+};
 
 struct CLSTMOCR {
   unique_ptr<INormalizer> normalizer;
@@ -195,11 +195,11 @@ struct CLSTMOCR {
   void get_outputs(mdarray<float> &outputs) {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
-    for (int t=0; t < outputs.dim(0); t++)
-      for (int c=0; c < outputs.dim(1); c++)
-        outputs(t,c) = net->outputs[t](c,0);
+    for (int t = 0; t < outputs.dim(0); t++)
+      for (int c = 0; c < outputs.dim(1); c++)
+        outputs(t, c) = net->outputs[t](c, 0);
   }
-  };
+};
 }
 
 #endif

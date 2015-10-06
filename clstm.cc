@@ -23,16 +23,15 @@ namespace ocropus {
 char exception_message[256];
 
 void gradient_clip(Sequence &s, Float m = 1.0) {
-  if (m<0) return;
+  if (m < 0) return;
   for (int t = 0; t < s.size(); t++) {
     s[t].d =
-        MAPFUNC(s[t].d,
-                [m](Float x) { return x > m ? m : x < -m ? -m : x; });
+        MAPFUNC(s[t].d, [m](Float x) { return x > m ? m : x < -m ? -m : x; });
   }
 }
 
 void gradient_clip(Mat &d, Float m = 1.0) {
-  if (m<0) return;
+  if (m < 0) return;
   d = MAPFUNC(d, [m](Float x) { return x > m ? m : x < -m ? -m : x; });
 }
 
@@ -131,14 +130,14 @@ void set_inputs(INetwork *net, Sequence &inputs) {
 void set_targets(INetwork *net, Sequence &targets) {
   int N = net->outputs.size();
   assert(N == targets.size());
-  assert(net->outputs.size()==N);
+  assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++) net->outputs[t].d = targets[t] - net->outputs[t];
 }
 void set_targets_accelerated(INetwork *net, Sequence &targets) {
   Float lo = 1e-5;
   assert(net->outputs.size() == targets.size());
   int N = net->outputs.size();
-  assert(net->outputs.size()==N);
+  assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++) {
     net->outputs[t].d = -net->outputs[t];
     for (int i = 0; i < ROWS(targets[t]); i++) {
@@ -156,7 +155,7 @@ void set_targets_accelerated(INetwork *net, Sequence &targets) {
 void set_classes(INetwork *net, Classes &classes) {
   int N = net->outputs.size();
   assert(N == classes.size());
-  assert(net->outputs.size()==N);
+  assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++) {
     net->outputs[t].d = -net->outputs[t];
     net->outputs[t].d(classes[t]) += 1;
@@ -178,7 +177,7 @@ void ctrain(INetwork *net, Sequence &xs, Classes &cs) {
   assert(len > 0);
   int dim = net->outputs[0].size();
   assert(dim > 0);
-  assert(net->outputs.size()==len);
+  assert(net->outputs.size() == len);
   if (dim == 1) {
     for (int t = 0; t < len; t++)
       net->outputs[t].d(0) =
@@ -372,11 +371,11 @@ struct Full : NetworkBase {
   Full() { name = string("full_") + NONLIN::name; }
   const char *kind() { return mykind.c_str(); }
   int noutput() { return ROWS(W1); }
-  int ninput() { return COLS(W1)-1; }
+  int ninput() { return COLS(W1) - 1; }
   void initialize() {
     int no = irequire("noutput");
     int ni = irequire("ninput");
-    randinit(W1, no, ni+1, 0.01);
+    randinit(W1, no, ni + 1, 0.01);
     W1.zeroGrad();
   }
   void forward() {
@@ -422,9 +421,7 @@ struct Full : NetworkBase {
   void myweights(const string &prefix, WeightFun f) {
     f(prefix + ".W1", &W1, (Mat *)0);
   }
-  void myparams(const string &prefix, ParamsFun f) {
-    f(prefix + ".W1", &W1);
-  }
+  void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
 
 struct NoNonlin {
@@ -493,17 +490,15 @@ struct SoftmaxLayer : NetworkBase {
   SoftmaxLayer() { name = "softmax"; }
   const char *kind() { return "SoftmaxLayer"; }
   int noutput() { return ROWS(W1); }
-  int ninput() { return COLS(W1)-1; }
+  int ninput() { return COLS(W1) - 1; }
   void initialize() {
     int no = irequire("noutput");
     int ni = irequire("ninput");
     if (no < 2) THROW("Softmax requires no>=2");
-    randinit(W1, no, ni+1, 0.01);
+    randinit(W1, no, ni + 1, 0.01);
     clearUpdates();
   }
-  void clearUpdates() {
-    W1.zeroGrad();
-  }
+  void clearUpdates() { W1.zeroGrad(); }
   void postLoad() {
     W1.zeroGrad();
     makeEncoders();
@@ -552,9 +547,7 @@ struct SoftmaxLayer : NetworkBase {
   void myweights(const string &prefix, WeightFun f) {
     f(prefix + ".W1", &W1, &W1.d);
   }
-  void myparams(const string &prefix, ParamsFun f) {
-    f(prefix + ".W1", &W1);
-  }
+  void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
 REGISTER(SoftmaxLayer);
 
@@ -581,14 +574,14 @@ struct Stacked : NetworkBase {
     assert(outputs.size() == inputs.size());
     for (int n = sub.size() - 1; n >= 0; n--) {
       if (n + 1 == sub.size())
-        for (int t=0; t<outputs.size(); t++)
+        for (int t = 0; t < outputs.size(); t++)
           sub[n]->outputs[t].d = outputs[t].d;
       else
-        for (int t=0; t<sub[n+1]->inputs.size(); t++)
-          sub[n]->outputs[t].d = sub[n+1]->inputs[t].d;
+        for (int t = 0; t < sub[n + 1]->inputs.size(); t++)
+          sub[n]->outputs[t].d = sub[n + 1]->inputs[t].d;
       sub[n]->backward();
     }
-    for (int t=0; t<sub[0]->inputs.size(); t++)
+    for (int t = 0; t < sub[0]->inputs.size(); t++)
       inputs[t].d = sub[0]->inputs[t].d;
   }
   void update() {
@@ -604,10 +597,7 @@ inline void revcopy(vector<T> &out, vector<T> &in) {
   for (int i = 0; i < N; i++) out[i] = in[N - i - 1];
 }
 
-void revcopy(Sequence &out, Sequence &in) {
-  revcopy(out.steps, in.steps);
-}
-
+void revcopy(Sequence &out, Sequence &in) { revcopy(out.steps, in.steps); }
 
 struct Reversed : NetworkBase {
   Reversed() { name = "reversed"; }
@@ -619,11 +609,11 @@ struct Reversed : NetworkBase {
     INetwork *net = sub[0].get();
     int N = inputs.size();
     net->inputs.resize(N);
-    for(int t=0; t<N; t++) net->inputs[t] = inputs[N-t-1];
+    for (int t = 0; t < N; t++) net->inputs[t] = inputs[N - t - 1];
     net->forward();
     int M = net->outputs.size();
     outputs.resize(M);
-    for(int t=0; t<M; t++) outputs[t] = net->outputs[N-t-1];
+    for (int t = 0; t < M; t++) outputs[t] = net->outputs[N - t - 1];
   }
   void backward() {
     assert(sub.size() == 1);
@@ -631,12 +621,12 @@ struct Reversed : NetworkBase {
     assert(outputs.size() > 0);
     assert(outputs.size() == inputs.size());
     int N = outputs.size();
-    assert(net->outputs.size()==outputs.size());
-    for(int t=0; t<N; t++) net->outputs[t].d = outputs[N-t-1].d;
+    assert(net->outputs.size() == outputs.size());
+    for (int t = 0; t < N; t++) net->outputs[t].d = outputs[N - t - 1].d;
     net->backward();
     int M = net->inputs.size();
-    assert(inputs.size()==M);
-    for(int t=0; t<M; t++) inputs[t].d = net->inputs[N-t-1].d;
+    assert(inputs.size() == M);
+    for (int t = 0; t < M; t++) inputs[t].d = net->inputs[N - t - 1].d;
   }
   void update() { sub[0]->update(); }
 };
@@ -741,11 +731,11 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   int bs = inp.cols();
   int ni = inp.rows();
   int no = out.rows();
-  int nf = ni+no+1;
+  int nf = ni + no + 1;
   all.resize(nf, bs);
   BLOCK(all, 0, 0, 1, bs).setConstant(1);
   BLOCK(all, 1, 0, ni, bs) = inp;
-  if (last<0)
+  if (last < 0)
     BLOCK(all, 1 + ni, 0, no, bs).setConstant(0);
   else
     BLOCK(all, 1 + ni, 0, no, bs) = out[last];
@@ -755,9 +745,9 @@ void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   int bs = inp.cols();
   int ni = inp.rows();
   int no = out.rows();
-  int nf = ni+no+1;
+  int nf = ni + no + 1;
   inp.d += BLOCK(all.d, 1, 0, ni, bs);
-  if (last>=0) out[last].d += BLOCK(all.d, 1 + ni, 0, no, bs);
+  if (last >= 0) out[last].d += BLOCK(all.d, 1 + ni, 0, no, bs);
 }
 
 // compute non-linear full layers
@@ -774,13 +764,13 @@ void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
 }
 
 // combine the delayed gated state with the gated input
-void forward_statemem(Batch &state, Batch &ci, Batch &gi,
-                      Sequence &states, int last, Batch &gf) {
+void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
+                      int last, Batch &gf) {
   state = EMUL(ci, gi);
-  if (last>=0) state += EMUL(gf, states[last]);
+  if (last >= 0) state += EMUL(gf, states[last]);
 }
-void backward_statemem(Batch &state, Batch &ci, Batch &gi,
-                       Sequence &states, int last, Batch &gf) {
+void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
+                       int last, Batch &gf) {
   if (last >= 0) states[last].d.A += state.d.A * gf.A;
   if (last >= 0) gf.d.A += state.d.A * states[last].A;
   gi.d.A += state.d.A * ci.A;
@@ -859,15 +849,15 @@ struct GenericNPLSTM : NetworkBase {
     int N = inputs.size();
     int bs = inputs.cols();
     resize(N);
-    outputs.resize(N,no,bs);
+    outputs.resize(N, no, bs);
     for (int t = 0; t < N; t++) {
       int bs = COLS(inputs[t]);
-      forward_stack1(source[t], inputs[t], outputs, t-1);
+      forward_stack1(source[t], inputs[t], outputs, t - 1);
       forward_full<F>(gi[t], WGI, source[t]);
       forward_full<F>(gf[t], WGF, source[t]);
       forward_full<F>(go[t], WGO, source[t]);
       forward_full<G>(ci[t], WCI, source[t]);
-      forward_statemem(state[t], ci[t], gi[t], state, t-1, gf[t]);
+      forward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
       forward_nonlingate<H>(outputs[t], state[t], go[t]);
     }
   }
@@ -876,20 +866,19 @@ struct GenericNPLSTM : NetworkBase {
     int bs = outputs.cols();
     Sequence out;
     out.copy(outputs);
-    each([](Sequence &s) {
-        s.zeroGrad();
-      }, source, inputs, state, gi, go, gf, ci);
+    each([](Sequence &s) { s.zeroGrad(); }, source, inputs, state, gi, go, gf,
+         ci);
 
     for (int t = N - 1; t >= 0; t--) {
       backward_nonlingate<H>(out[t], state[t], go[t]);
-      backward_statemem(state[t], ci[t], gi[t], state, t-1, gf[t]);
+      backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
       gradient_clip(state[t].d, gradient_clipping);
       backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
-      assert(gf[0].d.maxCoeff()==0);
+      assert(gf[0].d.maxCoeff() == 0);
       backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
       backward_full<F>(go[t], WGO, source[t], gradient_clipping);
       backward_full<G>(ci[t], WCI, source[t], gradient_clipping);
-      backward_stack1(source[t], inputs[t], out, t-1);
+      backward_stack1(source[t], inputs[t], out, t - 1);
     }
     nsteps += N;
     nseq += 1;
@@ -904,9 +893,10 @@ struct GenericNPLSTM : NetworkBase {
       ;
     else
       THROW("unknown normalization");
-    each([this,lr](Params &W) {
-        W += lr * W.d; W.d *= momentum;
-      }, WGI, WGF, WGO, WCI);
+    each([this, lr](Params &W) {
+      W += lr * W.d;
+      W.d *= momentum;
+    }, WGI, WGF, WGO, WCI);
   }
   void myweights(const string &prefix, WeightFun f) {
     f(prefix + ".WGI", &WGI, &WGI.d);
@@ -958,9 +948,7 @@ INetwork *make_NPLSTM() { return new NPLSTM(); }
 void save_net(const string &file, Network net) {
   save_as_proto(file, net.get());
 }
-Network load_net(const string &file) {
-  return load_as_proto(file);
-}
+Network load_net(const string &file) { return load_as_proto(file); }
 
 }  // namespace ocropus
 

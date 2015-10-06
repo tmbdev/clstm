@@ -70,8 +70,7 @@ wstring read_text32(string fname, int maxsize = 65536) {
   return utf8_to_utf32(string(buf, n));
 }
 
-void get_codec(vector<int> &codec,
-               const vector<string> &fnames,
+void get_codec(vector<int> &codec, const vector<string> &fnames,
                const wstring extra = L"") {
   set<int> codes;
   codes.insert(0);
@@ -106,7 +105,7 @@ void read_lines(vector<string> &lines, string fname) {
 wstring separate_chars(const wstring &s, const wstring &charsep) {
   if (charsep == L"") return s;
   wstring result;
-  for (int i=0; i<s.size(); i++) {
+  for (int i = 0; i < s.size(); i++) {
     if (i > 0) result.push_back(charsep[0]);
     result.push_back(s[i]);
   }
@@ -170,8 +169,8 @@ int main1(int argc, char **argv) {
     if (save_every == 0 && test_error < best_error) {
       best_error = test_error;
       string fname = save_name + ".clstm";
-      print("saving best performing network so far", fname,
-            "error rate: ", best_error);
+      print("saving best performing network so far", fname, "error rate: ",
+            best_error);
       clstm.save(fname);
     }
     if (trial > 0 && save_every > 0 && trial % save_every == 0) {
@@ -200,7 +199,7 @@ int main1(int argc, char **argv) {
       print("ALN", clstm.aligned_utf8());
       print("OUT", utf32_to_utf8(pred));
       if (trial > 0 && report_time)
-        print("steptime", (now()-start) / report_every);
+        print("steptime", (now() - start) / report_every);
       start = now();
     }
   }

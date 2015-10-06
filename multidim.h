@@ -13,7 +13,7 @@
     throw("FAILED: " __FILE__ ":" MDSTR1(__LINE__) ":" #X); \
   }
 #else
-  while (!(X)) abort();
+while (!(X)) abort();
 #endif
 
 #include <stdlib.h>
@@ -101,7 +101,7 @@ struct mdarray {
   int rank() {
     for (int i = 0; i < MAXRANK + 1; i++)
       if (!dims[i]) return i;
-    MDCHECK(MAXRANK<MAXRANK);
+    MDCHECK(MAXRANK < MAXRANK);
   }
 
   // total number of elements in linearized array

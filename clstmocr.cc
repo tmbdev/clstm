@@ -79,7 +79,7 @@ int main1(int argc, char **argv) {
       string out = clstm.predict_utf8(raw);
       cout << line << "\t" << out << endl;
       if (save_text) {
-        write_text(basename+".txt", out);
+        write_text(basename + ".txt", out);
       }
     } else {
       cout << "file " << line << endl;
@@ -91,19 +91,19 @@ int main1(int argc, char **argv) {
         cout << p.i << sep << p.x << sep << p.c << sep << p.p << endl;
       }
     }
-    if (output == "text" ) {
+    if (output == "text") {
       // nothing else to do
     } else if (output == "logs") {
       mdarray<float> outputs;
       clstm.get_outputs(outputs);
-      for (int t=0; t<outputs.dim(0); t++)
-        for (int c=0; c<outputs.dim(1); c++)
-          outputs(t,c) = scaled_log(outputs(t,c));
-      write_png((basename+".lp.png").c_str(), outputs);
+      for (int t = 0; t < outputs.dim(0); t++)
+        for (int c = 0; c < outputs.dim(1); c++)
+          outputs(t, c) = scaled_log(outputs(t, c));
+      write_png((basename + ".lp.png").c_str(), outputs);
     } else if (output == "posteriors") {
       mdarray<float> outputs;
       clstm.get_outputs(outputs);
-      write_png((basename+".p.png").c_str(), outputs);
+      write_png((basename + ".p.png").c_str(), outputs);
     } else {
       THROW("unknown output format");
     }
