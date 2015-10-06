@@ -207,8 +207,8 @@ struct ReluNonlin {
 void forward_stack(Batch &z, Batch &x, Batch &y);
 void backward_stack(Batch &z, Batch &x, Batch &y);
 
-void forward_reverse(Batch &y, Batch &x);
-void backward_reverse(Batch &y, Batch &x);
+void forward_reverse(Sequence &y, Sequence &x);
+void backward_reverse(Sequence &y, Sequence &x);
 
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last);
 void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last);

@@ -78,8 +78,8 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
   int ny = y.rows();
   int bs = x.cols();
   z.resize(nx+ny, bs);
-  x.d = BLOCK(z.d, 0, 0, nx, bs);
-  y.d = BLOCK(z.d, nx, 0, ny, bs);
+  x.d += BLOCK(z.d, 0, 0, nx, bs);
+  y.d += BLOCK(z.d, nx, 0, ny, bs);
 }
 
 void forward_reverse(Sequence &y, Sequence &x) {
@@ -89,7 +89,7 @@ void forward_reverse(Sequence &y, Sequence &x) {
 }
 void backward_reverse(Sequence &y, Sequence &x) {
   int N = x.size();
-  for (int i=0; i<N; i++) x[N-i-1].d = y[i].d;
+  for (int i=0; i<N; i++) x[N-i-1].d += y[i].d;
 }
 
 // stack the delayed output on the input

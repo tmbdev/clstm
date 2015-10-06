@@ -513,27 +513,18 @@ struct Reversed : NetworkBase {
   int ninput() { return sub[0]->ninput(); }
   void forward() {
     assert(sub.size() == 1);
-    INetwork *net = sub[0].get();
-    int N = inputs.size();
-    net->inputs.resize(N);
-    for (int t = 0; t < N; t++) net->inputs[t] = inputs[N - t - 1];
+    Network net = sub[0];
+    forward_reverse(net->inputs, inputs);
     net->forward();
-    int M = net->outputs.size();
-    outputs.resize(M);
-    for (int t = 0; t < M; t++) outputs[t] = net->outputs[N - t - 1];
+    forward_reverse(outputs, net->outputs);
   }
   void backward() {
-    assert(sub.size() == 1);
-    INetwork *net = sub[0].get();
-    assert(outputs.size() > 0);
-    assert(outputs.size() == inputs.size());
-    int N = outputs.size();
-    assert(net->outputs.size() == outputs.size());
-    for (int t = 0; t < N; t++) net->outputs[t].d = outputs[N - t - 1].d;
+    Network net = sub[0];
+    net->outputs.zeroGrad();
+    backward_reverse(outputs, net->outputs);
     net->backward();
-    int M = net->inputs.size();
-    assert(inputs.size() == M);
-    for (int t = 0; t < M; t++) inputs[t].d = net->inputs[N - t - 1].d;
+    outputs.zeroGrad();
+    backward_reverse(net->inputs, inputs);
   }
   void update() { sub[0]->update(); }
 };
