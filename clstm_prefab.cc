@@ -1,3 +1,4 @@
+#include "extras.h"
 #include "clstm.h"
 #include <assert.h>
 #include <iostream>
@@ -119,8 +120,10 @@ Network make_net_init(const string &kind, const string &params) {
   using std::cerr;
   using std::endl;
   Assoc args(params);
-  for (auto it : args) {
-    cerr << it.first << ": " << it.second << endl;
+  if (getienv("verbose_params", 0)) {
+    for (auto it : args) {
+      cerr << it.first << ": " << it.second << endl;
+    }
   }
   return make_net(kind, args);
 }

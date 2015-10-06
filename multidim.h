@@ -7,14 +7,10 @@
 
 #define MDSTR(X) #X
 #define MDSTR1(X) MDSTR(X)
-#ifndef NOEXCEPTIONS
 #define MDCHECK(X)                                          \
   while (!(X)) {                                            \
-    throw("FAILED: " __FILE__ ":" MDSTR1(__LINE__) ":" #X); \
+    THROW("FAILED: " __FILE__ ":" MDSTR1(__LINE__) ":" #X); \
   }
-#else
-while (!(X)) abort();
-#endif
 
 #include <stdlib.h>
 

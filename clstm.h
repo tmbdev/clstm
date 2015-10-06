@@ -16,16 +16,6 @@
 #include <Eigen/Dense>
 #include <random>
 
-#ifndef NOEXCEPTIONS
-#define THROW(X) throw
-#define TRY try
-#define CATCH(X) catch (X)
-#else
-#define THROW(X) abort()
-#define TRY /*nothing*/
-#define CATCH(X) while (0)
-#endif
-
 namespace ocropus {
 using std::string;
 using std::vector;

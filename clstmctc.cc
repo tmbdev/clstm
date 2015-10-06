@@ -526,7 +526,7 @@ int main(int argc, char **argv) {
     print(string(argv[0]) + " " + usage);
     exit(1);
   }
-  try {
+  TRY {
     string mode = getsenv("mode", "train");
     if (getienv("eval", 0)) {  // for old scripts
       return main_eval(argc, argv);
@@ -542,11 +542,9 @@ int main(int argc, char **argv) {
     } else {
       return main_eval(argc, argv);
     }
-#ifndef NOEXCEPTION
-  } catch (const char *msg) {
+  } CATCH (const char *msg) {
     print("EXCEPTION", msg);
-#endif
-  } catch (...) {
+  } CATCH (...) {
     print("UNKNOWN EXCEPTION");
   }
 }

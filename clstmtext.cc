@@ -413,18 +413,16 @@ int main(int argc, char **argv) {
     print(string(argv[0]) + " " + usage);
     exit(1);
   }
-  try {
+  TRY {
     string mode = getsenv("mode", "train");
     if (mode == "train") {
       return main_train(argc, argv);
     } else if (mode == "filter") {
       return main_filter(argc, argv);
     }
-#ifndef NOEXCEPTION
-  } catch (const char *msg) {
+  } CATCH (const char *msg) {
     print("EXCEPTION", msg);
-#endif
-  } catch (...) {
+  } CATCH (...) {
     print("UNKNOWN EXCEPTION");
   }
 }

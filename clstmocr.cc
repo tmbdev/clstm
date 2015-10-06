@@ -112,13 +112,10 @@ int main1(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-#ifdef NOEXCEPTION
-  return main1(argc, argv);
-#else
-  try {
+  TRY {
     return main1(argc, argv);
-  } catch (const char *message) {
+  } 
+  CATCH (const char *message) {
     cerr << "FATAL: " << message << endl;
   }
-#endif
 }

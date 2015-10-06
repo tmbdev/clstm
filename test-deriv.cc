@@ -178,7 +178,9 @@ void test_net(Network net) {
 
 int main(int argc, char **argv) {
   TRY {
+    test_net(layer("LinearLayer", 7, 3, {}, {}));
     test_net(layer("SigmoidLayer", 7, 3, {}, {}));
+    test_net(layer("TanhLayer", 7, 3, {}, {}));
     test_net(layer("NPLSTM", 7, 3, {}, {}));
     test_net(
         layer("Reversed", 7, 3, {}, {layer("SigmoidLayer", 7, 3, {}, {})}));
@@ -188,6 +190,7 @@ int main(int argc, char **argv) {
                                {"noutput", 3},
                                {"nhidden", 5},
                                {"output_type", "SigmoidLayer"}}));
+    // not testing: SoftmaxLayer and ReluLayer
   }
   CATCH(const char *message) { print("ERROR", message); }
 }
