@@ -18,21 +18,20 @@ void gradient_clip(Mat &d, Float m) {
 
 template <class F>
 void forward_full1(Batch &y, Params &W1, Batch &x) {
-  y = MATMUL(CBUTFIRST(W1), x).colwise() + CFIRST(W1);
+  y = HOMDOT(W1, x);
   F::f(y);
 }
 template <class F>
 void backward_full1(Batch &y, Params &W1, Batch &x, Float gc) {
+  Mat temp;
+  temp = y.d;
+  F::df(temp, y);
+  x.d = MATMUL_TR(CBUTFIRST(W1), temp);
   int bs = y.cols();
-  auto W = CBUTFIRST(W1);
-  auto w = CFIRST(W1);
   auto d_W = CBUTFIRST(W1.d);
-  auto d_w = CBUTFIRST(W1.d);
-  Mat temp = EMUL(yprime<F>(y), y.d);
-  gradient_clip(temp, gc);
-  x.d += MATMUL_TR(W, temp);
   d_W += MATMUL_RT(temp, x);
-  for (int b = 0; b < bs; b++) d_w += COL(y.d, b);
+  auto d_w = CFIRST(W1.d);
+  for (int b = 0; b < bs; b++) d_w += COL(temp, b);
 }
 template void forward_full1<NoNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);

@@ -359,7 +359,6 @@ struct Full : NetworkBase {
     }
     nsteps += outputs.size();
     nseq += 1;
-    outputs[0].d(0, 0) = NAN;  // invalidate it, since we have changed it
   }
   void update() {
     float lr = learning_rate;
