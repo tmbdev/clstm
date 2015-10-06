@@ -497,15 +497,6 @@ struct Stacked : NetworkBase {
 };
 REGISTER(Stacked);
 
-template <class T>
-inline void revcopy(vector<T> &out, vector<T> &in) {
-  int N = in.size();
-  out.resize(N);
-  for (int i = 0; i < N; i++) out[i] = in[N - i - 1];
-}
-
-void revcopy(Sequence &out, Sequence &in) { revcopy(out.steps, in.steps); }
-
 struct Reversed : NetworkBase {
   Reversed() { name = "reversed"; }
   const char *kind() { return "Reversed"; }
