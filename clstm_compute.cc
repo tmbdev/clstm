@@ -16,6 +16,33 @@ void gradient_clip(Mat &d, Float m) {
   d = MAPFUNC(d, [m](Float x) { return x > m ? m : x < -m ? -m : x; });
 }
 
+template <class F>
+void forward_full1(Batch &y, Params &W1, Batch &x) {
+  y = MATMUL(CBUTFIRST(W1), x).colwise() + CFIRST(W1);
+  F::f(y);
+}
+template <class F>
+void backward_full1(Batch &y, Params &W1, Batch &x, Float gc) {
+  int bs = y.cols();
+  auto W = CBUTFIRST(W1);
+  auto w = CFIRST(W1);
+  auto d_W = CBUTFIRST(W1.d);
+  auto d_w = CBUTFIRST(W1.d);
+  Mat temp = EMUL(yprime<F>(y), y.d);
+  gradient_clip(temp, gc);
+  x.d += MATMUL_TR(W, temp);
+  d_W += MATMUL_RT(temp, x);
+  for (int b = 0; b < bs; b++) d_w += COL(y.d, b);
+}
+template void forward_full1<NoNonlin>(Batch &y, Params &W, Batch &x);
+template void forward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
+template void forward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x);
+template void forward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full1<NoNonlin>(Batch &y, Params &W, Batch &x, Float gc);
+template void backward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x, Float gc);
+template void backward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x, Float gc);
+template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x, Float gc);
+
 // compute non-linear full layers
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
@@ -36,6 +63,35 @@ template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x, Float gc);
+
+void forward_stack(Batch &z, Batch &x, Batch &y) {
+  assert(x.cols()==y.cols());
+  int nx = x.rows();
+  int ny = y.rows();
+  int bs = x.cols();
+  z.resize(nx+ny, bs);
+  BLOCK(z, 0, 0, nx, bs) = x;
+  BLOCK(z, nx, 0, ny, bs) = y;
+}
+void backward_stack(Batch &z, Batch &x, Batch &y) {
+  assert(x.cols()==y.cols());
+  int nx = x.rows();
+  int ny = y.rows();
+  int bs = x.cols();
+  z.resize(nx+ny, bs);
+  x.d = BLOCK(z.d, 0, 0, nx, bs);
+  y.d = BLOCK(z.d, nx, 0, ny, bs);
+}
+
+void forward_reverse(Sequence &y, Sequence &x) {
+  int N = x.size();
+  y.resize(N, x.rows(), x.cols());
+  for (int i=0; i<N; i++) y[N-i-1] = x[i];
+}
+void backward_reverse(Sequence &y, Sequence &x) {
+  int N = x.size();
+  for (int i=0; i<N; i++) x[N-i-1].d = y[i].d;
+}
 
 // stack the delayed output on the input
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
