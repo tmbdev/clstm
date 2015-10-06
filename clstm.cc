@@ -537,50 +537,28 @@ struct Parallel : NetworkBase {
   int ninput() { return sub[0]->ninput(); }
   void forward() {
     assert(sub.size() == 2);
-    INetwork *net1 = sub[0].get();
-    INetwork *net2 = sub[1].get();
-    net1->inputs = inputs;
-    net2->inputs = inputs;
-    net1->forward();
-    net2->forward();
     int N = inputs.size();
-    assert(net1->outputs.size() == N);
-    assert(net2->outputs.size() == N);
-    int n1 = ROWS(net1->outputs[0]);
-    int n2 = ROWS(net2->outputs[0]);
-    outputs.resize(N);
-    int bs = COLS(net1->outputs[0]);
-    assert(bs == COLS(net2->outputs[0]));
+    outputs.resize(N, noutput(), inputs.cols());
+    sub[0]->inputs = inputs;
+    sub[1]->inputs = inputs;
+    sub[0]->forward();
+    sub[1]->forward();
     for (int t = 0; t < N; t++) {
-      outputs[t].resize(n1 + n2, bs);
-      BLOCK(outputs[t], 0, 0, n1, bs) = net1->outputs[t];
-      BLOCK(outputs[t], n1, 0, n2, bs) = net2->outputs[t];
+      forward_stack(outputs[t], sub[0]->outputs[t], sub[1]->outputs[t]);
     }
   }
   void backward() {
-    assert(sub.size() == 2);
-    INetwork *net1 = sub[0].get();
-    INetwork *net2 = sub[1].get();
-    assert(outputs.size() > 0);
-    assert(outputs.size() == inputs.size());
-    int n1 = ROWS(net1->outputs[0]);
-    int n2 = ROWS(net2->outputs[0]);
     int N = outputs.size();
-    assert(net1->outputs.size() == N);
-    assert(net2->outputs.size() == N);
-    int bs = COLS(net1->outputs[0]);
-    assert(bs == COLS(net2->outputs[0]));
-    for (int t = 0; t < N; t++) {
-      net1->outputs[t].d.resize(n1, bs);
-      net1->outputs[t].d = BLOCK(outputs[t].d, 0, 0, n1, bs);
-      net2->outputs[t].d.resize(n2, bs);
-      net2->outputs[t].d = BLOCK(outputs[t].d, n1, 0, n2, bs);
+    sub[0]->outputs.zeroGrad();
+    sub[1]->outputs.zeroGrad();
+    for (int t = N-1; t >= 0; t--) {
+      backward_stack(outputs[t], sub[0]->outputs[t], sub[1]->outputs[t]);
     }
-    net1->backward();
-    net2->backward();
+    sub[0]->backward();
+    sub[1]->backward();
     for (int t = 0; t < N; t++) {
-      inputs[t].d = net1->inputs[t].d;
-      inputs[t].d += net2->inputs[t].d;
+      inputs[t].d = sub[0]->inputs[t].d;
+      inputs[t].d += sub[1]->inputs[t].d;
     }
   }
   void update() {
