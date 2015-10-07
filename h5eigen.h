@@ -125,7 +125,7 @@ struct HDF5 {
     for (int i = 0; i < N; i++) a(i, 0) = data[i];
     dataset.vlenReclaim(dtype, mspace, DSetMemXferPropList::DEFAULT, vl);
   }
-  void setAttr(string name, string value) {
+  void attr.set(string name, string value) {
     Group root(h5->openGroup("/"));
     StrType strdatatype(PredType::C_S1, 256);
     DataSpace attr_dataspace = DataSpace(H5S_SCALAR);
@@ -133,7 +133,7 @@ struct HDF5 {
     root.createAttribute(name, strdatatype, attr_dataspace)
         .write(strdatatype, buffer);
   }
-  string getAttr(string name) {
+  string attr.get(string name) {
     Group root(h5->openGroup("/"));
     StrType strdatatype(PredType::C_S1, 256);
     DataSpace attr_dataspace = DataSpace(H5S_SCALAR);
@@ -142,7 +142,7 @@ struct HDF5 {
         .read(strdatatype, buffer);
     return buffer;
   }
-  void getAttrs(map<string, string> &result) {
+  void attr.gets(map<string, string> &result) {
     Group root(h5->openGroup("/"));
     StrType strdatatype(PredType::C_S1, 256);
     DataSpace attr_dataspace = DataSpace(H5S_SCALAR);

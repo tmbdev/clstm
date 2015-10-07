@@ -190,7 +190,7 @@ void save_net_raw(const char *fname, INetwork *net) {
   h5->open(fname, true);
   net->attributes["clstm-version"] = "1";
   for (auto &kv : net->attributes) {
-    h5->setAttr(kv.first, kv.second);
+    h5->attr.set(kv.first, kv.second);
   }
   save_codec(h5.get(), "codec", net->codec, net->noutput());
   save_codec(h5.get(), "icodec", net->icodec, net->ninput());
@@ -209,7 +209,7 @@ void load_net_raw(INetwork *net, const char *fname) {
   using namespace h5eigen;
   unique_ptr<HDF5> h5(make_HDF5());
   h5->open(fname);
-  h5->getAttrs(net->attributes);
+  h5->attr.gets(net->attributes);
   load_codec(net->icodec, h5.get(), "icodec");
   load_codec(net->codec, h5.get(), "codec");
   net->weights("", [&h5](const string &prefix, VecMat a, VecMat da) {
@@ -227,7 +227,7 @@ void load_attributes(map<string, string> &attributes, const string &fname) {
   using namespace h5eigen;
   unique_ptr<HDF5> h5(make_HDF5());
   h5->open(fname.c_str());
-  h5->getAttrs(attributes);
+  h5->attr.gets(attributes);
 }
 
 Network load_net_hdf5(const string &fname) {

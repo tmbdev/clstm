@@ -143,13 +143,8 @@ struct ITrainable {
     enum Normalization {
         NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
     } normalization = NORM_DFLT;
-    map<string, string> attributes;
-    string attr(string key, string dflt="");
-    int iattr(string key, int dflt=-1);
-    int irequire(string key);
-    void set(string key, string value);
-    void set(string key, int value);
-    void set(string key, double value);
+    string getAttr(string key, string dflt="");
+    void setAttr(string key, string value);
     virtual void setLearningRate(Float lr, Float momentum) = 0;
     virtual void forward() = 0;
     virtual void backward() = 0;

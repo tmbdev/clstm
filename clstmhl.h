@@ -31,11 +31,7 @@ struct CLSTMText {
     net = load_net(fname);
     nclasses = net->codec.size();
     iclasses = net->icodec.size();
-    if (net->attributes["neps"] == "") {
-      cerr << "WARNING: no neps";
-    } else {
-      neps = stoi(net->attributes["neps"]);
-    }
+    neps = net->attr.get("neps");
     net->makeEncoders();
   }
   void save(const std::string &fname) { save_net(fname, net); }
@@ -48,7 +44,7 @@ struct CLSTMText {
     net = make_net("bidi", {{"ninput", (int)icodec.size()},
                             {"noutput", (int)codec.size()},
                             {"nhidden", nhidden}});
-    net->attributes["neps"] = std::to_string(neps);
+    net->attr.set("neps", neps);
     net->icodec = icodec;
     net->codec = codec;
     net->makeEncoders();

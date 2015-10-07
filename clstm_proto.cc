@@ -110,7 +110,7 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
   for (int i = 0; i < net->icodec.size(); i++)
     proto->add_icodec(net->icodec[i]);
   for (int i = 0; i < net->codec.size(); i++) proto->add_codec(net->codec[i]);
-  for (auto kv : net->attributes) {
+  for (auto kv : net->attr.attributes) {
     if (kv.first == "name") continue;
     if (kv.first == "ninput") continue;
     if (kv.first == "noutput") continue;
@@ -144,11 +144,11 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
   assert(proto->noutput() < 1000000);
   net = make_layer(proto->kind());
   net->name = proto->name();
-  net->attributes["ninput"] = to_string(proto->ninput());
-  net->attributes["noutput"] = to_string(proto->noutput());
+  net->attr.set("ninput", proto->ninput());
+  net->attr.set("noutput", proto->noutput());
   for (int i = 0; i < proto->attribute_size(); i++) {
     const clstm::KeyValue *attr = &proto->attribute(i);
-    net->attributes[attr->key()] = attr->value();
+    net->attr.set(attr->key(), attr->value());
   }
   for (int i = 0; i < proto->icodec_size(); i++)
     net->icodec.push_back(proto->icodec(i));

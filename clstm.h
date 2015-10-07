@@ -112,6 +112,41 @@ struct VecMat {
   VecMat(Mat *mat) { this->mat = mat; }
 };
 
+struct stringval : string {
+  stringval() {}
+  stringval(const string &other) { *this = other; }
+  stringval(const stringval &other) { *this = other; }
+  stringval(double other) { *this = other; }
+  stringval(const char *other) { *this = other; }
+  operator double() { return std::stof(*this); }
+  void operator=(const string &value) {
+    this->string::operator=(value);
+  }
+  void operator=(const char *value) {
+    this->string::operator=(value);
+  }
+  void operator=(double value) { *this = std::to_string(value); }
+};
+
+struct Attributes {
+  map<string, stringval> attributes;
+  stringval get(string key) {
+    auto it = attributes.find(key);
+    if (it == attributes.end()) {
+      throwf("missing parameter: %s", key.c_str());
+    }
+    return it->second;
+  }
+  stringval get(string key, stringval dflt) {
+    auto it = attributes.find(key);
+    if (it == attributes.end()) return dflt;
+    return it->second;
+  }
+  void set(string key, stringval value) {
+    attributes[key] = value;
+  }
+};
+
 struct ITrainable {
   virtual ~ITrainable() {}
   string name = "";
@@ -130,35 +165,7 @@ struct ITrainable {
   // The attributes array contains parameters for constructing the
   // network, as well as information necessary for loading and saving
   // networks.
-  map<string, string> attributes;
-  string attr(string key, string dflt = "") {
-    auto it = attributes.find(key);
-    if (it == attributes.end()) return dflt;
-    return it->second;
-  }
-  int iattr(string key, int dflt = -1) {
-    auto it = attributes.find(key);
-    if (it == attributes.end()) return dflt;
-    return std::stoi(it->second);
-  }
-  double dattr(string key, double dflt = 0.0) {
-    auto it = attributes.find(key);
-    if (it == attributes.end()) return dflt;
-    return std::stof(it->second);
-  }
-  int irequire(string key) {
-    auto it = attributes.find(key);
-    if (it == attributes.end()) {
-      sprintf(exception_message, "missing parameter: %s", key.c_str());
-      throwf(exception_message);
-    }
-    return std::stoi(it->second);
-  }
-  void set(string key, string value) { attributes[key] = value; }
-  void set(string key, int value) { attributes[key] = std::to_string(value); }
-  void set(string key, double value) {
-    attributes[key] = std::to_string(value);
-  }
+  Attributes attr;
 
   // Learning rates
   virtual void setLearningRate(Float lr, Float momentum) = 0;
@@ -179,21 +186,21 @@ struct ITrainable {
 
   // These are convenience functions for initialization
   virtual void init(int no, int ni) final {
-    set("ninput", ni);
-    set("noutput", no);
+    attr.set("ninput", ni);
+    attr.set("noutput", no);
     initialize();
   }
   virtual void init(int no, int nh, int ni) final {
-    set("ninput", ni);
-    set("nhidden", nh);
-    set("noutput", no);
+    attr.set("ninput", ni);
+    attr.set("nhidden", nh);
+    attr.set("noutput", no);
     initialize();
   }
   virtual void init(int no, int nh2, int nh, int ni) final {
-    set("ninput", ni);
-    set("nhidden", nh);
-    set("nhidden2", nh2);
-    set("noutput", no);
+    attr.set("ninput", ni);
+    attr.set("nhidden", nh);
+    attr.set("nhidden2", nh2);
+    attr.set("noutput", no);
     initialize();
   }
 };

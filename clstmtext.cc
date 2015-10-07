@@ -205,7 +205,7 @@ int main_train(int argc, char **argv) {
     net = load_net(load_name);
     nclasses = net->codec.size();
     iclasses = net->icodec.size();
-    neps = stoi(net->attributes["neps"]);
+    neps = net->attr.get("neps");
   } else {
     vector<int> icodec, codec;
     get_codec(icodec, samples, &Sample::in);
@@ -240,8 +240,7 @@ int main_train(int argc, char **argv) {
   double start_time = now();
   double best_erate = 1e38;
 
-  int start =
-      stoi(getdef(net->attributes, "trial", getsenv("start", "-1"))) + 1;
+  int start = net->attr.get("trial", getienv("start", -1)) + 1;
   if (start > 0) print("start", start);
   for (int trial = start; trial < ntrain; trial++) {
     bool report = (report_every > 0) && (trial % report_every == 0);
@@ -251,7 +250,7 @@ int main_train(int argc, char **argv) {
       char fname[4096];
       sprintf(fname, save_name.c_str(), trial);
       print("saving", fname);
-      net->attributes["trial"] = to_string(trial);
+      net->attr.set("trial", trial);
       save_net(fname, net);
       if (after_save != "") system(after_save.c_str());
       cout.flush();
@@ -265,8 +264,8 @@ int main_train(int argc, char **argv) {
       if (save_every == 0 && erate < best_erate) {
         best_erate = erate;
         print("saving", save_name, "at", erate);
-        net->attributes["trial"] = to_string(trial);
-        net->attributes["last_err"] = to_string(best_erate);
+        net->attr.set("trial", trial);
+        net->attr.set("last_err", best_erate);
         save_net(save_name, net);
         if (after_save != "") system(after_save.c_str());
       }
@@ -352,7 +351,7 @@ int main_filter(int argc, char **argv) {
   if (load_name == "") THROW("must give load= parameter");
   Network net;
   net = load_net(load_name);
-  int neps = stoi(net->attributes["neps"]);
+  int neps = net->attr.get("neps");
   dprint("codec", net->codec.size(), "icodec", net->icodec.size(), "neps",
          neps);
 

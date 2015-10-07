@@ -77,10 +77,10 @@ Network layer(const string &kind, int ninput, int noutput, const Assoc &args,
   }
 
   for (auto it : args) {
-    net->attributes[it.first] = it.second;
+    net->attr.set(it.first, it.second);
   }
-  net->attributes["ninput"] = std::to_string(ninput);
-  net->attributes["noutput"] = std::to_string(noutput);
+  net->attr.set("ninput", ninput);
+  net->attr.set("noutput", noutput);
   for (int i = 0; i < subs.size(); i++) net->sub.push_back(subs[i]);
   net->initialize();
   return net;
@@ -342,8 +342,8 @@ struct Full : NetworkBase {
   int noutput() { return ROWS(W1); }
   int ninput() { return COLS(W1) - 1; }
   void initialize() {
-    int no = irequire("noutput");
-    int ni = irequire("ninput");
+    int no = attr.get("noutput");
+    int ni = attr.get("ninput");
     randinit(W1, no, ni + 1, 0.01);
     W1.zeroGrad();
   }
@@ -399,8 +399,8 @@ struct SoftmaxLayer : NetworkBase {
   int noutput() { return ROWS(W1); }
   int ninput() { return COLS(W1) - 1; }
   void initialize() {
-    int no = irequire("noutput");
-    int ni = irequire("ninput");
+    int no = attr.get("noutput");
+    int ni = attr.get("ninput");
     if (no < 2) THROW("Softmax requires no>=2");
     randinit(W1, no, ni + 1, 0.01);
     clearUpdates();
@@ -581,11 +581,11 @@ struct GenericNPLSTM : NetworkBase {
     clearUpdates();
   }
   void initialize() {
-    int ni = irequire("ninput");
-    int no = irequire("noutput");
+    int ni = attr.get("ninput");
+    int no = attr.get("noutput");
     int nf = 1 + ni + no;
-    string mode = attr("weight_mode", "pos");
-    float weight_dev = dattr("weight_dev", 0.01);
+    string mode = attr.get("weight_mode", "pos");
+    float weight_dev = attr.get("weight_dev", 0.01);
     this->ni = ni;
     this->no = no;
     this->nf = nf;
