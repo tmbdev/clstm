@@ -135,6 +135,12 @@ struct Sequence {
     }
 }
 
+struct Attributes {
+  string get(string key);
+  string get(string key, string dflt);
+  void set(string key, string dflt);
+};
+
 struct ITrainable {
     virtual ~ITrainable();
     string name;
@@ -143,8 +149,7 @@ struct ITrainable {
     enum Normalization {
         NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
     } normalization = NORM_DFLT;
-    string getAttr(string key, string dflt="");
-    void setAttr(string key, string value);
+    Attributes attr;
     virtual void setLearningRate(Float lr, Float momentum) = 0;
     virtual void forward() = 0;
     virtual void backward() = 0;

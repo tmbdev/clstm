@@ -131,32 +131,33 @@ struct String : public std::string {
 
 struct Assoc : std::map<std::string, String> {
   using std::map<std::string, String>::map;
+  Assoc() {}
   Assoc(const string &s);
+#if 0
   String at(const std::string &key) const {
     auto it = this->find(key);
     if (it == this->end()) throwf("%s: key not found", key.c_str());
     return it->second;
   }
-};
-
-struct Attributes {
-  map<string, String> attributes;
-  String get(string key) {
-    auto it = attributes.find(key);
-    if (it == attributes.end()) {
+#endif
+  String get(string key) const {
+    auto it = this->find(key);
+    if (it == this->end()) {
       throwf("missing parameter: %s", key.c_str());
     }
     return it->second;
   }
-  String get(string key, String dflt) {
-    auto it = attributes.find(key);
-    if (it == attributes.end()) return dflt;
+  String get(string key, String dflt) const {
+    auto it = this->find(key);
+    if (it == this->end()) return dflt;
     return it->second;
   }
   void set(string key, String value) {
-    attributes[key] = value;
+    this->operator[](key) = value;
   }
 };
+
+typedef Assoc Attributes;
 
 struct ITrainable {
   virtual ~ITrainable() {}

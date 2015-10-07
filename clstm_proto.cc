@@ -110,7 +110,7 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
   for (int i = 0; i < net->icodec.size(); i++)
     proto->add_icodec(net->icodec[i]);
   for (int i = 0; i < net->codec.size(); i++) proto->add_codec(net->codec[i]);
-  for (auto kv : net->attr.attributes) {
+  for (auto kv : net->attr) {
     if (kv.first == "name") continue;
     if (kv.first == "ninput") continue;
     if (kv.first == "noutput") continue;

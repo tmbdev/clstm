@@ -20,9 +20,9 @@ string get(const Assoc &params, const string &key, const string &dflt) {
 // A 1D unidirectional LSTM with Softmax/Sigmoid output layer.
 
 Network make_lstm1(const Assoc &params) {
-  int ninput = params.at("ninput");
-  int nhidden = params.at("nhidden");
-  int noutput = params.at("noutput");
+  int ninput = params.get("ninput");
+  int nhidden = params.get("nhidden");
+  int noutput = params.get("noutput");
   string lstm_type = get(params, "lstm_type", "NPLSTM");
   string output_type = get(params, "output_type",
                            noutput == 1 ? "SigmoidLayer" : "SoftmaxLayer");
@@ -34,9 +34,9 @@ Network make_lstm1(const Assoc &params) {
 // A 1D unidirectional reversed LSTM with Softmax/Sigmoid output layer.
 
 Network make_revlstm1(const Assoc &params) {
-  int ninput = params.at("ninput");
-  int nhidden = params.at("nhidden");
-  int noutput = params.at("noutput");
+  int ninput = params.get("ninput");
+  int nhidden = params.get("nhidden");
+  int noutput = params.get("noutput");
   string lstm_type = get(params, "lstm_type", "NPLSTM");
   string output_type = get(params, "output_type",
                            noutput == 1 ? "SigmoidLayer" : "SoftmaxLayer");
@@ -49,9 +49,9 @@ Network make_revlstm1(const Assoc &params) {
 // A 1D bidirectional LSTM with Softmax/Sigmoid output layer.
 
 Network make_bidi(const Assoc &params) {
-  int ninput = params.at("ninput");
-  int nhidden = params.at("nhidden");
-  int noutput = params.at("noutput");
+  int ninput = params.get("ninput");
+  int nhidden = params.get("nhidden");
+  int noutput = params.get("noutput");
   string lstm_type = get(params, "lstm_type", "NPLSTM");
   string output_type = get(params, "output_type",
                            noutput == 1 ? "SigmoidLayer" : "SoftmaxLayer");
@@ -68,10 +68,10 @@ Network make_bidi(const Assoc &params) {
 // Two stacked 1D bidirectional LSTM with Softmax/Sigmoid output layer.
 
 Network make_bidi2(const Assoc &params) {
-  int ninput = params.at("ninput");
-  int nhidden = params.at("nhidden");
-  int nhidden2 = params.at("nhidden2");
-  int noutput = params.at("noutput");
+  int ninput = params.get("ninput");
+  int nhidden = params.get("nhidden");
+  int nhidden2 = params.get("nhidden2");
+  int noutput = params.get("noutput");
   string lstm_type = get(params, "lstm_type", "NPLSTM");
   string output_type = get(params, "output_type",
                            noutput == 1 ? "SigmoidLayer" : "SoftmaxLayer");
@@ -106,7 +106,7 @@ Network make_net(const string &kind, const Assoc &args) {
   if (network_factories.find(kind) != network_factories.end()) {
     result = network_factories[kind](args);
   } else {
-    result = layer(kind, args.at("ninput"), args.at("noutput"), args, {});
+    result = layer(kind, args.get("ninput"), args.get("noutput"), args, {});
   }
   if (!result) throwf("%s: no such network or layer", kind.c_str());
   result->attr.set("kind", kind);
