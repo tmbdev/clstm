@@ -112,13 +112,14 @@ struct VecMat {
   VecMat(Mat *mat) { this->mat = mat; }
 };
 
-struct stringval : string {
-  stringval() {}
-  stringval(const string &other) { *this = other; }
-  stringval(const stringval &other) { *this = other; }
-  stringval(double other) { *this = other; }
-  stringval(const char *other) { *this = other; }
-  operator double() { return std::stof(*this); }
+struct String : public std::string {
+  String() {}
+  String(const char *s) : std::string(s) {}
+  String(const std::string &s) : std::string(s) {}
+  String(int x) : std::string(std::to_string(x)) {}
+  String(double x) : std::string(std::to_string(x)) {}
+  double operator+() { return atof(this->c_str()); }
+  operator double() { return atof(this->c_str()); }
   void operator=(const string &value) {
     this->string::operator=(value);
   }
@@ -128,21 +129,31 @@ struct stringval : string {
   void operator=(double value) { *this = std::to_string(value); }
 };
 
+struct Assoc : std::map<std::string, String> {
+  using std::map<std::string, String>::map;
+  Assoc(const string &s);
+  String at(const std::string &key) const {
+    auto it = this->find(key);
+    if (it == this->end()) throwf("%s: key not found", key.c_str());
+    return it->second;
+  }
+};
+
 struct Attributes {
-  map<string, stringval> attributes;
-  stringval get(string key) {
+  map<string, String> attributes;
+  String get(string key) {
     auto it = attributes.find(key);
     if (it == attributes.end()) {
       throwf("missing parameter: %s", key.c_str());
     }
     return it->second;
   }
-  stringval get(string key, stringval dflt) {
+  String get(string key, String dflt) {
     auto it = attributes.find(key);
     if (it == attributes.end()) return dflt;
     return it->second;
   }
-  void set(string key, stringval value) {
+  void set(string key, String value) {
     attributes[key] = value;
   }
 };
@@ -333,25 +344,6 @@ typedef std::function<INetwork *(void)> ILayerFactory;
 extern map<string, ILayerFactory> layer_factories;
 Network make_layer(const string &kind);
 
-struct String : public std::string {
-  String() {}
-  String(const char *s) : std::string(s) {}
-  String(const std::string &s) : std::string(s) {}
-  String(int x) : std::string(std::to_string(x)) {}
-  String(double x) : std::string(std::to_string(x)) {}
-  double operator+() { return atof(this->c_str()); }
-  operator int() { return atoi(this->c_str()); }
-  operator double() { return atof(this->c_str()); }
-};
-struct Assoc : std::map<std::string, String> {
-  using std::map<std::string, String>::map;
-  Assoc(const string &s);
-  String at(const std::string &key) const {
-    auto it = this->find(key);
-    if (it == this->end()) throwf("%s: key not found", key.c_str());
-    return it->second;
-  }
-};
 typedef std::vector<Network> Networks;
 Network layer(const string &kind, int ninput, int noutput, const Assoc &args,
               const Networks &subs);

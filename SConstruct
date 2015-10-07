@@ -125,7 +125,7 @@ libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
           "extras.cc", "clstm.pb.cc", "clstm_compute.cc"]
 libclstm = env.StaticLibrary("clstm", source = libsrc)
 
-programs = """clstmtext clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".split(
+programs = """clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".split(
 )
 for program in programs:
     env.Program(program, [program + ".cc"], LIBS=[libclstm] + libs)
