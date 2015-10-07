@@ -192,13 +192,7 @@ struct INetwork : virtual ITrainable {
 
 void set_inputs(INetwork *net, Sequence &inputs);
 void set_targets(INetwork *net, Sequence &targets);
-void set_targets_accelerated(INetwork *net, Sequence &targets);
 void set_classes(INetwork *net, Classes &classes);
-/*void set_classes(INetwork *net, BatchClasses &classes);*/
-void train(INetwork *net, Sequence &xs, Sequence &targets);
-void ctrain(INetwork *net, Sequence &xs, Classes &cs);
-void ctrain_accelerated(INetwork *net, Sequence &xs, Classes &cs, Float lo=1e-5);
-void cpred(INetwork *net, Classes &preds, Sequence &xs);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
 
 std::shared_ptr<INetwork> make_layer(string);

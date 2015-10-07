@@ -120,6 +120,16 @@ void set_targets(INetwork *net, Sequence &targets) {
   assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++) net->outputs[t].d = targets[t] - net->outputs[t];
 }
+void set_classes(INetwork *net, Classes &classes) {
+  int N = net->outputs.size();
+  assert(N == classes.size());
+  assert(net->outputs.size() == N);
+  for (int t = 0; t < N; t++) {
+    net->outputs[t].d = -net->outputs[t];
+    net->outputs[t].d(classes[t]) += 1;
+  }
+}
+#if 0
 void set_targets_accelerated(INetwork *net, Sequence &targets) {
   Float lo = 1e-5;
   assert(net->outputs.size() == targets.size());
@@ -137,15 +147,6 @@ void set_targets_accelerated(INetwork *net, Sequence &targets) {
         }
       }
     }
-  }
-}
-void set_classes(INetwork *net, Classes &classes) {
-  int N = net->outputs.size();
-  assert(N == classes.size());
-  assert(net->outputs.size() == N);
-  for (int t = 0; t < N; t++) {
-    net->outputs[t].d = -net->outputs[t];
-    net->outputs[t].d(classes[t]) += 1;
   }
 }
 void train(INetwork *net, Sequence &xs, Sequence &targets) {
@@ -218,6 +219,7 @@ void cpred(INetwork *net, Classes &preds, Sequence &xs) {
     preds[t] = index;
   }
 }
+#endif
 
 void INetwork::makeEncoders() {
   encoder.reset(new map<int, int>());
