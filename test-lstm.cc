@@ -20,6 +20,9 @@ using std::stoi;
 using namespace Eigen;
 using namespace ocropus;
 
+int ntrain = getienv("ntrain", 100000);
+int ntest = getienv("ntest", 1000);
+
 void gentest(Sequence &xs, Sequence &ys) {
   int N = 20;
   xs.resize(N, 1, 1);
@@ -47,21 +50,7 @@ Float maxerr(Sequence &xs, Sequence &ys) {
   return merr;
 }
 
-int main(int argc, char **argv) {
-  Network net = make_net_init("lstm1", "ninput=1:nhidden=4:noutput=2");
-  net->setLearningRate(1e-4, 0.9);
-  int ntrain = 30000;
-  int ntest = 1000;
-  print("training 1:4:2 network to learn delay");
-  for (int i = 0; i < ntrain; i++) {
-    Sequence xs, ys;
-    gentest(xs, ys);
-    set_inputs(net.get(), xs);
-    net->forward();
-    set_targets(net.get(), ys);
-    net->backward();
-    net->update();
-  }
+double test_net(Network net) {
   Float merr = 0.0;
   for (int i = 0; i < ntest; i++) {
     Sequence xs, ys;
@@ -80,5 +69,28 @@ int main(int argc, char **argv) {
     assert(err < 0.1);
     if (err > merr) merr = err;
   }
+  return merr;
+}
+
+int main(int argc, char **argv) {
+  Network net = make_net_init("lstm1", "ninput=1:nhidden=4:noutput=2");
+  net->setLearningRate(1e-4, 0.9);
+  print("training 1:4:2 network to learn delay");
+  for (int i = 0; i < ntrain; i++) {
+    Sequence xs, ys;
+    gentest(xs, ys);
+    set_inputs(net.get(), xs);
+    net->forward();
+    set_targets(net.get(), ys);
+    net->backward();
+    net->update();
+  }
+  test_net(net);
+  print("saving");
+  save_net("__test__.clstm", net);
+  net.reset();
+  print("loading");
+  net = load_net("__test__.clstm");
+  double merr = test_net(net);
   print("OK", merr);
 }

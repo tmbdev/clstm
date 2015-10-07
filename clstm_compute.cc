@@ -151,4 +151,79 @@ template void backward_nonlingate<SigmoidNonlin>(Batch &out, Batch &state, Batch
 template void backward_nonlingate<NoNonlin>(Batch &out, Batch &state, Batch &go);
 template void backward_nonlingate<ReluNonlin>(Batch &out, Batch &state, Batch &go);
 
+void randgauss(Mat &m) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::normal_distribution<double> randn;
+  for (int i = 0; i < ROWS(m); i++)
+    for (int j = 0; j < COLS(m); j++) m(i, j) = randn(gen);
+}
+void randgauss(Vec &v) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::normal_distribution<double> randn;
+  for (int i = 0; i < ROWS(v); i++) v(i) = randn(gen);
+}
+void randinit(Mat &m, float s, const string mode) {
+  if (mode == "unif") {
+    m.setRandom();
+    m = (2 * s * m).array() - s;
+  } else if (mode == "pos") {
+    m.setRandom();
+    m = m * s;
+  } else if (mode == "normal") {
+    randgauss(m);
+    m = m * s;
+  }
+}
+void randinit(Vec &m, float s, const string mode) {
+  if (mode == "unif") {
+    m.setRandom();
+    m = (2 * s * m).array() - s;
+  } else if (mode == "pos") {
+    m.setRandom();
+    m = m * s;
+  } else if (mode == "normal") {
+    randgauss(m);
+    m = m * s;
+  }
+}
+void randinit(Mat &m, int no, int ni, float s, const string mode) {
+  m.resize(no, ni);
+  randinit(m, s, mode);
+}
+void randinit(Vec &m, int no, float s, const string mode) {
+  m.resize(no);
+  randinit(m, s, mode);
+}
+void zeroinit(Mat &m, int no, int ni) {
+  m.resize(no, ni);
+  m.setZero();
+}
+void zeroinit(Vec &m, int no) {
+  m.resize(no);
+  m.setZero();
+}
+
+void resize(Sequence &seq, int nsteps, int dims, int bs) {
+  seq.resize(nsteps);
+  for (int i = 0; i < nsteps; i++) seq[i].resize(dims, bs);
+}
+int size(Sequence &seq, int dim) {
+  if (dim == 0) return seq.size();
+  if (dim == 1) return seq[0].rows();
+  if (dim == 2) return seq[0].cols();
+  THROW("bad dim ins size");
+  return -1;
+}
+
+typedef vector<int> Classes;
+typedef vector<Classes> BatchClasses;
+
+Vec timeslice(const Sequence &s, int i, int b) {
+  Vec result(s.size());
+  for (int t = 0; t < s.size(); t++) result[t] = s[t](i, b);
+  return result;
+}
+
 }

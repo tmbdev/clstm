@@ -155,6 +155,9 @@ struct Sequence {
   }
 };
 
+typedef vector<int> Classes;
+typedef vector<Classes> BatchClasses;
+
 void gradient_clip(Sequence &s, Float m = 1.0);
 void gradient_clip(Mat &d, Float m = 1.0);
 
@@ -231,6 +234,26 @@ template <class H>
 void forward_nonlingate(Batch &out, Batch &state, Batch &go);
 template <class H>
 void backward_nonlingate(Batch &out, Batch &state, Batch &go);
+
+void randgauss(Mat &m);
+void randgauss(Vec &v);
+void randinit(Mat &m, float s, const string mode = "unif");
+void randinit(Vec &m, float s, const string mode = "unif");
+void randinit(Mat &m, int no, int ni, float s, const string mode = "unif");
+void randinit(Vec &m, int no, float s, const string mode = "unif");
+void zeroinit(Mat &m, int no, int ni);
+void zeroinit(Vec &m, int no);
+void resize(Sequence &seq, int nsteps, int dims, int bs);
+int size(Sequence &seq, int dim);
+Vec timeslice(const Sequence &s, int i, int b = 0);
+
+struct VecMat {
+  Vec *vec = 0;
+  Mat *mat = 0;
+  VecMat() {}
+  VecMat(Vec *vec) { this->vec = vec; }
+  VecMat(Mat *mat) { this->mat = mat; }
+};
 
 }
 
