@@ -129,97 +129,6 @@ void set_classes(INetwork *net, Classes &classes) {
     net->outputs[t].d(classes[t]) += 1;
   }
 }
-#if 0
-void set_targets_accelerated(INetwork *net, Sequence &targets) {
-  Float lo = 1e-5;
-  assert(net->outputs.size() == targets.size());
-  int N = net->outputs.size();
-  assert(net->outputs.size() == N);
-  for (int t = 0; t < N; t++) {
-    net->outputs[t].d = -net->outputs[t];
-    for (int i = 0; i < ROWS(targets[t]); i++) {
-      for (int b = 0; b < COLS(targets[t]); b++) {
-        // only allow binary classification
-        assert(fabs(targets[t](i, b) - 0) < 1e-5 ||
-               fabs(targets[t](i, b) - 1) < 1e-5);
-        if (targets[t](i, b) > 0.5) {
-          net->outputs[t].d(i, b) = 1.0 / fmax(lo, net->outputs[t](i, b));
-        }
-      }
-    }
-  }
-}
-void train(INetwork *net, Sequence &xs, Sequence &targets) {
-  assert(xs.size() > 0);
-  assert(xs.size() == targets.size());
-  net->inputs = xs;
-  net->forward();
-  set_targets(net, targets);
-  net->backward();
-  net->update();
-}
-void ctrain(INetwork *net, Sequence &xs, Classes &cs) {
-  net->inputs = xs;
-  net->forward();
-  int len = net->outputs.size();
-  assert(len > 0);
-  int dim = net->outputs[0].size();
-  assert(dim > 0);
-  assert(net->outputs.size() == len);
-  if (dim == 1) {
-    for (int t = 0; t < len; t++)
-      net->outputs[t].d(0) =
-          cs[t] ? 1.0 - net->outputs[t](0) : -net->outputs[t](0);
-  } else {
-    for (int t = 0; t < len; t++) {
-      net->outputs[t].d = -net->outputs[t];
-      int c = cs[t];
-      net->outputs[t].d(c) = 1 - net->outputs[t](c);
-    }
-  }
-  net->backward();
-  net->update();
-}
-
-void ctrain_accelerated(INetwork *net, Sequence &xs, Classes &cs, Float lo) {
-  net->inputs = xs;
-  net->forward();
-  int len = net->outputs.size();
-  assert(len > 0);
-  int dim = net->outputs[0].size();
-  assert(dim > 0);
-  if (dim == 1) {
-    for (int t = 0; t < len; t++) {
-      if (cs[t] == 0)
-        net->outputs[t].d(0) = -1.0 / fmax(lo, 1.0 - net->outputs[t](0));
-      else
-        net->outputs[t].d(0) = 1.0 / fmax(lo, net->outputs[t](0));
-    }
-  } else {
-    for (int t = 0; t < len; t++) {
-      net->outputs[t].d = -net->outputs[t];
-      int c = cs[t];
-      net->outputs[t].d(c) = 1.0 / fmax(lo, net->outputs[t](c));
-    }
-  }
-  net->backward();
-  net->update();
-}
-
-void cpred(INetwork *net, Classes &preds, Sequence &xs) {
-  int N = xs.size();
-  assert(COLS(xs[0]) == 0);
-  net->inputs = xs;
-  preds.resize(N);
-  net->forward();
-  assert(net->outputs.size() == N);
-  for (int t = 0; t < N; t++) {
-    int index = -1;
-    net->outputs[t].col(0).maxCoeff(&index);
-    preds[t] = index;
-  }
-}
-#endif
 
 void INetwork::makeEncoders() {
   encoder.reset(new map<int, int>());
@@ -363,19 +272,7 @@ struct Full : NetworkBase {
     nseq += 1;
   }
   void update() {
-    float lr = learning_rate;
-    if (normalization == NORM_BATCH)
-      lr /= nseq;
-    else if (normalization == NORM_LEN)
-      lr /= nsteps;
-    else if (normalization == NORM_NONE) /* do nothing */
-      ;
-    else
-      THROW("unknown normalization");
-    W1 += lr * W1.d;
-    W1.d *= momentum;
-    nsteps = 0;
-    nseq = 0;
+    W1.update(effective_lr(), momentum);
   }
   void myweights(const string &prefix, WeightFun f) {
     f(prefix + ".W1", &W1, (Mat *)0);
