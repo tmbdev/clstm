@@ -325,8 +325,8 @@ struct SoftmaxLayer : NetworkBase {
     for (int t = outputs.size() - 1; t >= 0; t--) {
       inputs[t].d = MATMUL_TR(CBUTFIRST(W1), outputs[t].d);
     }
-    int bs = COLS(inputs[0]);
     for (int t = 0; t < outputs.size(); t++) {
+      int bs = COLS(inputs[t]);
       auto d_W = CBUTFIRST(W1.d);
       d_W += MATMUL_RT(outputs[t].d, inputs[t]);
       auto d_w = CFIRST(W1.d);
