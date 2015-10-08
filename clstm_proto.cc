@@ -12,6 +12,7 @@
 #include <fstream>
 #include <Eigen/Dense>
 #include <stdarg.h>
+#include <typeinfo>
 #ifdef GOOGLE
 #include "third_party/clstm/clstm.pb.h"
 #else
@@ -97,9 +98,11 @@ void Vec_of_proto(Vec &a, const clstm::Array *array) {
 void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
                   bool weights = true) {
   net->preSave();
-  assert(string("") != net->kind());
-  proto->set_kind(net->kind());
-  proto->set_name(net->name);
+  if (net->kind=="") {
+    cerr << typeid(*net).name() << endl;
+    assert(net->kind != "");
+  }
+  proto->set_kind(net->kind);
   proto->set_ninput(net->ninput());
   proto->set_noutput(net->noutput());
   assert(proto->kind() != "");
@@ -143,7 +146,6 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
   assert(proto->noutput() >= 0);
   assert(proto->noutput() < 1000000);
   net = make_layer(proto->kind());
-  net->name = proto->name();
   net->attr.set("ninput", proto->ninput());
   net->attr.set("noutput", proto->noutput());
   for (int i = 0; i < proto->attribute_size(); i++) {

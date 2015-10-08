@@ -88,12 +88,18 @@ Network layer(const string &kind, int ninput, int noutput, const Assoc &args,
 
 template <class T>
 int register_layer(const char *name) {
+  string s(name);
+  layer_factories[s] = [s]() {
+    T *result = new T();
+    result->kind = s;
+    return result;
+  };
+#if 0
   T *net = new T();
   string kind = net->kind();
   delete net;
-  string s(name);
-  layer_factories[s] = []() { return new T(); };
   layer_factories[kind] = []() { return new T(); };
+#endif
   return 0;
 }
 #define C(X, Y) X##Y
@@ -176,7 +182,7 @@ std::wstring INetwork::idecode(Classes &classes) {
 }
 
 void INetwork::info(string prefix) {
-  string nprefix = prefix + "." + name;
+  string nprefix = prefix + "." + kind;
   cout << nprefix << ": " << learning_rate << " " << momentum << " ";
   cout << "in " << inputs.size() << " " << ninput() << " ";
   cout << "out " << outputs.size() << " " << noutput() << endl;
@@ -184,7 +190,7 @@ void INetwork::info(string prefix) {
 }
 
 void INetwork::weights(const string &prefix, WeightFun f) {
-  string nprefix = prefix + "." + name;
+  string nprefix = prefix + "." + kind;
   myweights(nprefix, f);
   for (int i = 0; i < sub.size(); i++) {
     sub[i]->weights(nprefix + "." + to_string(i), f);
@@ -192,7 +198,7 @@ void INetwork::weights(const string &prefix, WeightFun f) {
 }
 
 void INetwork::params(const string &prefix, ParamsFun f) {
-  string nprefix = prefix + "." + name;
+  string nprefix = prefix + "." + kind;
   myparams(nprefix, f);
   for (int i = 0; i < sub.size(); i++) {
     sub[i]->params(nprefix + "." + to_string(i), f);
@@ -200,7 +206,7 @@ void INetwork::params(const string &prefix, ParamsFun f) {
 }
 
 void INetwork::states(const string &prefix, StateFun f) {
-  string nprefix = prefix + "." + name;
+  string nprefix = prefix + "." + kind;
   f(nprefix + ".inputs", &inputs);
   f(nprefix + ".outputs", &outputs);
   mystates(nprefix, f);
@@ -211,7 +217,7 @@ void INetwork::states(const string &prefix, StateFun f) {
 
 void INetwork::networks(const string &prefix,
                         function<void(string, INetwork *)> f) {
-  string nprefix = prefix + "." + kind();
+  string nprefix = prefix + "." + kind;
   f(nprefix, this);
   for (int i = 0; i < sub.size(); i++) {
     sub[i]->networks(nprefix, f);
@@ -247,12 +253,9 @@ struct Full : NetworkBase {
   Params W1;
   int nseq = 0;
   int nsteps = 0;
-  string mykind = string("Full_") + NONLIN::kind;
   Full() {
-    name = string("full_") + NONLIN::name;
     ENROLL(W1);
   }
-  const char *kind() { return mykind.c_str(); }
   int noutput() { return ROWS(W1); }
   int ninput() { return COLS(W1) - 1; }
   void initialize() {
@@ -296,8 +299,9 @@ struct SoftmaxLayer : NetworkBase {
   Params W1;
   int nsteps = 0;
   int nseq = 0;
-  SoftmaxLayer() { name = "softmax"; }
-  const char *kind() { return "SoftmaxLayer"; }
+  SoftmaxLayer() {
+    ENROLL(W1);
+  }
   int noutput() { return ROWS(W1); }
   int ninput() { return COLS(W1) - 1; }
   void initialize() {
@@ -336,8 +340,6 @@ struct SoftmaxLayer : NetworkBase {
 REGISTER(SoftmaxLayer);
 
 struct Stacked : NetworkBase {
-  Stacked() { name = "stacked"; }
-  const char *kind() { return "Stacked"; }
   int noutput() { return sub[sub.size() - 1]->noutput(); }
   int ninput() { return sub[0]->ninput(); }
   void forward() {
@@ -375,8 +377,6 @@ struct Stacked : NetworkBase {
 REGISTER(Stacked);
 
 struct Reversed : NetworkBase {
-  Reversed() { name = "reversed"; }
-  const char *kind() { return "Reversed"; }
   int noutput() { return sub[0]->noutput(); }
   int ninput() { return sub[0]->ninput(); }
   void forward() {
@@ -399,8 +399,6 @@ struct Reversed : NetworkBase {
 REGISTER(Reversed);
 
 struct Parallel : NetworkBase {
-  Parallel() { name = "parallel"; }
-  const char *kind() { return "Parallel"; }
   int noutput() { return sub[0]->noutput() + sub[1]->noutput(); }
   int ninput() { return sub[0]->ninput(); }
   void forward() {
@@ -445,9 +443,6 @@ struct GenericNPLSTM : NetworkBase {
   int ni, no, nf;
   int nsteps = 0;
   int nseq = 0;
-  string mykind = string("NPLSTM_") + F::kind + G::kind + H::kind;
-  GenericNPLSTM() { name = "lstm"; }
-  const char *kind() { return mykind.c_str(); }
   int noutput() { return no; }
   int ninput() { return ni; }
   void postLoad() {

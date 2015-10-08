@@ -143,7 +143,7 @@ struct Attributes {
 
 struct ITrainable {
     virtual ~ITrainable();
-    string name;
+    string kind;
     Float learning_rate = 1e-4;
     Float momentum = 0.9;
     enum Normalization {

@@ -140,7 +140,6 @@ void gradient_clip(Mat &d, Float m = 1.0);
 
 struct NoNonlin {
   static constexpr const char *kind = "Linear";
-  static constexpr const char *name = "linear";
   template <class T>
   static void f(T &x) {}
   template <class T, class U>
@@ -149,7 +148,6 @@ struct NoNonlin {
 
 struct SigmoidNonlin {
   static constexpr const char *kind = "Sigmoid";
-  static constexpr const char *name = "sigmoid";
   template <class T>
   static void f(T &x) {
     x = MAPFUN(x, sigmoid);
@@ -161,7 +159,6 @@ struct SigmoidNonlin {
 };
 struct TanhNonlin {
   static constexpr const char *kind = "Tanh";
-  static constexpr const char *name = "tanh";
   template <class T>
   static void f(T &x) {
     x = MAPFUN(x, tanh_);
@@ -173,7 +170,6 @@ struct TanhNonlin {
 };
 struct ReluNonlin {
   static constexpr const char *kind = "Relu";
-  static constexpr const char *name = "relu";
   template <class T>
   static void f(T &x) {
     x = MAPFUN(x, relu_);

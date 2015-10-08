@@ -97,7 +97,7 @@ struct Maximizer {
 };
 
 void test_net(Network net) {
-  print("testing", net->name);
+  print("testing", net->kind);
   int N = 4;
   int bs = 1;
   int ninput = net->ninput();

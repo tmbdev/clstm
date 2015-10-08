@@ -72,8 +72,13 @@ typedef Assoc Attributes;
 
 struct ITrainable {
   virtual ~ITrainable() {}
-  string name = "";
-  virtual const char *kind() = 0;
+
+  // This string is used to identify the type for
+  // saving/loading. It is set from the registry
+  // when the object is allocated through the registry
+  // (that assures that the string reflects the name
+  // of the type in the registry).
+  string kind = "";
 
   vector<pair<Sequence*,string>> states;
   vector<pair<Params*,string>> parameters;
@@ -89,10 +94,10 @@ struct ITrainable {
     enroll(args...);
   }
   virtual void update() {
+    Float lr = effective_lr();
     for(auto it : parameters)
-      it.first->update(effective_lr(), momentum);
+      it.first->update(lr, momentum);
   }
-
 
   // Learning rate and momentum used for training.
   Float learning_rate = 1e-4;
