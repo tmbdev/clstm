@@ -239,21 +239,6 @@ struct VecMat {
 
 bool anynan(Batch &a);
 bool anynan(Sequence &a);
-
-#define DOT(M, V) ((M) * (V))
-#define MATMUL(A, B) ((A) * (B))
-#define MATMUL_TR(A, B) ((A).transpose() * (B))
-#define MATMUL_RT(A, B) ((A) * (B).transpose())
-#define EMUL(U, V) ((U).array() * (V).array()).matrix()
-#define EMULV(U, V) ((U).array() * (V).array()).matrix()
-#define TRANPOSE(U) ((U).transpose())
-#define COL(A, b) (A).col(b)
-#define MAPFUNC(M, F) ((M).unaryExpr(F))
-#define SUMREDUCE(M) float(M.sum())
-#define BLOCK(A, i, j, n, m) (A).block(i, j, n, m)
-#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols() - 1)
-#define CFIRST(M) COL(M, 0)
-#define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
 }
 
 #endif

@@ -4,6 +4,21 @@
 
 namespace ocropus{
 
+#define DOT(M, V) ((M) * (V))
+#define MATMUL(A, B) ((A) * (B))
+#define MATMUL_TR(A, B) ((A).transpose() * (B))
+#define MATMUL_RT(A, B) ((A) * (B).transpose())
+#define EMUL(U, V) ((U).array() * (V).array()).matrix()
+#define EMULV(U, V) ((U).array() * (V).array()).matrix()
+#define TRANPOSE(U) ((U).transpose())
+#define COL(A, b) (A).col(b)
+#define MAPFUNC(M, F) ((M).unaryExpr(F))
+#define SUMREDUCE(M) float(M.sum())
+#define BLOCK(A, i, j, n, m) (A).block(i, j, n, m)
+#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols() - 1)
+#define CFIRST(M) COL(M, 0)
+#define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
+
 
 inline void ADDCOLS(Mat &m, Vec &v) {
   for (int i = 0; i < COLS(m); i++)
@@ -69,33 +84,6 @@ template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-
-
-void forward_softmax(Sequence &outputs, Params &W1, Sequence &inputs) {
-  int nsteps = inputs.size();
-  int no = ROWS(W1), bs = COLS(inputs[0]);
-  outputs.resize(nsteps, no, bs);
-  for (int t = 0; t < nsteps; t++) {
-    outputs[t] = MAPFUN(HOMDOT(W1, inputs[t]), limexp);
-    for (int b = 0; b < COLS(outputs[t]); b++) {
-      Float total = fmax(SUMREDUCE(COL(outputs[t], b)), 1e-9);
-      COL(outputs[t], b) /= total;
-    }
-  }
-}
-
-void backward_softmax(Sequence &outputs, Params &W1, Sequence &inputs) {
-  for (int t = outputs.size() - 1; t >= 0; t--) {
-    inputs[t].d = MATMUL_TR(CBUTFIRST(W1), outputs[t].d);
-  }
-  int bs = COLS(inputs[0]);
-  for (int t = 0; t < outputs.size(); t++) {
-    auto d_W = CBUTFIRST(W1.d);
-    d_W += MATMUL_RT(outputs[t].d, inputs[t]);
-    auto d_w = CFIRST(W1.d);
-    for (int b = 0; b < bs; b++) d_w += COL(outputs[t].d, b);
-  }
-}
 
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
   z = MAPFUN(HOMDOT(W1, x), limexp);

@@ -310,27 +310,14 @@ struct SoftmaxLayer : NetworkBase {
     makeEncoders();
   }
   void forward() {
-    int nsteps = inputs.size();
-    int no = ROWS(W1), bs = COLS(inputs[0]);
-    outputs.resize(nsteps, no, bs);
+    outputs.resize(inputs.size(), W1.rows(), inputs.cols());
     for (int t = 0; t < inputs.size(); t++) {
-      outputs[t] = MAPFUN(HOMDOT(W1, inputs[t]), limexp);
-      for (int b = 0; b < COLS(outputs[t]); b++) {
-        Float total = fmax(SUMREDUCE(COL(outputs[t], b)), 1e-9);
-        COL(outputs[t], b) /= total;
-      }
+      forward_softmax(outputs[t], W1, inputs[t]);
     }
   }
   void backward() {
     for (int t = outputs.size() - 1; t >= 0; t--) {
-      inputs[t].d = MATMUL_TR(CBUTFIRST(W1), outputs[t].d);
-    }
-    for (int t = 0; t < outputs.size(); t++) {
-      int bs = COLS(inputs[t]);
-      auto d_W = CBUTFIRST(W1.d);
-      d_W += MATMUL_RT(outputs[t].d, inputs[t]);
-      auto d_w = CFIRST(W1.d);
-      for (int b = 0; b < bs; b++) d_w += COL(outputs[t].d, b);
+      backward_softmax(outputs[t], W1, inputs[t]);
     }
     nsteps += outputs.size();
     nseq += 1;
