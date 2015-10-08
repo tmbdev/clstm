@@ -263,7 +263,6 @@ struct Full : NetworkBase {
     nsteps += outputs.size();
     nseq += 1;
   }
-  void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
 
 typedef Full<NoNonlin> LinearLayer;
@@ -308,7 +307,6 @@ struct SoftmaxLayer : NetworkBase {
     nsteps += outputs.size();
     nseq += 1;
   }
-  void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
 REGISTER(SoftmaxLayer);
 
@@ -411,6 +409,10 @@ struct GenericNPLSTM : NetworkBase {
   int nseq = 0;
   int noutput() { return no; }
   int ninput() { return ni; }
+  GenericNPLSTM() {
+    ENROLL(WGI, WGF, WGO, WCI);
+    ENROLL(gi, gf, go, ci, state);
+  }
   void initialize() {
     int ni = attr.get("ninput");
     int no = attr.get("noutput");
@@ -424,7 +426,6 @@ struct GenericNPLSTM : NetworkBase {
       randinit(w, no, nf, weight_dev, mode);
     }, WEIGHTS);
     each([this,no,nf](Params &w) { w.d = Mat::Zero(no, nf); }, WEIGHTS);
-    ENROLL(WGI, WGF, WGO, WCI);
   }
   void postLoad() {
     no = ROWS(WGI);
@@ -480,22 +481,6 @@ struct GenericNPLSTM : NetworkBase {
     nsteps += N;
     nseq += 1;
   }
-  void myparams(const string &prefix, ParamsFun f) {
-    f(prefix + ".WGI", &WGI);
-    f(prefix + ".WGF", &WGF);
-    f(prefix + ".WGO", &WGO);
-    f(prefix + ".WCI", &WCI);
-  }
-  virtual void mystates(const string &prefix, StateFun f) {
-    f(prefix + ".inputs", &inputs);
-    f(prefix + ".outputs", &outputs);
-    f(prefix + ".state", &state);
-    f(prefix + ".gi", &gi);
-    f(prefix + ".go", &go);
-    f(prefix + ".gf", &gf);
-    f(prefix + ".ci", &ci);
-  }
-  Sequence *getState() { return &state; }
 };
 typedef GenericNPLSTM<> NPLSTM;
 REGISTER(NPLSTM);

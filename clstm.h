@@ -97,12 +97,17 @@ struct ITrainable {
   typedef function<void(const string &, Params *)> ParamsFun;
   typedef function<void(const string &, Sequence *)> StateFun;
   virtual void myparams(const string &prefix, ParamsFun f) {
-    for(auto it : parameters) f(prefix + it.second, it.first);
+    for(auto it : parameters) {
+      f(prefix + "." + it.second, it.first);
+    }
   }
   virtual void mystates(const string &prefix, StateFun f) {
-    for(auto it : states) f(prefix + it.second, it.first);
+    //f(prefix + ".inputs", &inputs);
+    //f(prefix + ".outputs", &outputs);
+    for(auto it : states) {
+      f(prefix + "." + it.second, it.first);
+    }
   }
-
 
   // Learning rate and momentum used for training.
   Float learning_rate = 1e-4;
