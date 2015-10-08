@@ -137,10 +137,7 @@ struct ITrainable {
   virtual void forward() = 0;
   virtual void backward() = 0;
 
-  virtual void initialize() {
-    // this gets initialization parameters
-    // out of the attributes array
-  }
+  virtual void initialize() { }
 };
 
 struct INetwork;
@@ -178,13 +175,6 @@ struct INetwork : virtual ITrainable {
   bool softmax_accel = false;
 
   virtual ~INetwork() {}
-
-  std::function<void(INetwork *)> initializer = [](INetwork *) {};
-  virtual void initialize() {
-    // this gets initialization parameters
-    // out of the attributes array
-    initializer(this);
-  }
 
   // Expected number of input/output features.
   virtual int ninput() { return -999999; }

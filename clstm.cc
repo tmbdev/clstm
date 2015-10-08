@@ -94,12 +94,6 @@ int register_layer(const char *name) {
     result->kind = s;
     return result;
   };
-#if 0
-  T *net = new T();
-  string kind = net->kind();
-  delete net;
-  layer_factories[kind] = []() { return new T(); };
-#endif
   return 0;
 }
 #define C(X, Y) X##Y
@@ -256,14 +250,14 @@ struct Full : NetworkBase {
   Full() {
     ENROLL(W1);
   }
-  int noutput() { return ROWS(W1); }
-  int ninput() { return COLS(W1) - 1; }
   void initialize() {
     int no = attr.get("noutput");
     int ni = attr.get("ninput");
     randinit(W1, no, ni + 1, 0.01);
     W1.zeroGrad();
   }
+  int noutput() { return W1.rows(); }
+  int ninput() { return W1.cols() - 1; }
   void forward() {
     outputs.resize(inputs.size(), W1.rows(), inputs.cols());
     for (int t = 0; t < inputs.size(); t++) {
@@ -302,16 +296,15 @@ struct SoftmaxLayer : NetworkBase {
   SoftmaxLayer() {
     ENROLL(W1);
   }
-  int noutput() { return ROWS(W1); }
-  int ninput() { return COLS(W1) - 1; }
   void initialize() {
     int no = attr.get("noutput");
     int ni = attr.get("ninput");
     if (no < 2) THROW("Softmax requires no>=2");
     randinit(W1, no, ni + 1, 0.01);
-    clearUpdates();
+    W1.zeroGrad();
   }
-  void clearUpdates() { W1.zeroGrad(); }
+  int noutput() { return ROWS(W1); }
+  int ninput() { return COLS(W1) - 1; }
   void postLoad() {
     W1.zeroGrad();
     makeEncoders();
@@ -445,13 +438,6 @@ struct GenericNPLSTM : NetworkBase {
   int nseq = 0;
   int noutput() { return no; }
   int ninput() { return ni; }
-  void postLoad() {
-    no = ROWS(WGI);
-    nf = COLS(WGI);
-    assert(nf > no);
-    ni = nf - no - 1;
-    clearUpdates();
-  }
   void initialize() {
     int ni = attr.get("ninput");
     int no = attr.get("noutput");
@@ -464,18 +450,13 @@ struct GenericNPLSTM : NetworkBase {
     each([weight_dev, mode, no, nf](Mat &w) {
       randinit(w, no, nf, weight_dev, mode);
     }, WEIGHTS);
-#if 0
-        float gf_mean = dattr("gf_mean", 0.0);
-        float gf_dev = dattr("gf_dev", 0.01);
-        Vec offset;
-        randinit(offset, no, gf_dev, mode);
-        offset.array() += gf_mean;
-        COL(WGF, 0) = offset;
-#endif
-    clearUpdates();
+    each([this,no,nf](Params &w) { w.d = Mat::Zero(no, nf); }, WEIGHTS);
   }
-  void clearUpdates() {
-    each([this](Params &w) { w.d = Mat::Zero(no, nf); }, WEIGHTS);
+  void postLoad() {
+    no = ROWS(WGI);
+    nf = COLS(WGI);
+    assert(nf > no);
+    ni = nf - no - 1;
   }
   void resize(int N) {
     each([N](Sequence &s) {
@@ -577,15 +558,6 @@ REGISTER(RELUNPLSTM);
 
 typedef GenericNPLSTM<SigmoidNonlin, ReluNonlin, ReluNonlin> RELU2NPLSTM;
 REGISTER(RELU2NPLSTM);
-
-INetwork *make_SigmoidLayer() { return new SigmoidLayer(); }
-INetwork *make_SoftmaxLayer() { return new SoftmaxLayer(); }
-INetwork *make_ReluLayer() { return new ReluLayer(); }
-INetwork *make_Stacked() { return new Stacked(); }
-INetwork *make_Reversed() { return new Reversed(); }
-INetwork *make_Parallel() { return new Parallel(); }
-INetwork *make_LSTM() { return new NPLSTM(); }
-INetwork *make_NPLSTM() { return new NPLSTM(); }
 
 void save_net(const string &file, Network net) {
   save_as_proto(file, net.get());
