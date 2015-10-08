@@ -1,5 +1,7 @@
 #!/usr/bin/python
+from numpy import *
 from pylab import *
+from numpy.random import rand
 import clstm
 net = clstm.make_net_init("lstm1", "ninput=1:nhidden=4:noutput=2")
 net.setLearningRate(1e-4, 0.9)
