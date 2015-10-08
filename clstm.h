@@ -17,6 +17,7 @@
 #include <random>
 #include "clstm_compute.h"
 #include <initializer_list>
+#include "enroll.h"
 
 namespace ocropus {
 using std::string;
@@ -74,18 +75,22 @@ struct ITrainable {
   string name = "";
   virtual const char *kind() = 0;
 
-  vector<Sequence*> states;
-  vector<Params*> params;
-  void record(Sequence &s) { states.push_back(&s); }
-  void record(Params &p) { params.push_back(&p); }
+  vector<pair<Sequence*,string>> states;
+  vector<pair<Params*,string>> parameters;
+  void enroll(Sequence &s, const char *name) {
+    states.push_back(make_pair(&s,name));
+  }
+  void enroll(Params &p, const char *name) {
+    parameters.push_back(make_pair(&p, name));
+  }
   template <class T, typename... Args>
-  inline void record(T arg, Args... args) {
-    record(arg);
-    record(args...);
+  inline void enroll(T arg, Args... args) {
+    enroll(arg);
+    enroll(args...);
   }
   virtual void update() {
-    for(auto it : params)
-      it->update(effective_lr(), momentum);
+    for(auto it : parameters)
+      it.first->update(effective_lr(), momentum);
   }
 
 

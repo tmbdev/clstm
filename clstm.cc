@@ -250,7 +250,7 @@ struct Full : NetworkBase {
   string mykind = string("Full_") + NONLIN::kind;
   Full() {
     name = string("full_") + NONLIN::name;
-    record(W1);
+    ENROLL(W1);
   }
   const char *kind() { return mykind.c_str(); }
   int noutput() { return ROWS(W1); }
