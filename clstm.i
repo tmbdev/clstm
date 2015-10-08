@@ -154,12 +154,7 @@ struct ITrainable {
     virtual void forward() = 0;
     virtual void backward() = 0;
     virtual void update() = 0;
-    virtual int idepth();
-    virtual int odepth();
     virtual void initialize();
-    virtual void init(int no, int ni);
-    virtual void init(int no, int nh, int ni);
-    virtual void init(int no, int nh2, int nh, int ni);
 };
 
 struct INetwork;

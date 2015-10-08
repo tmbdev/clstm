@@ -137,32 +137,9 @@ struct ITrainable {
   virtual void forward() = 0;
   virtual void backward() = 0;
 
-  virtual int idepth() { return -9999; }
-  virtual int odepth() { return -9999; }
-
   virtual void initialize() {
     // this gets initialization parameters
     // out of the attributes array
-  }
-
-  // These are convenience functions for initialization
-  virtual void init(int no, int ni) final {
-    attr.set("ninput", ni);
-    attr.set("noutput", no);
-    initialize();
-  }
-  virtual void init(int no, int nh, int ni) final {
-    attr.set("ninput", ni);
-    attr.set("nhidden", nh);
-    attr.set("noutput", no);
-    initialize();
-  }
-  virtual void init(int no, int nh2, int nh, int ni) final {
-    attr.set("ninput", ni);
-    attr.set("nhidden", nh);
-    attr.set("nhidden2", nh2);
-    attr.set("noutput", no);
-    initialize();
   }
 };
 
