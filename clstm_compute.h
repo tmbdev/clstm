@@ -225,14 +225,6 @@ void resize(Sequence &seq, int nsteps, int dims, int bs);
 int size(Sequence &seq, int dim);
 Vec timeslice(const Sequence &s, int i, int b = 0);
 
-struct VecMat {
-  Vec *vec = 0;
-  Mat *mat = 0;
-  VecMat() {}
-  VecMat(Vec *vec) { this->vec = vec; }
-  VecMat(Mat *mat) { this->mat = mat; }
-};
-
 bool anynan(Batch &a);
 bool anynan(Sequence &a);
 }
