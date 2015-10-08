@@ -336,19 +336,7 @@ struct SoftmaxLayer : NetworkBase {
     nseq += 1;
   }
   void update() {
-    float lr = learning_rate;
-    if (normalization == NORM_BATCH)
-      lr /= nseq;
-    else if (normalization == NORM_LEN)
-      lr /= nsteps;
-    else if (normalization == NORM_NONE) /* do nothing */
-      ;
-    else
-      THROW("unknown normalization");
-    W1 += lr * W1.d;
-    W1.d *= momentum;
-    nsteps = 0;
-    nseq = 0;
+    W1.update(effective_lr(), momentum);
   }
   void myweights(const string &prefix, WeightFun f) {
     f(prefix + ".W1", &W1, &W1.d);
