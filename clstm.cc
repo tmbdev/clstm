@@ -183,14 +183,6 @@ void INetwork::info(string prefix) {
   for (auto s : sub) s->info(nprefix);
 }
 
-void INetwork::weights(const string &prefix, WeightFun f) {
-  string nprefix = prefix + "." + kind;
-  myweights(nprefix, f);
-  for (int i = 0; i < sub.size(); i++) {
-    sub[i]->weights(nprefix + "." + to_string(i), f);
-  }
-}
-
 void INetwork::params(const string &prefix, ParamsFun f) {
   string nprefix = prefix + "." + kind;
   myparams(nprefix, f);
@@ -274,9 +266,6 @@ struct Full : NetworkBase {
   void update() {
     W1.update(effective_lr(), momentum);
   }
-  void myweights(const string &prefix, WeightFun f) {
-    f(prefix + ".W1", &W1, (Mat *)0);
-  }
   void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
 
@@ -324,9 +313,6 @@ struct SoftmaxLayer : NetworkBase {
   }
   void update() {
     W1.update(effective_lr(), momentum);
-  }
-  void myweights(const string &prefix, WeightFun f) {
-    f(prefix + ".W1", &W1, &W1.d);
   }
   void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
@@ -520,12 +506,6 @@ struct GenericNPLSTM : NetworkBase {
       W += lr * W.d;
       W.d *= momentum;
     }, WGI, WGF, WGO, WCI);
-  }
-  void myweights(const string &prefix, WeightFun f) {
-    f(prefix + ".WGI", &WGI, &WGI.d);
-    f(prefix + ".WGF", &WGF, &WGF.d);
-    f(prefix + ".WGO", &WGO, &WGO.d);
-    f(prefix + ".WCI", &WCI, &WCI.d);
   }
   void myparams(const string &prefix, ParamsFun f) {
     f(prefix + ".WGI", &WGI);

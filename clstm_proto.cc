@@ -121,16 +121,11 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
     kvp->set_key(kv.first);
     kvp->set_value(kv.second);
   }
-  net->myweights("",
-                 [proto, weights](const string &prefix, VecMat a, VecMat da) {
+  net->myparams("",
+                 [proto, weights](const string &prefix, Params *a) {
                    clstm::Array *array = proto->add_weights();
                    array->set_name(prefix);
-                   if (a.mat)
-                     proto_of_Mat(array, *a.mat, weights);
-                   else if (a.vec)
-                     proto_of_Vec(array, *a.vec, weights);
-                   else
-                     THROW("oops (save type)");
+                   proto_of_Mat(array, *a, weights);
                  });
   for (int i = 0; i < net->sub.size(); i++) {
     clstm::NetworkProto *subproto = proto->add_sub();
@@ -156,17 +151,14 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
     net->icodec.push_back(proto->icodec(i));
   for (int i = 0; i < proto->codec_size(); i++)
     net->codec.push_back(proto->codec(i));
-  map<string, VecMat> weights;
-  net->myweights("", [&weights](const string &prefix, VecMat a, VecMat da) {
+  map<string, Params*> weights;
+  net->myparams("", [&weights](const string &prefix, Params *a) {
     weights[prefix] = a;
   });
   for (int i = 0; i < proto->weights_size(); i++) {
     string key = proto->weights(i).name();
-    VecMat a = weights[key];
-    if (a.mat)
-      Mat_of_proto(*a.mat, &proto->weights(i));
-    else if (a.vec)
-      Vec_of_proto(*a.vec, &proto->weights(i));
+    Params *a = weights[key];
+    Mat_of_proto(*a, &proto->weights(i));
   }
   for (int i = 0; i < proto->sub_size(); i++) {
     net->add(net_of_proto(&proto->sub(i)));

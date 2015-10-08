@@ -184,10 +184,8 @@ struct INetwork : virtual ITrainable {
   virtual void add(Network net) { sub.push_back(net); }
 
   // Hooks to iterate over the weights and states of this network.
-  typedef function<void(const string &, VecMat, VecMat)> WeightFun;
   typedef function<void(const string &, Params *)> ParamsFun;
   typedef function<void(const string &, Sequence *)> StateFun;
-  virtual void myweights(const string &prefix, WeightFun f) {}
   virtual void myparams(const string &prefix, ParamsFun f) {}
   virtual void mystates(const string &prefix, StateFun f) {}
 
@@ -207,7 +205,6 @@ struct INetwork : virtual ITrainable {
   }
 
   void info(string prefix);
-  void weights(const string &prefix, WeightFun f);
   void params(const string &prefix, ParamsFun f);
   void states(const string &prefix, StateFun f);
   void networks(const string &prefix, function<void(string, INetwork *)>);
