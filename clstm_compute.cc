@@ -3,6 +3,13 @@
 #define A array()
 
 namespace ocropus{
+
+
+inline void ADDCOLS(Mat &m, Vec &v) {
+  for (int i = 0; i < COLS(m); i++)
+    for (int j = 0; j < ROWS(m); j++) m(j, i) += v(j);
+}
+
 void gradient_clip(Sequence &s, Float m) {
   if (m < 0) return;
   for (int t = 0; t < s.size(); t++) {
@@ -62,6 +69,50 @@ template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x, Float gc);
 template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x, Float gc);
+
+
+void forward_softmax(Sequence &outputs, Params &W1, Sequence &inputs) {
+  int nsteps = inputs.size();
+  int no = ROWS(W1), bs = COLS(inputs[0]);
+  outputs.resize(nsteps, no, bs);
+  for (int t = 0; t < nsteps; t++) {
+    outputs[t] = MAPFUN(HOMDOT(W1, inputs[t]), limexp);
+    for (int b = 0; b < COLS(outputs[t]); b++) {
+      Float total = fmax(SUMREDUCE(COL(outputs[t], b)), 1e-9);
+      COL(outputs[t], b) /= total;
+    }
+  }
+}
+
+void backward_softmax(Sequence &outputs, Params &W1, Sequence &inputs) {
+  for (int t = outputs.size() - 1; t >= 0; t--) {
+    inputs[t].d = MATMUL_TR(CBUTFIRST(W1), outputs[t].d);
+  }
+  int bs = COLS(inputs[0]);
+  for (int t = 0; t < outputs.size(); t++) {
+    auto d_W = CBUTFIRST(W1.d);
+    d_W += MATMUL_RT(outputs[t].d, inputs[t]);
+    auto d_w = CFIRST(W1.d);
+    for (int b = 0; b < bs; b++) d_w += COL(outputs[t].d, b);
+  }
+}
+
+void forward_softmax(Batch &z, Params &W1, Batch &x) {
+  z = MAPFUN(HOMDOT(W1, x), limexp);
+  for (int b = 0; b < COLS(z); b++) {
+    Float total = fmax(SUMREDUCE(COL(z, b)), 1e-9);
+    COL(z, b) /= total;
+  }
+}
+
+void backward_softmax(Batch &z, Params &W1, Batch &x) {
+  x.d = MATMUL_TR(CBUTFIRST(W1), z.d);
+  auto d_W = CBUTFIRST(W1.d);
+  d_W += MATMUL_RT(z.d, x);
+  auto d_w = CFIRST(W1.d);
+  int bs = COLS(z);
+  for (int b = 0; b < bs; b++) d_w += COL(z.d, b);
+}
 
 void forward_stack(Batch &z, Batch &x, Batch &y) {
   assert(x.cols()==y.cols());
@@ -224,6 +275,20 @@ Vec timeslice(const Sequence &s, int i, int b) {
   Vec result(s.size());
   for (int t = 0; t < s.size(); t++) result[t] = s[t](i, b);
   return result;
+}
+
+bool anynan(Batch &a) {
+  for (int j = 0; j < ROWS(a); j++) {
+    for (int k = 0; k < COLS(a); k++) {
+      float x = a(j, k);
+      if (isnan(x)) return true;
+    }
+  }
+}
+bool anynan(Sequence &a) {
+  for (int i = 0; i < a.size(); i++)
+    if(anynan(a[i])) return true;
+  return false;
 }
 
 }

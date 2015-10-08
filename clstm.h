@@ -89,6 +89,22 @@ struct ITrainable {
     NORM_BATCH,
     NORM_DFLT = NORM_NONE,
   } normalization = NORM_DFLT;
+  int nseq = 0;
+  int nsteps = 0;
+  Float effective_lr() {
+    Float lr = learning_rate;
+    if (normalization == NORM_BATCH)
+      lr /= fmax(1.0,nseq);
+    else if (normalization == NORM_LEN)
+      lr /= fmax(1.0,nsteps);
+    else if (normalization == NORM_NONE) /* do nothing */
+      ;
+    else
+      THROW("unknown normalization");
+    nseq = 0;
+    nsteps = 0;
+    return lr;
+  }
 
   // The attributes array contains parameters for constructing the
   // network, as well as information necessary for loading and saving
@@ -301,16 +317,6 @@ void load_attributes(map<string, string> &attrs, const string &file);
 }
 
 namespace {
-inline bool anynan(ocropus::Sequence &a) {
-  for (int i = 0; i < a.size(); i++) {
-    for (int j = 0; j < ROWS(a[i]); j++) {
-      for (int k = 0; k < COLS(a[i]); k++) {
-        if (isnan(a[i](j, k))) return true;
-      }
-    }
-  }
-  return false;
-}
 
 template <class A, class B>
 double levenshtein(A &a, B &b) {

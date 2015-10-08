@@ -7,6 +7,10 @@
 namespace ocropus {
 using namespace std;
 
+#define ROWS(A) (A).rows()
+#define COLS(A) (A).cols()
+#define MAPFUN(M, F) ((M).unaryExpr(ptr_fun(F)))
+
 #ifdef LSTM_DOUBLE
 typedef double Float;
 typedef Eigen::VectorXi iVec;
@@ -62,39 +66,6 @@ inline Float log_add(Float x, Float y) {
 
 inline Float log_mul(Float x, Float y) { return x + y; }
 
-// These macros define the major matrix operations used
-// in CLSTM. They are here for eventually converting the
-// inner loops of CLSTM from Eigen::Matrix to Eigen::Tensor
-// (which uses different and incompatible notation)
-//
-// NB: In C++ 14, we can write Eigen functions more easily like this:
-// auto HOMDOT(Mat &A1, Mat &B) {return (DOT(CBUTFIRST(A1), B).colwise() +
-// CFIRST(A1));}
-//
-// All of this will be cleaned up when we're switching to Eigen::Tensor
-
-#define DOT(M, V) ((M) * (V))
-#define MATMUL(A, B) ((A) * (B))
-#define MATMUL_TR(A, B) ((A).transpose() * (B))
-#define MATMUL_RT(A, B) ((A) * (B).transpose())
-#define EMUL(U, V) ((U).array() * (V).array()).matrix()
-#define EMULV(U, V) ((U).array() * (V).array()).matrix()
-#define TRANPOSE(U) ((U).transpose())
-#define ROWS(A) (A).rows()
-#define COLS(A) (A).cols()
-#define COL(A, b) (A).col(b)
-#define MAPFUN(M, F) ((M).unaryExpr(ptr_fun(F)))
-#define MAPFUNC(M, F) ((M).unaryExpr(F))
-#define SUMREDUCE(M) float(M.sum())
-#define BLOCK(A, i, j, n, m) (A).block(i, j, n, m)
-#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols() - 1)
-#define CFIRST(M) COL(M, 0)
-#define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
-inline void ADDCOLS(Mat &m, Vec &v) {
-  for (int i = 0; i < COLS(m); i++)
-    for (int j = 0; j < ROWS(m); j++) m(j, i) += v(j);
-}
-
 template <class NONLIN, class T>
 inline Mat nonlin(T &a) {
   Mat result = a;
@@ -119,13 +90,19 @@ inline Mat xprime(T &a) {
 struct Batch : Mat {
   Mat d;
   template <class T>
-  void operator=(T other) {
-    (Mat &)*this = other;
-    // d.setZero(2,3);  // invalidate it
-  }
+  void operator=(T other) { (Mat &)*this = other; }
   void zeroGrad() { d.setZero(rows(), cols()); }
 };
-typedef Batch Params;
+struct Params : Mat {
+  Mat d;
+  template <class T>
+  void operator=(T other) { (Mat &)*this = other; }
+  void zeroGrad() { d.setZero(rows(), cols()); }
+  void update(Float lr, Float mom=0.0) {
+    *this += d;
+    d *= mom;
+  }
+};
 
 // typedef vector<Mat> Sequence;
 struct Sequence {
@@ -221,6 +198,11 @@ void forward_full1(Batch &y, Params &W, Batch &x);
 template <class F>
 void backward_full1(Batch &y, Params &W, Batch &x, Float gc);
 
+void forward_softmax(Batch &z, Params &W1, Batch &x);
+void backward_softmax(Batch &z, Params &W1, Batch &x);
+void forward_softmax(Sequence &outputs, Params &W1, Sequence &inputs);
+void backward_softmax(Sequence &outputs, Params &W1, Sequence &inputs);
+
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x);
 template <class F>
@@ -255,6 +237,23 @@ struct VecMat {
   VecMat(Mat *mat) { this->mat = mat; }
 };
 
+bool anynan(Batch &a);
+bool anynan(Sequence &a);
+
+#define DOT(M, V) ((M) * (V))
+#define MATMUL(A, B) ((A) * (B))
+#define MATMUL_TR(A, B) ((A).transpose() * (B))
+#define MATMUL_RT(A, B) ((A) * (B).transpose())
+#define EMUL(U, V) ((U).array() * (V).array()).matrix()
+#define EMULV(U, V) ((U).array() * (V).array()).matrix()
+#define TRANPOSE(U) ((U).transpose())
+#define COL(A, b) (A).col(b)
+#define MAPFUNC(M, F) ((M).unaryExpr(F))
+#define SUMREDUCE(M) float(M.sum())
+#define BLOCK(A, i, j, n, m) (A).block(i, j, n, m)
+#define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols() - 1)
+#define CFIRST(M) COL(M, 0)
+#define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
 }
 
 #endif
