@@ -16,6 +16,7 @@
 #include <Eigen/Dense>
 #include <random>
 #include "clstm_compute.h"
+#include <initializer_list>
 
 namespace ocropus {
 using std::string;
@@ -49,13 +50,6 @@ struct Assoc : std::map<std::string, String> {
   using std::map<std::string, String>::map;
   Assoc() {}
   Assoc(const string &s);
-#if 0
-  String at(const std::string &key) const {
-    auto it = this->find(key);
-    if (it == this->end()) throwf("%s: key not found", key.c_str());
-    return it->second;
-  }
-#endif
   String get(string key) const {
     auto it = this->find(key);
     if (it == this->end()) {
@@ -79,6 +73,21 @@ struct ITrainable {
   virtual ~ITrainable() {}
   string name = "";
   virtual const char *kind() = 0;
+
+  vector<Sequence*> states;
+  vector<Params*> params;
+  void record(Sequence &s) { states.push_back(&s); }
+  void record(Params &p) { params.push_back(&p); }
+  template <class T, typename... Args>
+  inline void record(T arg, Args... args) {
+    record(arg);
+    record(args...);
+  }
+  virtual void update() {
+    for(auto it : params)
+      it->update(effective_lr(), momentum);
+  }
+
 
   // Learning rate and momentum used for training.
   Float learning_rate = 1e-4;
@@ -105,7 +114,6 @@ struct ITrainable {
     nsteps = 0;
     return lr;
   }
-
   // The attributes array contains parameters for constructing the
   // network, as well as information necessary for loading and saving
   // networks.
@@ -118,7 +126,6 @@ struct ITrainable {
   // of activations.
   virtual void forward() = 0;
   virtual void backward() = 0;
-  virtual void update() = 0;
 
   virtual int idepth() { return -9999; }
   virtual int odepth() { return -9999; }

@@ -248,7 +248,10 @@ struct Full : NetworkBase {
   int nseq = 0;
   int nsteps = 0;
   string mykind = string("Full_") + NONLIN::kind;
-  Full() { name = string("full_") + NONLIN::name; }
+  Full() {
+    name = string("full_") + NONLIN::name;
+    record(W1);
+  }
   const char *kind() { return mykind.c_str(); }
   int noutput() { return ROWS(W1); }
   int ninput() { return COLS(W1) - 1; }
