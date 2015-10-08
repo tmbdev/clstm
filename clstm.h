@@ -93,11 +93,16 @@ struct ITrainable {
     enroll(arg);
     enroll(args...);
   }
-  virtual void update() {
-    Float lr = effective_lr();
-    for(auto it : parameters)
-      it.first->update(lr, momentum);
+  virtual void update() = 0;
+  typedef function<void(const string &, Params *)> ParamsFun;
+  typedef function<void(const string &, Sequence *)> StateFun;
+  virtual void myparams(const string &prefix, ParamsFun f) {
+    for(auto it : parameters) f(prefix + it.second, it.first);
   }
+  virtual void mystates(const string &prefix, StateFun f) {
+    for(auto it : states) f(prefix + it.second, it.first);
+  }
+
 
   // Learning rate and momentum used for training.
   Float learning_rate = 1e-4;
@@ -170,6 +175,14 @@ struct INetwork : virtual ITrainable {
   void encode(Classes &cs, const std::wstring &s);
   void iencode(Classes &cs, const std::wstring &s);
 
+  void update() {
+    Float lr = effective_lr();
+    for(auto it : parameters)
+      it.first->update(lr, momentum);
+    for (int i = 0; i < sub.size(); i++)
+      sub[i]->update();
+  }
+
   // Parameters specific to softmax.
   Float softmax_floor = 1e-5;
   bool softmax_accel = false;
@@ -182,12 +195,6 @@ struct INetwork : virtual ITrainable {
 
   // Add a network as a subnetwork.
   virtual void add(Network net) { sub.push_back(net); }
-
-  // Hooks to iterate over the weights and states of this network.
-  typedef function<void(const string &, Params *)> ParamsFun;
-  typedef function<void(const string &, Sequence *)> StateFun;
-  virtual void myparams(const string &prefix, ParamsFun f) {}
-  virtual void mystates(const string &prefix, StateFun f) {}
 
   // Hooks executed prior to saving and after loading.
   // Loading iterates over the weights with the `weights`

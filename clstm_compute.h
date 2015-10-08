@@ -98,8 +98,8 @@ struct Params : Mat {
   template <class T>
   void operator=(T other) { (Mat &)*this = other; }
   void zeroGrad() { d.setZero(rows(), cols()); }
-  void update(Float lr, Float mom=0.0) {
-    *this += d;
+  void update(Float lr, Float mom) {
+    *this += lr*d;
     d *= mom;
   }
 };

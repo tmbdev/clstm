@@ -263,9 +263,6 @@ struct Full : NetworkBase {
     nsteps += outputs.size();
     nseq += 1;
   }
-  void update() {
-    W1.update(effective_lr(), momentum);
-  }
   void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
 
@@ -311,9 +308,6 @@ struct SoftmaxLayer : NetworkBase {
     nsteps += outputs.size();
     nseq += 1;
   }
-  void update() {
-    W1.update(effective_lr(), momentum);
-  }
   void myparams(const string &prefix, ParamsFun f) { f(prefix + ".W1", &W1); }
 };
 REGISTER(SoftmaxLayer);
@@ -349,9 +343,6 @@ struct Stacked : NetworkBase {
     for (int t = 0; t < sub[0]->inputs.size(); t++)
       inputs[t].d = sub[0]->inputs[t].d;
   }
-  void update() {
-    for (int i = 0; i < sub.size(); i++) sub[i]->update();
-  }
 };
 REGISTER(Stacked);
 
@@ -373,7 +364,6 @@ struct Reversed : NetworkBase {
     outputs.zeroGrad();
     backward_reverse(net->inputs, inputs);
   }
-  void update() { sub[0]->update(); }
 };
 REGISTER(Reversed);
 
@@ -406,9 +396,6 @@ struct Parallel : NetworkBase {
       inputs[t].d += sub[1]->inputs[t].d;
     }
   }
-  void update() {
-    for (int i = 0; i < sub.size(); i++) sub[i]->update();
-  }
 };
 REGISTER(Parallel);
 
@@ -437,6 +424,7 @@ struct GenericNPLSTM : NetworkBase {
       randinit(w, no, nf, weight_dev, mode);
     }, WEIGHTS);
     each([this,no,nf](Params &w) { w.d = Mat::Zero(no, nf); }, WEIGHTS);
+    ENROLL(WGI, WGF, WGO, WCI);
   }
   void postLoad() {
     no = ROWS(WGI);
@@ -491,21 +479,6 @@ struct GenericNPLSTM : NetworkBase {
     }
     nsteps += N;
     nseq += 1;
-  }
-  void update() {
-    float lr = learning_rate;
-    if (normalization == NORM_BATCH)
-      lr /= nseq;
-    else if (normalization == NORM_LEN)
-      lr /= nsteps;
-    else if (normalization == NORM_NONE) /* do nothing */
-      ;
-    else
-      THROW("unknown normalization");
-    each([this, lr](Params &W) {
-      W += lr * W.d;
-      W.d *= momentum;
-    }, WGI, WGF, WGO, WCI);
   }
   void myparams(const string &prefix, ParamsFun f) {
     f(prefix + ".WGI", &WGI);
