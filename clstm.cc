@@ -514,11 +514,3 @@ void save_net(const string &file, Network net) {
 Network load_net(const string &file) { return load_as_proto(file); }
 
 }  // namespace ocropus
-
-#ifdef CLSTM_EXTRAS
-// Extra layers; this uses internal function and class definitions from this
-// file, so it's included rather than linked. It's mostly a way of slowly
-// deprecating
-// old layers.
-#include "clstm_extras.i"
-#endif
