@@ -159,19 +159,15 @@ void INetwork::update() {
     sub[i]->update();
 }
 
-void INetwork::makeEncoders() {
+void Codec::set(const vector<int> &a) {
+  codec = a;
   encoder.reset(new map<int, int>());
   for (int i = 0; i < codec.size(); i++) {
     encoder->insert(make_pair(codec[i], i));
   }
-  iencoder.reset(new map<int, int>());
-  for (int i = 0; i < icodec.size(); i++) {
-    iencoder->insert(make_pair(icodec[i], i));
-  }
 }
 
-void INetwork::encode(Classes &classes, const std::wstring &s) {
-  if (!encoder) makeEncoders();
+void Codec::encode(Classes &classes, const std::wstring &s) {
   classes.clear();
   for (int pos = 0; pos < s.size(); pos++) {
     unsigned c = s[pos];
@@ -181,26 +177,13 @@ void INetwork::encode(Classes &classes, const std::wstring &s) {
     classes.push_back(c);
   }
 }
-void INetwork::iencode(Classes &classes, const std::wstring &s) {
-  if (!iencoder) makeEncoders();
-  classes.clear();
-  for (int pos = 0; pos < s.size(); pos++) {
-    int c = (*iencoder)[int(s[pos])];
-    classes.push_back(c);
-  }
+wchar_t Codec::decode(int cls) { 
+  return wchar_t(codec[cls]); 
 }
-wchar_t INetwork::decode(int cls) { return wchar_t(codec[cls]); }
-wchar_t INetwork::idecode(int cls) { return wchar_t(icodec[cls]); }
-std::wstring INetwork::decode(Classes &classes) {
+std::wstring Codec::decode(Classes &classes) {
   std::wstring s;
   for (int i = 0; i < classes.size(); i++)
     s.push_back(wchar_t(codec[classes[i]]));
-  return s;
-}
-std::wstring INetwork::idecode(Classes &classes) {
-  std::wstring s;
-  for (int i = 0; i < classes.size(); i++)
-    s.push_back(wchar_t(icodec[classes[i]]));
   return s;
 }
 
@@ -305,7 +288,6 @@ struct SoftmaxLayer : INetwork {
   int ninput() { return COLS(W1) - 1; }
   void postLoad() {
     W1.zeroGrad();
-    makeEncoders();
   }
   void forward() {
     outputs.resize(inputs.size(), W1.rows(), inputs.cols());

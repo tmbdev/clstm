@@ -71,6 +71,18 @@ struct Assoc : std::map<std::string, String> {
   }
 };
 
+// A small class for encoding/decoding strings.
+struct Codec {
+  vector<int> codec;
+  unique_ptr<map<int, int> > encoder;
+  int size() { return codec.size(); }
+  void set(const vector<int> &data);
+  wchar_t decode(int cls);
+  std::wstring decode(Classes &cs);
+  void encode(Classes &cs, const std::wstring &s);
+};
+
+// The main network interface and a shared_ptr version of it.
 struct INetwork;
 typedef shared_ptr<INetwork> Network;
 
@@ -80,12 +92,14 @@ struct INetwork {
   // String that can be used for constructing these objects in `layer`;
   // set when allocated via the registry.
   string kind = "";
+  // string name = "";
 
   // Networks may have subnetworks, internal states, and parameters.
   vector<Network> sub;
   vector<pair<Sequence*,string>> statevec;
   vector<pair<Params*,string>> parameters;
 
+  virtual void add(Network net) { sub.push_back(net); }
   void enroll(Sequence &s, const char *name) {
     statevec.push_back(make_pair(&s,name));
   }
@@ -115,6 +129,14 @@ struct INetwork {
   void params(const string &prefix, ParamsFun f);
   void states(const string &prefix, StateFun f);
   void networks(const string &prefix, function<void(string, INetwork *)>);
+
+  // FIXME:
+  // zeroGrads for states and params
+  // update methods (AdaGrad, momentum, etc.)
+  // encapsulate updates
+  // make learning rate and momentum attributes and inheritable
+  // sub_lr = attr.get("lr", lr)
+  // inheritable params
 
   // Learning rate and momentum used for training.
   Float learning_rate = 1e-4;
@@ -155,17 +177,7 @@ struct INetwork {
 
   // Data for encoding/decoding input/output strings.
   // FIXME: factor this out
-  vector<int> codec;
-  vector<int> icodec;
-  unique_ptr<map<int, int> > encoder;   // cached
-  unique_ptr<map<int, int> > iencoder;  // cached
-  void makeEncoders();
-  wchar_t decode(int cls);
-  wchar_t idecode(int cls);
-  std::wstring decode(Classes &cs);
-  std::wstring idecode(Classes &cs);
-  void encode(Classes &cs, const std::wstring &s);
-  void iencode(Classes &cs, const std::wstring &s);
+  Codec codec, icodec;
 
   // Parameters specific to softmax.
   // FIXME: put these into attr
@@ -175,9 +187,6 @@ struct INetwork {
   // Expected number of input/output features.
   virtual int ninput() { return -999999; }
   virtual int noutput() { return -999999; }
-
-  // Add a network as a subnetwork.
-  virtual void add(Network net) { sub.push_back(net); }
 
   // Hooks executed prior to saving and after loading.
   // Loading iterates over the weights with the `weights`

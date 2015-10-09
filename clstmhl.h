@@ -32,7 +32,6 @@ struct CLSTMText {
     nclasses = net->codec.size();
     iclasses = net->icodec.size();
     neps = net->attr.get("neps");
-    net->makeEncoders();
   }
   void save(const std::string &fname) { save_net(fname, net); }
   void createBidi(const std::vector<int> &icodec, const std::vector<int> codec,
@@ -45,13 +44,12 @@ struct CLSTMText {
                             {"noutput", (int)codec.size()},
                             {"nhidden", nhidden}});
     net->attr.set("neps", neps);
-    net->icodec = icodec;
-    net->codec = codec;
-    net->makeEncoders();
+    net->icodec.set(icodec);
+    net->codec.set(codec);
   }
   void setInputs(const std::wstring &s) {
     Classes cs;
-    net->iencode(cs, s);
+    net->icodec.encode(cs, s);
     Sequence &seq = net->inputs;
     int d = net->ninput();
     seq.clear();
@@ -67,7 +65,7 @@ struct CLSTMText {
     setInputs(in);
     net->forward();
     Classes transcript;
-    net->encode(transcript, target);
+    net->codec.encode(transcript, target);
     mktargets(targets, transcript, nclasses);
     ctc_align_targets(aligned, net->outputs, targets);
     for (int t = 0; t < aligned.size(); t++)
@@ -76,14 +74,14 @@ struct CLSTMText {
     net->update();
     Classes output_classes;
     trivial_decode(output_classes, net->outputs);
-    return net->decode(output_classes);
+    return net->codec.decode(output_classes);
   }
   std::wstring predict(const std::wstring &in) {
     setInputs(in);
     net->forward();
     Classes output_classes;
     trivial_decode(output_classes, net->outputs);
-    return net->decode(output_classes);
+    return net->codec.decode(output_classes);
   }
   void train_utf8(const std::string &in, const std::string &target) {
     train(utf8_to_utf32(in), utf8_to_utf32(target));
@@ -91,7 +89,7 @@ struct CLSTMText {
   std::string aligned_utf8() {
     Classes outputs;
     trivial_decode(outputs, aligned);
-    std::wstring temp = net->decode(outputs);
+    std::wstring temp = net->codec.decode(outputs);
     return utf32_to_utf8(temp);
   }
   std::string predict_utf8(const std::string &in) {
@@ -127,8 +125,7 @@ struct CLSTMOCR {
                             {"noutput", nclasses},
                             {"nhidden", nhidden}});
     net->initialize();
-    net->codec = codec;
-    net->makeEncoders();
+    net->codec.set(codec);
     normalizer.reset(make_CenterNormalizer());
     normalizer->target_height = target_height;
   }
@@ -138,7 +135,7 @@ struct CLSTMOCR {
     assign(net->inputs, image);
     net->forward();
     Classes transcript;
-    net->encode(transcript, target);
+    net->codec.encode(transcript, target);
     mktargets(targets, transcript, nclasses);
     ctc_align_targets(aligned, net->outputs, targets);
     for (int t = 0; t < aligned.size(); t++)
@@ -147,12 +144,12 @@ struct CLSTMOCR {
     net->update();
     Classes outputs;
     trivial_decode(outputs, net->outputs);
-    return net->decode(outputs);
+    return net->codec.decode(outputs);
   }
   std::string aligned_utf8() {
     Classes outputs;
     trivial_decode(outputs, aligned);
-    std::wstring temp = net->decode(outputs);
+    std::wstring temp = net->codec.decode(outputs);
     return utf32_to_utf8(temp);
   }
   std::string train_utf8(mdarray<float> &raw, const std::string &target) {
@@ -165,7 +162,7 @@ struct CLSTMOCR {
     net->forward();
     Classes outputs;
     trivial_decode(outputs, net->outputs, 0, where);
-    return net->decode(outputs);
+    return net->codec.decode(outputs);
   }
   void predict(vector<CharPrediction> &preds, mdarray<float> &raw) {
     normalizer->measure(raw);
@@ -179,7 +176,7 @@ struct CLSTMOCR {
     for (int i = 0; i < outputs.size(); i++) {
       int t = where[i];
       int cls = outputs[i];
-      wchar_t c = net->decode(outputs[i]);
+      wchar_t c = net->codec.decode(outputs[i]);
       float p = net->outputs[t](cls, 0);
       CharPrediction pred{i, t, c, p};
       preds.push_back(pred);

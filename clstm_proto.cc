@@ -111,8 +111,9 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
   assert(proto->noutput() >= 0);
   assert(proto->noutput() < 1000000);
   for (int i = 0; i < net->icodec.size(); i++)
-    proto->add_icodec(net->icodec[i]);
-  for (int i = 0; i < net->codec.size(); i++) proto->add_codec(net->codec[i]);
+    proto->add_icodec(net->icodec.codec[i]);
+  for (int i = 0; i < net->codec.size(); i++) 
+    proto->add_codec(net->codec.codec[i]);
   for (auto kv : net->attr) {
     if (kv.first == "name") continue;
     if (kv.first == "ninput") continue;
@@ -147,10 +148,14 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
     const clstm::KeyValue *attr = &proto->attribute(i);
     net->attr.set(attr->key(), attr->value());
   }
+  vector<int> icodec;
   for (int i = 0; i < proto->icodec_size(); i++)
-    net->icodec.push_back(proto->icodec(i));
+    icodec.push_back(proto->icodec(i));
+  net->icodec.set(icodec);
+  vector<int> codec;
   for (int i = 0; i < proto->codec_size(); i++)
-    net->codec.push_back(proto->codec(i));
+    codec.push_back(proto->codec(i));
+  net->codec.set(codec);
   map<string, Params*> weights;
   net->myparams("", [&weights](const string &prefix, Params *a) {
     weights[prefix] = a;

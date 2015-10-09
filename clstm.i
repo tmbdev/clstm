@@ -141,6 +141,16 @@ struct Assoc {
   void set(string key, string dflt);
 };
 
+struct Codec {
+  std::vector<int> codec;
+  int size() { return codec.size(); }
+  void set(const vector<int> &data);
+  wchar_t decode(int cls);
+  std::wstring decode(Classes &cs);
+  void encode(Classes &cs, const std::wstring &s);
+  void operator=(const Codec &) = delete;
+};
+
 struct INetwork;
 typedef std::shared_ptr<INetwork> Network;
 %template(vectornet) std::vector<std::shared_ptr<INetwork> >;
@@ -162,15 +172,8 @@ struct INetwork {
     Sequence inputs;
     Sequence outputs;
     std::vector<std::shared_ptr<INetwork> > sub;
-    std::vector<int> codec;
-    std::vector<int> icodec;
-    //unique_ptr<map<int, int> > encoder;  // cached
-    //unique_ptr<map<int, int> > iencoder;  // cached
-    //void makeEncoders();
-    std::wstring decode(Classes &cs);
-    std::wstring idecode(Classes &cs);
-    void encode(Classes &cs, std::wstring &s);
-    void iencode(Classes &cs, std::wstring &s);
+    Codec codec;
+    Codec icodec;
     Float softmax_floor = 1e-5;
     bool softmax_accel = false;
     virtual int ninput();
