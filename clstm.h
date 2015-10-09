@@ -30,6 +30,8 @@ using std::function;
 void throwf(const char *format, ...);
 extern char exception_message[256];
 
+// A string that automatically converts to numbers when needed;
+// used for holding parameter values.
 struct String : public std::string {
   String() {}
   String(const char *s) : std::string(s) {}
@@ -47,6 +49,7 @@ struct String : public std::string {
   void operator=(double value) { *this = std::to_string(value); }
 };
 
+// A key-value store with defaults.
 struct Assoc : std::map<std::string, String> {
   using std::map<std::string, String>::map;
   Assoc() {}
@@ -68,22 +71,23 @@ struct Assoc : std::map<std::string, String> {
   }
 };
 
-typedef Assoc Attributes;
+struct INetwork;
+typedef shared_ptr<INetwork> Network;
 
-struct ITrainable {
-  virtual ~ITrainable() {}
+struct INetwork {
+  virtual ~INetwork() {}
 
-  // This string is used to identify the type for
-  // saving/loading. It is set from the registry
-  // when the object is allocated through the registry
-  // (that assures that the string reflects the name
-  // of the type in the registry).
+  // String that can be used for constructing these objects in `layer`;
+  // set when allocated via the registry.
   string kind = "";
 
-  vector<pair<Sequence*,string>> states;
+  // Networks may have subnetworks, internal states, and parameters.
+  vector<Network> sub;
+  vector<pair<Sequence*,string>> statevec;
   vector<pair<Params*,string>> parameters;
+
   void enroll(Sequence &s, const char *name) {
-    states.push_back(make_pair(&s,name));
+    statevec.push_back(make_pair(&s,name));
   }
   void enroll(Params &p, const char *name) {
     parameters.push_back(make_pair(&p, name));
@@ -93,7 +97,6 @@ struct ITrainable {
     enroll(arg);
     enroll(args...);
   }
-  virtual void update() = 0;
   typedef function<void(const string &, Params *)> ParamsFun;
   typedef function<void(const string &, Sequence *)> StateFun;
   virtual void myparams(const string &prefix, ParamsFun f) {
@@ -104,70 +107,54 @@ struct ITrainable {
   virtual void mystates(const string &prefix, StateFun f) {
     //f(prefix + ".inputs", &inputs);
     //f(prefix + ".outputs", &outputs);
-    for(auto it : states) {
+    for(auto it : statevec) {
       f(prefix + "." + it.second, it.first);
     }
   }
+  void info(string prefix);
+  void params(const string &prefix, ParamsFun f);
+  void states(const string &prefix, StateFun f);
+  void networks(const string &prefix, function<void(string, INetwork *)>);
 
   // Learning rate and momentum used for training.
   Float learning_rate = 1e-4;
   Float momentum = 0.9;
+  int nseq = 0;
+  int nsteps = 0;
   enum Normalization : int {
     NORM_NONE,
     NORM_LEN,
     NORM_BATCH,
     NORM_DFLT = NORM_NONE,
   } normalization = NORM_DFLT;
-  int nseq = 0;
-  int nsteps = 0;
-  Float effective_lr() {
-    Float lr = learning_rate;
-    if (normalization == NORM_BATCH)
-      lr /= fmax(1.0,nseq);
-    else if (normalization == NORM_LEN)
-      lr /= fmax(1.0,nsteps);
-    else if (normalization == NORM_NONE) /* do nothing */
-      ;
-    else
-      THROW("unknown normalization");
-    nseq = 0;
-    nsteps = 0;
-    return lr;
-  }
-  // The attributes array contains parameters for constructing the
-  // network, as well as information necessary for loading and saving
-  // networks.
-  Attributes attr;
+
+  // Compute an effective learning rate for the given batch size.
+  Float effective_lr();
 
   // Learning rates
-  virtual void setLearningRate(Float lr, Float momentum) = 0;
+  virtual void setLearningRate(Float lr, Float momentum);
+
+  // Update all enrolled parameters and subnetworks.
+  virtual void update();
+
+  // Misc parameters for construction, saving.
+  Assoc attr;
 
   // Main methods for forward and backward propagation
   // of activations.
   virtual void forward() = 0;
   virtual void backward() = 0;
-
   virtual void initialize() { }
-};
 
-struct INetwork;
-typedef shared_ptr<INetwork> Network;
-
-struct INetwork : virtual ITrainable {
   // Networks have input and output "ports" for sequences
   // and derivatives. These are propagated in forward()
   // and backward() methods.
   Sequence inputs;
   Sequence outputs;
 
-  // Some networks have subnetworks. They should be
-  // stored in the `sub` vector. That way, functions
-  // like `save` can automatically traverse the tree
-  // of networks. Together with the `name` field,
-  // this forms a hierarchical namespace of networks.
-  vector<Network> sub;
 
   // Data for encoding/decoding input/output strings.
+  // FIXME: factor this out
   vector<int> codec;
   vector<int> icodec;
   unique_ptr<map<int, int> > encoder;   // cached
@@ -180,19 +167,10 @@ struct INetwork : virtual ITrainable {
   void encode(Classes &cs, const std::wstring &s);
   void iencode(Classes &cs, const std::wstring &s);
 
-  void update() {
-    Float lr = effective_lr();
-    for(auto it : parameters)
-      it.first->update(lr, momentum);
-    for (int i = 0; i < sub.size(); i++)
-      sub[i]->update();
-  }
-
   // Parameters specific to softmax.
+  // FIXME: put these into attr
   Float softmax_floor = 1e-5;
   bool softmax_accel = false;
-
-  virtual ~INetwork() {}
 
   // Expected number of input/output features.
   virtual int ninput() { return -999999; }
@@ -206,20 +184,10 @@ struct INetwork : virtual ITrainable {
   // methods and restores only the weights. `postLoad`
   // allows classes to update other internal state that
   // depends on matrix size.
-  virtual void preSave() {}
-  virtual void postLoad() {}
+  virtual void preSave() {} // FIXME: delete
+  virtual void postLoad() {} // FIXME: use correctly
 
-  // Set the learning rate for this network and all subnetworks.
-  virtual void setLearningRate(Float lr, Float momentum) {
-    this->learning_rate = lr;
-    this->momentum = momentum;
-    for (int i = 0; i < sub.size(); i++) sub[i]->setLearningRate(lr, momentum);
-  }
-
-  void info(string prefix);
-  void params(const string &prefix, ParamsFun f);
-  void states(const string &prefix, StateFun f);
-  void networks(const string &prefix, function<void(string, INetwork *)>);
+  // FIXME: get rid of these
   Sequence *getState(string name);
   // special method for LSTM and similar networks, returning the
   // primary internal state sequence
@@ -231,38 +199,13 @@ struct INetwork : virtual ITrainable {
   void load(const char *fname);
 };
 
-// standard layer types
-INetwork *make_SigmoidLayer();
-INetwork *make_SoftmaxLayer();
-INetwork *make_ReluLayer();
-INetwork *make_Stacked();
-INetwork *make_Reversed();
-INetwork *make_Parallel();
-INetwork *make_LSTM();
-INetwork *make_NPLSTM();
-INetwork *make_BidiLayer();
-
 // setting inputs and outputs
 void set_inputs(INetwork *net, Sequence &inputs);
 void set_targets(INetwork *net, Sequence &targets);
 void set_targets_accelerated(INetwork *net, Sequence &targets);
 void set_classes(INetwork *net, Classes &classes);
 void set_classes(INetwork *net, BatchClasses &classes);
-
-// single sequence training functions
-void train(INetwork *net, Sequence &xs, Sequence &targets);
-void ctrain(INetwork *net, Sequence &xs, Classes &cs);
-void ctrain_accelerated(INetwork *net, Sequence &xs, Classes &cs,
-                        Float lo = 1e-5);
-void cpred(INetwork *net, Classes &preds, Sequence &xs);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
-
-// batch training functions
-void ctrain(INetwork *net, Sequence &xs, BatchClasses &cs);
-void ctrain_accelerated(INetwork *net, Sequence &xs, BatchClasses &cs,
-                        Float lo = 1e-5);
-void cpred(INetwork *net, BatchClasses &preds, Sequence &xs);
-void mktargets(Sequence &seq, BatchClasses &targets, int ndim);
 
 // instantiating layers and networks
 
@@ -300,13 +243,6 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
 void trivial_decode(Classes &cs, Sequence &outputs, int batch = 0);
 void trivial_decode(Classes &cs, Sequence &outputs, int batch,
                     vector<int> *locs);
-
-// DEPRECATED
-
-extern Mat debugmat;
-
-// loading and saving networks (using HDF5)
-void load_attributes(map<string, string> &attrs, const string &file);
 }
 
 namespace {

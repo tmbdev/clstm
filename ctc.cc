@@ -74,7 +74,6 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
     double l = epath.col(j).sum();
     epath.col(j) /= l == 0 ? 1e-9 : l;
   }
-  debugmat = epath;
 
   // compute posterior probabilities for each class and normalize
   Mat aligned;

@@ -135,33 +135,29 @@ struct Sequence {
     }
 }
 
-struct Attributes {
+struct Assoc {
   string get(string key);
   string get(string key, string dflt);
   void set(string key, string dflt);
-};
-
-struct ITrainable {
-    virtual ~ITrainable();
-    string kind;
-    Float learning_rate = 1e-4;
-    Float momentum = 0.9;
-    enum Normalization {
-        NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
-    } normalization = NORM_DFLT;
-    Attributes attr;
-    virtual void setLearningRate(Float lr, Float momentum) = 0;
-    virtual void forward() = 0;
-    virtual void backward() = 0;
-    virtual void update() = 0;
-    virtual void initialize();
 };
 
 struct INetwork;
 typedef std::shared_ptr<INetwork> Network;
 %template(vectornet) std::vector<std::shared_ptr<INetwork> >;
 
-struct INetwork : virtual ITrainable {
+struct INetwork {
+    string kind;
+    Float learning_rate = 1e-4;
+    Float momentum = 0.9;
+    enum Normalization {
+        NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
+    } normalization = NORM_DFLT;
+    Assoc attr;
+    virtual void setLearningRate(Float lr, Float momentum) = 0;
+    virtual void forward() = 0;
+    virtual void backward() = 0;
+    virtual void update() = 0;
+    virtual void initialize();
     virtual ~INetwork();
     Sequence inputs;
     Sequence outputs;
@@ -180,7 +176,6 @@ struct INetwork : virtual ITrainable {
     virtual int ninput();
     virtual int noutput();
     virtual void add(std::shared_ptr<INetwork> net);
-    virtual void setLearningRate(Float lr, Float momentum);
     void info(string prefix);
     Sequence *getState(string name);
 };
@@ -205,10 +200,6 @@ void save_net(const string &file, Network net);
 Network load_net(const string &file);
 
 %inline %{
-Mat &getdebugmat() {
-    return debugmat;
-}
-
 int string_edit_distance(string a, string b) {
     return levenshtein(a, b);
 }

@@ -130,6 +130,35 @@ void set_classes(INetwork *net, Classes &classes) {
   }
 }
 
+void INetwork::setLearningRate(Float lr, Float momentum) {
+  this->learning_rate = lr;
+  this->momentum = momentum;
+  for (int i = 0; i < sub.size(); i++) sub[i]->setLearningRate(lr, momentum);
+}
+
+Float INetwork::effective_lr() {
+  Float lr = learning_rate;
+  if (normalization == NORM_BATCH)
+    lr /= fmax(1.0,nseq);
+  else if (normalization == NORM_LEN)
+    lr /= fmax(1.0,nsteps);
+  else if (normalization == NORM_NONE) /* do nothing */
+    ;
+  else
+    THROW("unknown normalization");
+  nseq = 0;
+  nsteps = 0;
+  return lr;
+}
+
+void INetwork::update() {
+  Float lr = effective_lr();
+  for(auto it : parameters)
+    it.first->update(lr, momentum);
+  for (int i = 0; i < sub.size(); i++)
+    sub[i]->update();
+}
+
 void INetwork::makeEncoders() {
   encoder.reset(new map<int, int>());
   for (int i = 0; i < codec.size(); i++) {
@@ -218,24 +247,8 @@ Sequence *INetwork::getState(string name) {
   return result;
 }
 
-struct NetworkBase : INetwork {
-  Float error2(Sequence &xs, Sequence &targets) {
-    inputs = xs;
-    forward();
-    Float total = 0.0;
-    for (int t = 0; t < outputs.size(); t++) {
-      Vec delta = targets[t] - outputs[t];
-      total += delta.array().square().sum();
-      outputs[t].d = delta;
-    }
-    backward();
-    update();
-    return total;
-  }
-};
-
 template <class NONLIN>
-struct Full : NetworkBase {
+struct Full : INetwork {
   Params W1;
   int nseq = 0;
   int nsteps = 0;
@@ -274,7 +287,7 @@ REGISTER(TanhLayer);
 typedef Full<ReluNonlin> ReluLayer;
 REGISTER(ReluLayer);
 
-struct SoftmaxLayer : NetworkBase {
+struct SoftmaxLayer : INetwork {
   Params W1;
   int nsteps = 0;
   int nseq = 0;
@@ -310,7 +323,7 @@ struct SoftmaxLayer : NetworkBase {
 };
 REGISTER(SoftmaxLayer);
 
-struct Stacked : NetworkBase {
+struct Stacked : INetwork {
   int noutput() { return sub[sub.size() - 1]->noutput(); }
   int ninput() { return sub[0]->ninput(); }
   void forward() {
@@ -344,7 +357,7 @@ struct Stacked : NetworkBase {
 };
 REGISTER(Stacked);
 
-struct Reversed : NetworkBase {
+struct Reversed : INetwork {
   int noutput() { return sub[0]->noutput(); }
   int ninput() { return sub[0]->ninput(); }
   void forward() {
@@ -365,7 +378,7 @@ struct Reversed : NetworkBase {
 };
 REGISTER(Reversed);
 
-struct Parallel : NetworkBase {
+struct Parallel : INetwork {
   int noutput() { return sub[0]->noutput() + sub[1]->noutput(); }
   int ninput() { return sub[0]->ninput(); }
   void forward() {
@@ -398,7 +411,7 @@ struct Parallel : NetworkBase {
 REGISTER(Parallel);
 
 template <class F = SigmoidNonlin, class G = TanhNonlin, class H = TanhNonlin>
-struct GenericNPLSTM : NetworkBase {
+struct GenericNPLSTM : INetwork {
 #define WEIGHTS WGI, WGF, WGO, WCI
 #define SEQUENCES gi, gf, go, ci, state
   Sequence source, SEQUENCES;
