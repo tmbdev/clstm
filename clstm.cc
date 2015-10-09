@@ -7,6 +7,9 @@
 #include <math.h>
 #include <Eigen/Dense>
 #include <stdarg.h>
+#include <set>
+#include <fstream>
+#include "pstring.h"
 
 #ifndef MAXEXP
 #define MAXEXP 30
@@ -131,19 +134,19 @@ void set_classes(INetwork *net, Classes &classes) {
 }
 
 void INetwork::setLearningRate(Float lr, Float momentum) {
-  this->learning_rate = lr;
-  this->momentum = momentum;
-  for (int i = 0; i < sub.size(); i++) sub[i]->setLearningRate(lr, momentum);
+  attr.set("learning_rate", lr);
+  attr.set("momentum", momentum);
 }
 
 Float INetwork::effective_lr() {
   // FIXME: get learning_rate from attributes
-  Float lr = learning_rate;
-  if (normalization == NORM_BATCH)
+  Float lr = attr.get("learning_rate");
+  string normalization = attr.get("normalization", "batch");
+  if (normalization == "batch")
     lr /= fmax(1.0,nseq);
-  else if (normalization == NORM_LEN)
+  else if (normalization == "len")
     lr /= fmax(1.0,nsteps);
-  else if (normalization == NORM_NONE) /* do nothing */
+  else if (normalization == "none") /* do nothing */
     ;
   else
     THROW("unknown normalization");
@@ -153,9 +156,9 @@ Float INetwork::effective_lr() {
 }
 
 void INetwork::update() {
-  // FIXME: refactor to allow different methods
-  // FIXME: implement gradient clipping
   Float lr = effective_lr();
+  Float momentum = attr.get("momentum", 0.9);
+  Float clip_at = attr.get("gradient_clip", 10.0);
   for(auto it : parameters)
     it.first->update(lr, momentum);
   for (int i = 0; i < sub.size(); i++)
@@ -180,9 +183,11 @@ void Codec::encode(Classes &classes, const std::wstring &s) {
     classes.push_back(c);
   }
 }
+
 wchar_t Codec::decode(int cls) { 
   return wchar_t(codec[cls]); 
 }
+
 std::wstring Codec::decode(Classes &classes) {
   std::wstring s;
   for (int i = 0; i < classes.size(); i++)
@@ -190,8 +195,31 @@ std::wstring Codec::decode(Classes &classes) {
   return s;
 }
 
+void Codec::build(const vector<string> &fnames, const wstring &extra) {
+  std::set<int> codes;
+  for (auto c : extra) codes.insert(int(c));
+  for (auto fname : fnames) {
+    std::ifstream stream(fname);
+    string line;
+    wstring in, out;
+    while (getline(stream, line)) {
+      // skip blank lines and lines starting with a comment
+      if (line.substr(0, 1) == "#") continue;
+      if (line.size() == 0) continue;
+      wstring s = utf8_to_utf32(line);
+      for (auto c : s) codes.insert(int(c));
+    }
+  }
+  vector<int> codec;
+  for (auto c : codes) codec.push_back(c);
+  for (int i = 1; i < codec.size(); i++) assert(codec[i] > codec[i - 1]);
+  this->set(codec);
+}
+
 void INetwork::info(string prefix) {
   string nprefix = prefix + "." + kind;
+  Float learning_rate = attr.get("learning_rate");
+  Float momentum = attr.get("momentum");
   cout << nprefix << ": " << learning_rate << " " << momentum << " ";
   cout << "in " << inputs.size() << " " << ninput() << " ";
   cout << "out " << outputs.size() << " " << noutput() << endl;

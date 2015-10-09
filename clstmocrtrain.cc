@@ -70,22 +70,6 @@ wstring read_text32(string fname, int maxsize = 65536) {
   return utf8_to_utf32(string(buf, n));
 }
 
-void get_codec(vector<int> &codec, const vector<string> &fnames,
-               const wstring extra = L"") {
-  set<int> codes;
-  codes.insert(0);
-  for (auto c : extra) codes.insert(int(c));
-  for (int i = 0; i < fnames.size(); i++) {
-    string fname = fnames[i];
-    string base = basename(fname);
-    wstring text32 = read_text32(base + ".gt.txt");
-    for (auto c : text32) codes.insert(int(c));
-  }
-  codec.clear();
-  for (auto c : codes) codec.push_back(c);
-  for (int i = 1; i < codec.size(); i++) assert(codec[i] > codec[i - 1]);
-}
-
 void show(PyServer &py, Sequence &s, int subplot = 0) {
   mdarray<float> temp;
   assign(temp, s);

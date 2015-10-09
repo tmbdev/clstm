@@ -56,20 +56,27 @@ public:
   using std::map<std::string, String>::map;
   Assoc() {}
   Assoc(const string &s);
-  bool contains(const string &key) const {
+  Assoc *super = nullptr;
+  bool contains(const string &key, bool parent=true) const {
     auto it = this->find(key);
-    return (it != this->end());
+    if (it != this->end()) return true;
+    if (parent) return super->contains(key, parent);
+    return false;
   }
   String get(const string &key) const {
     auto it = this->find(key);
     if (it == this->end()) {
+      if (super) return super->get(key);
       throwf("missing parameter: %s", key.c_str());
     }
     return it->second;
   }
   String get(const string &key, String dflt) const {
     auto it = this->find(key);
-    if (it == this->end()) return dflt;
+    if (it == this->end()) {
+      if (super) return super->get(key, dflt);
+      return dflt;
+    }
     return it->second;
   }
   void set(const string &key, String value) {
@@ -87,7 +94,7 @@ public:
   wchar_t decode(int cls);
   std::wstring decode(Classes &cs);
   void encode(Classes &cs, const std::wstring &s);
-  // FIXME: build(file), build(stream), build(iterator)
+  void build(const vector<string> &fname, const wstring &extra = L"");
 };
 
 // The main network interface and a shared_ptr version of it.
@@ -103,8 +110,6 @@ public:
   string kind = "";
   // FIXME:
   // string name = "";
-  // weak_ptr<INetwork> parent;
-  // getInheritedAttr(name, default)
 
   // Networks may have subnetworks, internal states, and parameters.
   // FIXME: refactor or use RTTI
@@ -139,33 +144,15 @@ public:
   void states(const string &prefix, StateFun f);
   void networks(const string &prefix, function<void(string, INetwork *)>);
 
-  // FIXME:
-  // zeroGrads for states and params
-  // update methods (AdaGrad, momentum, etc.)
-  // encapsulate updates
-  // make learning rate and momentum attributes and inheritable
-  // sub_lr = attr.get("lr", lr)
-  // inheritable params
+  void gradientClip(Float value) {} // FIXME
+  void zeroStateGrads() {} // FIXME
+  void zeroParamGrads() {} // FIXME
 
   // Learning rate and momentum used for training.
-  Float learning_rate = 1e-4;
-  Float momentum = 0.9;
   int nseq = 0;
   int nsteps = 0;
-  enum Normalization : int {
-    NORM_NONE,
-    NORM_LEN,
-    NORM_BATCH,
-    NORM_DFLT = NORM_NONE,
-  } normalization = NORM_DFLT;
-
-  // Compute an effective learning rate for the given batch size.
   Float effective_lr();
-
-  // Learning rates
   virtual void setLearningRate(Float lr, Float momentum);
-
-  // Update all enrolled parameters and subnetworks.
   virtual void update();
 
   // Misc parameters for construction, saving.
