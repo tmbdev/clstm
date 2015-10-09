@@ -142,7 +142,6 @@ void INetwork::setLearningRate(Float lr, Float momentum) {
 }
 
 Float INetwork::effective_lr() {
-  // FIXME: get learning_rate from attributes
   Float lr = attr.get("learning_rate");
   string normalization = attr.get("normalization", "batch");
   if (normalization == "batch")
@@ -153,8 +152,6 @@ Float INetwork::effective_lr() {
     ;
   else
     THROW("unknown normalization");
-  nseq = 0;
-  nsteps = 0;
   return lr;
 }
 
@@ -166,6 +163,8 @@ void INetwork::update() {
     it.first->update(lr, momentum);
   for (int i = 0; i < sub.size(); i++)
     sub[i]->update();
+  nseq = 0;
+  nsteps = 0;
 }
 
 void Codec::set(const vector<int> &a) {
@@ -326,6 +325,8 @@ struct Stacked : INetwork {
   int ninput() { return sub[0]->ninput(); }
   void forward() {
     assert(inputs.size() > 0);
+    assert(inputs.rows() > 0);
+    assert(inputs.cols() > 0);
     assert(sub.size() > 0);
     for (int n = 0; n < sub.size(); n++) {
       if (n == 0)
@@ -336,6 +337,7 @@ struct Stacked : INetwork {
     }
     outputs = sub[sub.size() - 1]->outputs;
     assert(outputs.size() == inputs.size());
+    assert(outputs.cols() == inputs.cols());
   }
   void backward() {
     assert(outputs.size() > 0);
@@ -377,16 +379,24 @@ struct Reversed : INetwork {
 REGISTER(Reversed);
 
 struct Parallel : INetwork {
-  int noutput() { return sub[0]->noutput() + sub[1]->noutput(); }
+  int noutput() { 
+    assert(sub[0]->noutput() > 0);
+    assert(sub[1]->noutput() > 0);
+    return sub[0]->noutput() + sub[1]->noutput(); 
+  }
   int ninput() { return sub[0]->ninput(); }
   void forward() {
     assert(sub.size() == 2);
     int N = inputs.size();
-    outputs.resize(N, noutput(), inputs.cols());
     sub[0]->inputs = inputs;
-    sub[1]->inputs = inputs;
     sub[0]->forward();
+    assert(sub[0]->outputs.size() == N);
+    assert(sub[0]->outputs.cols() == inputs.cols());
+    sub[1]->inputs = inputs;
     sub[1]->forward();
+    assert(sub[1]->outputs.size() == N);
+    assert(sub[1]->outputs.cols() == inputs.cols());
+    outputs.resize(N, noutput(), inputs.cols());
     for (int t = 0; t < N; t++) {
       forward_stack(outputs[t], sub[0]->outputs[t], sub[1]->outputs[t]);
     }

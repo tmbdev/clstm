@@ -110,10 +110,22 @@ struct Sequence {
   Sequence() {}
   Sequence(int n) : steps(n) {}
   void clear() { steps.clear(); }
-  int size() const { return steps.size(); }
+  int rows() const { return steps[0].rows(); }
+  int cols() const { return steps[0].cols(); }
+  void check() const {
+    int N = steps.size();
+    if (N == 0) return;
+    assert(steps[0].rows() > 0);
+    assert(steps[0].cols() > 0);
+    for (int t = 0; t < N; t++) {
+      assert(steps[t].rows() == steps[0].rows());
+      assert(steps[t].cols() == steps[0].cols());
+    }
+  }
+  int size() const { 
+    return steps.size(); 
+  }
   void resize(int n) { steps.resize(n); }
-  int rows() { return steps[0].rows(); }
-  int cols() { return steps[0].cols(); }
   void resize(int n, int rows, int cols) {
     steps.resize(n);
     for (int t = 0; t < n; t++) steps[t].resize(rows, cols);

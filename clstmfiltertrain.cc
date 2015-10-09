@@ -41,7 +41,6 @@ void read_samples(vector<Sample> &samples, const string &fname) {
   ifstream stream(fname);
   string line;
   wstring in, out;
-  ;
   samples.clear();
   while (getline(stream, line)) {
     // skip blank lines and lines starting with a comment
@@ -81,7 +80,7 @@ int main1(int argc, char **argv) {
 
   CLSTMText clstm;
   clstm.createBidi(icodec, codec, getienv("nhidden", 100));
-  clstm.setLearningRate(getdenv("rate", 1e-4), getdenv("momentum", 0.9));
+  clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
   clstm.net->info("");
 
   int ntrain = getienv("ntrain", 10000000);
