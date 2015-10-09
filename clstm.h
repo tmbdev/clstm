@@ -32,7 +32,8 @@ extern char exception_message[256];
 
 // A string that automatically converts to numbers when needed;
 // used for holding parameter values.
-struct String : public std::string {
+class String : public std::string {
+public:
   String() {}
   String(const char *s) : std::string(s) {}
   String(const std::string &s) : std::string(s) {}
@@ -50,29 +51,35 @@ struct String : public std::string {
 };
 
 // A key-value store with defaults.
-struct Assoc : std::map<std::string, String> {
+class Assoc : public std::map<std::string, String> {
+public:
   using std::map<std::string, String>::map;
   Assoc() {}
   Assoc(const string &s);
-  String get(string key) const {
+  bool contains(const string &key) const {
+    auto it = this->find(key);
+    return (it != this->end());
+  }
+  String get(const string &key) const {
     auto it = this->find(key);
     if (it == this->end()) {
       throwf("missing parameter: %s", key.c_str());
     }
     return it->second;
   }
-  String get(string key, String dflt) const {
+  String get(const string &key, String dflt) const {
     auto it = this->find(key);
     if (it == this->end()) return dflt;
     return it->second;
   }
-  void set(string key, String value) {
+  void set(const string &key, String value) {
     this->operator[](key) = value;
   }
 };
 
 // A small class for encoding/decoding strings.
-struct Codec {
+class Codec {
+public:
   vector<int> codec;
   unique_ptr<map<int, int> > encoder;
   int size() { return codec.size(); }
@@ -80,21 +87,27 @@ struct Codec {
   wchar_t decode(int cls);
   std::wstring decode(Classes &cs);
   void encode(Classes &cs, const std::wstring &s);
+  // FIXME: build(file), build(stream), build(iterator)
 };
 
 // The main network interface and a shared_ptr version of it.
-struct INetwork;
+class INetwork;
 typedef shared_ptr<INetwork> Network;
 
-struct INetwork {
+class INetwork {
+public:
   virtual ~INetwork() {}
 
   // String that can be used for constructing these objects in `layer`;
   // set when allocated via the registry.
   string kind = "";
+  // FIXME:
   // string name = "";
+  // weak_ptr<INetwork> parent;
+  // getInheritedAttr(name, default)
 
   // Networks may have subnetworks, internal states, and parameters.
+  // FIXME: refactor or use RTTI
   vector<Network> sub;
   vector<pair<Sequence*,string>> statevec;
   vector<pair<Params*,string>> parameters;
@@ -106,13 +119,9 @@ struct INetwork {
   void enroll(Params &p, const char *name) {
     parameters.push_back(make_pair(&p, name));
   }
-  template <class T, typename... Args>
-  inline void enroll(T arg, Args... args) {
-    enroll(arg);
-    enroll(args...);
-  }
   typedef function<void(const string &, Params *)> ParamsFun;
   typedef function<void(const string &, Sequence *)> StateFun;
+  // FIXME: reverse args, make name optional
   virtual void myparams(const string &prefix, ParamsFun f) {
     for(auto it : parameters) {
       f(prefix + "." + it.second, it.first);
@@ -179,31 +188,13 @@ struct INetwork {
   // FIXME: factor this out
   Codec codec, icodec;
 
-  // Parameters specific to softmax.
-  // FIXME: put these into attr
-  Float softmax_floor = 1e-5;
-  bool softmax_accel = false;
-
   // Expected number of input/output features.
   virtual int ninput() { return -999999; }
   virtual int noutput() { return -999999; }
 
-  // Hooks executed prior to saving and after loading.
-  // Loading iterates over the weights with the `weights`
-  // methods and restores only the weights. `postLoad`
-  // allows classes to update other internal state that
-  // depends on matrix size.
-  virtual void preSave() {} // FIXME: delete
-  virtual void postLoad() {} // FIXME: use correctly
+  // Hook executed after loading.
+  virtual void postLoad() {}
 
-  // FIXME: get rid of these
-  Sequence *getState(string name);
-  // special method for LSTM and similar networks, returning the
-  // primary internal state sequence
-  Sequence *getState() {
-    throwf("unimplemented");
-    return 0;
-  };
   void save(const char *fname);
   void load(const char *fname);
 };

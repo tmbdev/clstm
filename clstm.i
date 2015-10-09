@@ -174,13 +174,10 @@ struct INetwork {
     std::vector<std::shared_ptr<INetwork> > sub;
     Codec codec;
     Codec icodec;
-    Float softmax_floor = 1e-5;
-    bool softmax_accel = false;
     virtual int ninput();
     virtual int noutput();
     virtual void add(std::shared_ptr<INetwork> net);
     void info(string prefix);
-    Sequence *getState(string name);
 };
 
 void set_inputs(INetwork *net, Sequence &inputs);

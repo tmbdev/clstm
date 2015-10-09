@@ -97,7 +97,6 @@ void Vec_of_proto(Vec &a, const clstm::Array *array) {
 
 void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
                   bool weights = true) {
-  net->preSave();
   if (net->kind=="") {
     cerr << typeid(*net).name() << endl;
     assert(net->kind != "");

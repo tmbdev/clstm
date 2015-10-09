@@ -137,6 +137,7 @@ void INetwork::setLearningRate(Float lr, Float momentum) {
 }
 
 Float INetwork::effective_lr() {
+  // FIXME: get learning_rate from attributes
   Float lr = learning_rate;
   if (normalization == NORM_BATCH)
     lr /= fmax(1.0,nseq);
@@ -152,6 +153,8 @@ Float INetwork::effective_lr() {
 }
 
 void INetwork::update() {
+  // FIXME: refactor to allow different methods
+  // FIXME: implement gradient clipping
   Float lr = effective_lr();
   for(auto it : parameters)
     it.first->update(lr, momentum);
@@ -222,9 +225,9 @@ void INetwork::networks(const string &prefix,
   }
 }
 
-Sequence *INetwork::getState(string name) {
+Sequence *get_state_by_name(Network net,string name) {
   Sequence *result = nullptr;
-  states("", [&result, &name](const string &prefix, Sequence *s) {
+  net->states("", [&result, &name](const string &prefix, Sequence *s) {
     if (prefix == name) result = s;
   });
   return result;
