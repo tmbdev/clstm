@@ -157,11 +157,6 @@ typedef std::shared_ptr<INetwork> Network;
 
 struct INetwork {
     string kind;
-    Float learning_rate = 1e-4;
-    Float momentum = 0.9;
-    enum Normalization {
-        NORM_NONE, NORM_LEN, NORM_BATCH, NORM_DFLT = NORM_NONE,
-    } normalization = NORM_DFLT;
     Assoc attr;
     virtual void setLearningRate(Float lr, Float momentum) = 0;
     virtual void forward() = 0;
@@ -207,8 +202,10 @@ int string_edit_distance(string a, string b) {
 string network_info(Network net) {
     string result = "";
     net->networks("", [&result] (string s, INetwork *net) {
-        result += s + ": " + to_string(net->learning_rate);
-        result += string(" ") + to_string(net->momentum);
+        double lr = net->attr.get("learning_rate","-1");
+        double momentum = net->attr.get("momentum","-1");
+        result += s + ": " + to_string(lr);
+        result += string(" ") + to_string(momentum);
         result += string(" ") + to_string(net->ninput());
         result += string(" ") + to_string(net->noutput());
         result += "\n";

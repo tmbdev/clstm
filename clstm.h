@@ -108,8 +108,7 @@ public:
   // String that can be used for constructing these objects in `layer`;
   // set when allocated via the registry.
   string kind = "";
-  // FIXME:
-  // string name = "";
+  // string name = ""; // FIXME
 
   // Networks may have subnetworks, internal states, and parameters.
   // FIXME: refactor or use RTTI
@@ -126,22 +125,19 @@ public:
   }
   typedef function<void(const string &, Params *)> ParamsFun;
   typedef function<void(const string &, Sequence *)> StateFun;
-  // FIXME: reverse args, make name optional
-  virtual void myparams(const string &prefix, ParamsFun f) {
-    for(auto it : parameters) {
-      f(prefix + "." + it.second, it.first);
-    }
-  }
-  virtual void mystates(const string &prefix, StateFun f) {
-    //f(prefix + ".inputs", &inputs);
-    //f(prefix + ".outputs", &outputs);
-    for(auto it : statevec) {
-      f(prefix + "." + it.second, it.first);
-    }
-  }
   void info(string prefix);
-  void params(const string &prefix, ParamsFun f);
-  void states(const string &prefix, StateFun f);
+  void params(ParamsFun f, const string &prefix = "") {
+    for(auto it : parameters)
+      f(prefix + "." + it.second, it.first);
+    for(auto s : sub)
+      s->params(f, prefix + "." + kind);
+  }
+  void states(StateFun f, const string &prefix = "") {
+    for(auto it : statevec)
+      f(prefix + "." + it.second, it.first);
+    for(auto s : sub)
+      s->states(f, prefix + "." + kind);
+  }
   void networks(const string &prefix, function<void(string, INetwork *)>);
 
   void gradientClip(Float value) {} // FIXME

@@ -115,15 +115,15 @@ int main1(int argc, char **argv) {
   if (argc > 2) read_lines(test_fnames, argv[2]);
   print("got", fnames.size(), "files,", test_fnames.size(), "tests");
 
-  vector<int> codec;
-  get_codec(codec, fnames, charsep);
-  print("got", codec.size(), "classes");
-
   CLSTMOCR clstm;
   clstm.target_height = int(getrenv("target_height", 48));
-  clstm.createBidi(codec, getienv("nhidden", 100));
+  Codec codec;
+  codec.build(fnames, charsep);
+  print("got", codec.size(), "classes");
+  clstm.createBidi(codec.codec, getienv("nhidden", 100));
   clstm.setLearningRate(getdenv("rate", 1e-4), getdenv("momentum", 0.9));
   clstm.net->info("");
+
 
   double test_error = 9999.0;
   double best_error = 1e38;

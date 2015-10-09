@@ -121,12 +121,13 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
     kvp->set_key(kv.first);
     kvp->set_value(kv.second);
   }
-  net->myparams("",
-                 [proto, weights](const string &prefix, Params *a) {
-                   clstm::Array *array = proto->add_weights();
-                   array->set_name(prefix);
-                   proto_of_Mat(array, *a, weights);
-                 });
+  for (auto it : net->parameters) {
+    Params *a = it.first;
+    string name = it.second;
+    clstm::Array *array = proto->add_weights();
+    array->set_name(name);
+    proto_of_Mat(array, *a, weights);
+  }
   for (int i = 0; i < net->sub.size(); i++) {
     clstm::NetworkProto *subproto = proto->add_sub();
     proto_of_net(subproto, net->sub[i].get(), weights);
@@ -156,9 +157,9 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
     codec.push_back(proto->codec(i));
   net->codec.set(codec);
   map<string, Params*> weights;
-  net->myparams("", [&weights](const string &prefix, Params *a) {
-    weights[prefix] = a;
-  });
+  for (auto it : net->parameters) {
+    weights[it.second] = it.first;
+  }
   for (int i = 0; i < proto->weights_size(); i++) {
     string key = proto->weights(i).name();
     Params *a = weights[key];

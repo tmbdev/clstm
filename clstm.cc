@@ -84,7 +84,10 @@ Network layer(const string &kind, int ninput, int noutput, const Assoc &args,
   }
   net->attr.set("ninput", ninput);
   net->attr.set("noutput", noutput);
-  for (int i = 0; i < subs.size(); i++) net->sub.push_back(subs[i]);
+  for (int i = 0; i < subs.size(); i++) {
+    net->sub.push_back(subs[i]);
+    subs[i]->attr.super = &net->attr;
+  }
   net->initialize();
   return net;
 }
@@ -226,24 +229,6 @@ void INetwork::info(string prefix) {
   for (auto s : sub) s->info(nprefix);
 }
 
-void INetwork::params(const string &prefix, ParamsFun f) {
-  string nprefix = prefix + "." + kind;
-  myparams(nprefix, f);
-  for (int i = 0; i < sub.size(); i++) {
-    sub[i]->params(nprefix + "." + to_string(i), f);
-  }
-}
-
-void INetwork::states(const string &prefix, StateFun f) {
-  string nprefix = prefix + "." + kind;
-  f(nprefix + ".inputs", &inputs);
-  f(nprefix + ".outputs", &outputs);
-  mystates(nprefix, f);
-  for (int i = 0; i < sub.size(); i++) {
-    sub[i]->states(nprefix + "." + to_string(i), f);
-  }
-}
-
 void INetwork::networks(const string &prefix,
                         function<void(string, INetwork *)> f) {
   string nprefix = prefix + "." + kind;
@@ -255,7 +240,7 @@ void INetwork::networks(const string &prefix,
 
 Sequence *get_state_by_name(Network net,string name) {
   Sequence *result = nullptr;
-  net->states("", [&result, &name](const string &prefix, Sequence *s) {
+  net->states([&result, &name](const string &prefix, Sequence *s) {
     if (prefix == name) result = s;
   });
   return result;
