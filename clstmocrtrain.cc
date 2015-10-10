@@ -114,15 +114,23 @@ int main1(int argc, char **argv) {
   if (argc > 2) read_lines(test_fnames, argv[2]);
   print("got", fnames.size(), "files,", test_fnames.size(), "tests");
 
+  string load_name = getsenv("load", "");
+
   CLSTMOCR clstm;
-  clstm.target_height = int(getrenv("target_height", 48));
-  Codec codec;
-  vector<string> gtnames;
-  for (auto s : fnames) gtnames.push_back(basename(s) + ".gt.txt");
-  codec.build(gtnames, charsep);
-  print("got", codec.size(), "classes");
-  clstm.createBidi(codec.codec, getienv("nhidden", 100));
-  clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
+
+  if (load_name != "") {
+    clstm.load(load_name);
+  } else {
+    Codec codec;
+    vector<string> gtnames;
+    for (auto s : fnames) gtnames.push_back(basename(s) + ".gt.txt");
+    codec.build(gtnames, charsep);
+    print("got", codec.size(), "classes");
+
+    clstm.target_height = int(getrenv("target_height", 48));
+    clstm.createBidi(codec.codec, getienv("nhidden", 100));
+    clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
+  }
   network_info(clstm.net);
 
   double test_error = 9999.0;
@@ -130,8 +138,10 @@ int main1(int argc, char **argv) {
 
   PyServer py;
   if (display_every > 0) py.open();
-  double start = now();
-  for (int trial = 0; trial < ntrain; trial++) {
+  double start_time = now();
+  int start = clstm.net->attr.get("trial", getienv("start", -1)) + 1;
+  if (start > 0) print("start", start);
+  for (int trial = start; trial < ntrain; trial++) {
     if (trial > 0 && test_fnames.size() > 0 && test_every > 0 &&
         trial % test_every == 0) {
       double errors = 0.0;
@@ -155,6 +165,7 @@ int main1(int argc, char **argv) {
       string fname = save_name + ".clstm";
       print("saving best performing network so far", fname, "error rate: ",
             best_error);
+      clstm.net->attr.set("trial", trial);
       clstm.save(fname);
     }
     bool do_save = (save_every > 0 && trial % save_every == 0);
@@ -162,6 +173,7 @@ int main1(int argc, char **argv) {
     do_save = (do_save && (save_name != ""));
     if (trial > 0 && do_save) {
       string fname = save_name + "-" + to_string(trial) + ".clstm";
+      clstm.net->attr.set("trial", trial);
       clstm.save(fname);
     }
     int sample = irandom() % fnames.size();
@@ -186,8 +198,8 @@ int main1(int argc, char **argv) {
       print("ALN", clstm.aligned_utf8());
       print("OUT", utf32_to_utf8(pred));
       if (trial > 0 && report_time)
-        print("steptime", (now() - start) / report_every);
-      start = now();
+        print("steptime", (now() - start_time) / report_every);
+      start_time = now();
     }
   }
 

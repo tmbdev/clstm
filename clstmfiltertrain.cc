@@ -74,13 +74,20 @@ int main1(int argc, char **argv) {
   if (argc > 2) read_samples(test_samples, argv[2]);
   print("got", samples.size(), "inputs,", test_samples.size(), "tests");
 
-  vector<int> icodec, codec;
-  get_codec(icodec, samples, &Sample::in);
-  get_codec(codec, samples, &Sample::out);
+  string load_name = getsenv("load", "");
 
   CLSTMText clstm;
-  clstm.createBidi(icodec, codec, getienv("nhidden", 100));
-  clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
+
+  if (load_name != "") {
+    clstm.load(load_name);
+  } else {
+    vector<int> icodec, codec;
+    get_codec(icodec, samples, &Sample::in);
+    get_codec(codec, samples, &Sample::out);
+
+    clstm.createBidi(icodec, codec, getienv("nhidden", 100));
+    clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
+  }
   network_info(clstm.net);
 
   int ntrain = getienv("ntrain", 10000000);
@@ -94,7 +101,9 @@ int main1(int argc, char **argv) {
 
   double best_error = 1e38;
   double test_error = 9999.0;
-  for (int trial = 0; trial < ntrain; trial++) {
+  int start = clstm.net->attr.get("trial", getienv("start", -1)) + 1;
+  if (start > 0) print("start", start);
+  for (int trial = start; trial < ntrain; trial++) {
     int sample = irandom() % samples.size();
     if (trial > 0 && test_samples.size() > 0 && test_every > 0 &&
         trial % test_every == 0) {
@@ -113,12 +122,14 @@ int main1(int argc, char **argv) {
         string fname = save_name + ".clstm";
         print("saving best performing network so far", fname, "error rate: ",
               best_error);
+        clstm.net->attr.set("trial", trial);
         clstm.save(fname);
       }
       if (after_test != "") system(after_test.c_str());
     }
     if (trial > 0 && save_every > 0 && trial % save_every == 0) {
       string fname = save_name + "-" + to_string(trial) + ".clstm";
+      clstm.net->attr.set("trial", trial);
       clstm.save(fname);
     }
     wstring pred = clstm.train(samples[sample].in, samples[sample].out);
