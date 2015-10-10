@@ -38,6 +38,10 @@ void gradient_clip(Mat &d, Float m) {
   d = MAPFUNC(d, [m](Float x) { return x > m ? m : x < -m ? -m : x; });
 }
 
+void gradient_clip(Batch &b, Float m) {
+  gradient_clip(b.d, m);
+}
+
 template <class F>
 void forward_full1(Batch &y, Params &W1, Batch &x) {
   y = HOMDOT(W1, x);

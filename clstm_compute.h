@@ -122,13 +122,18 @@ struct Sequence {
       assert(steps[t].cols() == steps[0].cols());
     }
   }
-  int size() const { 
-    return steps.size(); 
+  int size() const {
+    return steps.size();
   }
-  void resize(int n) { steps.resize(n); }
+  void resize(int n) {
+    resize(n, 1, 1);
+  }
   void resize(int n, int rows, int cols) {
     steps.resize(n);
-    for (int t = 0; t < n; t++) steps[t].resize(rows, cols);
+    for (int t = 0; t < n; t++) {
+      steps[t].setZero(rows, cols);
+      steps[t].d.setZero(rows, cols);
+    }
   }
   void copy(const Sequence &other) {
     resize(other.size());
@@ -147,8 +152,9 @@ struct Sequence {
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 
-void gradient_clip(Sequence &s, Float m = 1.0);
-void gradient_clip(Mat &d, Float m = 1.0);
+void gradient_clip(Sequence &s, Float m = 100.0);
+void gradient_clip(Batch &b, Float m = 100.0);
+void gradient_clip(Mat &d, Float m = 100.0);
 
 // FIXME: refactor into forward_/backward_
 struct NoNonlin {

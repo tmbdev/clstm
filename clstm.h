@@ -108,32 +108,23 @@ public:
   // String that can be used for constructing these objects in `layer`;
   // set when allocated via the registry.
   string kind = "";
-  // string name = ""; // FIXME
 
   // Networks may have subnetworks, internal states, and parameters.
   vector<Network> sub;
-  map<string, Sequence*> statevec;
+  map<string, Sequence*> states;
   map<string, Params*> parameters;
 
+  // Utility functions for adding subnetworks, etc.
+  // (The ENROLL macro makes this easy.)
   virtual void add(Network net) { sub.push_back(net); }
-  void enroll(Sequence &s, const char *name) {
-    statevec[name] = &s;
-  }
-  void enroll(Params &p, const char *name) {
-    parameters[name] = &p;
-  }
-  typedef function<void(const string &, Params *)> ParamsFun;
-  typedef function<void(const string &, Sequence *)> StateFun;
-  typedef function<void(const string &, INetwork *)> NetworkFun;
-  void info(string prefix);
-  void params(ParamsFun f, const string &prefix = "");
-  void states(StateFun f, const string &prefix = "");
-  void networks(NetworkFun f, const string &prefix = "");
-  void subs(NetworkFun f);
+  void enroll(Sequence &s, const char *name) { states[name] = &s; }
+  void enroll(Params &p, const char *name) { parameters[name] = &p; }
 
-  void gradientClip(Float value) {} // FIXME
-  void zeroStateGrads() {} // FIXME
-  void zeroParamGrads() {} // FIXME
+  // Clip and reset gradients in this node.
+  void gradientClipParameters(Float value);
+  void gradientClipStates(Float value);
+  void zeroGradsStates();
+  void zeroGradsParameters();
 
   // Learning rate and momentum used for training.
   int nseq = 0;
@@ -145,33 +136,37 @@ public:
   // Misc parameters for construction, saving.
   Assoc attr;
 
+  // Networks have input and output "ports" for sequences
+  // and derivatives. These are propagated in forward()
+  // and backward() methods.
+  Sequence inputs;
+  Sequence outputs;
+  virtual int ninput() { return -999999; }
+  virtual int noutput() { return -999999; }
+
   // Main methods for forward and backward propagation
   // of activations.
   virtual void forward() = 0;
   virtual void backward() = 0;
   virtual void initialize() { }
 
-  // Networks have input and output "ports" for sequences
-  // and derivatives. These are propagated in forward()
-  // and backward() methods.
-  Sequence inputs;
-  Sequence outputs;
-
-
   // Data for encoding/decoding input/output strings.
-  // FIXME: factor this out
   Codec codec, icodec;
 
-  // Expected number of input/output features.
-  virtual int ninput() { return -999999; }
-  virtual int noutput() { return -999999; }
-
-  // Hook executed after loading.
-  virtual void postLoad() {}
-
+  // Loading and saving.
   void save(const char *fname);
   void load(const char *fname);
+  virtual void postLoad() {}
 };
+
+typedef function<void(const string &, Params *)> ParamsFun;
+typedef function<void(const string &, Sequence *)> StateFun;
+typedef function<void(const string &, INetwork *)> NetworkFun;
+void walk_params(Network net, ParamsFun f, const string &prefix = "");
+void walk_states(Network net, StateFun f, const string &prefix = "");
+void walk_networks(Network net, NetworkFun f, const string &prefix = "");
+void network_info(Network net, string prefix = "");
+
 
 // setting inputs and outputs
 void set_inputs(INetwork *net, Sequence &inputs);

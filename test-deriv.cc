@@ -60,16 +60,16 @@ double err(Sequence &a, Sequence &b) {
 }
 
 void zero_grad(Network net) {
-  net->params([](const string &s, Params *p) { p->zeroGrad(); });
+  walk_params(net, [](const string &s, Params *p) { p->zeroGrad(); });
 }
 void get_params(vector<Params> &params, Network net) {
   params.clear();
-  net->params([&params](const string &s, Params *p) { params.emplace_back(*p); });
+  walk_params(net, [&params](const string &s, Params *p) { params.emplace_back(*p); });
 }
 
 void set_params(Network net, vector<Params> &params) {
   int index = 0;
-  net->params([&index, &params](const string &s, Params *p) {
+  walk_params(net, [&index, &params](const string &s, Params *p) {
     *p = params[index++];
   });
   assert(index == params.size());

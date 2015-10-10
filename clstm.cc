@@ -54,23 +54,44 @@ Assoc::Assoc(const string &s) {
   }
 }
 
-void INetwork::params(ParamsFun f, const string &prefix) {
-  for(auto it : parameters)
+void walk_params(Network net, ParamsFun f, const string &prefix) {
+  for(auto it : net->parameters)
     f(prefix + "." + it.first, it.second);
-  for(auto s : sub)
-    s->params(f, prefix + "." + kind);
+  for(auto s : net->sub)
+    walk_params(s, f, prefix + "." + s->kind);
 }
-void INetwork::states(StateFun f, const string &prefix) {
-  for(auto it : statevec)
+void walk_states(Network net, StateFun f, const string &prefix) {
+  for(auto it : net->states)
     f(prefix + "." + it.first, it.second);
-  for(auto s : sub)
-    s->states(f, prefix + "." + kind);
+  for(auto s : net->sub)
+    walk_states(net, f, prefix + "." + s->kind);
 }
-void INetwork::networks(NetworkFun f, const string &prefix) {
-  string nprefix = prefix + "." + kind;
-  f(nprefix, this);
-  for (int i = 0; i < sub.size(); i++) {
-    sub[i]->networks(f, nprefix);
+void walk_networks(Network net, NetworkFun f, const string &prefix) {
+  string nprefix = prefix + "." + net->kind;
+  f(nprefix, net.get());
+  for (int i = 0; i < net->sub.size(); i++) {
+    walk_networks(net->sub[i], f, nprefix);
+  }
+}
+
+void INetwork::gradientClipParameters(Float value) {
+  for(auto it : parameters) {
+    gradient_clip(*it.second, value);
+  }
+}
+void INetwork::gradientClipStates(Float value) {
+  for(auto it : states) {
+    gradient_clip(*it.second, value);
+  }
+}
+void INetwork::zeroGradsParameters() {
+  for(auto it : parameters) {
+    it.second->zeroGrad();
+  }
+}
+void INetwork::zeroGradsStates() {
+  for(auto it : states) {
+    it.second->zeroGrad();
   }
 }
 
@@ -239,19 +260,19 @@ void Codec::build(const vector<string> &fnames, const wstring &extra) {
   this->set(codec);
 }
 
-void INetwork::info(string prefix) {
-  string nprefix = prefix + "." + kind;
-  Float learning_rate = attr.get("learning_rate");
-  Float momentum = attr.get("momentum");
+void network_info(Network net, string prefix) {
+  string nprefix = prefix + "." + net->kind;
+  Float learning_rate = net->attr.get("learning_rate");
+  Float momentum = net->attr.get("momentum");
   cout << nprefix << ": " << learning_rate << " " << momentum << " ";
-  cout << "in " << inputs.size() << " " << ninput() << " ";
-  cout << "out " << outputs.size() << " " << noutput() << endl;
-  for (auto s : sub) s->info(nprefix);
+  cout << "in " << net->inputs.size() << " " << net->ninput() << " ";
+  cout << "out " << net->outputs.size() << " " << net->noutput() << endl;
+  for (auto s : net->sub) network_info(s, nprefix);
 }
 
 Sequence *get_state_by_name(Network net,string name) {
   Sequence *result = nullptr;
-  net->states([&result, &name](const string &prefix, Sequence *s) {
+  walk_states(net, [&result, &name](const string &prefix, Sequence *s) {
     if (prefix == name) result = s;
   });
   return result;
