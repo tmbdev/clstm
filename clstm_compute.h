@@ -97,7 +97,10 @@ struct Params : Mat {
   Mat d;
   template <class T>
   void operator=(T other) { (Mat &)*this = other; }
-  void zeroGrad() { d.setZero(rows(), cols()); }
+  void zeroGrad() { 
+    d.setZero(rows(), cols()); 
+    assert(d.rows()>0);
+  }
   void update(Float lr, Float mom) {
     *this += lr*d;
     d *= mom;
@@ -129,6 +132,9 @@ struct Sequence {
   void resize(int n, int rows, int cols) {
     steps.resize(n);
     for (int t = 0; t < n; t++) steps[t].resize(rows, cols);
+  }
+  void like(const Sequence &other) {
+    resize(other.size(), other.rows(), other.cols());
   }
   void copy(const Sequence &other) {
     resize(other.size());

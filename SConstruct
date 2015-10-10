@@ -174,6 +174,10 @@ deriv = env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)
 deriv_alias = Alias('deriv', [deriv], deriv[0].abspath)
 AlwaysBuild(deriv_alias)
 
+cderiv = env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)
+cderiv_alias = Alias('cderiv', [cderiv], cderiv[0].abspath)
+AlwaysBuild(cderiv_alias)
+
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"
 
