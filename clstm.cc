@@ -54,6 +54,26 @@ Assoc::Assoc(const string &s) {
   }
 }
 
+void INetwork::params(ParamsFun f, const string &prefix) {
+  for(auto it : parameters)
+    f(prefix + "." + it.first, it.second);
+  for(auto s : sub)
+    s->params(f, prefix + "." + kind);
+}
+void INetwork::states(StateFun f, const string &prefix) {
+  for(auto it : statevec)
+    f(prefix + "." + it.first, it.second);
+  for(auto s : sub)
+    s->states(f, prefix + "." + kind);
+}
+void INetwork::networks(NetworkFun f, const string &prefix) {
+  string nprefix = prefix + "." + kind;
+  f(nprefix, this);
+  for (int i = 0; i < sub.size(); i++) {
+    sub[i]->networks(f, nprefix);
+  }
+}
+
 map<string, ILayerFactory> layer_factories;
 
 Network make_layer(const string &kind) {
@@ -85,7 +105,7 @@ Network layer(const string &kind, int ninput, int noutput, const Assoc &args,
   net->attr.set("ninput", ninput);
   net->attr.set("noutput", noutput);
   for (int i = 0; i < subs.size(); i++) {
-    net->sub.push_back(subs[i]);
+    net->add(subs[i]);
     subs[i]->attr.super = &net->attr;
   }
   net->initialize();
@@ -160,7 +180,7 @@ void INetwork::update() {
   Float momentum = attr.get("momentum", 0.9);
   Float clip_at = attr.get("gradient_clip", 10.0);
   for(auto it : parameters)
-    it.first->update(lr, momentum);
+    it.second->update(lr, momentum);
   for (int i = 0; i < sub.size(); i++)
     sub[i]->update();
   nseq = 0;
@@ -227,15 +247,6 @@ void INetwork::info(string prefix) {
   cout << "in " << inputs.size() << " " << ninput() << " ";
   cout << "out " << outputs.size() << " " << noutput() << endl;
   for (auto s : sub) s->info(nprefix);
-}
-
-void INetwork::networks(const string &prefix,
-                        function<void(string, INetwork *)> f) {
-  string nprefix = prefix + "." + kind;
-  f(nprefix, this);
-  for (int i = 0; i < sub.size(); i++) {
-    sub[i]->networks(nprefix, f);
-  }
 }
 
 Sequence *get_state_by_name(Network net,string name) {

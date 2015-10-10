@@ -122,8 +122,8 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
     kvp->set_value(kv.second);
   }
   for (auto it : net->parameters) {
-    Params *a = it.first;
-    string name = it.second;
+    Params *a = it.second;
+    string name = it.first;
     clstm::Array *array = proto->add_weights();
     array->set_name(name);
     proto_of_Mat(array, *a, weights);
@@ -158,7 +158,7 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
   net->codec.set(codec);
   map<string, Params*> weights;
   for (auto it : net->parameters) {
-    weights[it.second] = it.first;
+    weights[it.first] = it.second;
   }
   for (int i = 0; i < proto->weights_size(); i++) {
     string key = proto->weights(i).name();

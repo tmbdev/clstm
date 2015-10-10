@@ -111,34 +111,25 @@ public:
   // string name = ""; // FIXME
 
   // Networks may have subnetworks, internal states, and parameters.
-  // FIXME: refactor or use RTTI
   vector<Network> sub;
-  vector<pair<Sequence*,string>> statevec;
-  vector<pair<Params*,string>> parameters;
+  map<string, Sequence*> statevec;
+  map<string, Params*> parameters;
 
   virtual void add(Network net) { sub.push_back(net); }
   void enroll(Sequence &s, const char *name) {
-    statevec.push_back(make_pair(&s,name));
+    statevec[name] = &s;
   }
   void enroll(Params &p, const char *name) {
-    parameters.push_back(make_pair(&p, name));
+    parameters[name] = &p;
   }
   typedef function<void(const string &, Params *)> ParamsFun;
   typedef function<void(const string &, Sequence *)> StateFun;
+  typedef function<void(const string &, INetwork *)> NetworkFun;
   void info(string prefix);
-  void params(ParamsFun f, const string &prefix = "") {
-    for(auto it : parameters)
-      f(prefix + "." + it.second, it.first);
-    for(auto s : sub)
-      s->params(f, prefix + "." + kind);
-  }
-  void states(StateFun f, const string &prefix = "") {
-    for(auto it : statevec)
-      f(prefix + "." + it.second, it.first);
-    for(auto s : sub)
-      s->states(f, prefix + "." + kind);
-  }
-  void networks(const string &prefix, function<void(string, INetwork *)>);
+  void params(ParamsFun f, const string &prefix = "");
+  void states(StateFun f, const string &prefix = "");
+  void networks(NetworkFun f, const string &prefix = "");
+  void subs(NetworkFun f);
 
   void gradientClip(Float value) {} // FIXME
   void zeroStateGrads() {} // FIXME

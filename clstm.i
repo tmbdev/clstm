@@ -201,7 +201,7 @@ int string_edit_distance(string a, string b) {
 
 string network_info(Network net) {
     string result = "";
-    net->networks("", [&result] (string s, INetwork *net) {
+    net->networks([&result] (string s, INetwork *net) {
         double lr = net->attr.get("learning_rate","-1");
         double momentum = net->attr.get("momentum","-1");
         result += s + ": " + to_string(lr);
