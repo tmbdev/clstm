@@ -139,7 +139,9 @@ struct Testcase {
   ParamVec ps;
   Sequence outputs;
   Sequence targets;
-  virtual string name() = 0;
+  virtual string name() {
+    return typeid(*this).name();
+  }
   // Store random initial test values appropriate for
   // the test case into inputs, ps, and targets
   virtual void init() {
@@ -155,7 +157,7 @@ struct Testcase {
 };
 
 void test_net(Testcase &tc) {
-  int verbose = getienv("verbose", 1);
+  int verbose = getienv("verbose", 0);
   print("testing", tc.name());
 
   tc.init();
@@ -181,9 +183,7 @@ void test_net(Testcase &tc) {
           double out = mse(tc.outputs, targets);
           tc.inputs.zeroGrad();
           for(Params &p:tc.ps) p.zeroGrad();
-          assert(tc.ps[0].d.rows()>0);
           tc.backward();
-          assert(tc.ps[0].d.rows()>0);
           double a_deriv = tc.inputs[t].d(i, b);
           tc.inputs[t](i, b) += h;
           tc.forward();
@@ -216,12 +216,10 @@ void test_net(Testcase &tc) {
 }
 
 struct TestFullSigmoid : Testcase {
-  string name() { return "full<SigmoidNonlin>"; }
   void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
   void backward() { backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0); }
 };
 struct TestFullTanh : Testcase {
-  string name() { return "full<TanhNonlin>"; }
   void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
   void backward() { backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0); }
 };
@@ -231,7 +229,6 @@ struct TestFull1Sigmoid : Testcase {
     randseq(targets, 1, 3, 4);
     randparams(ps, {{3, 8}});
   }
-  string name() { return "full1<SigmoidNonlin>"; }
   void forward() { forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
   void backward() { backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0); }
 };
@@ -241,9 +238,26 @@ struct TestFull1Tanh : Testcase {
     randseq(targets, 1, 3, 4);
     randparams(ps, {{3, 8}});
   }
-  string name() { return "full1<TanhNonlin>"; }
   void forward() { forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
   void backward() { backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0); }
+};
+struct TestStack : Testcase {
+  virtual void init() {
+    randseq(inputs, 2, 7, 4);
+    randseq(targets, 1, 14, 4);
+    randparams(ps, {});
+  }
+  void forward() { forward_stack(outputs[0], inputs[0], inputs[1]); }
+  void backward() { backward_stack(outputs[0], inputs[0], inputs[1]); }
+};
+struct TestStack1 : Testcase {
+  virtual void init() {
+    randseq(inputs, 2, 7, 4);
+    randseq(targets, 1, 15, 4);
+    randparams(ps, {});
+  }
+  void forward() { forward_stack1(outputs[0], inputs[0], inputs, 1); }
+  void backward() { backward_stack1(outputs[0], inputs[0], inputs, 1); }
 };
 
 
@@ -253,6 +267,8 @@ int main(int argc, char **argv) {
     test_net(*new TestFullTanh);
     test_net(*new TestFull1Sigmoid);
     test_net(*new TestFull1Tanh);
+    test_net(*new TestStack);
+    test_net(*new TestStack1);
   }
   CATCH(const char *message) { print("ERROR", message); }
 }

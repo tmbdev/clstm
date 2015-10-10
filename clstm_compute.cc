@@ -116,7 +116,6 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
   int nx = x.rows();
   int ny = y.rows();
   int bs = x.cols();
-  z.resize(nx+ny, bs);
   x.d += BLOCK(z.d, 0, 0, nx, bs);
   y.d += BLOCK(z.d, nx, 0, ny, bs);
 }

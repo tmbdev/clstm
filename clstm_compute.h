@@ -90,13 +90,27 @@ inline Mat xprime(T &a) {
 struct Batch : Mat {
   Mat d;
   template <class T>
-  void operator=(T other) { (Mat &)*this = other; }
+  void operator=(T other) { 
+    (Mat &)*this = other; 
+    zeroGrad();
+  }
+  void resize(int n, int m) {
+    setZero(n, m);
+    d.setZero(n, m);
+  }
   void zeroGrad() { d.setZero(rows(), cols()); }
 };
 struct Params : Mat {
   Mat d;
   template <class T>
-  void operator=(T other) { (Mat &)*this = other; }
+  void operator=(T other) { 
+    (Mat &)*this = other; 
+    zeroGrad();
+  }
+  void resize(int n, int m) {
+    setZero(n, m);
+    d.setZero(n, m);
+  }
   void zeroGrad() { 
     d.setZero(rows(), cols()); 
     assert(d.rows()>0);
