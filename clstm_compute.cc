@@ -120,11 +120,28 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
   int nx = x.rows();
   int ny = y.rows();
   int bs = x.cols();
-  z.resize(nx+ny, bs);
   x.d += BLOCK(z.d, 0, 0, nx, bs);
   y.d += BLOCK(z.d, nx, 0, ny, bs);
 }
 
+void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
+  assert(x.cols()==y.cols());
+  int nx = x.rows();
+  int ny = y.rows();
+  int bs = x.cols();
+  z.resize(nx+ny, bs);
+  BLOCK(z, 0, 0, nx, bs) = x;
+  if (last>=0) BLOCK(z, nx, 0, ny, bs) = y[last];
+  else BLOCK(z, nx, 0, ny, bs).setZero();
+}
+void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
+  assert(x.cols()==y.cols());
+  int nx = x.rows();
+  int ny = y.rows();
+  int bs = x.cols();
+  x.d += BLOCK(z.d, 0, 0, nx, bs);
+  if (last>=0) y[last].d += BLOCK(z.d, nx, 0, ny, bs);
+}
 void forward_reverse(Sequence &y, Sequence &x) {
   int N = x.size();
   y.resize(N, x.rows(), x.cols());
