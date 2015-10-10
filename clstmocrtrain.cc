@@ -158,7 +158,7 @@ int main1(int argc, char **argv) {
       clstm.save(fname);
     }
     bool do_save = (save_every > 0 && trial % save_every == 0);
-    do_save = (do_save || (trial == ntrain-1));
+    do_save = (do_save || (trial == ntrain - 1));
     do_save = (do_save && (save_name != ""));
     if (trial > 0 && do_save) {
       string fname = save_name + "-" + to_string(trial) + ".clstm";
@@ -195,9 +195,6 @@ int main1(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-  TRY {
-    return main1(argc, argv);
-  } CATCH (const char *message) {
-    cerr << "FATAL: " << message << endl;
-  }
+  TRY { return main1(argc, argv); }
+  CATCH(const char *message) { cerr << "FATAL: " << message << endl; }
 }

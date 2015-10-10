@@ -55,16 +55,12 @@ Assoc::Assoc(const string &s) {
 }
 
 void walk_params(Network net, ParamsFun f, const string &prefix) {
-  for(auto it : net->parameters)
-    f(prefix + "." + it.first, it.second);
-  for(auto s : net->sub)
-    walk_params(s, f, prefix + "." + s->kind);
+  for (auto it : net->parameters) f(prefix + "." + it.first, it.second);
+  for (auto s : net->sub) walk_params(s, f, prefix + "." + s->kind);
 }
 void walk_states(Network net, StateFun f, const string &prefix) {
-  for(auto it : net->states)
-    f(prefix + "." + it.first, it.second);
-  for(auto s : net->sub)
-    walk_states(net, f, prefix + "." + s->kind);
+  for (auto it : net->states) f(prefix + "." + it.first, it.second);
+  for (auto s : net->sub) walk_states(net, f, prefix + "." + s->kind);
 }
 void walk_networks(Network net, NetworkFun f, const string &prefix) {
   string nprefix = prefix + "." + net->kind;
@@ -75,22 +71,22 @@ void walk_networks(Network net, NetworkFun f, const string &prefix) {
 }
 
 void INetwork::gradientClipParameters(Float value) {
-  for(auto it : parameters) {
+  for (auto it : parameters) {
     gradient_clip(*it.second, value);
   }
 }
 void INetwork::gradientClipStates(Float value) {
-  for(auto it : states) {
+  for (auto it : states) {
     gradient_clip(*it.second, value);
   }
 }
 void INetwork::zeroGradsParameters() {
-  for(auto it : parameters) {
+  for (auto it : parameters) {
     it.second->zeroGrad();
   }
 }
 void INetwork::zeroGradsStates() {
-  for(auto it : states) {
+  for (auto it : states) {
     it.second->zeroGrad();
   }
 }
@@ -186,9 +182,9 @@ Float INetwork::effective_lr() {
   Float lr = attr.get("learning_rate");
   string normalization = attr.get("normalization", "batch");
   if (normalization == "batch")
-    lr /= fmax(1.0,nseq);
+    lr /= fmax(1.0, nseq);
   else if (normalization == "len")
-    lr /= fmax(1.0,nsteps);
+    lr /= fmax(1.0, nsteps);
   else if (normalization == "none") /* do nothing */
     ;
   else
@@ -200,10 +196,8 @@ void INetwork::update() {
   Float lr = effective_lr();
   Float momentum = attr.get("momentum", 0.9);
   Float clip_at = attr.get("gradient_clip", 10.0);
-  for(auto it : parameters)
-    it.second->update(lr, momentum);
-  for (int i = 0; i < sub.size(); i++)
-    sub[i]->update();
+  for (auto it : parameters) it.second->update(lr, momentum);
+  for (int i = 0; i < sub.size(); i++) sub[i]->update();
   nseq = 0;
   nsteps = 0;
 }
@@ -227,9 +221,7 @@ void Codec::encode(Classes &classes, const std::wstring &s) {
   }
 }
 
-wchar_t Codec::decode(int cls) { 
-  return wchar_t(codec[cls]); 
-}
+wchar_t Codec::decode(int cls) { return wchar_t(codec[cls]); }
 
 std::wstring Codec::decode(Classes &classes) {
   std::wstring s;
@@ -270,7 +262,7 @@ void network_info(Network net, string prefix) {
   for (auto s : net->sub) network_info(s, nprefix);
 }
 
-Sequence *get_state_by_name(Network net,string name) {
+Sequence *get_state_by_name(Network net, string name) {
   Sequence *result = nullptr;
   walk_states(net, [&result, &name](const string &prefix, Sequence *s) {
     if (prefix == name) result = s;
@@ -283,9 +275,7 @@ struct Full : INetwork {
   Params W1;
   int nseq = 0;
   int nsteps = 0;
-  Full() {
-    ENROLL(W1);
-  }
+  Full() { ENROLL(W1); }
   void initialize() {
     int no = attr.get("noutput");
     int ni = attr.get("ninput");
@@ -322,9 +312,7 @@ struct SoftmaxLayer : INetwork {
   Params W1;
   int nsteps = 0;
   int nseq = 0;
-  SoftmaxLayer() {
-    ENROLL(W1);
-  }
+  SoftmaxLayer() { ENROLL(W1); }
   void initialize() {
     int no = attr.get("noutput");
     int ni = attr.get("ninput");
@@ -334,9 +322,7 @@ struct SoftmaxLayer : INetwork {
   }
   int noutput() { return ROWS(W1); }
   int ninput() { return COLS(W1) - 1; }
-  void postLoad() {
-    W1.zeroGrad();
-  }
+  void postLoad() { W1.zeroGrad(); }
   void forward() {
     outputs.resize(inputs.size(), W1.rows(), inputs.cols());
     for (int t = 0; t < inputs.size(); t++) {
@@ -412,10 +398,10 @@ struct Reversed : INetwork {
 REGISTER(Reversed);
 
 struct Parallel : INetwork {
-  int noutput() { 
+  int noutput() {
     assert(sub[0]->noutput() > 0);
     assert(sub[1]->noutput() > 0);
-    return sub[0]->noutput() + sub[1]->noutput(); 
+    return sub[0]->noutput() + sub[1]->noutput();
   }
   int ninput() { return sub[0]->ninput(); }
   void forward() {
@@ -438,7 +424,7 @@ struct Parallel : INetwork {
     int N = outputs.size();
     sub[0]->outputs.zeroGrad();
     sub[1]->outputs.zeroGrad();
-    for (int t = N-1; t >= 0; t--) {
+    for (int t = N - 1; t >= 0; t--) {
       backward_stack(outputs[t], sub[0]->outputs[t], sub[1]->outputs[t]);
     }
     sub[0]->backward();

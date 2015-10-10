@@ -64,7 +64,8 @@ void zero_grad(Network net) {
 }
 void get_params(vector<Params> &params, Network net) {
   params.clear();
-  walk_params(net, [&params](const string &s, Params *p) { params.emplace_back(*p); });
+  walk_params(
+      net, [&params](const string &s, Params *p) { params.emplace_back(*p); });
 }
 
 void set_params(Network net, vector<Params> &params) {
