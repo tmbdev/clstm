@@ -19,15 +19,14 @@ print "version", hgversion
 # A bunch of utility functions to make the rest of the SConstruct file a
 # little simpler.
 
-
 def die(msg):
     sys.stderr.write("ERROR " + msg + "\n")
     Exit(1)
 
-
 def option(name, dflt):
-    return (ARGUMENTS.get(name) or os.environ.get(name, dflt))
-
+    result = (ARGUMENTS.get(name) or os.environ.get(name, dflt))
+    if type(dflt)==int: result = int(result)
+    return result
 
 def findonpath(fname, path):
     for dir in path:
@@ -35,10 +34,8 @@ def findonpath(fname, path):
             return dir
     raise die("%s: not found" % fname)
 
-
 def protoc(target, source, env):
     os.system("protoc %s --cpp_out=." % source[0])
-
 
 def protoemitter(target, source, env):
     for s in source:
@@ -78,8 +75,11 @@ if option("profile", 0):
     env.Append(CXXFLAGS="-g -pg -fno-inline".split())
     env.Append(CCFLAGS="-g -pg".split())
     env.Append(LINKFLAGS="-g -pg".split())
-elif option("debug", 0):
-    env.Append(CXXFLAGS="-g -fno-inline".split())
+elif option("debug", 0)>0:
+    if option("debug", 0)>1:
+      env.Append(CXXFLAGS="-g -fno-inline".split())
+    else:
+      env.Append(CXXFLAGS="-g".split())
     env.Append(CCFLAGS="-g".split())
     env.Append(LINKFLAGS="-g".split())
 else:
@@ -189,7 +189,6 @@ destlib = distutils.sysconfig.get_config_var("DESTLIB")
 Alias('pyinstall',
       Install(os.path.join(destlib, "site-packages"),
               ["_clstm.so", "clstm.py"]))
-
 
 # A simple test of the Python extension.
 

@@ -199,6 +199,7 @@ std::wstring Codec::decode(Classes &classes) {
 
 void Codec::build(const vector<string> &fnames, const wstring &extra) {
   std::set<int> codes;
+  codes.insert(0);
   for (auto c : extra) codes.insert(int(c));
   for (auto fname : fnames) {
     std::ifstream stream(fname);

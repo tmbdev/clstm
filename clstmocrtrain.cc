@@ -107,7 +107,6 @@ int main1(int argc, char **argv) {
   int report_time = getienv("report_time", 0);
   int test_every = getienv("test_every", 10000);
   wstring charsep = utf8_to_utf32(getsenv("charsep", ""));
-  print("*** charsep", charsep);
 
   if (argc < 2 || argc > 3) THROW("... training [testing]");
   vector<string> fnames, test_fnames;
@@ -118,12 +117,13 @@ int main1(int argc, char **argv) {
   CLSTMOCR clstm;
   clstm.target_height = int(getrenv("target_height", 48));
   Codec codec;
-  codec.build(fnames, charsep);
+  vector<string> gtnames;
+  for (auto s : fnames) gtnames.push_back(basename(s) + ".gt.txt");
+  codec.build(gtnames, charsep);
   print("got", codec.size(), "classes");
   clstm.createBidi(codec.codec, getienv("nhidden", 100));
-  clstm.setLearningRate(getdenv("rate", 1e-4), getdenv("momentum", 0.9));
+  clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
   clstm.net->info("");
-
 
   double test_error = 9999.0;
   double best_error = 1e38;
@@ -157,7 +157,10 @@ int main1(int argc, char **argv) {
             best_error);
       clstm.save(fname);
     }
-    if (trial > 0 && save_every > 0 && trial % save_every == 0) {
+    bool do_save = (save_every > 0 && trial % save_every == 0);
+    do_save = (do_save || (trial == ntrain-1));
+    do_save = (do_save && (save_name != ""));
+    if (trial > 0 && do_save) {
       string fname = save_name + "-" + to_string(trial) + ".clstm";
       clstm.save(fname);
     }
@@ -169,14 +172,14 @@ int main1(int argc, char **argv) {
     read_png(raw, fname.c_str(), true);
     for (int i = 0; i < raw.size(); i++) raw[i] = 1 - raw[i];
     wstring pred = clstm.train(raw, gt);
-    if (trial % display_every == 0) {
+    if (display_every > 0 && trial % display_every == 0) {
       py.evalf("clf");
       show(py, clstm.net->inputs, 411);
       show(py, clstm.net->outputs, 412);
       show(py, clstm.targets, 413);
       show(py, clstm.aligned, 414);
     }
-    if (trial % report_every == 0) {
+    if (report_every > 0 && trial % report_every == 0) {
       mdarray<float> temp;
       print(trial);
       print("TRU", gt);

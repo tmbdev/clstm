@@ -1,10 +1,19 @@
 #!/bin/sh
 set -e
+export PS4='################################
+################################ '
 trap "echo TEST FAILED" EXIT
 set -x
-scons
+scons -c
+scons -c pytest
 scons -j 4 test
-scons pytest
+scons -j 4
+./run-test-filter
+./run-test-ocr
 scons -j 4 debug=1 deriv
+scons -c
+scons -j 4 pytest
+scons -c
+scons -c pytest
 set +x
 trap "echo ALL TESTS PASS" EXIT
