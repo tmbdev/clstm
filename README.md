@@ -1,6 +1,10 @@
 # clstm
 
-[![Join the chat at https://gitter.im/tmbdev/clstm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tmbdev/clstm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+CLSTM is currently undergoing refactoring and significant changes; if you want a stable basis to work with,
+check out the `separate-derivs` branch:
+
+    git clone git@github.com:tmbdev/clstm.git
+    git checkout separate-derivs
 
 To build a standalone C library, run
 
@@ -11,8 +15,8 @@ Prerequisites:
 
  - scons, Eigen
  - protocol buffer library and compiler
- - HDF5 libraries and C++, Python bindings (optional, for HDF5 I/O)
- - ZMQ libraries and C++, Python bindings (optional, for display)
+
+Optional: HDF5, ZMQ, Python
 
 On Ubuntu, this means:
 
