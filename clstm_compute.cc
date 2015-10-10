@@ -2,7 +2,7 @@
 
 #define A array()
 
-namespace ocropus{
+namespace ocropus {
 
 #define DOT(M, V) ((M) * (V))
 #define MATMUL(A, B) ((A) * (B))
@@ -18,7 +18,6 @@ namespace ocropus{
 #define CBUTFIRST(M) BLOCK((M), 0, 1, (M).rows(), (M).cols() - 1)
 #define CFIRST(M) COL(M, 0)
 #define HOMDOT(A1, B) (DOT(CBUTFIRST(A1), B).colwise() + CFIRST(A1))
-
 
 inline void ADDCOLS(Mat &m, Vec &v) {
   for (int i = 0; i < COLS(m); i++)
@@ -37,6 +36,8 @@ void gradient_clip(Mat &d, Float m) {
   if (m < 0) return;
   d = MAPFUNC(d, [m](Float x) { return x > m ? m : x < -m ? -m : x; });
 }
+
+void gradient_clip(Batch &b, Float m) { gradient_clip(b.d, m); }
 
 template <class F>
 void forward_full1(Batch &y, Params &W1, Batch &x) {
@@ -60,9 +61,12 @@ template void forward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x);
 template void backward_full1<NoNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-template void backward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-template void backward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x, Float gc);
+template void backward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x,
+                                            Float gc);
+template void backward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x,
+                                         Float gc);
+template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x,
+                                         Float gc);
 
 // compute non-linear full layers
 template <class F>
@@ -81,9 +85,12 @@ template void forward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
 template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x, Float gc);
+template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x,
+                                           Float gc);
+template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x,
+                                        Float gc);
+template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x,
+                                        Float gc);
 
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
   z = MAPFUN(HOMDOT(W1, x), limexp);
@@ -103,16 +110,16 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
 }
 
 void forward_stack(Batch &z, Batch &x, Batch &y) {
-  assert(x.cols()==y.cols());
+  assert(x.cols() == y.cols());
   int nx = x.rows();
   int ny = y.rows();
   int bs = x.cols();
-  z.resize(nx+ny, bs);
+  z.resize(nx + ny, bs);
   BLOCK(z, 0, 0, nx, bs) = x;
   BLOCK(z, nx, 0, ny, bs) = y;
 }
 void backward_stack(Batch &z, Batch &x, Batch &y) {
-  assert(x.cols()==y.cols());
+  assert(x.cols() == y.cols());
   int nx = x.rows();
   int ny = y.rows();
   int bs = x.cols();
@@ -120,14 +127,34 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
   y.d += BLOCK(z.d, nx, 0, ny, bs);
 }
 
+void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
+  assert(x.cols() == y.cols());
+  int nx = x.rows();
+  int ny = y.rows();
+  int bs = x.cols();
+  z.resize(nx + ny, bs);
+  BLOCK(z, 0, 0, nx, bs) = x;
+  if (last >= 0)
+    BLOCK(z, nx, 0, ny, bs) = y[last];
+  else
+    BLOCK(z, nx, 0, ny, bs).setZero();
+}
+void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
+  assert(x.cols() == y.cols());
+  int nx = x.rows();
+  int ny = y.rows();
+  int bs = x.cols();
+  x.d += BLOCK(z.d, 0, 0, nx, bs);
+  if (last >= 0) y[last].d += BLOCK(z.d, nx, 0, ny, bs);
+}
 void forward_reverse(Sequence &y, Sequence &x) {
   int N = x.size();
   y.resize(N, x.rows(), x.cols());
-  for (int i=0; i<N; i++) y[N-i-1] = x[i];
+  for (int i = 0; i < N; i++) y[N - i - 1] = x[i];
 }
 void backward_reverse(Sequence &y, Sequence &x) {
   int N = x.size();
-  for (int i=0; i<N; i++) x[N-i-1].d += y[i].d;
+  for (int i = 0; i < N; i++) x[N - i - 1].d += y[i].d;
 }
 
 // stack the delayed output on the input
@@ -180,14 +207,21 @@ void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
   state.d.A += xprime<H>(state).A * go.A * out.d.A;
 }
 
-template void forward_nonlingate<TanhNonlin>(Batch &out, Batch &state, Batch &go);
-template void forward_nonlingate<SigmoidNonlin>(Batch &out, Batch &state, Batch &go);
+template void forward_nonlingate<TanhNonlin>(Batch &out, Batch &state,
+                                             Batch &go);
+template void forward_nonlingate<SigmoidNonlin>(Batch &out, Batch &state,
+                                                Batch &go);
 template void forward_nonlingate<NoNonlin>(Batch &out, Batch &state, Batch &go);
-template void forward_nonlingate<ReluNonlin>(Batch &out, Batch &state, Batch &go);
-template void backward_nonlingate<TanhNonlin>(Batch &out, Batch &state, Batch &go);
-template void backward_nonlingate<SigmoidNonlin>(Batch &out, Batch &state, Batch &go);
-template void backward_nonlingate<NoNonlin>(Batch &out, Batch &state, Batch &go);
-template void backward_nonlingate<ReluNonlin>(Batch &out, Batch &state, Batch &go);
+template void forward_nonlingate<ReluNonlin>(Batch &out, Batch &state,
+                                             Batch &go);
+template void backward_nonlingate<TanhNonlin>(Batch &out, Batch &state,
+                                              Batch &go);
+template void backward_nonlingate<SigmoidNonlin>(Batch &out, Batch &state,
+                                                 Batch &go);
+template void backward_nonlingate<NoNonlin>(Batch &out, Batch &state,
+                                            Batch &go);
+template void backward_nonlingate<ReluNonlin>(Batch &out, Batch &state,
+                                              Batch &go);
 
 void randgauss(Mat &m) {
   std::random_device rd;
@@ -274,8 +308,7 @@ bool anynan(Batch &a) {
 }
 bool anynan(Sequence &a) {
   for (int i = 0; i < a.size(); i++)
-    if(anynan(a[i])) return true;
+    if (anynan(a[i])) return true;
   return false;
 }
-
 }

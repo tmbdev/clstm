@@ -172,7 +172,6 @@ struct INetwork {
     virtual int ninput();
     virtual int noutput();
     virtual void add(std::shared_ptr<INetwork> net);
-    void info(string prefix);
 };
 
 void set_inputs(INetwork *net, Sequence &inputs);
@@ -194,14 +193,16 @@ void mktargets(Sequence &seq, Classes &targets, int ndim);
 void save_net(const string &file, Network net);
 Network load_net(const string &file);
 
+%rename(network_info) network_info_as_strings;
+
 %inline %{
 int string_edit_distance(string a, string b) {
     return levenshtein(a, b);
 }
 
-string network_info(Network net) {
+string network_info_as_string(Network net) {
     string result = "";
-    net->networks("", [&result] (string s, INetwork *net) {
+    walk_networks(net, [&result] (string s, INetwork *net) {
         double lr = net->attr.get("learning_rate","-1");
         double momentum = net->attr.get("momentum","-1");
         result += s + ": " + to_string(lr);

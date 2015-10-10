@@ -33,7 +33,7 @@ extern char exception_message[256];
 // A string that automatically converts to numbers when needed;
 // used for holding parameter values.
 class String : public std::string {
-public:
+ public:
   String() {}
   String(const char *s) : std::string(s) {}
   String(const std::string &s) : std::string(s) {}
@@ -41,23 +41,19 @@ public:
   String(double x) : std::string(std::to_string(x)) {}
   double operator+() { return atof(this->c_str()); }
   operator double() { return atof(this->c_str()); }
-  void operator=(const string &value) {
-    this->string::operator=(value);
-  }
-  void operator=(const char *value) {
-    this->string::operator=(value);
-  }
+  void operator=(const string &value) { this->string::operator=(value); }
+  void operator=(const char *value) { this->string::operator=(value); }
   void operator=(double value) { *this = std::to_string(value); }
 };
 
 // A key-value store with defaults.
 class Assoc : public std::map<std::string, String> {
-public:
+ public:
   using std::map<std::string, String>::map;
   Assoc() {}
   Assoc(const string &s);
   Assoc *super = nullptr;
-  bool contains(const string &key, bool parent=true) const {
+  bool contains(const string &key, bool parent = true) const {
     auto it = this->find(key);
     if (it != this->end()) return true;
     if (parent) return super->contains(key, parent);
@@ -79,14 +75,12 @@ public:
     }
     return it->second;
   }
-  void set(const string &key, String value) {
-    this->operator[](key) = value;
-  }
+  void set(const string &key, String value) { this->operator[](key) = value; }
 };
 
 // A small class for encoding/decoding strings.
 class Codec {
-public:
+ public:
   vector<int> codec;
   unique_ptr<map<int, int> > encoder;
   int size() { return codec.size(); }
@@ -102,47 +96,29 @@ class INetwork;
 typedef shared_ptr<INetwork> Network;
 
 class INetwork {
-public:
+ public:
   virtual ~INetwork() {}
 
   // String that can be used for constructing these objects in `layer`;
   // set when allocated via the registry.
   string kind = "";
-  // string name = ""; // FIXME
 
   // Networks may have subnetworks, internal states, and parameters.
-  // FIXME: refactor or use RTTI
   vector<Network> sub;
-  vector<pair<Sequence*,string>> statevec;
-  vector<pair<Params*,string>> parameters;
+  map<string, Sequence *> states;
+  map<string, Params *> parameters;
 
+  // Utility functions for adding subnetworks, etc.
+  // (The ENROLL macro makes this easy.)
   virtual void add(Network net) { sub.push_back(net); }
-  void enroll(Sequence &s, const char *name) {
-    statevec.push_back(make_pair(&s,name));
-  }
-  void enroll(Params &p, const char *name) {
-    parameters.push_back(make_pair(&p, name));
-  }
-  typedef function<void(const string &, Params *)> ParamsFun;
-  typedef function<void(const string &, Sequence *)> StateFun;
-  void info(string prefix);
-  void params(ParamsFun f, const string &prefix = "") {
-    for(auto it : parameters)
-      f(prefix + "." + it.second, it.first);
-    for(auto s : sub)
-      s->params(f, prefix + "." + kind);
-  }
-  void states(StateFun f, const string &prefix = "") {
-    for(auto it : statevec)
-      f(prefix + "." + it.second, it.first);
-    for(auto s : sub)
-      s->states(f, prefix + "." + kind);
-  }
-  void networks(const string &prefix, function<void(string, INetwork *)>);
+  void enroll(Sequence &s, const char *name) { states[name] = &s; }
+  void enroll(Params &p, const char *name) { parameters[name] = &p; }
 
-  void gradientClip(Float value) {} // FIXME
-  void zeroStateGrads() {} // FIXME
-  void zeroParamGrads() {} // FIXME
+  // Clip and reset gradients in this node.
+  void gradientClipParameters(Float value);
+  void gradientClipStates(Float value);
+  void zeroGradsStates();
+  void zeroGradsParameters();
 
   // Learning rate and momentum used for training.
   int nseq = 0;
@@ -154,33 +130,36 @@ public:
   // Misc parameters for construction, saving.
   Assoc attr;
 
-  // Main methods for forward and backward propagation
-  // of activations.
-  virtual void forward() = 0;
-  virtual void backward() = 0;
-  virtual void initialize() { }
-
   // Networks have input and output "ports" for sequences
   // and derivatives. These are propagated in forward()
   // and backward() methods.
   Sequence inputs;
   Sequence outputs;
-
-
-  // Data for encoding/decoding input/output strings.
-  // FIXME: factor this out
-  Codec codec, icodec;
-
-  // Expected number of input/output features.
   virtual int ninput() { return -999999; }
   virtual int noutput() { return -999999; }
 
-  // Hook executed after loading.
-  virtual void postLoad() {}
+  // Main methods for forward and backward propagation
+  // of activations.
+  virtual void forward() = 0;
+  virtual void backward() = 0;
+  virtual void initialize() {}
 
+  // Data for encoding/decoding input/output strings.
+  Codec codec, icodec;
+
+  // Loading and saving.
   void save(const char *fname);
   void load(const char *fname);
+  virtual void postLoad() {}
 };
+
+typedef function<void(const string &, Params *)> ParamsFun;
+typedef function<void(const string &, Sequence *)> StateFun;
+typedef function<void(const string &, INetwork *)> NetworkFun;
+void walk_params(Network net, ParamsFun f, const string &prefix = "");
+void walk_states(Network net, StateFun f, const string &prefix = "");
+void walk_networks(Network net, NetworkFun f, const string &prefix = "");
+void network_info(Network net, string prefix = "");
 
 // setting inputs and outputs
 void set_inputs(INetwork *net, Sequence &inputs);

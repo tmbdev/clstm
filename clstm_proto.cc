@@ -97,7 +97,7 @@ void Vec_of_proto(Vec &a, const clstm::Array *array) {
 
 void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
                   bool weights = true) {
-  if (net->kind=="") {
+  if (net->kind == "") {
     cerr << typeid(*net).name() << endl;
     assert(net->kind != "");
   }
@@ -111,7 +111,7 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
   assert(proto->noutput() < 1000000);
   for (int i = 0; i < net->icodec.size(); i++)
     proto->add_icodec(net->icodec.codec[i]);
-  for (int i = 0; i < net->codec.size(); i++) 
+  for (int i = 0; i < net->codec.size(); i++)
     proto->add_codec(net->codec.codec[i]);
   for (auto kv : net->attr) {
     if (kv.first == "name") continue;
@@ -122,8 +122,8 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
     kvp->set_value(kv.second);
   }
   for (auto it : net->parameters) {
-    Params *a = it.first;
-    string name = it.second;
+    Params *a = it.second;
+    string name = it.first;
     clstm::Array *array = proto->add_weights();
     array->set_name(name);
     proto_of_Mat(array, *a, weights);
@@ -156,9 +156,9 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
   for (int i = 0; i < proto->codec_size(); i++)
     codec.push_back(proto->codec(i));
   net->codec.set(codec);
-  map<string, Params*> weights;
+  map<string, Params *> weights;
   for (auto it : net->parameters) {
-    weights[it.second] = it.first;
+    weights[it.first] = it.second;
   }
   for (int i = 0; i < proto->weights_size(); i++) {
     string key = proto->weights(i).name();

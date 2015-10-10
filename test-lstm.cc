@@ -75,7 +75,7 @@ double test_net(Network net) {
 int main(int argc, char **argv) {
   Network net = make_net_init("lstm1", "ninput=1:nhidden=4:noutput=2");
   net->setLearningRate(1e-4, 0.9);
-  net->info("");
+  network_info(net);
   save_net("__test0__.clstm", net);
   print("training 1:4:2 network to learn delay");
   for (int i = 0; i < ntrain; i++) {

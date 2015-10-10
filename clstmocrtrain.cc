@@ -123,7 +123,7 @@ int main1(int argc, char **argv) {
   print("got", codec.size(), "classes");
   clstm.createBidi(codec.codec, getienv("nhidden", 100));
   clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
-  clstm.net->info("");
+  network_info(clstm.net);
 
   double test_error = 9999.0;
   double best_error = 1e38;
@@ -158,7 +158,7 @@ int main1(int argc, char **argv) {
       clstm.save(fname);
     }
     bool do_save = (save_every > 0 && trial % save_every == 0);
-    do_save = (do_save || (trial == ntrain-1));
+    do_save = (do_save || (trial == ntrain - 1));
     do_save = (do_save && (save_name != ""));
     if (trial > 0 && do_save) {
       string fname = save_name + "-" + to_string(trial) + ".clstm";
@@ -195,9 +195,6 @@ int main1(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-  TRY {
-    return main1(argc, argv);
-  } CATCH (const char *message) {
-    cerr << "FATAL: " << message << endl;
-  }
+  TRY { return main1(argc, argv); }
+  CATCH(const char *message) { cerr << "FATAL: " << message << endl; }
 }

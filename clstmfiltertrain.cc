@@ -81,7 +81,7 @@ int main1(int argc, char **argv) {
   CLSTMText clstm;
   clstm.createBidi(icodec, codec, getienv("nhidden", 100));
   clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
-  clstm.net->info("");
+  network_info(clstm.net);
 
   int ntrain = getienv("ntrain", 10000000);
   int save_every = getienv("save_every", 10000);
@@ -135,9 +135,6 @@ int main1(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-  TRY {
-    return main1(argc, argv);
-  } CATCH (const char *message) {
-    cerr << "FATAL: " << message << endl;
-  }
+  TRY { return main1(argc, argv); }
+  CATCH(const char *message) { cerr << "FATAL: " << message << endl; }
 }

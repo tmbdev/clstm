@@ -116,7 +116,7 @@ struct Params : Mat {
     assert(d.rows()>0);
   }
   void update(Float lr, Float mom) {
-    *this += lr*d;
+    *this += lr *d;
     d *= mom;
   }
 };
@@ -139,13 +139,14 @@ struct Sequence {
       assert(steps[t].cols() == steps[0].cols());
     }
   }
-  int size() const { 
-    return steps.size(); 
-  }
-  void resize(int n) { steps.resize(n); }
+  int size() const { return steps.size(); }
+  void resize(int n) { resize(n, 1, 1); }
   void resize(int n, int rows, int cols) {
     steps.resize(n);
-    for (int t = 0; t < n; t++) steps[t].resize(rows, cols);
+    for (int t = 0; t < n; t++) {
+      steps[t].setZero(rows, cols);
+      steps[t].d.setZero(rows, cols);
+    }
   }
   void like(const Sequence &other) {
     resize(other.size(), other.rows(), other.cols());
@@ -167,8 +168,9 @@ struct Sequence {
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 
-void gradient_clip(Sequence &s, Float m = 1.0);
-void gradient_clip(Mat &d, Float m = 1.0);
+void gradient_clip(Sequence &s, Float m = 100.0);
+void gradient_clip(Batch &b, Float m = 100.0);
+void gradient_clip(Mat &d, Float m = 100.0);
 
 // FIXME: refactor into forward_/backward_
 struct NoNonlin {
@@ -215,6 +217,8 @@ struct ReluNonlin {
 
 void forward_stack(Batch &z, Batch &x, Batch &y);
 void backward_stack(Batch &z, Batch &x, Batch &y);
+void forward_stack(Batch &z, Batch &x, Sequence &y, int last);
+void backward_stack(Batch &z, Batch &x, Sequence &y, int last);
 
 void forward_reverse(Sequence &y, Sequence &x);
 void backward_reverse(Sequence &y, Sequence &x);

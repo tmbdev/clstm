@@ -61,7 +61,7 @@ struct CLSTMText {
       seq[index++](cs[pos], 0) = 1.0;
       for (int i = 0; i < neps; i++) seq[index++].setZero(d, 1);
     }
-    assert (index==seq.size());
+    assert(index == seq.size());
     seq.check();
   }
   std::wstring train(const std::wstring &in, const std::wstring &target) {
