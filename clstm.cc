@@ -476,10 +476,10 @@ struct GenericNPLSTM : INetwork {
     this->ni = ni;
     this->no = no;
     this->nf = nf;
-    each([weight_dev, mode, no, nf](Mat &w) {
+    each([weight_dev, mode, no, nf](Params &w) {
       randinit(w, no, nf, weight_dev, mode);
+      w.zeroGrad();
     }, WEIGHTS);
-    each([this,no,nf](Params &w) { w.d = Mat::Zero(no, nf); }, WEIGHTS);
   }
   void postLoad() {
     no = ROWS(WGI);
@@ -487,20 +487,15 @@ struct GenericNPLSTM : INetwork {
     assert(nf > no);
     ni = nf - no - 1;
   }
-  void resize(int N) {
-    each([N](Sequence &s) {
-      s.resize(N);
-      for (int t = 0; t < N; t++) s[t].setConstant(NAN);
-      for (int t = 0; t < N; t++) s[t].d.setConstant(NAN);
-    }, source, outputs, SEQUENCES);
-    assert(source.size() == N);
-    assert(gi.size() == N);
-    assert(go.size() == N);
-  }
   void forward() {
     int N = inputs.size();
     int bs = inputs.cols();
-    resize(N);
+    source.resize(N, nf, bs);
+    state.resize(N, no, bs);
+    gi.resize(N, no, bs);
+    go.resize(N, no, bs);
+    gf.resize(N, no, bs);
+    ci.resize(N, no, bs);
     outputs.resize(N, no, bs);
     for (int t = 0; t < N; t++) {
       int bs = COLS(inputs[t]);
@@ -518,18 +513,15 @@ struct GenericNPLSTM : INetwork {
     int bs = outputs.cols();
     Sequence out;
     out.copy(outputs);
-    each([](Sequence &s) { s.zeroGrad(); }, source, inputs, state, gi, go, gf,
-         ci);
-
     for (int t = N - 1; t >= 0; t--) {
       backward_nonlingate<H>(out[t], state[t], go[t]);
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
       gradient_clip(state[t].d, gradient_clipping);
+      backward_full<G>(ci[t], WCI, source[t], gradient_clipping);
+      backward_full<F>(go[t], WGO, source[t], gradient_clipping);
+      backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
       backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
       assert(gf[0].d.maxCoeff() == 0);
-      backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
-      backward_full<F>(go[t], WGO, source[t], gradient_clipping);
-      backward_full<G>(ci[t], WCI, source[t], gradient_clipping);
       backward_stack1(source[t], inputs[t], out, t - 1);
     }
     nsteps += N;
