@@ -114,7 +114,7 @@ void forward_stack(Batch &z, Batch &x, Batch &y) {
   int nx = x.rows();
   int ny = y.rows();
   int bs = x.cols();
-  z.resize(nx + ny, bs);
+  //z.resize(nx + ny, bs);
   BLOCK(z, 0, 0, nx, bs) = x;
   BLOCK(z, nx, 0, ny, bs) = y;
 }
@@ -132,7 +132,7 @@ void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.rows();
   int ny = y.rows();
   int bs = x.cols();
-  z.resize(nx + ny, bs);
+  //z.resize(nx + ny, bs);
   BLOCK(z, 0, 0, nx, bs) = x;
   if (last >= 0)
     BLOCK(z, nx, 0, ny, bs) = y[last];
@@ -149,7 +149,7 @@ void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 }
 void forward_reverse(Sequence &y, Sequence &x) {
   int N = x.size();
-  y.resize(N, x.rows(), x.cols());
+  //y.resize(N, x.rows(), x.cols());
   for (int i = 0; i < N; i++) y[N - i - 1] = x[i];
 }
 void backward_reverse(Sequence &y, Sequence &x) {
@@ -164,7 +164,7 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   int ni = inp.rows();
   int no = out.rows();
   int nf = ni + no + 1;
-  all.resize(nf, bs);
+  //all.resize(nf, bs);
   BLOCK(all, 0, 0, 1, bs).setConstant(1);
   BLOCK(all, 1, 0, ni, bs) = inp;
   if (last < 0)

@@ -382,8 +382,10 @@ struct Reversed : INetwork {
   void forward() {
     assert(sub.size() == 1);
     Network net = sub[0];
+    net->inputs.like(inputs);
     forward_reverse(net->inputs, inputs);
     net->forward();
+    outputs.like(net->outputs);
     forward_reverse(outputs, net->outputs);
   }
   void backward() {
