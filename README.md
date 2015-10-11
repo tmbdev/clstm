@@ -4,13 +4,31 @@ CLSTM is currently undergoing refactoring and significant changes; if you want a
 check out the `separate-derivs` branch:
 
     git clone git@github.com:tmbdev/clstm.git
+    cd clstm
     git checkout separate-derivs
+
+If you want the cutting edge branch, just run:
+
+    git clone git@github.com:tmbdev/clstm.git
+    cd clstm
+
+There is a full set of tests in the current version of clstm; just
+run them with:
+
+    ./run-tests
+
+This will check:
+
+ - gradient checkers for layers and compute steps
+ - training a simple model through the C++ API
+ - training a simple model through the Python API
+ - checking the command line training tools, including loading and saving
 
 To build a standalone C library, run
 
     scons
     sudo scons install
-    
+
 Prerequisites:
 
  - scons, Eigen
@@ -22,9 +40,9 @@ On Ubuntu, this means:
 
     sudo apt-get install libeigen3-dev \
     hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py \
-    libprotobuf-dev libprotobuf9 protobuf-compiler \                  
+    libprotobuf-dev libprotobuf9 protobuf-compiler \
     libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3 libpng12-dev
-    
+
 There are a bunch of options:
 
  - `debug=1` build with debugging options, no optimization
@@ -74,7 +92,7 @@ The `INetwork` interface contains:
         ...
     };
 
-Network structures can be hierarchical and there are some network 
+Network structures can be hierarchical and there are some network
 implementations whose purpose it is to combine other networks into more
 complex structures.
 
@@ -100,7 +118,7 @@ There are three different functions for constructing layers and networks:
  - `make_net(kind,args)` initializes a whole collection of layers at once
  - `make_net_init(kind,params)` is like `make_net`, but parameters are given in string form
 
-The `layer(kind,ninput,noutput,args,sub)` function will perform 
+The `layer(kind,ninput,noutput,args,sub)` function will perform
 these steps in sequence.
 
 Layers and networks are usually passed around as `shared_ptr<INetwork>`;
@@ -132,8 +150,8 @@ and testing code, for plotting, and for HDF5 input/output. Unlike Eigen,
 it uses standard C/C++ row major element order, as libraries like
 HDF5 expect. (NB: This will be replaced with Eigen::Tensor.)
 
-LSTM models are stored in protocol buffer format (`clstm.proto`), 
-although adding new formats is easy. There is an older HDF5-based 
+LSTM models are stored in protocol buffer format (`clstm.proto`),
+although adding new formats is easy. There is an older HDF5-based
 storage format.
 
 # Python API
@@ -152,7 +170,7 @@ There are several command line drivers:
   - `clstmocrtrain training-images test-images` learns OCR (or image-to-text) transformations;
     - input files are lists of text line images; the corresponding UTF-8 ground truth is expected in the corresponding `.gt.txt` file
   - `clstmocr` applies learned OCR models
- 
+
  In addition, you get the following HDF5-based commands:
 
   - clstmseq learns sequence-to-sequence mappings
@@ -162,7 +180,7 @@ There are several command line drivers:
 Note that most parameters are passed through the environment:
 
     lrate=3e-5 clstmctc uw3-dew.h5
-    
+
 See the notebooks in the `misc/` subdirectory for documentation on the parameters and examples of usage.
 
 (You can find all parameters via `grep 'get.env' *.cc`.)

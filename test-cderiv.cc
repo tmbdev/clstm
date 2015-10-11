@@ -44,10 +44,10 @@ void randseq(Sequence &a, int N, int n, int m) {
 void randparams(ParamVec &a, const vector<vector<int>> &specs) {
   int N = specs.size();
   a.resize(N);
-  for(int k=0; k<N; k++) {
+  for (int k = 0; k < N; k++) {
     int n = specs[k][0];
     int m = specs[k][1];
-    a[k].setZero(n,m);
+    a[k].setZero(n, m);
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
         a[k](i, j) = randu();
@@ -65,8 +65,8 @@ double maxerr(Sequence &out, Sequence &target) {
   for (int t = 0; t < N; t++) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        double delta = target[t](i,j) - out[t](i, j);
-        if (fabs(delta)>maxerr) maxerr = fabs(delta);
+        double delta = target[t](i, j) - out[t](i, j);
+        if (fabs(delta) > maxerr) maxerr = fabs(delta);
       }
     }
   }
@@ -83,7 +83,7 @@ double avgerr(Sequence &out, Sequence &target) {
   for (int t = 0; t < N; t++) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        double delta = target[t](i,j) - out[t](i, j);
+        double delta = target[t](i, j) - out[t](i, j);
         total += fabs(delta);
         count++;
       }
@@ -102,8 +102,8 @@ double mse(Sequence &out, Sequence &target) {
     out[t].zeroGrad();
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        double delta = target[t](i,j) - out[t](i, j);
-        out[t].d(i,j) = delta;
+        double delta = target[t](i, j) - out[t](i, j);
+        out[t].d(i, j) = delta;
         total += sqr(delta);
       }
     }
@@ -132,16 +132,14 @@ struct Maximizer {
 };
 
 struct Testcase;
-vector<Testcase*> testcases;
+vector<Testcase *> testcases;
 
 struct Testcase {
   Sequence inputs;
   ParamVec ps;
   Sequence outputs;
   Sequence targets;
-  virtual string name() {
-    return typeid(*this).name();
-  }
+  virtual string name() { return typeid(*this).name(); }
   // Store random initial test values appropriate for
   // the test case into inputs, ps, and targets
   virtual void init() {
@@ -182,7 +180,7 @@ void test_net(Testcase &tc) {
           outputs = tc.outputs;
           double out = mse(tc.outputs, targets);
           tc.inputs.zeroGrad();
-          for(Params &p:tc.ps) p.zeroGrad();
+          for (Params &p : tc.ps) p.zeroGrad();
           tc.backward();
           double a_deriv = tc.inputs[t].d(i, b);
           tc.inputs[t](i, b) += h;
@@ -190,7 +188,8 @@ void test_net(Testcase &tc) {
           double out1 = mse(tc.outputs, targets);
           double num_deriv = (out1 - out) / h;
           double error = fabs(1.0 - num_deriv / a_deriv / -2.0);
-          if(verbose>1) print(t, i, b, ":", error, h, "/" ,num_deriv, a_deriv, out1, out);
+          if (verbose > 1)
+            print(t, i, b, ":", error, h, "/", num_deriv, a_deriv, out1, out);
           minerr.add(error, h);
         }
         if (verbose) print("deltas", t, i, b, minerr.value, minerr.param);
@@ -201,7 +200,7 @@ void test_net(Testcase &tc) {
   }
 
   Maximizer maxparamerr;
-  for (int k=0; k<ps.size(); k++) {
+  for (int k = 0; k < ps.size(); k++) {
     int n = ps[k].rows();
     int m = ps[k].cols();
     for (int i = 0; i < n; i++) {
@@ -217,11 +216,15 @@ void test_net(Testcase &tc) {
 
 struct TestFullSigmoid : Testcase {
   void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
-  void backward() { backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0); }
+  void backward() {
+    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0);
+  }
 };
 struct TestFullTanh : Testcase {
   void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
-  void backward() { backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0); }
+  void backward() {
+    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0);
+  }
 };
 struct TestFull1Sigmoid : Testcase {
   virtual void init() {
@@ -230,7 +233,9 @@ struct TestFull1Sigmoid : Testcase {
     randparams(ps, {{3, 8}});
   }
   void forward() { forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
-  void backward() { backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0); }
+  void backward() {
+    backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0);
+  }
 };
 struct TestFull1Tanh : Testcase {
   virtual void init() {
@@ -239,7 +244,9 @@ struct TestFull1Tanh : Testcase {
     randparams(ps, {{3, 8}});
   }
   void forward() { forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
-  void backward() { backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0); }
+  void backward() {
+    backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0);
+  }
 };
 struct TestStack : Testcase {
   virtual void init() {
@@ -259,7 +266,6 @@ struct TestStack1 : Testcase {
   void forward() { forward_stack1(outputs[0], inputs[0], inputs, 1); }
   void backward() { backward_stack1(outputs[0], inputs[0], inputs, 1); }
 };
-
 
 int main(int argc, char **argv) {
   TRY {
