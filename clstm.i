@@ -148,7 +148,8 @@ struct Codec {
   wchar_t decode(int cls);
   std::wstring decode(Classes &cs);
   void encode(Classes &cs, const std::wstring &s);
-  void operator=(const Codec &) = delete;
+private:
+  void operator=(const Codec &);
 };
 
 struct INetwork;
