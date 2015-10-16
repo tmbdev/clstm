@@ -204,6 +204,7 @@ void save_as_proto(const string &fname, INetwork *net) {
 Network load_as_proto(const string &fname) {
   ifstream stream;
   stream.open(fname, ios::binary);
+  if(!stream) throwf("%s: cannot open", fname.c_str());
   unique_ptr<clstm::NetworkProto> proto;
   proto.reset(new clstm::NetworkProto());
   if (proto->ParseFromIstream(&stream) == false) {
