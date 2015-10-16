@@ -39,9 +39,46 @@ void gradient_clip(Mat &d, Float m) {
 
 void gradient_clip(Batch &b, Float m) { gradient_clip(b.d, m); }
 
+inline array<Eigen::IndexPair<int>,1> axes(int i,int j) {
+  array<Eigen::IndexPair<int>,1> result = {Eigen::IndexPair<int>(i,j)};
+  return result;
+}
+inline array<ptrdiff_t,1> ar(int i) {
+  return array<ptrdiff_t,1>({i});
+}
+inline array<ptrdiff_t,2> ar(int i,int j) {
+  return array<ptrdiff_t,2>({i,j});
+}
+inline Eigen::Sizes<1> S(int i) {
+  return Eigen::Sizes<1>({i});
+}
+inline Eigen::Sizes<2> S(int i,int j) {
+  return Eigen::Sizes<2>({i,j});
+}
+
+#ifndef USEMAT
 template <class F>
 void forward_full1(Batch &y, Params &W1, Batch &x) {
-  y.v = HOMDOT(W1.v, x.v);
+  int n = W1.V().dimension(0), m = W1.V().dimension(1);
+  int bs = x.V().dimension(1);
+  Float (*f)(Float) = F::nonlin;
+  y.V() = (W1.V().slice(ar(0,1),ar(n,m-1)).contract(x.V(),axes(1,0)) +
+         W1.V().chip(0,1).reshape(ar(n,1)).broadcast(ar(1,bs)))
+           .unaryExpr(f);
+}
+template <class F>
+void backward_full1(Batch &y, Params &W1, Batch &x, Float gc) {
+  int n = W1.V().dimension(0), m = W1.V().dimension(1);
+  Float (*g)(Float) = F::yderiv;
+  Tensor2 temp = y.D() * y.V().unaryExpr(g);
+  x.D() = W1.V().slice(ar(0,1),ar(n,m-1)).contract(temp,axes(0,0));
+  W1.D().slice(ar(0,1),ar(n,m-1)) += temp.contract(x.V(), axes(1,1));
+  W1.D().chip(0,1) += temp.sum(ar(1));
+}
+#else
+template <class F>
+void forward_full1(Batch &y, Params &W1, Batch &x) {
+  y.v = (CBUTFIRST(W1.v) * x.v).colwise() + CFIRST(W1.v);
   F::f(y.v);
 }
 template <class F>
@@ -56,6 +93,7 @@ void backward_full1(Batch &y, Params &W1, Batch &x, Float gc) {
   auto d_w = CFIRST(W1.d);
   for (int b = 0; b < bs; b++) d_w += COL(temp, b);
 }
+#endif
 template void forward_full1<NoNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x);
@@ -69,6 +107,20 @@ template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x,
                                          Float gc);
 
 // compute non-linear full layers
+#ifndef USEMAT
+template <class F>
+void forward_full(Batch &y, Params &W, Batch &x) {
+   Float (*f)(Float) = F::nonlin;
+   y.V() = W.V().contract(x.V(), axes(1,0)).unaryExpr(f);
+}
+template <class F>
+void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
+   Float (*g)(Float) = F::yderiv;
+   Tensor2 temp = y.V().unaryExpr(g) * y.D();
+   x.D() += W.V().contract(temp, axes(0,0));
+   W.D() += temp.contract(x.V(), axes(1,1));
+}
+#else
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
   y.v = nonlin<F>(MATMUL(W.v, x.v));
@@ -80,6 +132,7 @@ void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
   x.d += MATMUL_TR(W.v, temp);
   W.d += MATMUL_RT(temp, x.v);
 }
+#endif
 template void forward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
@@ -92,6 +145,30 @@ template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x,
 template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x,
                                         Float gc);
 
+#ifndef USEMAT
+void forward_softmax(Batch &z, Params &W1, Batch &x) {
+  int n = W1.V().dimension(0);
+  int m = W1.V().dimension(1);
+  int bs = z.V().dimension(1);
+  Float (*f)(Float) = limexp;
+  z.V() = (W1.V().slice(ar(0,1),ar(n,m-1)).contract(x.V(),axes(1,0)) +
+         W1.V().chip(0,1).reshape(ar(n,1)).broadcast(ar(1,bs))).unaryExpr(f);
+  for (int b = 0; b < bs; b++) {
+    double total = 0.0;
+    for(int i=0; i<n; i++) total += z.V()(i,b);
+    for(int i=0; i<n; i++) z.V()(i,b) /= total;
+  }
+}
+void backward_softmax(Batch &z, Params &W1, Batch &x) {
+  int n = W1.V().dimension(0), m = W1.V().dimension(1);
+  int bs = z.V().dimension(1);
+  x.D() = W1.V().slice(ar(0,1),ar(n,m-1)).contract(z.D(),axes(0,0));
+  W1.D().slice(ar(0,1),ar(n,m-1)) += z.D().contract(x.V(), axes(1,1));
+  for (int i=0; i<n; i++) 
+    for (int b = 0; b < bs; b++)
+      W1.D()(i,0) += z.D()(i,b);
+}
+#else
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
   int n = ROWS(W1.v);
   int m = COLS(W1.v);
@@ -103,7 +180,6 @@ void forward_softmax(Batch &z, Params &W1, Batch &x) {
     for(int i=0; i<n; i++) z.v(i,b) /= total;
   }
 }
-
 void backward_softmax(Batch &z, Params &W1, Batch &x) {
   x.d = MATMUL_TR(CBUTFIRST(W1.v), z.d);
   auto d_W = CBUTFIRST(W1.d);
@@ -116,6 +192,7 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
       d_w(i) += z.d(i,b);
   CFIRST(W1.d) = d_w;
 }
+#endif
 
 void forward_stack(Batch &z, Batch &x, Batch &y) {
   assert(x.cols() == y.cols());
