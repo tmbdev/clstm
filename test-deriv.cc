@@ -35,7 +35,7 @@ void randseq(Sequence &a, int N, int n, int m) {
   a.resize(N, n, m);
   for (int t = 0; t < N; t++)
     for (int i = 0; i < n; i++)
-      for (int j = 0; j < m; j++) a[t](i, j) = randu();
+      for (int j = 0; j < m; j++) a[t].v(i, j) = randu();
 }
 void randparams(vector<Params> &a) {
   int N = a.size();
@@ -43,7 +43,7 @@ void randparams(vector<Params> &a) {
     int n = a[t].rows();
     int m = a[t].cols();
     for (int i = 0; i < n; i++)
-      for (int j = 0; j < m; j++) a[t](i, j) = randu();
+      for (int j = 0; j < m; j++) a[t].v(i, j) = randu();
   }
 }
 
@@ -55,7 +55,7 @@ double err(Sequence &a, Sequence &b) {
   double total = 0.0;
   for (int t = 0; t < N; t++)
     for (int i = 0; i < n; i++)
-      for (int j = 0; j < m; j++) total += sqr(a[t](i, j) - b[t](i, j));
+      for (int j = 0; j < m; j++) total += sqr(a[t].v(i, j) - b[t].v(i, j));
   return total;
 }
 
@@ -121,7 +121,7 @@ void test_net(Network net) {
           set_inputs(&*net, xs);
           net->forward();
           double out1 = err(net->outputs, ys);
-          net->inputs[t](i, b) += h;
+          net->inputs[t].v(i, b) += h;
           net->forward();
           double out2 = err(net->outputs, ys);
           double num_deriv = (out2 - out1) / h;
@@ -158,7 +158,7 @@ void test_net(Network net) {
         Minimizer minerr;
         for (float h = 1e-6; h < 1.0; h *= 10) {
           params1 = params;
-          params1[k](i, j) += h;
+          params1[k].v(i, j) += h;
           set_params(net, params1);
           net->forward();
           double out1 = err(net->outputs, ys);

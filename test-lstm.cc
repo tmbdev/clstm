@@ -29,11 +29,11 @@ void gentest(Sequence &xs, Sequence &ys) {
   xs.zero();
   ys.resize(N, 2, 1);
   ys.zero();
-  ys[0](0, 0) = 1;
+  ys[0].v(0, 0) = 1;
   for (int t = 0; t < N; t++) {
     int out = (drand48() < 0.3);
-    xs[t](0, 0) = out;
-    if (t < N - 1) ys[t + 1](out, 0) = 1.0;
+    xs[t].v(0, 0) = out;
+    if (t < N - 1) ys[t + 1].v(out, 0) = 1.0;
   }
 }
 
@@ -42,7 +42,7 @@ Float maxerr(Sequence &xs, Sequence &ys) {
   for (int t = 0; t < xs.size(); t++) {
     for (int i = 0; i < xs.rows(); i++) {
       for (int j = 0; j < ys.cols(); j++) {
-        Float err = fabs(xs[t](i, j) - ys[t](i, j));
+        Float err = fabs(xs[t].v(i, j) - ys[t].v(i, j));
         merr = fmax(err, merr);
       }
     }
@@ -58,10 +58,10 @@ double test_net(Network net) {
     set_inputs(net.get(), xs);
     net->forward();
     if (getienv("verbose", 0)) {
-      for (int t = 0; t < xs.size(); t++) cout << xs[t](0, 0);
+      for (int t = 0; t < xs.size(); t++) cout << xs[t].v(0, 0);
       cout << endl;
       for (int t = 0; t < net->outputs.size(); t++)
-        cout << int(0.5 + net->outputs[t](1, 0));
+        cout << int(0.5 + net->outputs[t].v(1, 0));
       cout << endl;
       cout << endl;
     }

@@ -222,8 +222,8 @@ string sequence_info(Sequence &seq) {
     result += string(":") + (seq.size()>0?to_string(seq[0].cols()):"*");
     double lo = 1e99, hi = -1e99;
     for (int t=0;t<seq.size(); t++) {
-        lo = fmin(lo, seq[t].minCoeff());
-        hi = fmax(hi, seq[t].maxCoeff());
+        lo = fmin(lo, seq[t].v.minCoeff());
+        hi = fmax(hi, seq[t].v.maxCoeff());
     }
     result += "[" + to_string(lo) + "," + to_string(hi) + "]";
     return result;
@@ -373,7 +373,7 @@ void sequence_of_array(Sequence &a,PyObject *object_) {
         a[t].resize(d,bs);
         for(int i=0; i<d; i++)
             for(int b=0; b<bs; b++)
-                a[t](i,b) = np(t,i,b);
+                a[t].v(i,b) = np(t,i,b);
     }
 }
 
@@ -404,7 +404,7 @@ void array_of_sequence(PyObject *object_,Sequence &a) {
     for(int t=0; t<N; t++) {
         for(int i=0; i<d; i++)
             for(int b=0; b<bs; b++)
-                np(t,i,b) = a[t](i,b);
+                np(t,i,b) = a[t].v(i,b);
     }
 }
 

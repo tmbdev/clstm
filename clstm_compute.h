@@ -87,36 +87,24 @@ inline Mat xprime(T &a) {
   return result;
 }
 
-struct Batch : Mat {
+struct Batch {
+  Mat v;
   Mat d;
-  template <class T>
-  void operator=(T other) {
-    (Mat &)*this = other;
-    zeroGrad();
-  }
-  void resize(int n, int m) {
-    setZero(n, m);
+  int rows() const { return v.rows(); }
+  int cols() const { return v.cols(); }
+  void setZero(int n, int m) {
+    v.setZero(n, m);
     d.setZero(n, m);
   }
+  void resize(int n, int m) {
+    setZero(n,m);
+  }
+  void clear() { v.setZero(); d.setZero(); }
   void zeroGrad() { d.setZero(rows(), cols()); }
 };
-struct Params : Mat {
-  Mat d;
-  template <class T>
-  void operator=(T other) {
-    (Mat &)*this = other;
-    zeroGrad();
-  }
-  void resize(int n, int m) {
-    setZero(n, m);
-    d.setZero(n, m);
-  }
-  void zeroGrad() {
-    d.setZero(rows(), cols());
-    assert(d.rows() > 0);
-  }
+struct Params : Batch {
   void update(Float lr, Float mom) {
-    *this += lr *d;
+    v += lr *d;
     d *= mom;
   }
 };
@@ -125,7 +113,7 @@ struct Params : Mat {
 struct Sequence {
   vector<Batch> steps;
   Sequence() {}
-  Sequence(int n) : steps(n) {}
+  Sequence(int N, int r, int b) { resize(N, r, b); }
   void clear() { steps.clear(); }
   int rows() const { return steps[0].rows(); }
   int cols() const { return steps[0].cols(); }
@@ -141,11 +129,10 @@ struct Sequence {
   }
   int size() const { return steps.size(); }
   void resize(int n) { resize(n, 1, 1); }
-  void resize(int n, int rows, int cols) {
-    steps.resize(n);
-    for (int t = 0; t < n; t++) {
-      steps[t].setZero(rows, cols);
-      steps[t].d.setZero(rows, cols);
+  void resize(int N, int n, int m) {
+    steps.resize(N);
+    for (int t = 0; t < N; t++) {
+      steps[t].resize(n, m);
     }
   }
   void like(const Sequence &other) {
@@ -158,7 +145,7 @@ struct Sequence {
   Batch &operator[](int i) { return steps[i]; }
   const Batch &operator[](int i) const { return steps[i]; }
   void zero() {
-    for (int t = 0; t < steps.size(); t++) steps[t].setZero();
+    for (int t = 0; t < steps.size(); t++) steps[t].clear();
   }
   void zeroGrad() {
     for (int t = 0; t < steps.size(); t++) steps[t].zeroGrad();
@@ -254,6 +241,7 @@ void randgauss(Mat &m);
 void randgauss(Vec &v);
 void randinit(Mat &m, float s, const string mode = "unif");
 void randinit(Vec &m, float s, const string mode = "unif");
+void randinit(Batch &m, int no, int ni, float s, const string mode = "unif");
 void randinit(Mat &m, int no, int ni, float s, const string mode = "unif");
 void randinit(Vec &m, int no, float s, const string mode = "unif");
 void zeroinit(Mat &m, int no, int ni);

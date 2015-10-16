@@ -126,7 +126,7 @@ void proto_of_net(clstm::NetworkProto *proto, INetwork *net,
     string name = it.first;
     clstm::Array *array = proto->add_weights();
     array->set_name(name);
-    proto_of_Mat(array, *a, weights);
+    proto_of_Mat(array, a->v, weights);
   }
   for (int i = 0; i < net->sub.size(); i++) {
     clstm::NetworkProto *subproto = proto->add_sub();
@@ -163,7 +163,7 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
   for (int i = 0; i < proto->weights_size(); i++) {
     string key = proto->weights(i).name();
     Params *a = weights[key];
-    Mat_of_proto(*a, &proto->weights(i));
+    Mat_of_proto(a->v, &proto->weights(i));
   }
   for (int i = 0; i < proto->sub_size(); i++) {
     net->add(net_of_proto(&proto->sub(i)));

@@ -38,7 +38,7 @@ void randseq(Sequence &a, int N, int n, int m) {
   a.resize(N, n, m);
   for (int t = 0; t < N; t++)
     for (int i = 0; i < n; i++)
-      for (int j = 0; j < m; j++) a[t](i, j) = randu();
+      for (int j = 0; j < m; j++) a[t].v(i, j) = randu();
 }
 
 void randparams(ParamVec &a, const vector<vector<int>> &specs) {
@@ -50,7 +50,7 @@ void randparams(ParamVec &a, const vector<vector<int>> &specs) {
     a[k].setZero(n, m);
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        a[k](i, j) = randu();
+        a[k].v(i, j) = randu();
       }
     }
   }
@@ -65,7 +65,7 @@ double maxerr(Sequence &out, Sequence &target) {
   for (int t = 0; t < N; t++) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        double delta = target[t](i, j) - out[t](i, j);
+        double delta = target[t].v(i, j) - out[t].v(i, j);
         if (fabs(delta) > maxerr) maxerr = fabs(delta);
       }
     }
@@ -83,7 +83,7 @@ double avgerr(Sequence &out, Sequence &target) {
   for (int t = 0; t < N; t++) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        double delta = target[t](i, j) - out[t](i, j);
+        double delta = target[t].v(i, j) - out[t].v(i, j);
         total += fabs(delta);
         count++;
       }
@@ -102,7 +102,7 @@ double mse(Sequence &out, Sequence &target) {
     out[t].zeroGrad();
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        double delta = target[t](i, j) - out[t](i, j);
+        double delta = target[t].v(i, j) - out[t].v(i, j);
         out[t].d(i, j) = delta;
         total += sqr(delta);
       }
@@ -183,7 +183,7 @@ void test_net(Testcase &tc) {
           for (Params &p : tc.ps) p.zeroGrad();
           tc.backward();
           double a_deriv = tc.inputs[t].d(i, b);
-          tc.inputs[t](i, b) += h;
+          tc.inputs[t].v(i, b) += h;
           tc.forward();
           double out1 = mse(tc.outputs, targets);
           double num_deriv = (out1 - out) / h;

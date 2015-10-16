@@ -325,14 +325,14 @@ inline void assign(Sequence &seq, mdarray<float> &a) {
     seq.resize(a.dim(0));
     for (int t = 0; t < seq.size(); t++) {
       seq[t].resize(a.dim(1), 1);
-      for (int i = 0; i < a.dim(1); i++) seq[t](i, 0) = a(t, i);
+      for (int i = 0; i < a.dim(1); i++) seq[t].v(i, 0) = a(t, i);
     }
   } else if (a.rank() == 3) {
     seq.resize(a.dim(0));
     for (int t = 0; t < seq.size(); t++) {
       seq[t].resize(a.dim(1), a.dim(2));
       for (int i = 0; i < a.dim(1); i++)
-        for (int j = 0; j < a.dim(2); j++) seq[t](i, j) = a(t, i, j);
+        for (int j = 0; j < a.dim(2); j++) seq[t].v(i, j) = a(t, i, j);
     }
   } else {
     THROW("bad rank");
@@ -348,7 +348,7 @@ void set_targets(INetwork *net, mdarray<float> &targets) {
   for (int t = 0; t < N; t++)
     for (int i = 0; i < d; i++) net->outputs[t].d(i, 0) = targets(t, i);
   for (int t = 0; t < net->outputs.size(); t++)
-    net->outputs[t].d -= net->outputs[t];
+    net->outputs[t].d -= net->outputs[t].v;
 }
 void set_targets_accelerated(INetwork *net, mdarray<float> &targets) {
   THROW("unimplemented");

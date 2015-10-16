@@ -101,29 +101,29 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
   assert(COLS(targets[0]) == 1);
   int n1 = outputs.size();
   int n2 = targets.size();
-  int nc = targets[0].size();
+  int nc = targets[0].rows();
   Mat moutputs(n1, nc);
   Mat mtargets(n2, nc);
-  for (int i = 0; i < n1; i++) moutputs.row(i) = outputs[i].col(0);
-  for (int i = 0; i < n2; i++) mtargets.row(i) = targets[i].col(0);
+  for (int i = 0; i < n1; i++) moutputs.row(i) = outputs[i].v.col(0);
+  for (int i = 0; i < n2; i++) mtargets.row(i) = targets[i].v.col(0);
   Mat aligned;
   ctc_align_targets(aligned, moutputs, mtargets);
   posteriors.resize(n1);
   for (int i = 0; i < n1; i++) {
     posteriors[i].resize(aligned.row(i).size(), 1);
-    posteriors[i].col(0) = aligned.row(i);
+    posteriors[i].v.col(0) = aligned.row(i);
   }
 }
 
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
                        Classes &targets) {
-  int nclasses = outputs[0].size();
+  int nclasses = outputs[0].v.size();
   Sequence stargets;
   stargets.resize(targets.size());
   for (int t = 0; t < stargets.size(); t++) {
     stargets[t].resize(nclasses, 1);
-    stargets[t].fill(0);
-    stargets[t](targets[t], 0) = 1.0;
+    stargets[t].v.fill(0);
+    stargets[t].v(targets[t], 0) = 1.0;
   }
   ctc_align_targets(posteriors, outputs, stargets);
 }
@@ -133,9 +133,9 @@ void mktargets(Sequence &seq, Classes &transcript, int ndim) {
   for (int t = 0; t < seq.size(); t++) {
     seq[t].setZero(ndim, 1);
     if (t % 2 == 1)
-      seq[t](transcript[(t - 1) / 2]) = 1;
+      seq[t].v(transcript[(t - 1) / 2]) = 1;
     else
-      seq[t](0) = 1;
+      seq[t].v(0) = 1;
   }
 }
 
@@ -150,7 +150,7 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
   int mt = -1;
   while (t < N) {
     int index;
-    float v = outputs[t].col(batch).maxCoeff(&index);
+    float v = outputs[t].v.col(batch).maxCoeff(&index);
     if (index == 0) {
       // NB: there should be a 0 at the end anyway
       if (mc != -1 && mc != 0) {

@@ -327,15 +327,15 @@ inline void assign(Sequence &seq, T &a) {
   seq.resize(a.dim(0));
   for (int t = 0; t < a.dim(0); t++) {
     seq[t].resize(a.dim(1), 1);
-    for (int i = 0; i < a.dim(1); i++) seq[t](i, 0) = a(t, i);
+    for (int i = 0; i < a.dim(1); i++) seq[t].v(i, 0) = a(t, i);
   }
 }
 
 template <class T>
 inline void assign(T &a, Sequence &seq) {
-  a.resize(int(seq.size()), int(seq[0].size()));
+  a.resize(int(seq.size()), int(seq[0].v.size()));
   for (int t = 0; t < a.dim(0); t++) {
-    for (int i = 0; i < a.dim(1); i++) a(t, i) = seq[t](i);
+    for (int i = 0; i < a.dim(1); i++) a(t, i) = seq[t].v(i);
   }
 }
 

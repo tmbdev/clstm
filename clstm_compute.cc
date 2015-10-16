@@ -41,18 +41,18 @@ void gradient_clip(Batch &b, Float m) { gradient_clip(b.d, m); }
 
 template <class F>
 void forward_full1(Batch &y, Params &W1, Batch &x) {
-  y = HOMDOT(W1, x);
-  F::f(y);
+  y.v = HOMDOT(W1.v, x.v);
+  F::f(y.v);
 }
 template <class F>
 void backward_full1(Batch &y, Params &W1, Batch &x, Float gc) {
   Mat temp;
   temp = y.d;
-  F::df(temp, y);
-  x.d = MATMUL_TR(CBUTFIRST(W1), temp);
-  int bs = y.cols();
+  F::df(temp, y.v);
+  x.d = MATMUL_TR(CBUTFIRST(W1.v), temp);
+  int bs = y.v.cols();
   auto d_W = CBUTFIRST(W1.d);
-  d_W += MATMUL_RT(temp, x);
+  d_W += MATMUL_RT(temp, x.v);
   auto d_w = CFIRST(W1.d);
   for (int b = 0; b < bs; b++) d_w += COL(temp, b);
 }
@@ -71,14 +71,14 @@ template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x,
 // compute non-linear full layers
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
-  y = nonlin<F>(MATMUL(W, x));
+  y.v = nonlin<F>(MATMUL(W.v, x.v));
 }
 template <class F>
 void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
-  Mat temp = EMUL(yprime<F>(y), y.d);
+  Mat temp = EMUL(yprime<F>(y.v), y.d);
   gradient_clip(temp, gc);
-  x.d += MATMUL_TR(W, temp);
-  W.d += MATMUL_RT(temp, x);
+  x.d += MATMUL_TR(W.v, temp);
+  W.d += MATMUL_RT(temp, x.v);
 }
 template void forward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
@@ -93,20 +93,28 @@ template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x,
                                         Float gc);
 
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
-  z = MAPFUN(HOMDOT(W1, x), limexp);
-  for (int b = 0; b < COLS(z); b++) {
-    Float total = fmax(SUMREDUCE(COL(z, b)), 1e-9);
-    COL(z, b) /= total;
+  int n = ROWS(W1.v);
+  int m = COLS(W1.v);
+  int bs = COLS(x.v);
+  z.v = MAPFUN(HOMDOT(W1.v, x.v), limexp);
+  for (int b = 0; b < bs; b++) {
+    double total = 0.0;
+    for(int i=0; i<n; i++) total += z.v(i,b);
+    for(int i=0; i<n; i++) z.v(i,b) /= total;
   }
 }
 
 void backward_softmax(Batch &z, Params &W1, Batch &x) {
-  x.d = MATMUL_TR(CBUTFIRST(W1), z.d);
+  x.d = MATMUL_TR(CBUTFIRST(W1.v), z.d);
   auto d_W = CBUTFIRST(W1.d);
-  d_W += MATMUL_RT(z.d, x);
-  auto d_w = CFIRST(W1.d);
-  int bs = COLS(z);
-  for (int b = 0; b < bs; b++) d_w += COL(z.d, b);
+  d_W += MATMUL_RT(z.d, x.v);
+  int n = ROWS(W1.v);
+  int bs = COLS(z.v);
+  Vec d_w= CFIRST(W1.d);
+  for (int i=0; i<n; i++) 
+    for (int b = 0; b < bs; b++)
+      d_w(i) += z.d(i,b);
+  CFIRST(W1.d) = d_w;
 }
 
 void forward_stack(Batch &z, Batch &x, Batch &y) {
@@ -115,8 +123,8 @@ void forward_stack(Batch &z, Batch &x, Batch &y) {
   int ny = y.rows();
   int bs = x.cols();
   //z.resize(nx + ny, bs);
-  BLOCK(z, 0, 0, nx, bs) = x;
-  BLOCK(z, nx, 0, ny, bs) = y;
+  BLOCK(z.v, 0, 0, nx, bs) = x.v;
+  BLOCK(z.v, nx, 0, ny, bs) = y.v;
 }
 void backward_stack(Batch &z, Batch &x, Batch &y) {
   assert(x.cols() == y.cols());
@@ -133,11 +141,11 @@ void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   int ny = y.rows();
   int bs = x.cols();
   //z.resize(nx + ny, bs);
-  BLOCK(z, 0, 0, nx, bs) = x;
+  BLOCK(z.v, 0, 0, nx, bs) = x.v;
   if (last >= 0)
-    BLOCK(z, nx, 0, ny, bs) = y[last];
+    BLOCK(z.v, nx, 0, ny, bs) = y[last].v;
   else
-    BLOCK(z, nx, 0, ny, bs).setZero();
+    BLOCK(z.v, nx, 0, ny, bs).setZero();
 }
 void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   assert(x.cols() == y.cols());
@@ -165,12 +173,12 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   int no = out.rows();
   int nf = ni + no + 1;
   //all.resize(nf, bs);
-  BLOCK(all, 0, 0, 1, bs).setConstant(1);
-  BLOCK(all, 1, 0, ni, bs) = inp;
+  BLOCK(all.v, 0, 0, 1, bs).setConstant(1);
+  BLOCK(all.v, 1, 0, ni, bs) = inp.v;
   if (last < 0)
-    BLOCK(all, 1 + ni, 0, no, bs).setConstant(0);
+    BLOCK(all.v, 1 + ni, 0, no, bs).setConstant(0);
   else
-    BLOCK(all, 1 + ni, 0, no, bs) = out[last];
+    BLOCK(all.v, 1 + ni, 0, no, bs) = out[last].v;
 }
 void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   assert(inp.cols() == out.cols());
@@ -185,26 +193,26 @@ void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
 // combine the delayed gated state with the gated input
 void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
                       int last, Batch &gf) {
-  state = EMUL(ci, gi);
-  if (last >= 0) state += EMUL(gf, states[last]);
+  state.v = EMUL(ci.v, gi.v);
+  if (last >= 0) state.v += EMUL(gf.v, states[last].v);
 }
 void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
                        int last, Batch &gf) {
-  if (last >= 0) states[last].d.A += state.d.A * gf.A;
-  if (last >= 0) gf.d.A += state.d.A * states[last].A;
-  gi.d.A += state.d.A * ci.A;
-  ci.d.A += state.d.A * gi.A;
+  if (last >= 0) states[last].d.A += state.d.A * gf.v.A;
+  if (last >= 0) gf.d.A += state.d.A * states[last].v.A;
+  gi.d.A += state.d.A * ci.v.A;
+  ci.d.A += state.d.A * gi.v.A;
 }
 
 // nonlinear gated output
 template <class H>
 void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
-  out = EMUL(nonlin<H>(state), go);
+  out.v = EMUL(nonlin<H>(state.v), go.v);
 }
 template <class H>
 void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
-  go.d.A += nonlin<H>(state).A * out.d.A;
-  state.d.A += xprime<H>(state).A * go.A * out.d.A;
+  go.d.A += nonlin<H>(state.v).A * out.d.A;
+  state.d.A += xprime<H>(state.v).A * go.v.A * out.d.A;
 }
 
 template void forward_nonlingate<TanhNonlin>(Batch &out, Batch &state,
@@ -260,6 +268,10 @@ void randinit(Vec &m, float s, const string mode) {
     m = m * s;
   }
 }
+void randinit(Batch &m, int no, int ni, float s, const string mode) {
+  m.resize(no, ni);
+  randinit(m.v, s, mode);
+}
 void randinit(Mat &m, int no, int ni, float s, const string mode) {
   m.resize(no, ni);
   randinit(m, s, mode);
@@ -294,17 +306,20 @@ typedef vector<Classes> BatchClasses;
 
 Vec timeslice(const Sequence &s, int i, int b) {
   Vec result(s.size());
-  for (int t = 0; t < s.size(); t++) result[t] = s[t](i, b);
+  for (int t = 0; t < s.size(); t++) result[t] = s[t].v(i, b);
   return result;
 }
 
-bool anynan(Batch &a) {
+bool anynan(Mat &a) {
   for (int j = 0; j < ROWS(a); j++) {
     for (int k = 0; k < COLS(a); k++) {
       float x = a(j, k);
       if (isnan(x)) return true;
     }
   }
+}
+bool anynan(Batch &a) {
+  return anynan(a.v) || anynan(a.d);
 }
 bool anynan(Sequence &a) {
   for (int i = 0; i < a.size(); i++)

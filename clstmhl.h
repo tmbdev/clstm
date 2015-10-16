@@ -53,13 +53,13 @@ struct CLSTMText {
     Sequence &seq = net->inputs;
     int d = net->ninput();
     seq.clear();
-    seq.resize(cs.size() * (neps + 1) + neps);
+    seq.resize(cs.size() * (neps + 1) + neps, d, 1);
     int index = 0;
-    for (int i = 0; i < neps; i++) seq[index++].setZero(d, 1);
+    for (int i = 0; i < neps; i++) seq[index++].clear();
     for (int pos = 0; pos < cs.size(); pos++) {
-      seq[index].setZero(d, 1);
-      seq[index++](cs[pos], 0) = 1.0;
-      for (int i = 0; i < neps; i++) seq[index++].setZero(d, 1);
+      seq[index].clear();
+      seq[index++].v(cs[pos], 0) = 1.0;
+      for (int i = 0; i < neps; i++) seq[index++].clear();
     }
     assert(index == seq.size());
     seq.check();
@@ -72,7 +72,7 @@ struct CLSTMText {
     mktargets(targets, transcript, nclasses);
     ctc_align_targets(aligned, net->outputs, targets);
     for (int t = 0; t < aligned.size(); t++)
-      net->outputs[t].d = aligned[t] - net->outputs[t];
+      net->outputs[t].d = aligned[t].v - net->outputs[t].v;
     net->backward();
     net->update();
     Classes output_classes;
@@ -103,7 +103,7 @@ struct CLSTMText {
     outputs.resize(int(o.size()), int(o[0].rows()));
     for (int t = 0; t < outputs.dim(0); t++)
       for (int c = 0; c < outputs.dim(1); c++)
-        outputs(t, c) = net->outputs[t](c, 0);
+        outputs(t, c) = net->outputs[t].v(c, 0);
   }
 };
 
@@ -142,7 +142,7 @@ struct CLSTMOCR {
     mktargets(targets, transcript, nclasses);
     ctc_align_targets(aligned, net->outputs, targets);
     for (int t = 0; t < aligned.size(); t++)
-      net->outputs[t].d = aligned[t] - net->outputs[t];
+      net->outputs[t].d = aligned[t].v - net->outputs[t].v;
     net->backward();
     net->update();
     Classes outputs;
@@ -180,7 +180,7 @@ struct CLSTMOCR {
       int t = where[i];
       int cls = outputs[i];
       wchar_t c = net->codec.decode(outputs[i]);
-      float p = net->outputs[t](cls, 0);
+      float p = net->outputs[t].v(cls, 0);
       CharPrediction pred{i, t, c, p};
       preds.push_back(pred);
     }
@@ -193,7 +193,7 @@ struct CLSTMOCR {
     outputs.resize(int(o.size()), int(o[0].rows()));
     for (int t = 0; t < outputs.dim(0); t++)
       for (int c = 0; c < outputs.dim(1); c++)
-        outputs(t, c) = net->outputs[t](c, 0);
+        outputs(t, c) = net->outputs[t].v(c, 0);
   }
 };
 }
