@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <Eigen/Dense>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 namespace ocropus {
 using namespace std;
@@ -16,11 +17,15 @@ typedef double Float;
 typedef Eigen::VectorXi iVec;
 typedef Eigen::VectorXd Vec;
 typedef Eigen::MatrixXd Mat;
+typedef Eigen::TensorMap<Eigen::Tensor<double,1>> Ten1;
+typedef Eigen::TensorMap<Eigen::Tensor<double,2>> Ten2;
 #else
 typedef float Float;
 typedef Eigen::VectorXi iVec;
 typedef Eigen::VectorXf Vec;
 typedef Eigen::MatrixXf Mat;
+typedef Eigen::TensorMap<Eigen::Tensor<float,1>> Ten1;
+typedef Eigen::TensorMap<Eigen::Tensor<float,2>> Ten2;
 #endif
 
 template <typename F, typename T>
@@ -88,10 +93,11 @@ inline Mat xprime(T &a) {
 }
 
 struct Batch {
-  Mat v;
-  Mat d;
+  Mat v, d;
   int rows() const { return v.rows(); }
   int cols() const { return v.cols(); }
+  Ten2 V() { return Ten2(v.data(), v.rows(), v.cols()); }
+  Ten2 D() { return Ten2(d.data(), d.rows(), d.cols()); }
   void setZero(int n, int m) {
     v.setZero(n, m);
     d.setZero(n, m);
