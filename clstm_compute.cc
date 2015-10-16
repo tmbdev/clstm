@@ -152,7 +152,7 @@ inline Eigen::Sizes<2> S(int i,int j) {
   return Eigen::Sizes<2>({i,j});
 }
 
-// forward and backward steps
+// full layers with constant offset
 
 #ifndef USEMAT
 template <class F>
@@ -204,6 +204,8 @@ template void backward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x,
 template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x,
                                          Float gc);
 
+// full layers without constant offset
+
 #ifndef USEMAT
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
@@ -241,6 +243,8 @@ template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x,
                                         Float gc);
 template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x,
                                         Float gc);
+
+// softmax
 
 #ifndef USEMAT
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
@@ -292,12 +296,13 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
 }
 #endif
 
+// stacking
+
 void forward_stack(Batch &z, Batch &x, Batch &y) {
   assert(x.cols() == y.cols());
   int nx = x.rows();
   int ny = y.rows();
   int bs = x.cols();
-  //z.resize(nx + ny, bs);
   z.v.block(0,0,nx,bs) = x.v;
   z.v.block(nx,0,ny,bs) = y.v;
 }
@@ -310,12 +315,13 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
   y.d += z.d.block( nx, 0, ny, bs);
 }
 
+// stacking with delay
+
 void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   assert(x.cols() == y.cols());
   int nx = x.rows();
   int ny = y.rows();
   int bs = x.cols();
-  //z.resize(nx + ny, bs);
   z.v.block( 0, 0, nx, bs) = x.v;
   if (last >= 0)
     z.v.block( nx, 0, ny, bs) = y[last].v;
@@ -330,17 +336,8 @@ void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   x.d += z.d.block( 0, 0, nx, bs);
   if (last >= 0) y[last].d += z.d.block( nx, 0, ny, bs);
 }
-void forward_reverse(Sequence &y, Sequence &x) {
-  int N = x.size();
-  //y.resize(N, x.rows(), x.cols());
-  for (int i = 0; i < N; i++) y[N - i - 1] = x[i];
-}
-void backward_reverse(Sequence &y, Sequence &x) {
-  int N = x.size();
-  for (int i = 0; i < N; i++) x[N - i - 1].d += y[i].d;
-}
 
-// stack the delayed output on the input
+// stacking with delay and adding a constant
 
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   assert(inp.cols() == out.cols());
@@ -348,7 +345,6 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   int ni = inp.rows();
   int no = out.rows();
   int nf = ni + no + 1;
-  //all.resize(nf, bs);
   all.v.block( 0, 0, 1, bs).setConstant(1);
   all.v.block( 1, 0, ni, bs) = inp.v;
   if (last < 0)
@@ -366,7 +362,19 @@ void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   if (last >= 0) out[last].d += all.d.block( 1 + ni, 0, no, bs);
 }
 
+// reverse sequences
+
+void forward_reverse(Sequence &y, Sequence &x) {
+  int N = x.size();
+  for (int i = 0; i < N; i++) y[N - i - 1] = x[i];
+}
+void backward_reverse(Sequence &y, Sequence &x) {
+  int N = x.size();
+  for (int i = 0; i < N; i++) x[N - i - 1].d += y[i].d;
+}
+
 // combine the delayed gated state with the gated input
+
 void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
                       int last, Batch &gf) {
   state.v = ci.v.array() * gi.v.array();
@@ -381,6 +389,7 @@ void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
 }
 
 // nonlinear gated output
+
 template <class H>
 void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
   out.v = nonlin<H>(state.v).array() * go.v.array();
