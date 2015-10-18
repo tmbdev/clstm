@@ -7,6 +7,7 @@
 
 namespace ocropus {
 using namespace std;
+extern int useten;
 
 #define ROWS(A) (A).rows()
 #define COLS(A) (A).cols()
@@ -17,10 +18,10 @@ typedef double Float;
 typedef Eigen::VectorXi iVec;
 typedef Eigen::VectorXd Vec;
 typedef Eigen::MatrixXd Mat;
-typedef Eigen::Tensor<double,1> Tensor1;
-typedef Eigen::Tensor<double,2> Tensor2;
-typedef Eigen::TensorMap<Eigen::Tensor<double,1>> Ten1;
-typedef Eigen::TensorMap<Eigen::Tensor<double,2>> Ten2;
+typedef Eigen::Tensor<double, 1> Tensor1;
+typedef Eigen::Tensor<double, 2> Tensor2;
+typedef Eigen::TensorMap<Eigen::Tensor<double, 1>> Ten1;
+typedef Eigen::TensorMap<Eigen::Tensor<double, 2>> Ten2;
 inline int rows(const Mat &m) { return m.rows(); }
 inline int cols(const Mat &m) { return m.cols(); }
 inline int rows(const Vec &m) { return m.rows(); }
@@ -30,10 +31,10 @@ typedef float Float;
 typedef Eigen::VectorXi iVec;
 typedef Eigen::VectorXf Vec;
 typedef Eigen::MatrixXf Mat;
-typedef Eigen::Tensor<float,1> Tensor1;
-typedef Eigen::Tensor<float,2> Tensor2;
-typedef Eigen::TensorMap<Eigen::Tensor<float,1>> Ten1;
-typedef Eigen::TensorMap<Eigen::Tensor<float,2>> Ten2;
+typedef Eigen::Tensor<float, 1> Tensor1;
+typedef Eigen::Tensor<float, 2> Tensor2;
+typedef Eigen::TensorMap<Eigen::Tensor<float, 1>> Ten1;
+typedef Eigen::TensorMap<Eigen::Tensor<float, 2>> Ten2;
 typedef Float Scalar;
 inline int cols(const Ten2 &m) { return m.dimension(0); }
 inline int rows(const Ten2 &m) { return m.dimension(1); }
@@ -113,15 +114,16 @@ struct Batch {
     v.setZero(n, m);
     d.setZero(n, m);
   }
-  void resize(int n, int m) {
-    setZero(n,m);
+  void resize(int n, int m) { setZero(n, m); }
+  void clear() {
+    v.setZero();
+    d.setZero();
   }
-  void clear() { v.setZero(); d.setZero(); }
   void zeroGrad() { d.setZero(rows(), cols()); }
 };
 struct Params : Batch {
   void update(Float lr, Float mom) {
-    v += lr *d;
+    v += lr * d;
     d *= mom;
   }
 };
@@ -190,7 +192,7 @@ struct NoNonlin {
 struct SigmoidNonlin {
   static constexpr const char *kind = "Sigmoid";
   static inline Float nonlin(Float x) { return sigmoid(x); }
-  static inline Float yderiv(Float y) { return y*(1-y); }
+  static inline Float yderiv(Float y) { return y * (1 - y); }
   template <class T>
   static void f(T &x) {
     x = x.unaryExpr(ptr_fun(sigmoid));
@@ -203,7 +205,7 @@ struct SigmoidNonlin {
 struct TanhNonlin {
   static constexpr const char *kind = "Tanh";
   static inline Float nonlin(Float x) { return tanh(x); }
-  static inline Float yderiv(Float y) { return 1-y*y; }
+  static inline Float yderiv(Float y) { return 1 - y * y; }
   template <class T>
   static void f(T &x) {
     x = x.unaryExpr(ptr_fun(tanh_));

@@ -161,7 +161,6 @@ void test_net(Testcase &tc) {
   tc.init();
   // make backups for computing derivatives
   Sequence inputs = tc.inputs;
-  Sequence outputs;
   Sequence targets = tc.targets;
   ParamVec ps = tc.ps;
 
@@ -177,7 +176,6 @@ void test_net(Testcase &tc) {
           tc.inputs = inputs;
           tc.outputs.like(targets);
           tc.forward();
-          outputs = tc.outputs;
           double out = mse(tc.outputs, targets);
           tc.inputs.zeroGrad();
           for (Params &p : tc.ps) p.zeroGrad();
@@ -207,10 +205,32 @@ void test_net(Testcase &tc) {
       for (int j = 0; j < m; j++) {
         Minimizer minerr;
         for (float h = 1e-6; h < 1.0; h *= 10) {
+          tc.ps = ps;
+          tc.inputs = inputs;
+          tc.outputs.like(targets);
+          tc.forward();
+          double out = mse(tc.outputs, targets);
+          tc.inputs.zeroGrad();
+          for (Params &p : tc.ps) p.zeroGrad();
+          tc.backward();
+          double a_deriv = tc.ps[k].d(i, j);
+          tc.ps[k].v(i, j) += h;
+          tc.forward();
+          double out1 = mse(tc.outputs, targets);
+          double num_deriv = (out1 - out) / h;
+          double error = fabs(1.0 - num_deriv / a_deriv / -2.0);
+          if (verbose > 1)
+            print(k, i, j, ":", error, h, "/", num_deriv, a_deriv, out1, out);
+          minerr.add(error, h);
         }
       }
     }
   }
+
+  tc.inputs = inputs;
+  tc.ps = ps;
+  tc.targets = targets;
+
   print("OK", maxinerr.value, maxparamerr.value);
 }
 
