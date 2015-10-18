@@ -1,5 +1,7 @@
 #include "clstm_compute.h"
 
+// FIXME: factor out nonlinearities
+
 namespace ocropus {
 
 #define CBUTFIRST(M) (M).block(0,1,(M).rows(),(M).cols()-1)
@@ -248,29 +250,6 @@ template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x,
 
 #ifndef USEMAT
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
-  int n = W1.V().dimension(0);
-  int m = W1.V().dimension(1);
-  int bs = z.V().dimension(1);
-  Float (*f)(Float) = limexp;
-  z.V() = (W1.V().slice(ar(0,1),ar(n,m-1)).contract(x.V(),axes(1,0)) +
-         W1.V().chip(0,1).reshape(ar(n,1)).broadcast(ar(1,bs))).unaryExpr(f);
-  for (int b = 0; b < bs; b++) {
-    double total = 0.0;
-    for(int i=0; i<n; i++) total += z.V()(i,b);
-    for(int i=0; i<n; i++) z.V()(i,b) /= total;
-  }
-}
-void backward_softmax(Batch &z, Params &W1, Batch &x) {
-  int n = W1.V().dimension(0), m = W1.V().dimension(1);
-  int bs = z.V().dimension(1);
-  x.D() = W1.V().slice(ar(0,1),ar(n,m-1)).contract(z.D(),axes(0,0));
-  W1.D().slice(ar(0,1),ar(n,m-1)) += z.D().contract(x.V(), axes(1,1));
-  for (int i=0; i<n; i++) 
-    for (int b = 0; b < bs; b++)
-      W1.D()(i,0) += z.D()(i,b);
-}
-#else
-void forward_softmax(Batch &z, Params &W1, Batch &x) {
   int n = ROWS(W1.v);
   int m = COLS(W1.v);
   int bs = COLS(x.v);
@@ -294,10 +273,34 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
       d_w(i) += z.d(i,b);
   CFIRST(W1.d) = d_w;
 }
+#else
+void forward_softmax(Batch &z, Params &W1, Batch &x) {
+  int n = W1.V().dimension(0);
+  int m = W1.V().dimension(1);
+  int bs = z.V().dimension(1);
+  Float (*f)(Float) = limexp;
+  z.V() = (W1.V().slice(ar(0,1),ar(n,m-1)).contract(x.V(),axes(1,0)) +
+         W1.V().chip(0,1).reshape(ar(n,1)).broadcast(ar(1,bs))).unaryExpr(f);
+  for (int b = 0; b < bs; b++) {
+    double total = 0.0;
+    for(int i=0; i<n; i++) total += z.V()(i,b);
+    for(int i=0; i<n; i++) z.V()(i,b) /= total;
+  }
+}
+void backward_softmax(Batch &z, Params &W1, Batch &x) {
+  int n = W1.V().dimension(0), m = W1.V().dimension(1);
+  int bs = z.V().dimension(1);
+  x.D() = W1.V().slice(ar(0,1),ar(n,m-1)).contract(z.D(),axes(0,0));
+  W1.D().slice(ar(0,1),ar(n,m-1)) += z.D().contract(x.V(), axes(1,1));
+  for (int i=0; i<n; i++) 
+    for (int b = 0; b < bs; b++)
+      W1.D()(i,0) += z.D()(i,b);
+}
 #endif
 
 // stacking
 
+#ifdef USEMAT
 void forward_stack(Batch &z, Batch &x, Batch &y) {
   assert(x.cols() == y.cols());
   int nx = x.rows();
@@ -314,9 +317,24 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
   x.d += z.d.block( 0, 0, nx, bs);
   y.d += z.d.block( nx, 0, ny, bs);
 }
+#else
+void forward_stack(Batch &z, Batch &x, Batch &y) {
+  int nx = x.V().dimension(0), ny = y.V().dimension(0);
+  int bs = x.V().dimension(1);
+  z.V().slice(ar(0,0),ar(nx,bs)) = x.V();
+  z.V().slice(ar(nx,0),ar(ny,bs)) = y.V();
+}
+void backward_stack(Batch &z, Batch &x, Batch &y) {
+  int nx = x.V().dimension(0), ny = y.V().dimension(0);
+  int bs = x.V().dimension(1);
+  x.D() += z.D().slice(ar(0,0),ar(nx,bs));
+  y.D() += z.D().slice(ar(nx,0),ar(ny,bs));
+}
+#endif
 
 // stacking with delay
 
+#ifdef USEMAT
 void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   assert(x.cols() == y.cols());
   int nx = x.rows();
@@ -336,9 +354,25 @@ void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   x.d += z.d.block( 0, 0, nx, bs);
   if (last >= 0) y[last].d += z.d.block( nx, 0, ny, bs);
 }
+#else
+void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
+  int nx = x.V().dimension(0), ny = y[0].V().dimension(0);
+  int bs = x.V().dimension(1);
+  z.V().slice(ar(0,0),ar(nx,bs)) = x.V();
+  if(last>=0) z.V().slice(ar(nx,0),ar(ny,bs)) = y[last].V();
+  else z.V().slice(ar(nx,0),ar(ny,bs)).setZero();
+}
+void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
+  int nx = x.V().dimension(0), ny = y[0].V().dimension(0);
+  int bs = x.V().dimension(1);
+  x.D() += z.D().slice(ar(0,0),ar(nx,bs));
+  if(last>=0) y[last].D() += z.D().slice(ar(nx,0),ar(ny,bs));
+}
+#endif
 
 // stacking with delay and adding a constant
 
+#ifdef USEMAT
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   assert(inp.cols() == out.cols());
   int bs = inp.cols();
@@ -361,6 +395,22 @@ void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   inp.d += all.d.block( 1, 0, ni, bs);
   if (last >= 0) out[last].d += all.d.block( 1 + ni, 0, no, bs);
 }
+#else
+void forward_stack1(Batch &z, Batch &x, Sequence &y, int last) {
+  int nx = x.V().dimension(0), ny = y[0].V().dimension(0);
+  int bs = x.V().dimension(1);
+  z.V().slice(ar(0,0),ar(1,bs)).setConstant(Scalar(1));
+  z.V().slice(ar(1,0),ar(nx,bs)) = x.V();
+  if(last>=0) z.V().slice(ar(1+nx,0),ar(ny,bs)) = y[last].V();
+  else z.V().slice(ar(1+nx,0),ar(ny,bs)).setZero();
+}
+void backward_stack1(Batch &z, Batch &x, Sequence &y, int last) {
+  int nx = x.V().dimension(0), ny = y[0].V().dimension(0);
+  int bs = x.V().dimension(1);
+  x.D() += z.D().slice(ar(1,0),ar(nx,bs));
+  if(last>=0) y[last].D() += z.D().slice(ar(1+nx,0),ar(ny,bs));
+}
+#endif
 
 // reverse sequences
 
@@ -375,6 +425,7 @@ void backward_reverse(Sequence &y, Sequence &x) {
 
 // combine the delayed gated state with the gated input
 
+#ifdef USEMAT
 void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
                       int last, Batch &gf) {
   state.v = ci.v.array() * gi.v.array();
@@ -387,9 +438,22 @@ void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
   gi.d.array() += state.d.array() * ci.v.array();
   ci.d.array() += state.d.array() * gi.v.array();
 }
+#else
+void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int last, Batch &gf) {
+  state.V() = ci.V() * gi.V();
+  if (last>=0) state.V() += gf.V() * states[last].V();
+}
+void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states, int last, Batch &gf) {
+  if (last>=0) states[last].D() += state.D() * gf.V();
+  if (last>=0) gf.D() += state.D() * states[last].V();
+  gi.D() += state.D() * ci.V();
+  ci.D() += state.D() * gi.V();
+}
+#endif
 
 // nonlinear gated output
 
+#ifdef USEMAT
 template <class H>
 void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
   out.v = nonlin<H>(state.v).array() * go.v.array();
@@ -399,6 +463,22 @@ void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
   go.d.array() += nonlin<H>(state.v).array() * out.d.array();
   state.d.array() += xprime<H>(state.v).array() * go.v.array() * out.d.array();
 }
+#else
+template <class H>
+void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
+  Float (*f)(Float) = H::nonlin;
+  out.V() = state.V().unaryExpr(f) * go.V();
+}
+
+template <class H>
+void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
+  Float (*f)(Float) = H::nonlin;
+  auto g = [](Float x) { return H::yderiv(H::nonlin(x)); };
+  go.D() += state.V().unaryExpr(f) * out.D();
+  state.D() += state.V().unaryExpr(g) * go.V() * out.D();
+}
+#endif
+
 
 template void forward_nonlingate<TanhNonlin>(Batch &out, Batch &state,
                                              Batch &go);

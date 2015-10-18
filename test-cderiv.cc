@@ -257,7 +257,16 @@ struct TestStack : Testcase {
   void forward() { forward_stack(outputs[0], inputs[0], inputs[1]); }
   void backward() { backward_stack(outputs[0], inputs[0], inputs[1]); }
 };
-struct TestStack1 : Testcase {
+struct TestStackDelay : Testcase {
+  virtual void init() {
+    randseq(inputs, 2, 7, 4);
+    randseq(targets, 1, 14, 4);
+    randparams(ps, {});
+  }
+  void forward() { forward_stack(outputs[0], inputs[0], inputs, 1); }
+  void backward() { backward_stack(outputs[0], inputs[0], inputs, 1); }
+};
+struct TestStack1Delay : Testcase {
   virtual void init() {
     randseq(inputs, 2, 7, 4);
     randseq(targets, 1, 15, 4);
@@ -265,6 +274,33 @@ struct TestStack1 : Testcase {
   }
   void forward() { forward_stack1(outputs[0], inputs[0], inputs, 1); }
   void backward() { backward_stack1(outputs[0], inputs[0], inputs, 1); }
+};
+struct TestReverse : Testcase {
+  virtual void init() {
+    randseq(inputs, 5, 7, 4);
+    randseq(targets, 5, 7, 4);
+    randparams(ps, {});
+  }
+  void forward() { forward_reverse(outputs, inputs); }
+  void backward() { backward_reverse(outputs, inputs); }
+};
+struct TestStatemem : Testcase {
+  virtual void init() {
+    randseq(inputs, 4, 7, 4);
+    randseq(targets, 1, 7, 4);
+    randparams(ps, {});
+  }
+  void forward() { forward_statemem(outputs[0], inputs[0], inputs[1], inputs, 2, inputs[3]); }
+  void backward() { backward_statemem(outputs[0], inputs[0], inputs[1], inputs, 2, inputs[3]); }
+};
+struct TestNonlingate : Testcase {
+  virtual void init() {
+    randseq(inputs, 2, 7, 4);
+    randseq(targets, 1, 7, 4);
+    randparams(ps, {});
+  }
+  void forward() { forward_nonlingate<TanhNonlin>(outputs[0], inputs[0], inputs[1]);}
+  void backward() { backward_nonlingate<TanhNonlin>(outputs[0], inputs[0], inputs[1]); }
 };
 
 int main(int argc, char **argv) {
@@ -274,7 +310,11 @@ int main(int argc, char **argv) {
     test_net(*new TestFull1Sigmoid);
     test_net(*new TestFull1Tanh);
     test_net(*new TestStack);
-    test_net(*new TestStack1);
+    test_net(*new TestStackDelay);
+    test_net(*new TestStack1Delay);
+    test_net(*new TestReverse);
+    test_net(*new TestStatemem);
+    test_net(*new TestNonlingate);
   }
   CATCH(const char *message) { print("ERROR", message); }
 }

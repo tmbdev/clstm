@@ -59,7 +59,7 @@ env["BUILDERS"]["Protoc"] = protoc_builder
 if option("double", 0):
     env.Append(CPPDEFINES={'LSTM_DOUBLE': '1'})
 
-if option("usemat", 1):
+if option("usemat", 0):
     env.Append(CPPDEFINES={'USEMAT': '1'})
 
 # With omp=1 support, Eigen and other parts of the code may use

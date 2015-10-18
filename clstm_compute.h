@@ -10,7 +10,7 @@ using namespace std;
 
 #define ROWS(A) (A).rows()
 #define COLS(A) (A).cols()
-#define MAPFUN(M, F) ((M).unaryExpr(ptr_fun(F)))
+//#define MAPFUN(M, F) ((M).unaryExpr(ptr_fun(F)))
 
 #ifdef LSTM_DOUBLE
 typedef double Float;
@@ -21,6 +21,10 @@ typedef Eigen::Tensor<double,1> Tensor1;
 typedef Eigen::Tensor<double,2> Tensor2;
 typedef Eigen::TensorMap<Eigen::Tensor<double,1>> Ten1;
 typedef Eigen::TensorMap<Eigen::Tensor<double,2>> Ten2;
+inline int rows(const Mat &m) { return m.rows(); }
+inline int cols(const Mat &m) { return m.cols(); }
+inline int rows(const Vec &m) { return m.rows(); }
+inline int cols(const Vec &m) { return 1; }
 #else
 typedef float Float;
 typedef Eigen::VectorXi iVec;
@@ -30,6 +34,9 @@ typedef Eigen::Tensor<float,1> Tensor1;
 typedef Eigen::Tensor<float,2> Tensor2;
 typedef Eigen::TensorMap<Eigen::Tensor<float,1>> Ten1;
 typedef Eigen::TensorMap<Eigen::Tensor<float,2>> Ten2;
+typedef Float Scalar;
+inline int cols(const Ten2 &m) { return m.dimension(0); }
+inline int rows(const Ten2 &m) { return m.dimension(1); }
 #endif
 
 template <typename F, typename T>
@@ -186,7 +193,7 @@ struct SigmoidNonlin {
   static inline Float yderiv(Float y) { return y*(1-y); }
   template <class T>
   static void f(T &x) {
-    x = MAPFUN(x, sigmoid);
+    x = x.unaryExpr(ptr_fun(sigmoid));
   }
   template <class T, class U>
   static void df(T &dx, U &y) {
@@ -199,7 +206,7 @@ struct TanhNonlin {
   static inline Float yderiv(Float y) { return 1-y*y; }
   template <class T>
   static void f(T &x) {
-    x = MAPFUN(x, tanh_);
+    x = x.unaryExpr(ptr_fun(tanh_));
   }
   template <class T, class U>
   static void df(T &dx, U &y) {
@@ -212,11 +219,11 @@ struct ReluNonlin {
   static inline Float yderiv(Float y) { return heavi_(y); }
   template <class T>
   static void f(T &x) {
-    x = MAPFUN(x, relu_);
+    x = x.unaryExpr(ptr_fun(relu_));
   }
   template <class T, class U>
   static void df(T &dx, U &y) {
-    dx.array() *= MAPFUN(y, heavi_).array();
+    dx.array() *= y.unaryExpr(ptr_fun(heavi_)).array();
   }
 };
 
