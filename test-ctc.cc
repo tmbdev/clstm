@@ -53,7 +53,7 @@ void test1() {
       {0, 0, 1, 1},  //
   });
   Tensor1 err = (expected-result).abs().maximum();
-  cerr << "test1 " << err(0) << "\n";
+  cerr << "ctc test 1 err " << err(0) << "\n";
   assert(err(0) < 1e-4);
 }
 
@@ -85,7 +85,7 @@ void test2() {
       {0., 0., 0., 0., 0.12029, 1.},
   });
   Tensor1 err = (expected-result).abs().maximum();
-  cerr << "test2 " << err(0) << "\n";
+  cerr << "ctc test 2 err " << err(0) << "\n";
   assert(err(0) < 1e-4);
 }
 

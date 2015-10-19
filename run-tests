@@ -10,7 +10,7 @@ scons -j 4 test
 scons -j 4
 ./test-filter.sh
 ./test-ocr.sh
-scons -j 4 debug=1 cderiv deriv
+scons -j 4 debug=1 cderiv deriv ctc
 scons -c
 scons -j 4 pytest
 scons -c
