@@ -4,11 +4,12 @@
 // FIXME: factor out nonlinearities
 
 namespace ocropus {
+using std::cerr;
 
 int useten = []() {
   if(!getenv("useten")) return 0;
   int result = atoi(getenv("useten"));
-  std::cerr << "useten=" << result << "\n";
+  cerr << "useten=" << result << "\n";
   return result;
 } ();
 
