@@ -16,19 +16,16 @@ extern int useten;
 #ifdef LSTM_DOUBLE
 typedef double Float;
 typedef Eigen::MatrixXd Mat;
-typedef Eigen::Tensor<double, 1> Tensor1;
-typedef Eigen::Tensor<double, 2> Tensor2;
-typedef Eigen::TensorMap<Eigen::Tensor<double, 1>> Ten1;
-typedef Eigen::TensorMap<Eigen::Tensor<double, 2>> Ten2;
 #else
 typedef float Float;
 typedef Eigen::MatrixXf Mat;
-typedef Eigen::Tensor<float, 1> Tensor1;
-typedef Eigen::Tensor<float, 2> Tensor2;
-typedef Eigen::TensorMap<Eigen::Tensor<float, 1>> Ten1;
-typedef Eigen::TensorMap<Eigen::Tensor<float, 2>> Ten2;
-typedef Float Scalar;
 #endif
+
+typedef Float Scalar;
+typedef Eigen::Tensor<Float, 1> Tensor1;
+typedef Eigen::Tensor<Float, 2> Tensor2;
+typedef Eigen::TensorMap<Eigen::Tensor<Float, 1>> Ten1;
+typedef Eigen::TensorMap<Eigen::Tensor<Float, 2>> Ten2;
 
 inline int rows(const Ten2 &m) { return m.dimension(0); }
 inline int cols(const Ten2 &m) { return m.dimension(1); }
@@ -58,11 +55,6 @@ inline int argmax(const Tensor1 &m) {
 }
 inline Float sum(const Tensor1 &m) { return reduction_(m.sum()); }
 inline Float sum(const Tensor2 &m) { return reduction_(m.sum()); }
-
-inline int rows(const Mat &m) { return m.rows(); }
-inline int cols(const Mat &m) { return m.cols(); }
-inline Float maximum(const Mat &m) { return m.maxCoeff(); }
-inline Float sum(const Mat &m) { return m.sum(); }
 
 template <typename F, typename T>
 void each(F f, T &a) {
@@ -106,27 +98,6 @@ inline Float log_add(Float x, Float y) {
 }
 
 inline Float log_mul(Float x, Float y) { return x + y; }
-
-template <class NONLIN, class T>
-inline Mat nonlin(T &a) {
-  Mat result = a;
-  NONLIN::f(result);
-  return result;
-}
-template <class NONLIN, class T>
-inline Mat yprime(T &a) {
-  Mat result = Mat::Ones(ROWS(a), COLS(a));
-  NONLIN::df(result, a);
-  return result;
-}
-template <class NONLIN, class T>
-inline Mat xprime(T &a) {
-  Mat result = Mat::Ones(ROWS(a), COLS(a));
-  Mat temp = a;
-  NONLIN::f(temp);
-  NONLIN::df(result, temp);
-  return result;
-}
 
 struct Batch {
   Mat v, d;
@@ -207,50 +178,21 @@ struct NoNonlin {
   static constexpr const char *kind = "Linear";
   static inline Float nonlin(Float x) { return x; }
   static inline Float yderiv(Float y) { return 1; }
-  template <class T>
-  static void f(T &x) {}
-  template <class T, class U>
-  static void df(T &dx, U &y) {}
 };
-
 struct SigmoidNonlin {
   static constexpr const char *kind = "Sigmoid";
   static inline Float nonlin(Float x) { return sigmoid(x); }
   static inline Float yderiv(Float y) { return y * (1 - y); }
-  template <class T>
-  static void f(T &x) {
-    x = x.unaryExpr(ptr_fun(sigmoid));
-  }
-  template <class T, class U>
-  static void df(T &dx, U &y) {
-    dx.array() *= y.array() * (1 - y.array());
-  }
 };
 struct TanhNonlin {
   static constexpr const char *kind = "Tanh";
   static inline Float nonlin(Float x) { return tanh(x); }
   static inline Float yderiv(Float y) { return 1 - y * y; }
-  template <class T>
-  static void f(T &x) {
-    x = x.unaryExpr(ptr_fun(tanh_));
-  }
-  template <class T, class U>
-  static void df(T &dx, U &y) {
-    dx.array() *= (1 - y.array().square());
-  }
 };
 struct ReluNonlin {
   static constexpr const char *kind = "Relu";
   static inline Float nonlin(Float x) { return relu_(x); }
   static inline Float yderiv(Float y) { return heavi_(y); }
-  template <class T>
-  static void f(T &x) {
-    x = x.unaryExpr(ptr_fun(relu_));
-  }
-  template <class T, class U>
-  static void df(T &dx, U &y) {
-    dx.array() *= y.unaryExpr(ptr_fun(heavi_)).array();
-  }
 };
 
 void forward_stack(Batch &z, Batch &x, Batch &y);

@@ -124,10 +124,12 @@ libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
           "extras.cc", "clstm.pb.cc", "clstm_compute.cc"]
 libclstm = env.StaticLibrary("clstm", source = libsrc)
 
+all = [libclstm]
+
 programs = """clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".split(
 )
 for program in programs:
-    env.Program(program, [program + ".cc"], LIBS=[libclstm] + libs)
+    all += [env.Program(program, [program + ".cc"], LIBS=[libclstm] + libs)]
     Default(program)
 
 env.Program("test-forward", ["test-forward.cc"], LIBS=[libclstm] + libs)
@@ -161,10 +163,10 @@ if option("hdf5lib", "") != "":
         h5env.Program(program, [program + ".cc"])
 
 # A simple test of the C++ LSTM implementation.
-env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)
-env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)
-env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)
-env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)
+all += [env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)]
+all += [env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)]
+all += [env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)]
+all += [env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)]
 
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"
@@ -176,9 +178,12 @@ pyswig = swigenv.SharedLibrary("_clstm.so",
                                 "clstm.pb.cc", "clstm_compute.cc",
                                "clstm_prefab.cc", "ctc.cc"],
                                LIBS=libs)
+all += [pyswig]
 Alias('pyswig', [pyswig])
 
 destlib = distutils.sysconfig.get_config_var("DESTLIB")
 Alias('pyinstall',
       Install(os.path.join(destlib, "site-packages"),
               ["_clstm.so", "clstm.py"]))
+
+Alias('all', [all])
