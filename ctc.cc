@@ -17,10 +17,10 @@ namespace ocropus {
 using namespace std;
 using Eigen::Ref;
 
-static void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5) {
+static void forward_algorithm(Tensor2 &lr, Tensor2 &lmatch, double skip=-5) {
   int n = rows(lmatch), m = cols(lmatch);
   lr.resize(n, m);
-  Vec v(m), w(m);
+  Tensor1 v(m), w(m);
   for (int j = 0; j < m; j++) v(j) = skip * j;
   for (int i = 0; i < n; i++) {
     w(0) = skip * i;
@@ -34,28 +34,24 @@ static void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5) {
   }
 }
 
-inline Ten2 t2(Mat &m) {
-  return Ten2(m.data(), m.rows(), m.cols());
-}
-
-static void forwardbackward(Mat &both, Mat &lmatch) {
+static void forwardbackward(Tensor2 &both, Tensor2 &lmatch) {
   int n = rows(lmatch), m = cols(lmatch);
-  Mat lr;
+  Tensor2 lr;
   forward_algorithm(lr, lmatch);
-  Mat rlmatch(n,m);
+  Tensor2 rlmatch(n,m);
   for(int i=0; i<n; i++)
     for(int j=0; j<m; j++)
       rlmatch(i,j) = lmatch(n-i-1,m-j-1);
-  Mat rrl;
+  Tensor2 rrl;
   forward_algorithm(rrl, rlmatch);
-  Mat rl(n,m);
+  Tensor2 rl(n,m);
   for(int i=0; i<n; i++)
     for(int j=0; j<m; j++)
       rl(i,j) = rrl(n-i-1,m-j-1);
   both = lr + rl;
 }
 
-void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
+void ctc_align_targets(Tensor2 &posteriors, Tensor2 &outputs, Tensor2 &targets) {
   double lo = 1e-5;
   int n1 = rows(outputs);
   int n2 = rows(targets);
@@ -63,30 +59,33 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
   assert(nc == cols(outputs));
 
   // compute log probability of state matches
-  Mat lmatch;
+  Tensor2 lmatch;
   lmatch.resize(n1, n2);
   for (int t1 = 0; t1 < n1; t1++) {
-    Vec out(nc);
+    Tensor1 out(nc);
     for(int i=0; i<nc; i++) out(i) = fmax(lo, outputs(t1,i));
-    out /= sum(out);
+    out = out / sum(out);
     for (int t2 = 0; t2 < n2; t2++) {
-      double value = out.transpose() * targets.row(t2).transpose();
-      lmatch(t1, t2) = log(value);
+      double total = 0.0;
+      for(int k=0; k<nc; k++) total += out(k) * targets(t2,k);
+      lmatch(t1, t2) = log(total);
     }
   }
   // compute unnormalized forward backward algorithm
-  Mat both;
+  Tensor2 both;
   forwardbackward(both, lmatch);
 
   // compute normalized state probabilities
-  Mat epath = (both.array() - maximum(both)).unaryExpr(ptr_fun(limexp));
+  Tensor2 epath = (both - maximum(both)).unaryExpr(ptr_fun(limexp));
   for (int j = 0; j < n2; j++) {
-    double l = epath.col(j).sum();
-    epath.col(j) /= l == 0 ? 1e-9 : l;
+    double total = 0.0;
+    for(int i=0;i<rows(epath);i++) total += epath(i,j);
+    total = fmax(1e-9,total);
+    for(int i=0;i<rows(epath);i++) epath(i,j) /= total;
   }
 
   // compute posterior probabilities for each class and normalize
-  Mat aligned;
+  Tensor2 aligned;
   aligned.resize(n1, nc);
   for (int i = 0; i < n1; i++) {
     for (int j = 0; j < nc; j++) {
@@ -99,7 +98,10 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
     }
   }
   for (int i = 0; i < n1; i++) {
-    aligned.row(i) /= fmax(1e-9, aligned.row(i).sum());
+    double total = 0.0;
+    for (int j = 0; j < nc; j++) total += aligned(i,j);
+    total = fmax(total, 1e-9);
+    for (int j = 0; j < nc; j++) aligned(i,j) /= total;
   }
 
   posteriors = aligned;
@@ -113,20 +115,20 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
   int n1 = outputs.size();
   int n2 = targets.size();
   int nc = targets[0].rows();
-  Mat moutputs(n1, nc);
-  Mat mtargets(n2, nc);
+  Tensor2 moutputs(n1, nc);
+  Tensor2 mtargets(n2, nc);
   for (int i = 0; i < n1; i++) 
     for (int j=0; j<nc; j++)
       moutputs(i,j) = outputs[i].v(j,0);
   for (int i = 0; i < n2; i++) 
     for (int j=0; j<nc; j++)
       mtargets(i,j) = targets[i].v(j,0);
-  Mat aligned;
+  Tensor2 aligned;
   ctc_align_targets(aligned, moutputs, mtargets);
-  posteriors.resize(n1);
+  posteriors.resize(n1, nc, 1);
   for (int i = 0; i < n1; i++) {
-    posteriors[i].resize(aligned.row(i).size(), 1);
-    posteriors[i].v.col(0) = aligned.row(i);
+    for(int j=0; j<nc; j++)
+      posteriors[i].v(j,0) = aligned(i,j);
   }
 }
 

@@ -54,13 +54,13 @@ inline Float reduction_(const Ten1 &m) {
 inline Float reduction_(float m) {
   return m;
 }
-inline Float maximum(const Ten1 &m) {
+inline Float maximum(const Tensor1 &m) {
   return reduction_(m.maximum());
 }
-inline Float maximum(const Ten2 &m) {
+inline Float maximum(const Tensor2 &m) {
   return reduction_(m.maximum());
 }
-inline int argmax(const Ten1 &m) {
+inline int argmax(const Tensor1 &m) {
   int mi = -1;
   Float mv = m(0);
   for(int i=0; i<size(m); i++) {
@@ -70,10 +70,10 @@ inline int argmax(const Ten1 &m) {
   }
   return mi;
 }
-inline Float sum(const Ten1 &m) {
+inline Float sum(const Tensor1 &m) {
   return reduction_(m.sum());
 }
-inline Float sum(const Ten2 &m) {
+inline Float sum(const Tensor2 &m) {
   return reduction_(m.sum());
 }
 
