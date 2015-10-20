@@ -39,6 +39,11 @@ inline int cols(const Ten2 &m) { return m.dimension(1); }
 inline int size(const Ten1 &m) { return m.dimension(0); }
 inline int rows(const Ten1 &m) { return m.dimension(0); }
 inline int cols(const Ten1 &m) { THROW("cols applied to Ten1"); }
+inline int rows(const Tensor2 &m) { return m.dimension(0); }
+inline int cols(const Tensor2 &m) { return m.dimension(1); }
+inline int size(const Tensor1 &m) { return m.dimension(0); }
+inline int rows(const Tensor1 &m) { return m.dimension(0); }
+inline int cols(const Tensor1 &m) { THROW("cols applied to Ten1"); }
 
 inline Float reduction_(const Tensor1 &m) {
   return m(0);
@@ -54,6 +59,16 @@ inline Float maximum(const Ten1 &m) {
 }
 inline Float maximum(const Ten2 &m) {
   return reduction_(m.maximum());
+}
+inline int argmax(const Ten1 &m) {
+  int mi = -1;
+  Float mv = m(0);
+  for(int i=0; i<size(m); i++) {
+    if(m(i)<mv) continue;
+    mi = i;
+    mv = m(i);
+  }
+  return mi;
 }
 inline Float sum(const Ten1 &m) {
   return reduction_(m.sum());
@@ -72,6 +87,16 @@ inline Float maximum(const Mat &m) {
 }
 inline Float maximum(const Vec &m) {
   return m.maxCoeff();
+}
+inline int argmax(const Vec &m) {
+  int mi = -1;
+  Float mv = m(0);
+  for(int i=0; i<size(m); i++) {
+    if(m(i)<mv) continue;
+    mi = i;
+    mv = m(i);
+  }
+  return mi;
 }
 inline Float sum(const Mat &m) {
   return m.sum();

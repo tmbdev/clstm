@@ -183,10 +183,12 @@ void mktargets(Sequence &seq, Classes &targets, int ndim);
 std::shared_ptr<INetwork> make_layer(string);
 std::shared_ptr<INetwork> make_net_init(string,string);
 
+/*
 %rename(seq_forward) forward_algorithm;
 void forward_algorithm(Mat &lr,Mat &lmatch,double skip=-5.0);
 %rename(seq_forwardbackward) forwardbackward;
 void forwardbackward(Mat &both,Mat &lmatch);
+*/
 %rename(seq_ctc_align) ctc_align_targets;
 void ctc_align_targets(Sequence &posteriors,Sequence &outputs,Sequence &targets);
 void mktargets(Sequence &seq, Classes &targets, int ndim);

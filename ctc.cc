@@ -17,23 +17,7 @@ namespace ocropus {
 using namespace std;
 using Eigen::Ref;
 
-void forward_algorithm(Mat &lr, Mat &lmatch, double skip) {
-#if 0
-  int n = ROWS(lmatch), m = COLS(lmatch);
-  lr.resize(n, m);
-  Vec v(m), w(m);
-  for (int j = 0; j < m; j++) v(j) = skip * j;
-  for (int i = 0; i < n; i++) {
-    w.segment(1, m - 1) = v.segment(0, m - 1);
-    w(0) = skip * i;
-    for (int j = 0; j < m; j++) {
-      Float same = log_mul(v(j), lmatch(i, j));
-      Float next = log_mul(w(j), lmatch(i, j));
-      v(j) = log_add(same, next);
-    }
-    lr.row(i) = v;
-  }
-#else
+static void forward_algorithm(Mat &lr, Mat &lmatch, double skip=-5) {
   int n = rows(lmatch), m = cols(lmatch);
   lr.resize(n, m);
   Vec v(m), w(m);
@@ -48,14 +32,13 @@ void forward_algorithm(Mat &lr, Mat &lmatch, double skip) {
     }
     for(int j=0; j<m; j++) lr(i, j) = v(j);
   }
-#endif
 }
 
 inline Ten2 t2(Mat &m) {
   return Ten2(m.data(), m.rows(), m.cols());
 }
 
-void forwardbackward(Mat &both, Mat &lmatch) {
+static void forwardbackward(Mat &both, Mat &lmatch) {
   int n = rows(lmatch), m = cols(lmatch);
   Mat lr;
   forward_algorithm(lr, lmatch);
@@ -85,7 +68,7 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
   for (int t1 = 0; t1 < n1; t1++) {
     Vec out(nc);
     for(int i=0; i<nc; i++) out(i) = fmax(lo, outputs(t1,i));
-    out /= out.sum();
+    out /= sum(out);
     for (int t2 = 0; t2 < n2; t2++) {
       double value = out.transpose() * targets.row(t2).transpose();
       lmatch(t1, t2) = log(value);
@@ -96,7 +79,7 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
   forwardbackward(both, lmatch);
 
   // compute normalized state probabilities
-  Mat epath = (both.array() - both.maxCoeff()).unaryExpr(ptr_fun(limexp));
+  Mat epath = (both.array() - maximum(both)).unaryExpr(ptr_fun(limexp));
   for (int j = 0; j < n2; j++) {
     double l = epath.col(j).sum();
     epath.col(j) /= l == 0 ? 1e-9 : l;
@@ -124,15 +107,20 @@ void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
 
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
                        Sequence &targets) {
-  assert(COLS(outputs[0]) == 1);
-  assert(COLS(targets[0]) == 1);
+  assert(outputs.cols() ==1);
+  assert(targets.cols()==1);
+  assert(outputs.rows()==targets.rows());
   int n1 = outputs.size();
   int n2 = targets.size();
   int nc = targets[0].rows();
   Mat moutputs(n1, nc);
   Mat mtargets(n2, nc);
-  for (int i = 0; i < n1; i++) moutputs.row(i) = outputs[i].v.col(0);
-  for (int i = 0; i < n2; i++) mtargets.row(i) = targets[i].v.col(0);
+  for (int i = 0; i < n1; i++) 
+    for (int j=0; j<nc; j++)
+      moutputs(i,j) = outputs[i].v(j,0);
+  for (int i = 0; i < n2; i++) 
+    for (int j=0; j<nc; j++)
+      mtargets(i,j) = targets[i].v(j,0);
   Mat aligned;
   ctc_align_targets(aligned, moutputs, mtargets);
   posteriors.resize(n1);
@@ -176,8 +164,8 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
   int mc = -1;
   int mt = -1;
   while (t < N) {
-    int index;
-    float v = outputs[t].v.col(batch).maxCoeff(&index);
+    int index = argmax(outputs[t].v.col(batch));
+    float v = outputs[t].v(index,batch);
     if (index == 0) {
       // NB: there should be a 0 at the end anyway
       if (mc != -1 && mc != 0) {

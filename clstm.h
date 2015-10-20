@@ -195,9 +195,9 @@ void save_net(const string &file, Network net);
 Network load_net(const string &file);
 
 // training with CTC
-void forward_algorithm(Mat &lr, Mat &lmatch, double skip = -5.0);
-void forwardbackward(Mat &both, Mat &lmatch);
-void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets);
+// void forward_algorithm(Mat &lr, Mat &lmatch, double skip = -5.0);
+//  void forwardbackward(Mat &both, Mat &lmatch);
+// void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
                        Sequence &targets);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
