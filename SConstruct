@@ -176,14 +176,9 @@ pyswig = swigenv.SharedLibrary("_clstm.so",
                                 "clstm.pb.cc", "clstm_compute.cc",
                                "clstm_prefab.cc", "ctc.cc"],
                                LIBS=libs)
+Alias('pyswig', [pyswig])
 
 destlib = distutils.sysconfig.get_config_var("DESTLIB")
 Alias('pyinstall',
       Install(os.path.join(destlib, "site-packages"),
               ["_clstm.so", "clstm.py"]))
-
-# A simple test of the Python extension.
-
-Alias('pyswig', [pyswig])
-pytest = Alias('pytest', [pyswig], 'python test-lstm.py')
-AlwaysBuild(pytest)
