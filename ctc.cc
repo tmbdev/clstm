@@ -162,7 +162,7 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
   int mc = -1;
   int mt = -1;
   while (t < N) {
-    int index = argmax(outputs[t].v.col(batch));
+    int index = argmax(outputs[t].V().chip(batch,1));
     float v = outputs[t].v(index, batch);
     if (index == 0) {
       // NB: there should be a 0 at the end anyway

@@ -60,7 +60,7 @@ const char *hgversion = HGVERSION;
 import_array();
 %}
 
-/* create simple interface definitions for the built-in Sequence and Vec types */
+/* create simple interface definitions for the built-in Sequence and Mat types */
 
 struct Classes {
     Classes();
@@ -72,19 +72,6 @@ struct Classes {
 };
 %extend Classes {
     void __setitem__(int i,int value) {
-        (*$self)[i] = value;
-    }
-}
-
-struct Vec {
-    Vec();
-    Vec(int);
-    %rename(__getitem__) operator[];
-    float operator[](int i);
-    int size();
-};
-%extend Vec {
-    void __setitem__(int i,float value) {
         (*$self)[i] = value;
     }
 }

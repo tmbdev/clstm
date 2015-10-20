@@ -15,8 +15,6 @@ extern int useten;
 
 #ifdef LSTM_DOUBLE
 typedef double Float;
-typedef Eigen::VectorXi iVec;
-typedef Eigen::VectorXd Vec;
 typedef Eigen::MatrixXd Mat;
 typedef Eigen::Tensor<double, 1> Tensor1;
 typedef Eigen::Tensor<double, 2> Tensor2;
@@ -24,8 +22,6 @@ typedef Eigen::TensorMap<Eigen::Tensor<double, 1>> Ten1;
 typedef Eigen::TensorMap<Eigen::Tensor<double, 2>> Ten2;
 #else
 typedef float Float;
-typedef Eigen::VectorXi iVec;
-typedef Eigen::VectorXf Vec;
 typedef Eigen::MatrixXf Mat;
 typedef Eigen::Tensor<float, 1> Tensor1;
 typedef Eigen::Tensor<float, 2> Tensor2;
@@ -65,24 +61,8 @@ inline Float sum(const Tensor2 &m) { return reduction_(m.sum()); }
 
 inline int rows(const Mat &m) { return m.rows(); }
 inline int cols(const Mat &m) { return m.cols(); }
-inline int size(const Vec &m) { return m.rows(); }
-inline int rows(const Vec &m) { return m.rows(); }
-inline int cols(const Vec &m) { return 1; }
 inline Float maximum(const Mat &m) { return m.maxCoeff(); }
-inline Float maximum(const Vec &m) { return m.maxCoeff(); }
-inline int argmax(const Vec &m) {
-  int mi = -1;
-  Float mv = m(0);
-  for (int i = 0; i < size(m); i++) {
-    if (m(i) < mv) continue;
-    mi = i;
-    mv = m(i);
-  }
-  return mi;
-}
 inline Float sum(const Mat &m) { return m.sum(); }
-inline Float sum(const Vec &m) { return m.sum(); }
-
 
 template <typename F, typename T>
 void each(F f, T &a) {

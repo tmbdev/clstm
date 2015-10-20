@@ -64,12 +64,6 @@ void proto_of_Mat(clstm::Array *array, Mat &a, bool weights = true) {
     for (int j = 0; j < a.cols(); j++) array->add_value(a(i, j));
 }
 
-void proto_of_Vec(clstm::Array *array, Vec &a, bool weights = true) {
-  array->add_dim(a.size());
-  if (!weights) return;
-  for (int i = 0; i < a.size(); i++) array->add_value(a(i));
-}
-
 void Mat_of_proto(Mat &a, const clstm::Array *array) {
   if (array->dim_size() != 2)
     throwf("bad format (Mat, %s, %d)", array->name().c_str(),
@@ -81,17 +75,6 @@ void Mat_of_proto(Mat &a, const clstm::Array *array) {
     int k = 0;
     for (int i = 0; i < a.rows(); i++)
       for (int j = 0; j < a.cols(); j++) a(i, j) = array->value(k++);
-  }
-}
-
-void Vec_of_proto(Vec &a, const clstm::Array *array) {
-  if (array->dim_size() != 1) THROW("bad format (Vec)");
-  a.resize(array->dim(0));
-  a.setZero();
-  if (array->value_size() > 0) {
-    if (array->value_size() != a.size()) THROW("bad size (Vec)");
-    int k = 0;
-    for (int i = 0; i < a.size(); i++) a(i) = array->value(k++);
   }
 }
 
