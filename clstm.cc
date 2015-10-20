@@ -33,6 +33,14 @@ void throwf(const char *format, ...) {
   THROW(exception_message);
 }
 
+void rinit(Params &m, int r, int c, Assoc &attr, string prefix="") {
+  m.resize(r,c);
+  float s = attr.get(prefix+"init_scale", 0.01);
+  string mode = attr.get(prefix+"init_mode", "negbiased");
+  float offset = attr.get(prefix+"init_offset", 0.0);
+  rinit(m, r, c, s, mode, offset);
+}
+
 Assoc::Assoc(const string &s) {
   int start = 0;
   for (;;) {
@@ -280,8 +288,7 @@ struct Full : INetwork {
   void initialize() {
     int no = attr.get("noutput");
     int ni = attr.get("ninput");
-    randinit(W1, no, ni + 1, 0.01);
-    W1.zeroGrad();
+    rinit(W1, no, ni+1, attr);
   }
   int noutput() { return W1.rows(); }
   int ninput() { return W1.cols() - 1; }
@@ -318,8 +325,7 @@ struct SoftmaxLayer : INetwork {
     int no = attr.get("noutput");
     int ni = attr.get("ninput");
     if (no < 2) THROW("Softmax requires no>=2");
-    randinit(W1, no, ni + 1, 0.01);
-    W1.zeroGrad();
+    rinit(W1, no, ni + 1, attr);
   }
   int noutput() { return ROWS(W1); }
   int ninput() { return COLS(W1) - 1; }
@@ -465,9 +471,8 @@ struct GenericNPLSTM : INetwork {
     this->ni = ni;
     this->no = no;
     this->nf = nf;
-    each([weight_dev, mode, no, nf](Params &w) {
-      randinit(w, no, nf, weight_dev, mode);
-      w.zeroGrad();
+    each([this, no, nf](Params &w) {
+      rinit(w, no, nf, attr);
     }, WEIGHTS);
   }
   void postLoad() {

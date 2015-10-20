@@ -4,10 +4,6 @@ import sys
 import os.path
 import distutils.sysconfig
 
-if "deriv" in COMMAND_LINE_TARGETS:
-    ARGUMENTS["double"] = "1"
-    ARGUMENTS["debug"] = "1"
-
 if os.path.isdir(".hg"):
     hgversion = os.popen("hg -q id").read().strip()
 elif os.path.isdir(".git"):
@@ -165,25 +161,10 @@ if option("hdf5lib", "") != "":
         h5env.Program(program, [program + ".cc"])
 
 # A simple test of the C++ LSTM implementation.
-
-program = env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)
-test_alias = Alias('test', [program], program[0].abspath)
-AlwaysBuild(test_alias)
-
-# Derivative checking for the major layer types. This recompiles the
-# entire library with Float=double
-
-deriv = env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)
-deriv_alias = Alias('deriv', [deriv], deriv[0].abspath)
-AlwaysBuild(deriv_alias)
-
-cderiv = env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)
-cderiv_alias = Alias('cderiv', [cderiv], cderiv[0].abspath)
-AlwaysBuild(cderiv_alias)
-
-ctc = env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)
-ctc_alias = Alias('ctc', [ctc], ctc[0].abspath)
-AlwaysBuild(ctc_alias)
+env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)
+env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)
+env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)
+env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)
 
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"

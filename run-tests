@@ -1,19 +1,21 @@
 #!/bin/sh
 set -e
-export PS4='################################
-################################ '
+export PS4='
+>>>>>>> '
 trap "echo TEST FAILED" EXIT
 set -x
-scons -c
-scons -c pytest
-scons -j 4 test
-scons -j 4
+export seed=0.3423
+scons -s -c; rm -f *.o *.a
+scons -j 4 clstmocrtrain clstmfiltertrain clstmfilter clstmocr test-lstm
+./test-lstm
 ./test-filter.sh
 ./test-ocr.sh
-scons -j 4 debug=1 cderiv deriv ctc
-scons -c
-scons -j 4 pytest
-scons -c
-scons -c pytest
+scons -s -c; rm -f *.o *.a
+scons -j 4 double=1 debug=1 test-cderiv test-deriv test-ctc
+./test-cderiv
+./test-deriv
+./test-ctc
+scons -s -c pytest
+scons pytest
 set +x
 trap "echo ALL TESTS PASS" EXIT

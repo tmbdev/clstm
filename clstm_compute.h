@@ -83,6 +83,7 @@ inline int argmax(const Vec &m) {
 inline Float sum(const Mat &m) { return m.sum(); }
 inline Float sum(const Vec &m) { return m.sum(); }
 
+
 template <typename F, typename T>
 void each(F f, T &a) {
   f(a);
@@ -307,21 +308,12 @@ void forward_full(Batch &y, Params &W, Batch &x);
 template <class F>
 void backward_full(Batch &y, Params &W, Batch &x, Float gc);
 
-void randgauss(Mat &m);
-void randgauss(Vec &v);
-void randinit(Mat &m, float s, const string mode = "unif");
-void randinit(Vec &m, float s, const string mode = "unif");
-void randinit(Batch &m, int no, int ni, float s, const string mode = "unif");
-void randinit(Mat &m, int no, int ni, float s, const string mode = "unif");
-void randinit(Vec &m, int no, float s, const string mode = "unif");
-void zeroinit(Mat &m, int no, int ni);
-void zeroinit(Vec &m, int no);
-void resize(Sequence &seq, int nsteps, int dims, int bs);
-int size(Sequence &seq, int dim);
-Vec timeslice(const Sequence &s, int i, int b = 0);
-
+void rinit(Batch &m, int no, int ni, Float s, const string mode = "unif", Float offset=0.0);
+void rinit(Sequence &m, int no, int ni, Float s, const string mode = "unif", Float offset=0.0);
+void rinit(Params &m, int N, int no, int ni, Float s, const string mode = "pos", Float offset=0.0);
 bool anynan(Batch &a);
 bool anynan(Sequence &a);
+bool anynan(Params &a);
 }
 
 #endif

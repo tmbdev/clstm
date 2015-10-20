@@ -1,7 +1,6 @@
 #!/bin/bash
 set -ea
 trap "echo clstmocrtrain FAILED" EXIT
-scons -j 4 clstmocrtrain
 echo misc/textline.bin.png > _ocrtest.txt
 ntrain=201 hidden=50 lrate=1e-2 save_name=_ocrtest \
     ./clstmocrtrain _ocrtest.txt
