@@ -310,8 +310,12 @@ struct TestStatemem : Testcase {
     randseq(targets, 1, 7, 4);
     randparams(ps, {});
   }
-  void forward() { forward_statemem(outputs[0], inputs[0], inputs[1], inputs, 2, inputs[3]); }
-  void backward() { backward_statemem(outputs[0], inputs[0], inputs[1], inputs, 2, inputs[3]); }
+  void forward() {
+    forward_statemem(outputs[0], inputs[0], inputs[1], inputs, 2, inputs[3]);
+  }
+  void backward() {
+    backward_statemem(outputs[0], inputs[0], inputs[1], inputs, 2, inputs[3]);
+  }
 };
 struct TestNonlingate : Testcase {
   virtual void init() {
@@ -319,8 +323,12 @@ struct TestNonlingate : Testcase {
     randseq(targets, 1, 7, 4);
     randparams(ps, {});
   }
-  void forward() { forward_nonlingate<TanhNonlin>(outputs[0], inputs[0], inputs[1]);}
-  void backward() { backward_nonlingate<TanhNonlin>(outputs[0], inputs[0], inputs[1]); }
+  void forward() {
+    forward_nonlingate<TanhNonlin>(outputs[0], inputs[0], inputs[1]);
+  }
+  void backward() {
+    backward_nonlingate<TanhNonlin>(outputs[0], inputs[0], inputs[1]);
+  }
 };
 
 int main(int argc, char **argv) {

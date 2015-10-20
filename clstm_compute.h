@@ -45,65 +45,43 @@ inline int size(const Tensor1 &m) { return m.dimension(0); }
 inline int rows(const Tensor1 &m) { return m.dimension(0); }
 inline int cols(const Tensor1 &m) { THROW("cols applied to Ten1"); }
 
-inline Float reduction_(const Tensor1 &m) {
-  return m(0);
-}
-inline Float reduction_(const Ten1 &m) {
-  return m(0);
-}
-inline Float reduction_(float m) {
-  return m;
-}
-inline Float maximum(const Tensor1 &m) {
-  return reduction_(m.maximum());
-}
-inline Float maximum(const Tensor2 &m) {
-  return reduction_(m.maximum());
-}
+inline Float reduction_(const Tensor1 &m) { return m(0); }
+inline Float reduction_(const Ten1 &m) { return m(0); }
+inline Float reduction_(float m) { return m; }
+inline Float maximum(const Tensor1 &m) { return reduction_(m.maximum()); }
+inline Float maximum(const Tensor2 &m) { return reduction_(m.maximum()); }
 inline int argmax(const Tensor1 &m) {
   int mi = -1;
   Float mv = m(0);
-  for(int i=0; i<size(m); i++) {
-    if(m(i)<mv) continue;
+  for (int i = 0; i < size(m); i++) {
+    if (m(i) < mv) continue;
     mi = i;
     mv = m(i);
   }
   return mi;
 }
-inline Float sum(const Tensor1 &m) {
-  return reduction_(m.sum());
-}
-inline Float sum(const Tensor2 &m) {
-  return reduction_(m.sum());
-}
+inline Float sum(const Tensor1 &m) { return reduction_(m.sum()); }
+inline Float sum(const Tensor2 &m) { return reduction_(m.sum()); }
 
 inline int rows(const Mat &m) { return m.rows(); }
 inline int cols(const Mat &m) { return m.cols(); }
 inline int size(const Vec &m) { return m.rows(); }
 inline int rows(const Vec &m) { return m.rows(); }
 inline int cols(const Vec &m) { return 1; }
-inline Float maximum(const Mat &m) {
-  return m.maxCoeff();
-}
-inline Float maximum(const Vec &m) {
-  return m.maxCoeff();
-}
+inline Float maximum(const Mat &m) { return m.maxCoeff(); }
+inline Float maximum(const Vec &m) { return m.maxCoeff(); }
 inline int argmax(const Vec &m) {
   int mi = -1;
   Float mv = m(0);
-  for(int i=0; i<size(m); i++) {
-    if(m(i)<mv) continue;
+  for (int i = 0; i < size(m); i++) {
+    if (m(i) < mv) continue;
     mi = i;
     mv = m(i);
   }
   return mi;
 }
-inline Float sum(const Mat &m) {
-  return m.sum();
-}
-inline Float sum(const Vec &m) {
-  return m.sum();
-}
+inline Float sum(const Mat &m) { return m.sum(); }
+inline Float sum(const Vec &m) { return m.sum(); }
 
 template <typename F, typename T>
 void each(F f, T &a) {

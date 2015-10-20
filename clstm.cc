@@ -161,7 +161,8 @@ void set_targets(INetwork *net, Sequence &targets) {
   int N = net->outputs.size();
   assert(N == targets.size());
   assert(net->outputs.size() == N);
-  for (int t = 0; t < N; t++) net->outputs[t].d = targets[t].v - net->outputs[t].v;
+  for (int t = 0; t < N; t++)
+    net->outputs[t].d = targets[t].v - net->outputs[t].v;
 }
 void set_classes(INetwork *net, Classes &classes) {
   int N = net->outputs.size();
