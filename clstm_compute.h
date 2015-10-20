@@ -22,10 +22,6 @@ typedef Eigen::Tensor<double, 1> Tensor1;
 typedef Eigen::Tensor<double, 2> Tensor2;
 typedef Eigen::TensorMap<Eigen::Tensor<double, 1>> Ten1;
 typedef Eigen::TensorMap<Eigen::Tensor<double, 2>> Ten2;
-inline int rows(const Mat &m) { return m.rows(); }
-inline int cols(const Mat &m) { return m.cols(); }
-inline int rows(const Vec &m) { return m.rows(); }
-inline int cols(const Vec &m) { return 1; }
 #else
 typedef float Float;
 typedef Eigen::VectorXi iVec;
@@ -36,9 +32,53 @@ typedef Eigen::Tensor<float, 2> Tensor2;
 typedef Eigen::TensorMap<Eigen::Tensor<float, 1>> Ten1;
 typedef Eigen::TensorMap<Eigen::Tensor<float, 2>> Ten2;
 typedef Float Scalar;
-inline int cols(const Ten2 &m) { return m.dimension(0); }
-inline int rows(const Ten2 &m) { return m.dimension(1); }
 #endif
+
+inline int rows(const Ten2 &m) { return m.dimension(0); }
+inline int cols(const Ten2 &m) { return m.dimension(1); }
+inline int size(const Ten1 &m) { return m.dimension(0); }
+inline int rows(const Ten1 &m) { return m.dimension(0); }
+inline int cols(const Ten1 &m) { THROW("cols applied to Ten1"); }
+
+inline Float reduction_(const Tensor1 &m) {
+  return m(0);
+}
+inline Float reduction_(const Ten1 &m) {
+  return m(0);
+}
+inline Float reduction_(float m) {
+  return m;
+}
+inline Float maximum(const Ten1 &m) {
+  return reduction_(m.maximum());
+}
+inline Float maximum(const Ten2 &m) {
+  return reduction_(m.maximum());
+}
+inline Float sum(const Ten1 &m) {
+  return reduction_(m.sum());
+}
+inline Float sum(const Ten2 &m) {
+  return reduction_(m.sum());
+}
+
+inline int rows(const Mat &m) { return m.rows(); }
+inline int cols(const Mat &m) { return m.cols(); }
+inline int size(const Vec &m) { return m.rows(); }
+inline int rows(const Vec &m) { return m.rows(); }
+inline int cols(const Vec &m) { return 1; }
+inline Float maximum(const Mat &m) {
+  return m.maxCoeff();
+}
+inline Float maximum(const Vec &m) {
+  return m.maxCoeff();
+}
+inline Float sum(const Mat &m) {
+  return m.sum();
+}
+inline Float sum(const Vec &m) {
+  return m.sum();
+}
 
 template <typename F, typename T>
 void each(F f, T &a) {

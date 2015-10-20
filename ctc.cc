@@ -7,6 +7,7 @@
 #include <math.h>
 #include <Eigen/Dense>
 #include <stdarg.h>
+#include "clstm_compute.h"
 
 #ifndef MAXEXP
 #define MAXEXP 30
@@ -17,6 +18,7 @@ using namespace std;
 using Eigen::Ref;
 
 void forward_algorithm(Mat &lr, Mat &lmatch, double skip) {
+#if 0
   int n = ROWS(lmatch), m = COLS(lmatch);
   lr.resize(n, m);
   Vec v(m), w(m);
@@ -31,33 +33,58 @@ void forward_algorithm(Mat &lr, Mat &lmatch, double skip) {
     }
     lr.row(i) = v;
   }
+#else
+  int n = rows(lmatch), m = cols(lmatch);
+  lr.resize(n, m);
+  Vec v(m), w(m);
+  for (int j = 0; j < m; j++) v(j) = skip * j;
+  for (int i = 0; i < n; i++) {
+    w(0) = skip * i;
+    for(int j=1; j<m; j++) w(j) = v(j-1);
+    for (int j = 0; j < m; j++) {
+      Float same = log_mul(v(j), lmatch(i, j));
+      Float next = log_mul(w(j), lmatch(i, j));
+      v(j) = log_add(same, next);
+    }
+    for(int j=0; j<m; j++) lr(i, j) = v(j);
+  }
+#endif
+}
+
+inline Ten2 t2(Mat &m) {
+  return Ten2(m.data(), m.rows(), m.cols());
 }
 
 void forwardbackward(Mat &both, Mat &lmatch) {
+  int n = rows(lmatch), m = cols(lmatch);
   Mat lr;
   forward_algorithm(lr, lmatch);
-  Mat rlmatch = lmatch;
-  rlmatch = rlmatch.rowwise().reverse().eval();
-  rlmatch = rlmatch.colwise().reverse().eval();
-  Mat rl;
-  forward_algorithm(rl, rlmatch);
-  rl = rl.colwise().reverse().eval();
-  rl = rl.rowwise().reverse().eval();
+  Mat rlmatch(n,m);
+  for(int i=0; i<n; i++)
+    for(int j=0; j<m; j++)
+      rlmatch(i,j) = lmatch(n-i-1,m-j-1);
+  Mat rrl;
+  forward_algorithm(rrl, rlmatch);
+  Mat rl(n,m);
+  for(int i=0; i<n; i++)
+    for(int j=0; j<m; j++)
+      rl(i,j) = rrl(n-i-1,m-j-1);
   both = lr + rl;
 }
 
 void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets) {
   double lo = 1e-5;
-  int n1 = ROWS(outputs);
-  int n2 = ROWS(targets);
-  int nc = COLS(targets);
+  int n1 = rows(outputs);
+  int n2 = rows(targets);
+  int nc = cols(targets);
+  assert(nc == cols(outputs));
 
   // compute log probability of state matches
   Mat lmatch;
   lmatch.resize(n1, n2);
   for (int t1 = 0; t1 < n1; t1++) {
-    Vec out = outputs.row(t1);
-    out = out.cwiseMax(lo);
+    Vec out(nc);
+    for(int i=0; i<nc; i++) out(i) = fmax(lo, outputs(t1,i));
     out /= out.sum();
     for (int t2 = 0; t2 < n2; t2++) {
       double value = out.transpose() * targets.row(t2).transpose();
