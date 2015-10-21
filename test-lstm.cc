@@ -76,6 +76,7 @@ int main(int argc, char **argv) {
   net->setLearningRate(1e-4, 0.9);
   network_info(net);
   save_net("__test0__.clstm", net);
+  unlink("__test0__.clstm");
   print("training 1:4:2 network to learn delay");
   for (int i = 0; i < ntrain; i++) {
     Sequence xs, ys;
@@ -93,5 +94,6 @@ int main(int argc, char **argv) {
   print("loading");
   net = load_net("__test__.clstm");
   double merr = test_net(net);
+  unlink("__test__.clstm");
   print("OK", merr);
 }
