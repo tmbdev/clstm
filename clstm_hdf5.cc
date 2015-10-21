@@ -9,7 +9,6 @@
 #include <string>
 #include <memory>
 #include <math.h>
-#include <Eigen/Dense>
 #include "clstm.pb.h"
 #include <stdarg.h>
 

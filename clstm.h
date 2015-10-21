@@ -13,7 +13,6 @@
 #include <typeinfo>
 #include <memory>
 #include <map>
-#include <Eigen/Dense>
 #include <random>
 #include "clstm_compute.h"
 #include <initializer_list>

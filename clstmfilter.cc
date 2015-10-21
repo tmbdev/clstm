@@ -6,19 +6,14 @@
 #include <vector>
 #include <memory>
 #include <math.h>
-#include <Eigen/Dense>
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <set>
-
-#include "multidim.h"
-#include "pymulti.h"
 #include "extras.h"
 
 using namespace Eigen;
 using namespace ocropus;
-using namespace pymulti;
 using std::vector;
 using std::map;
 using std::make_pair;

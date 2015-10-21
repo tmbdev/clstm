@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 #include <math.h>
-#include <Eigen/Dense>
 #include <string>
 #include "extras.h"
 #include "clstm_compute.h"

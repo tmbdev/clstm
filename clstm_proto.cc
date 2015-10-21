@@ -10,7 +10,6 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
-#include <Eigen/Dense>
 #include <stdarg.h>
 #include <typeinfo>
 #ifdef GOOGLE

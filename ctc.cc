@@ -5,7 +5,6 @@
 #include <string>
 #include <memory>
 #include <math.h>
-#include <Eigen/Dense>
 #include <stdarg.h>
 #include "clstm_compute.h"
 

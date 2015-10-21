@@ -6,19 +6,15 @@
 #include <vector>
 #include <memory>
 #include <math.h>
-#include <Eigen/Dense>
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <regex>
-
-#include "pymulti.h"
 #include "extras.h"
 
 using namespace Eigen;
 using namespace ocropus;
-using namespace pymulti;
 using std::vector;
 using std::map;
 using std::make_pair;
@@ -69,8 +65,9 @@ wstring read_text32(string fname, int maxsize = 65536) {
   return utf8_to_utf32(string(buf, n));
 }
 
+#ifndef NODISPLAY
 void show(PyServer &py, Sequence &s, int subplot = 0, int batch=0) {
-  mdarray<float> temp;
+  Tensor<float,2> temp;
   temp.resize(s.size(), s.rows());
   for(int i=0; i<s.size(); i++)
     for(int j=0; j<s.rows(); j++)
@@ -78,6 +75,7 @@ void show(PyServer &py, Sequence &s, int subplot = 0, int batch=0) {
   if (subplot > 0) py.evalf("subplot(%d)", subplot);
   py.imshowT(temp, "cmap=cm.hot");
 }
+#endif
 
 void read_lines(vector<string> &lines, string fname) {
   ifstream stream(fname);
@@ -138,8 +136,10 @@ int main1(int argc, char **argv) {
   double test_error = 9999.0;
   double best_error = 1e38;
 
+#ifndef NODISPLAY
   PyServer py;
   if (display_every > 0) py.open();
+#endif
   double start_time = now();
   int start = clstm.net->attr.get("trial", getienv("start", -1)) + 1;
   if (start > 0) print("start", start);
@@ -186,6 +186,7 @@ int main1(int argc, char **argv) {
     read_png(raw, fname.c_str());
     raw = -raw + Float(1);
     wstring pred = clstm.train(raw, gt);
+#ifndef NODISPLAY
     if (display_every > 0 && trial % display_every == 0) {
       py.evalf("clf");
       show(py, clstm.net->inputs, 411);
@@ -193,8 +194,8 @@ int main1(int argc, char **argv) {
       show(py, clstm.targets, 413);
       show(py, clstm.aligned, 414);
     }
+#endif
     if (report_every > 0 && trial % report_every == 0) {
-      mdarray<float> temp;
       print(trial);
       print("TRU", gt);
       print("ALN", clstm.aligned_utf8());

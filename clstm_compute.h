@@ -2,7 +2,6 @@
 #define clstm_compute__
 
 #include <vector>
-#include <Eigen/Dense>
 #include <unsupported/Eigen/CXX11/Tensor>
 
 namespace ocropus {
