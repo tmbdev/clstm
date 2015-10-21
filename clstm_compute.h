@@ -21,6 +21,9 @@ typedef float Float;
 typedef Eigen::MatrixXf Mat;
 #endif
 
+using Eigen::Tensor;
+using Eigen::TensorMap;
+
 typedef Float Scalar;
 typedef Eigen::Tensor<Float, 1> Tensor1;
 typedef Eigen::Tensor<Float, 2> Tensor2;

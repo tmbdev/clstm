@@ -7,7 +7,6 @@
 #define ocropus_clstm_extras_
 
 #include "clstm.h"
-#include "multidim.h"
 #include <string>
 #include <sys/time.h>
 #include <math.h>
@@ -19,27 +18,6 @@
 
 #include <iostream>
 
-template <class T>
-inline std::ostream &operator<<(std::ostream &stream, multidim::mdarray<T> &a) {
-  if (a.rank() == 1) {
-    stream << "[mdarray1d";
-    for (int i = 0; i < a.dim(0); i++) stream << " " << a(i);
-    stream << "]" << std::endl;
-  } else if (a.rank() == 2) {
-    stream << "[mdarray2d" << std::endl;
-    for (int i = 0; i < a.dim(0); i++) {
-      for (int j = 0; j < a.dim(1); j++) {
-        stream << " " << a(i);
-      }
-      stream << std::endl;
-    }
-    stream << "]" << std::endl;
-  } else {
-    stream << "[mdarray of rank > 2]" << std::endl;
-  }
-  return stream;
-}
-
 namespace ocropus {
 using std::string;
 using std::wstring;
@@ -50,7 +28,6 @@ using std::ostream;
 using std::cerr;
 using std::endl;
 using std::min;
-using namespace multidim;
 
 void glob(vector<string> &result, const string &arg);
 
@@ -104,28 +81,6 @@ inline string getdef(std::map<string, string> &m, const string &key,
   auto it = m.find(key);
   if (it == m.end()) return dflt;
   return it->second;
-}
-
-// print the arguments to cerr
-
-inline void debug(Mat &b, string prefix = "") {
-  for (int i = 0; i < b.rows(); i++) {
-    cerr << prefix;
-    for (int j = 0; j < b.cols(); j++) {
-      cerr << " " << b(i, j);
-    }
-    cerr << endl;
-  }
-}
-
-inline void debugT(Mat &b, string prefix = "") {
-  for (int j = 0; j < b.cols(); j++) {
-    cerr << prefix << ".T";
-    for (int i = 0; i < b.rows(); i++) {
-      cerr << " " << b(i, j);
-    }
-    cerr << endl;
-  }
 }
 
 inline void dprint() { cerr << endl; }
@@ -233,24 +188,6 @@ inline double getuenv(const char *name, double dflt = 0) {
   }
 }
 
-// array minimum, maximum
-
-template <class T>
-T amin(mdarray<T> &a) {
-  T m = a[0];
-  for (int i = 1; i < a.size(); i++)
-    if (a[i] < m) m = a[i];
-  return m;
-}
-
-template <class T>
-T amax(mdarray<T> &a) {
-  T m = a[0];
-  for (int i = 1; i < a.size(); i++)
-    if (a[i] > m) m = a[i];
-  return m;
-}
-
 // text line normalization
 
 struct INormalizer {
@@ -261,8 +198,8 @@ struct INormalizer {
   float vscale = 1.0;
   virtual ~INormalizer() {}
   virtual void getparams(bool verbose = false) {}
-  virtual void measure(mdarray<float> &line) = 0;
-  virtual void normalize(mdarray<float> &out, mdarray<float> &in) = 0;
+  virtual void measure(Tensor<float,2> &line) = 0;
+  virtual void normalize(Tensor<float,2> &out, Tensor<float,2> &in) = 0;
   virtual void setPyServer(void *p) {}
 };
 
@@ -271,40 +208,41 @@ INormalizer *make_NoNormalizer();
 INormalizer *make_MeanNormalizer();
 INormalizer *make_CenterNormalizer();
 
-void read_png(mdarray<unsigned char> &image, FILE *fp, bool gray = false);
-void write_png(FILE *fp, mdarray<unsigned char> &image);
-void read_png(mdarray<unsigned char> &image, const char *name,
-              bool gray = false);
-void write_png(const char *name, mdarray<unsigned char> &image);
+void read_png(Tensor<unsigned char,3> &image, FILE *fp);
+void write_png(FILE *fp, Tensor<float,3> &image);
+void read_png(Tensor<float,2> &image, const char *name);
+void write_png(const char *name, Tensor<float,2> &image);
 
-void read_png(mdarray<float> &image, FILE *fp, bool gray = false);
-void write_png(FILE *fp, mdarray<float> &image);
-void read_png(mdarray<float> &image, const char *name, bool gray = false);
-void write_png(const char *name, mdarray<float> &image);
-
-inline bool anynan(mdarray<float> &a) {
+inline bool anynan(Tensor<float,1> &a) {
   for (int i = 0; i < a.size(); i++)
     if (isnan(a[i])) return true;
   return false;
 }
+inline bool anynan(Tensor<float, 2> &a) {
+  for (int i = 0; i < a.dimension(0); i++)
+    for (int j = 0; j < a.dimension(0); j++)
+      if (isnan(a(i, j))) return true;
+  return false;
+}
 
-inline void assign(mdarray<int> &dest, vector<int> &src) {
+
+inline void assign(Tensor<int,1> &dest, vector<int> &src) {
   int n = src.size();
   dest.resize(n);
   for (int i = 0; i < n; i++) dest[i] = src[i];
 }
 
-inline void assign(vector<int> &dest, mdarray<int> &src) {
-  int n = src.dim(0);
+inline void assign(vector<int> &dest, Tensor<int,1> &src) {
+  int n = src.dimension(0);
   dest.resize(n);
   for (int i = 0; i < n; i++) dest[i] = src[i];
 }
 
 template <class S, class T>
 inline void transpose(S &dest, T &src) {
-  dest.resize(src.dim(1), src.dim(0));
-  for (int i = 0; i < dest.dim(0); i++)
-    for (int j = 0; j < dest.dim(1); j++) dest(i, j) = src(j, i);
+  dest.resize(src.dimension(1), src.dimension(0));
+  for (int i = 0; i < dest.dimension(0); i++)
+    for (int j = 0; j < dest.dimension(1); j++) dest(i, j) = src(j, i);
 }
 
 template <class T>
@@ -317,10 +255,10 @@ inline void transpose(T &a) {
 template <class T>
 inline void assign(Sequence &seq, T &a) {
   assert(a.rank() == 2);
-  seq.resize(a.dim(0));
-  for (int t = 0; t < a.dim(0); t++) {
-    seq[t].resize(a.dim(1), 1);
-    for (int i = 0; i < a.dim(1); i++) seq[t].v(i, 0) = a(t, i);
+  seq.resize(a.dimension(0));
+  for (int t = 0; t < a.dimension(0); t++) {
+    seq[t].resize(a.dimension(1), 1);
+    for (int i = 0; i < a.dimension(1); i++) seq[t].v(i, 0) = a(t, i);
   }
 }
 
@@ -328,8 +266,8 @@ inline void assign(Sequence &seq, T &a) {
 template <class T>
 inline void assign(T &a, Sequence &seq) {
   a.resize(int(seq.size()), int(seq[0].v.size()));
-  for (int t = 0; t < a.dim(0); t++) {
-    for (int i = 0; i < a.dim(1); i++) a(t, i) = seq[t].v(i);
+  for (int t = 0; t < a.dimension(0); t++) {
+    for (int i = 0; i < a.dimension(1); i++) a(t, i) = seq[t].v(i);
   }
 }
 #endif
@@ -346,20 +284,20 @@ Network make_net_init(const string &kind, int nclasses, int dim,
                       string prefix = "");
 
 // setting inputs and outputs
-void set_inputs(INetwork *net, mdarray<float> &inputs);
-void set_targets(INetwork *net, mdarray<float> &targets);
-void set_targets_accelerated(INetwork *net, mdarray<float> &targets);
-void set_classes(INetwork *net, mdarray<int> &targets);
+void set_inputs(INetwork *net, Tensor<float,2> &inputs);
+void set_targets(INetwork *net, Tensor<float,2> &targets);
+void set_targets_accelerated(INetwork *net, Tensor<float,2> &targets);
+void set_classes(INetwork *net, Tensor<int,1> &targets);
 
 // single sequence training functions
-void mktargets(mdarray<float> &seq, mdarray<int> &targets, int ndim);
-void train(INetwork *net, mdarray<float> &inputs, mdarray<float> &targets);
-void ctrain(INetwork *net, mdarray<float> &inputs, mdarray<int> &targets);
-void cpred(INetwork *net, mdarray<int> &preds, mdarray<float> &inputs);
-void ctc_train(INetwork *net, mdarray<float> &xs, mdarray<float> &targets);
-void ctc_train(INetwork *net, mdarray<float> &xs, mdarray<int> &targets);
-void ctc_train(INetwork *net, mdarray<float> &xs, string &targets);
-void ctc_train(INetwork *net, mdarray<float> &xs, wstring &targets);
+void mktargets(Tensor<float,2> &seq, Tensor<int,1> &targets, int ndim);
+void train(INetwork *net, Tensor<float,2> &inputs, Tensor<float,2> &targets);
+void ctrain(INetwork *net, Tensor<float,2> &inputs, Tensor<int,1> &targets);
+void cpred(INetwork *net, Tensor<int,1> &preds, Tensor<float,2> &inputs);
+void ctc_train(INetwork *net, Tensor<float,2> &xs, Tensor<float,2> &targets);
+void ctc_train(INetwork *net, Tensor<float,2> &xs, Tensor<int,1> &targets);
+void ctc_train(INetwork *net, Tensor<float,2> &xs, string &targets);
+void ctc_train(INetwork *net, Tensor<float,2> &xs, wstring &targets);
 }
 
 #endif

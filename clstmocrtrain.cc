@@ -13,7 +13,6 @@
 #include <set>
 #include <regex>
 
-#include "multidim.h"
 #include "pymulti.h"
 #include "extras.h"
 
@@ -153,9 +152,9 @@ int main1(int argc, char **argv) {
         string fname = test_fnames[test];
         string base = basename(fname);
         wstring gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
-        mdarray<float> raw;
-        read_png(raw, fname.c_str(), true);
-        for (int i = 0; i < raw.size(); i++) raw[i] = 1 - raw[i];
+        Tensor<float,2> raw;
+        read_png(raw, fname.c_str());
+        raw = -raw + Float(1);
         wstring pred = clstm.predict(raw);
         count += gt.size();
         errors += levenshtein(pred, gt);
@@ -183,9 +182,9 @@ int main1(int argc, char **argv) {
     string fname = fnames[sample];
     string base = basename(fname);
     wstring gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
-    mdarray<float> raw;
-    read_png(raw, fname.c_str(), true);
-    for (int i = 0; i < raw.size(); i++) raw[i] = 1 - raw[i];
+    Tensor<float,2> raw;
+    read_png(raw, fname.c_str());
+    raw = -raw + Float(1);
     wstring pred = clstm.train(raw, gt);
     if (display_every > 0 && trial % display_every == 0) {
       py.evalf("clf");

@@ -58,10 +58,10 @@ struct PyServer {
   string evalf(const char *format, ...) { return ""; }
   void clf() {}
   void subplot(int rows, int cols, int n) {}
-  void plot(mdarray<float> &v, string extra = "") {}
-  void plot2(mdarray<float> &u, mdarray<float> &v, string extra = "") {}
-  void imshow(mdarray<float> &a, string extra = "") {}
-  void imshowT(mdarray<float> &a, string extra = "") {}
+  void plot(Tensor<float, 1> &v, string extra = "") {}
+  void plot2(Tensor<float, 1> &u, Tensor<float, 1> &v, string extra = "") {}
+  void imshow(Tensor<float, 2> &a, string extra = "") {}
+  void imshowT(Tensor<float, 2> &a, string extra = "") {}
 };
 #else
 struct PyServer {

@@ -5,11 +5,11 @@
 #include <string>
 #include <memory>
 #include <math.h>
-#include <Eigen/Dense>
 #include <stdarg.h>
 #include <set>
 #include <fstream>
 #include "pstring.h"
+#include "clstm_compute.h"
 
 #ifndef MAXEXP
 #define MAXEXP 30

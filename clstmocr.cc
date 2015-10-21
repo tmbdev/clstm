@@ -12,7 +12,6 @@
 #include <iostream>
 #include <set>
 
-#include "multidim.h"
 #include "pymulti.h"
 #include "extras.h"
 
@@ -70,11 +69,11 @@ int main1(int argc, char **argv) {
   ifstream stream(fname);
   string line;
   while (getline(stream, line)) {
-    mdarray<float> raw;
+    Tensor<float,2> raw;
     string fname = line;
     string basename = fname.substr(0, fname.find_last_of("."));
-    read_png(raw, fname.c_str(), true);
-    for (int i = 0; i < raw.size(); i++) raw[i] = 1 - raw[i];
+    read_png(raw, fname.c_str());
+    raw = -raw + Float(1.0);
     if (!conf) {
       string out = clstm.predict_utf8(raw);
       cout << line << "\t" << out << endl;
@@ -94,14 +93,14 @@ int main1(int argc, char **argv) {
     if (output == "text") {
       // nothing else to do
     } else if (output == "logs") {
-      mdarray<float> outputs;
+      Tensor<float,2> outputs;
       clstm.get_outputs(outputs);
-      for (int t = 0; t < outputs.dim(0); t++)
-        for (int c = 0; c < outputs.dim(1); c++)
+      for (int t = 0; t < outputs.dimension(0); t++)
+        for (int c = 0; c < outputs.dimension(1); c++)
           outputs(t, c) = scaled_log(outputs(t, c));
       write_png((basename + ".lp.png").c_str(), outputs);
     } else if (output == "posteriors") {
-      mdarray<float> outputs;
+      Tensor<float,2> outputs;
       clstm.get_outputs(outputs);
       write_png((basename + ".p.png").c_str(), outputs);
     } else {

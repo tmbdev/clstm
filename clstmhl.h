@@ -98,11 +98,11 @@ struct CLSTMText {
   std::string predict_utf8(const std::string &in) {
     return utf32_to_utf8(predict(utf8_to_utf32(in)));
   }
-  void get_outputs(mdarray<float> &outputs) {
+  void get_outputs(Tensor<float,2> &outputs) {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
-    for (int t = 0; t < outputs.dim(0); t++)
-      for (int c = 0; c < outputs.dim(1); c++)
+    for (int t = 0; t < outputs.dimension(0); t++)
+      for (int c = 0; c < outputs.dimension(1); c++)
         outputs(t, c) = net->outputs[t].v(c, 0);
   }
 };
@@ -113,7 +113,7 @@ struct CLSTMOCR {
   int target_height = 48;
   int nclasses = -1;
   Sequence aligned, targets;
-  mdarray<float> image;
+  Tensor<float,2> image;
   void setLearningRate(float lr, float mom) { net->setLearningRate(lr, mom); }
   void load(const std::string &fname) {
     net = load_net(fname);
@@ -132,7 +132,7 @@ struct CLSTMOCR {
     normalizer.reset(make_CenterNormalizer());
     normalizer->target_height = target_height;
   }
-  std::wstring train(mdarray<float> &raw, const std::wstring &target) {
+  std::wstring train(Tensor<float,2> &raw, const std::wstring &target) {
     normalizer->measure(raw);
     normalizer->normalize(image, raw);
     assign(net->inputs, image);
@@ -155,10 +155,10 @@ struct CLSTMOCR {
     std::wstring temp = net->codec.decode(outputs);
     return utf32_to_utf8(temp);
   }
-  std::string train_utf8(mdarray<float> &raw, const std::string &target) {
+  std::string train_utf8(Tensor<float,2> &raw, const std::string &target) {
     return utf32_to_utf8(train(raw, utf8_to_utf32(target)));
   }
-  std::wstring predict(mdarray<float> &raw, vector<int> *where = 0) {
+  std::wstring predict(Tensor<float,2> &raw, vector<int> *where = 0) {
     normalizer->measure(raw);
     normalizer->normalize(image, raw);
     assign(net->inputs, image);
@@ -167,7 +167,7 @@ struct CLSTMOCR {
     trivial_decode(outputs, net->outputs, 0, where);
     return net->codec.decode(outputs);
   }
-  void predict(vector<CharPrediction> &preds, mdarray<float> &raw) {
+  void predict(vector<CharPrediction> &preds, Tensor<float,2> &raw) {
     normalizer->measure(raw);
     normalizer->normalize(image, raw);
     assign(net->inputs, image);
@@ -185,14 +185,14 @@ struct CLSTMOCR {
       preds.push_back(pred);
     }
   }
-  std::string predict_utf8(mdarray<float> &raw) {
+  std::string predict_utf8(Tensor<float,2> &raw) {
     return utf32_to_utf8(predict(raw));
   }
-  void get_outputs(mdarray<float> &outputs) {
+  void get_outputs(Tensor<float,2> &outputs) {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
-    for (int t = 0; t < outputs.dim(0); t++)
-      for (int c = 0; c < outputs.dim(1); c++)
+    for (int t = 0; t < outputs.dimension(0); t++)
+      for (int c = 0; c < outputs.dimension(1); c++)
         outputs(t, c) = net->outputs[t].v(c, 0);
   }
 };
