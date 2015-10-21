@@ -4,14 +4,6 @@ import sys
 import os.path
 import distutils.sysconfig
 
-if os.path.isdir(".hg"):
-    hgversion = os.popen("hg -q id").read().strip()
-elif os.path.isdir(".git"):
-    hgversion = os.popen("git rev-list HEAD | sed 1q").read().strip()
-else:
-    hgversion = os.popen("date").read().strip()
-print "version", hgversion
-
 # A bunch of utility functions to make the rest of the SConstruct file a
 # little simpler.
 
@@ -48,7 +40,6 @@ protoc_builder = Builder(action=protoc,
 prefix = option('prefix', "/usr/local")
 
 env = Environment()
-env.Append(CPPDEFINES={"HGVERSION": '\\"' + hgversion + '\\"'})
 env.Append(CPPDEFINES={'THROW': 'throw', 'CATCH': 'catch', 'TRY': 'try'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
