@@ -288,13 +288,6 @@ inline bool anynan(mdarray<float> &a) {
   return false;
 }
 
-template <class S, class T>
-inline void assign(S &dest, T &src) {
-  dest.resize_(src.dims);
-  int n = dest.size();
-  for (int i = 0; i < n; i++) dest.data[i] = src.data[i];
-}
-
 inline void assign(mdarray<int> &dest, vector<int> &src) {
   int n = src.size();
   dest.resize(n);
@@ -331,6 +324,7 @@ inline void assign(Sequence &seq, T &a) {
   }
 }
 
+#if FIXME
 template <class T>
 inline void assign(T &a, Sequence &seq) {
   a.resize(int(seq.size()), int(seq[0].v.size()));
@@ -338,6 +332,7 @@ inline void assign(T &a, Sequence &seq) {
     for (int i = 0; i < a.dim(1); i++) a(t, i) = seq[t].v(i);
   }
 }
+#endif
 
 template <class A, class T>
 inline int indexof(A &a, const T &t) {

@@ -348,7 +348,7 @@ void set_targets(INetwork *net, mdarray<float> &targets) {
   for (int t = 0; t < N; t++)
     for (int i = 0; i < d; i++) net->outputs[t].d(i, 0) = targets(t, i);
   for (int t = 0; t < net->outputs.size(); t++)
-    net->outputs[t].d -= net->outputs[t].v;
+    net->outputs[t].D() -= net->outputs[t].V();
 }
 void set_targets_accelerated(INetwork *net, mdarray<float> &targets) {
   THROW("unimplemented");

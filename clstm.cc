@@ -170,15 +170,15 @@ void set_targets(INetwork *net, Sequence &targets) {
   assert(N == targets.size());
   assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++)
-    net->outputs[t].d = targets[t].v - net->outputs[t].v;
+    net->outputs[t].D() = targets[t].V() - net->outputs[t].V();
 }
 void set_classes(INetwork *net, Classes &classes) {
   int N = net->outputs.size();
   assert(N == classes.size());
   assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++) {
-    net->outputs[t].d = -net->outputs[t].v;
-    net->outputs[t].d(classes[t]) += 1;
+    net->outputs[t].D() = -net->outputs[t].V();
+    net->outputs[t].d(classes[t],0) += 1;
   }
 }
 
@@ -371,14 +371,14 @@ struct Stacked : INetwork {
     for (int n = sub.size() - 1; n >= 0; n--) {
       if (n + 1 == sub.size())
         for (int t = 0; t < outputs.size(); t++)
-          sub[n]->outputs[t].d = outputs[t].d;
+          sub[n]->outputs[t].D() = outputs[t].D();
       else
         for (int t = 0; t < sub[n + 1]->inputs.size(); t++)
-          sub[n]->outputs[t].d = sub[n + 1]->inputs[t].d;
+          sub[n]->outputs[t].D() = sub[n + 1]->inputs[t].D();
       sub[n]->backward();
     }
     for (int t = 0; t < sub[0]->inputs.size(); t++)
-      inputs[t].d = sub[0]->inputs[t].d;
+      inputs[t].D() = sub[0]->inputs[t].D();
   }
 };
 REGISTER(Stacked);
@@ -439,8 +439,8 @@ struct Parallel : INetwork {
     sub[0]->backward();
     sub[1]->backward();
     for (int t = 0; t < N; t++) {
-      inputs[t].d = sub[0]->inputs[t].d;
-      inputs[t].d += sub[1]->inputs[t].d;
+      inputs[t].D() = sub[0]->inputs[t].D();
+      inputs[t].D() += sub[1]->inputs[t].D();
     }
   }
 };
@@ -510,12 +510,10 @@ struct GenericNPLSTM : INetwork {
     for (int t = N - 1; t >= 0; t--) {
       backward_nonlingate<H>(out[t], state[t], go[t]);
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
-      gradient_clip(state[t].d, gradient_clipping);
       backward_full<G>(ci[t], WCI, source[t], gradient_clipping);
       backward_full<F>(go[t], WGO, source[t], gradient_clipping);
       backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
       backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
-      assert(gf[0].d.maxCoeff() == 0);
       backward_stack1(source[t], inputs[t], out, t - 1);
     }
     nsteps += N;

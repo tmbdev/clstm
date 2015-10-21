@@ -100,26 +100,38 @@ inline Float log_add(Float x, Float y) {
 inline Float log_mul(Float x, Float y) { return x + y; }
 
 struct Batch {
-  Mat v, d;
-  int rows() const { return v.rows(); }
-  int cols() const { return v.cols(); }
-  Ten2 V() { return Ten2(v.data(), v.rows(), v.cols()); }
-  Ten2 D() { return Ten2(d.data(), d.rows(), d.cols()); }
+protected:
+  Mat values, derivs;
+public:
+  Float &v(int i, int j) { return values(i,j); }
+  Float &d(int i, int j) { return derivs(i,j); }
+  int rows() const { return values.rows(); }
+  int cols() const { return values.cols(); }
+  Ten2 V() { return Ten2(values.data(), values.rows(), values.cols()); }
+  Ten2 D() { return Ten2(derivs.data(), derivs.rows(), derivs.cols()); }
   void setZero(int n, int m) {
-    v.setZero(n, m);
-    d.setZero(n, m);
+    values.setZero(n, m);
+    derivs.setZero(n, m);
   }
   void resize(int n, int m) { setZero(n, m); }
   void clear() {
-    v.setZero();
-    d.setZero();
+    values.setZero();
+    derivs.setZero();
   }
-  void zeroGrad() { d.setZero(rows(), cols()); }
+  void zeroGrad() { derivs.setZero(rows(), cols()); }
+  void gradientClip(Float clip) {
+    assert(clip>0);
+    for(int i=0; i<rows(); i++) {
+      for(int j=0; j<cols(); j++) {
+        derivs(i,j) = fmax(-clip, fmin(clip, derivs(i,j)));
+      }
+    }
+  }
 };
 struct Params : Batch {
   void update(Float lr, Float mom) {
-    v += lr * d;
-    d *= mom;
+    values += lr * derivs;
+    derivs *= mom;
   }
 };
 

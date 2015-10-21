@@ -72,7 +72,7 @@ struct CLSTMText {
     mktargets(targets, transcript, nclasses);
     ctc_align_targets(aligned, net->outputs, targets);
     for (int t = 0; t < aligned.size(); t++)
-      net->outputs[t].d = aligned[t].v - net->outputs[t].v;
+      net->outputs[t].D() = aligned[t].V() - net->outputs[t].V();
     net->backward();
     net->update();
     Classes output_classes;
@@ -142,7 +142,7 @@ struct CLSTMOCR {
     mktargets(targets, transcript, nclasses);
     ctc_align_targets(aligned, net->outputs, targets);
     for (int t = 0; t < aligned.size(); t++)
-      net->outputs[t].d = aligned[t].v - net->outputs[t].v;
+      net->outputs[t].D() = aligned[t].V() - net->outputs[t].V();
     net->backward();
     net->update();
     Classes outputs;

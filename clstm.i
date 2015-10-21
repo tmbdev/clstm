@@ -24,16 +24,13 @@
 #include <memory>
 #include <iostream>
 #include "clstm.h"
+#include "clstm_compute.h"
 using namespace ocropus;
 using namespace std;
 %}
 
 typedef float Float;
 using std::string;
-
-%inline %{
-const char *hgversion = HGVERSION;
-%}
 
 #ifdef SWIGPYTHON
 %exception {
@@ -60,7 +57,7 @@ const char *hgversion = HGVERSION;
 import_array();
 %}
 
-/* create simple interface definitions for the built-in Sequence and Mat types */
+/* create simple interface definitions for the built-in Sequence types */
 
 struct Classes {
     Classes();
@@ -76,51 +73,34 @@ struct Classes {
     }
 }
 
-struct Mat {
-    Mat();
-    Mat(int,int);
-    %rename(__getitem__) operator();
-    float operator()(int i,int j);
-    int rows();
-    int cols();
+struct Batch {
+  void resize(int,int);
+  void setZero(int,int);
+  int rows();
+  int cols();
+  float &v(int,int);
+  float &d(int,int);
 };
-%extend Mat {
-    void setValue(int i,int j,float value) {
-        (*$self)(i,j) = value;
-    }
-}
 
-struct Batch : Mat {
-  Mat d;
+struct Params {
+  void resize(int,int);
+  void setZero(int,int);
+  int rows();
+  int cols();
+  float &v(int,int);
+  float &d(int,int);
 };
-typedef Batch Params;
 
 
 struct Sequence {
     Sequence();
     ~Sequence();
     int size();
+    int rows();
+    int cols();
     %rename(__getitem__) operator[];
     Batch &operator[](int i);
 };
-%extend Sequence {
-    int length() {
-        return $self->size();
-    }
-    int depth() {
-        if($self->size()==0) return -1;
-        return (*$self)[0].rows();
-    }
-    int batchsize() {
-        if($self->size()==0) return -1;
-        return (*$self)[0].cols();
-    }
-    void assign(Sequence &other) {
-        $self->resize(other.size());
-        for(int t=0;t<$self->size();t++)
-            (*$self)[t] = other[t];
-    }
-}
 
 struct Assoc {
   string get(string key);
@@ -170,12 +150,13 @@ void mktargets(Sequence &seq, Classes &targets, int ndim);
 std::shared_ptr<INetwork> make_layer(string);
 std::shared_ptr<INetwork> make_net_init(string,string);
 
-/*
+#if 0
 %rename(seq_forward) forward_algorithm;
 void forward_algorithm(Mat &lr,Mat &lmatch,double skip=-5.0);
 %rename(seq_forwardbackward) forwardbackward;
 void forwardbackward(Mat &both,Mat &lmatch);
-*/
+#endif
+
 %rename(seq_ctc_align) ctc_align_targets;
 void ctc_align_targets(Sequence &posteriors,Sequence &outputs,Sequence &targets);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
@@ -209,12 +190,15 @@ string sequence_info(Sequence &seq) {
     result += to_string(seq.size());
     result += string(":") + (seq.size()>0?to_string(seq[0].rows()):"*");
     result += string(":") + (seq.size()>0?to_string(seq[0].cols()):"*");
+#if 0
+    // FIXME
     double lo = 1e99, hi = -1e99;
     for (int t=0;t<seq.size(); t++) {
-        lo = fmin(lo, seq[t].v.minCoeff());
-        hi = fmax(hi, seq[t].v.maxCoeff());
+        lo = fmin(lo, minimum(seq[t].V()));
+        hi = fmax(hi, maximum(seq[t].V()));
     }
     result += "[" + to_string(lo) + "," + to_string(hi) + "]";
+#endif
     return result;
 }
 
@@ -329,6 +313,7 @@ typedef NumPyArray<float, NPY_FLOAT> npa_float;
 %}
 
 %inline %{
+#if 0
 void mat_of_array(Mat &a,PyObject *object_) {
     npa_float np(object_);
     if(np.rank()!=2) throw "rank must be 2";
@@ -350,6 +335,7 @@ void array_of_mat(PyObject *object_,Mat &a) {
         for(int i=0;i<d;i++)
             np(t,i) = a(t,i);
 }
+#endif
 
 void sequence_of_array(Sequence &a,PyObject *object_) {
     npa_float np(object_);
@@ -357,9 +343,8 @@ void sequence_of_array(Sequence &a,PyObject *object_) {
     int N = np.dim(0);
     int d = np.dim(1);
     int bs = np.dim(2);
-    a.resize(N);
+    a.resize(N,d,bs);
     for(int t=0;t<N;t++) {
-        a[t].resize(d,bs);
         for(int i=0; i<d; i++)
             for(int b=0; b<bs; b++)
                 a[t].v(i,b) = np(t,i,b);
@@ -374,7 +359,6 @@ void d_sequence_of_array(Sequence &a,PyObject *object_) {
     int bs = np.dim(2);
     if (a.size() != N) throw "size mismatch";
     for(int t=0;t<N;t++) {
-        a[t].d.resize(d,bs);
         for(int i=0; i<d; i++)
             for(int b=0; b<bs; b++)
                 a[t].d(i,b) = np(t,i,b);

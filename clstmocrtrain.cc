@@ -70,9 +70,12 @@ wstring read_text32(string fname, int maxsize = 65536) {
   return utf8_to_utf32(string(buf, n));
 }
 
-void show(PyServer &py, Sequence &s, int subplot = 0) {
+void show(PyServer &py, Sequence &s, int subplot = 0, int batch=0) {
   mdarray<float> temp;
-  assign(temp, s);
+  temp.resize(s.size(), s.rows());
+  for(int i=0; i<s.size(); i++)
+    for(int j=0; j<s.rows(); j++)
+      temp(i,j) = s[i].v(j,batch);
   if (subplot > 0) py.evalf("subplot(%d)", subplot);
   py.imshowT(temp, "cmap=cm.hot");
 }

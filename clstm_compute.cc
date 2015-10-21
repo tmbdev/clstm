@@ -77,16 +77,16 @@ void rinit(Sequence &m, int N, int r, int c, Float s, const string mode, Float o
 
 // checking for NaNs in different objects
 
-bool anynan(Mat &a) {
-  for (int j = 0; j < ROWS(a); j++) {
-    for (int k = 0; k < COLS(a); k++) {
+bool anynan(Ten2 a) {
+  for (int j = 0; j < rows(a); j++) {
+    for (int k = 0; k < cols(a); k++) {
       float x = a(j, k);
       if (isnan(x)) return true;
     }
   }
 }
 
-bool anynan(Batch &a) { return anynan(a.v) || anynan(a.d); }
+bool anynan(Batch &a) { return anynan(a.V()) || anynan(a.D()); }
 
 bool anynan(Sequence &a) {
   for (int i = 0; i < a.size(); i++)
@@ -99,17 +99,17 @@ bool anynan(Sequence &a) {
 void gradient_clip(Sequence &s, Float m) {
   if (m < 0) return;
   for (int t = 0; t < s.size(); t++) {
-    s[t].d =
-        s[t].d.unaryExpr([m](Float x) { return x > m ? m : x < -m ? -m : x; });
+    s[t].D() =
+        s[t].D().unaryExpr([m](Float x) { return x > m ? m : x < -m ? -m : x; });
   }
 }
 
-void gradient_clip(Mat &d, Float m) {
+void gradient_clip(Ten2 d, Float m) {
   if (m < 0) return;
   d = d.unaryExpr([m](Float x) { return x > m ? m : x < -m ? -m : x; });
 }
 
-void gradient_clip(Batch &b, Float m) { gradient_clip(b.d, m); }
+void gradient_clip(Batch &b, Float m) { gradient_clip(b.D(), m); }
 
 // helper functions for Eigen::Tensor axes and sizes
 
@@ -387,7 +387,7 @@ void forward_reverse(Sequence &y, Sequence &x) {
 }
 void backward_reverse(Sequence &y, Sequence &x) {
   int N = x.size();
-  for (int i = 0; i < N; i++) x[N - i - 1].d += y[i].d;
+  for (int i = 0; i < N; i++) x[N - i - 1].D() += y[i].D();
 }
 
 // combine the delayed gated state with the gated input
