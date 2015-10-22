@@ -50,7 +50,6 @@ using std::string;
 
 %{
 #include "numpy/arrayobject.h"
-
 %}
 
 %init %{
@@ -206,137 +205,9 @@ string sequence_info(Sequence &seq) {
 
 #ifdef SWIGPYTHON
 %{
-template <class T, int TYPENUM>
-struct NumPyArray {
-    PyArrayObject *obj = 0;
-    NumPyArray() {}
-    NumPyArray(PyObject *object_) {
-        if(!object_) throw "null pointer";
-        if(!PyArray_Check(object_))
-            throw "expected a numpy array";
-        obj = (PyArrayObject *)object_;
-        Py_INCREF(obj);
-        valid();
-    }
-    NumPyArray(NumPyArray<T,TYPENUM> &other) {
-        Py_INCREF(other.obj);
-        Py_DECREF(obj);
-        obj = other.obj;
-    }
-    NumPyArray(int d0, int d1=0, int d2=0, int d3=0) {
-        npy_intp ndims[] = {d0, d1, d2, d3, 0};
-        int rank = 0;
-        while (ndims[rank]) rank++;
-        obj = PyArray_SimpleNew(rank, ndims, TYPENUM);
-        valid();
-    }
-    ~NumPyArray() {
-        Py_DECREF(obj);
-        obj = 0;
-    }
-    void operator=(NumPyArray<T,TYPENUM> &other) {
-        Py_INCREF(other.obj);
-        Py_DECREF(obj);
-        obj = other.obj;
-    }
-    void valid() {
-        if (!obj)
-            throw "no array set";
-        if(PyArray_TYPE(obj)!=TYPENUM)
-            throw "wrong numpy array type";
-        if((PyArray_FLAGS(obj)&NPY_ARRAY_C_CONTIGUOUS)==0)
-            throw "expected contiguous array";
-    }
-    int rank() {
-        valid();
-        return PyArray_NDIM(obj);
-    }
-    int dim(int i) {
-        valid();
-        return PyArray_DIM(obj,i);
-    }
-    int size() {
-        valid();
-        return PyArray_SIZE(obj);
-    }
-    void resize(int d0, int d1=0, int d2=0, int d3=0) {
-        npy_intp ndims[] = {d0, d1, d2, d3, 0};
-        int rank = 0;
-        while (ndims[rank]) rank++;
-        PyArray_Dims dims = { ndims, rank };
-        if (PyArray_Resize(obj, &dims, 0, NPY_CORDER)==nullptr)
-            throw "resize failed";
-    }
-    T &operator()(int i) {
-        assert(rank()==1);
-        assert(unsigned(i)<unsigned(dim(0)));
-        T *data = (T*)PyArray_DATA(obj);
-        return data[i];
-    }
-    T &operator()(int i,int j) {
-        assert(rank()==2);
-        assert(unsigned(i)<unsigned(dim(0)));
-        assert(unsigned(j)<unsigned(dim(1)));
-        T *data = (T*)PyArray_DATA(obj);
-        return data[i*dim(1)+j];
-    }
-    T &operator()(int i,int j,int k) {
-        assert(rank()==3);
-        assert(unsigned(i)<unsigned(dim(0)));
-        assert(unsigned(j)<unsigned(dim(1)));
-        assert(unsigned(k)<unsigned(dim(2)));
-        T *data = (T*)PyArray_DATA(obj);
-        return data[(i*dim(1)+j)*dim(2)+k];
-    }
-    T &operator()(int i,int j,int k,int l) {
-        assert(rank()==4);
-        assert(unsigned(i)<unsigned(dim(0)));
-        assert(unsigned(j)<unsigned(dim(1)));
-        assert(unsigned(k)<unsigned(dim(2)));
-        assert(unsigned(l)<unsigned(dim(3)));
-        T *data = (T*)PyArray_DATA(obj);
-        return data[((i*dim(1)+j)*dim(2)+k)*dim(3)+l];
-    }
-    T *data() {
-        valid();
-        return (T*)PyArray_DATA(obj);
-    }
-    void copyTo(T *dest) {
-        valid();
-        T *data = (T*)PyArray_DATA(obj);
-        int N = size();
-        for(int i=0; i<N; i++) dest[i] = data[i];
-    }
-};
-
-typedef NumPyArray<float, NPY_FLOAT> npa_float;
+#include "numpyarray.h"
 %}
-
 %inline %{
-#if 0
-void mat_of_array(Mat &a,PyObject *object_) {
-    npa_float np(object_);
-    if(np.rank()!=2) throw "rank must be 2";
-    int N = np.dim(0);
-    int d = np.dim(1);
-    a.resize(N,d);
-    for(int t=0;t<N;t++)
-        for(int i=0;i<d;i++)
-            a(t,i) = np(d,i);
-}
-
-void array_of_mat(PyObject *object_,Mat &a) {
-    npa_float np(object_);
-    if(np.rank()!=2) throw "rank must be 2";
-    int N = a.rows();
-    int d = a.cols();
-    np.resize(N,d);
-    for(int t=0;t<N;t++)
-        for(int i=0;i<d;i++)
-            np(t,i) = a(t,i);
-}
-#endif
-
 void sequence_of_array(Sequence &a,PyObject *object_) {
     npa_float np(object_);
     if(np.rank()!=3) throw "rank must be 3";

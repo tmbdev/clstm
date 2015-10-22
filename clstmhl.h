@@ -135,7 +135,7 @@ struct CLSTMOCR {
   std::wstring train(Tensor<float,2> &raw, const std::wstring &target) {
     normalizer->measure(raw);
     normalizer->normalize(image, raw);
-    assign(net->inputs, image);
+    set_inputs(net, image);
     net->forward();
     Classes transcript;
     net->codec.encode(transcript, target);
@@ -161,7 +161,7 @@ struct CLSTMOCR {
   std::wstring predict(Tensor<float,2> &raw, vector<int> *where = 0) {
     normalizer->measure(raw);
     normalizer->normalize(image, raw);
-    assign(net->inputs, image);
+    set_inputs(net, image);
     net->forward();
     Classes outputs;
     trivial_decode(outputs, net->outputs, 0, where);
@@ -170,7 +170,7 @@ struct CLSTMOCR {
   void predict(vector<CharPrediction> &preds, Tensor<float,2> &raw) {
     normalizer->measure(raw);
     normalizer->normalize(image, raw);
-    assign(net->inputs, image);
+    set_inputs(net, image);
     net->forward();
     Classes outputs;
     vector<int> where;

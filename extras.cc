@@ -322,42 +322,6 @@ INormalizer *make_Normalizer(const string &name) {
   THROW("unknown normalizer name");
 }
 
-// Setting inputs/outputs using mdarray
-
-inline void assign(Sequence &seq, Tensor<float, 2> &a) {
-  seq.resize(a.dimension(0));
-  for (int t = 0; t < seq.size(); t++) {
-    seq[t].resize(a.dimension(1), 1);
-    for (int i = 0; i < a.dimension(1); i++) seq[t].v(i, 0) = a(t, i);
-  }
-}
-inline void assign(Sequence &seq, Tensor<float, 3> &a) {
-  seq.resize(a.dimension(0));
-  for (int t = 0; t < seq.size(); t++) {
-    seq[t].resize(a.dimension(1), a.dimension(2));
-    for (int i = 0; i < a.dimension(1); i++)
-      for (int j = 0; j < a.dimension(2); j++) seq[t].v(i, j) = a(t, i, j);
-  }
-}
-
-void set_inputs(INetwork *net, Tensor<float,2> &inputs) {
-  assign(net->inputs, inputs);
-}
-void set_targets(INetwork *net, Tensor<float,2> &targets) {
-  int N = targets.dimension(0);
-  int d = targets.dimension(1);
-  for (int t = 0; t < N; t++)
-    for (int i = 0; i < d; i++) net->outputs[t].d(i, 0) = targets(t, i);
-  for (int t = 0; t < net->outputs.size(); t++)
-    net->outputs[t].D() -= net->outputs[t].V();
-}
-void set_targets_accelerated(INetwork *net, Tensor<float,2> &targets) {
-  THROW("unimplemented");
-}
-void set_classes(INetwork *net, Tensor<int,1> &targets) {
-  THROW("unimplemented");
-}
-
 // PNG I/O (taken from iulib)
 
 #define __sigsetjmp __sigsetjump0
@@ -619,44 +583,4 @@ void write_png(const char *name, Tensor<float,2> &image) {
   write_png(stream, temp);
   fclose(stream);
 }
-
-void glob(vector<string> &result, const string &arg) {
-  result.clear();
-  glob_t buf;
-  glob(arg.c_str(), GLOB_TILDE, nullptr, &buf);
-  for (int i = 0; i < buf.gl_pathc; i++) {
-    result.push_back(buf.gl_pathv[i]);
-  }
-  if (buf.gl_pathc > 0) globfree(&buf);
-}
-
-unsigned long random_state;
-
-void srandomize() {
-  random_state = getienv("seed", 0);
-  if (random_state == 0) {
-    random_state = (unsigned long)fmod(now() * 1e6, 1e9);
-    char **ep = environ;
-    while (*ep) {
-      char *p = *ep++;
-      while (*p) random_state = 17 * random_state + *p++;
-    }
-  }
-  // cerr << "# srandomize " << random_state << endl;
-}
-
-void randstep() {
-  random_state = (random_state * 1664525 + 1013904223) % (1ul << 32);
-}
-
-unsigned urandom() {
-  randstep();
-  return random_state;
-}
-
-int irandom() {
-  randstep();
-  return abs(int(random_state));
-}
-double drandom() { return double(irandom() % 999999733) / 999999733.0; }
 }

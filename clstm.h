@@ -163,7 +163,6 @@ void set_targets(INetwork *net, Sequence &targets);
 void set_targets_accelerated(INetwork *net, Sequence &targets);
 void set_classes(INetwork *net, Classes &classes);
 void set_classes(INetwork *net, BatchClasses &classes);
-void mktargets(Sequence &seq, Classes &targets, int ndim);
 
 // instantiating layers and networks
 
@@ -194,6 +193,7 @@ Network load_net(const string &file);
 // void forward_algorithm(Mat &lr, Mat &lmatch, double skip = -5.0);
 //  void forwardbackward(Mat &both, Mat &lmatch);
 // void ctc_align_targets(Mat &posteriors, Mat &outputs, Mat &targets);
+void mktargets(Sequence &seq, Classes &transcript, int ndim);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
                        Sequence &targets);
 void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
@@ -201,6 +201,15 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
 void trivial_decode(Classes &cs, Sequence &outputs, int batch = 0);
 void trivial_decode(Classes &cs, Sequence &outputs, int batch,
                     vector<int> *locs);
+
+// setting inputs and outputs
+void set_inputs(Network net, Tensor<float,2> &inputs);
+void set_targets(Network net, Tensor<float,2> &targets);
+void set_targets_accelerated(Network net, Tensor<float,2> &targets);
+void set_classes(Network net, Tensor<int,1> &targets);
+
+// single sequence training functions
+void mktargets(Tensor<float,2> &seq, Tensor<int,1> &targets, int ndim);
 }
 
 namespace {

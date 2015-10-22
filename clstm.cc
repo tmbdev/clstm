@@ -532,4 +532,26 @@ void save_net(const string &file, Network net) {
 }
 Network load_net(const string &file) { return load_as_proto(file); }
 
+void set_inputs(Network net, Tensor<float,2> &inputs) {
+  int N = inputs.dimension(0);
+  int d = inputs.dimension(1);
+  net->inputs.resize(N,d,1);
+  for (int t = 0; t < N; t++)
+    for (int i = 0; i < d; i++) net->inputs[t].v(i, 0) = inputs(t, i);
+}
+void set_targets(Network net, Tensor<float,2> &targets) {
+  int N = targets.dimension(0);
+  int d = targets.dimension(1);
+  for (int t = 0; t < N; t++)
+    for (int i = 0; i < d; i++) net->outputs[t].d(i, 0) = targets(t, i);
+  for (int t = 0; t < net->outputs.size(); t++)
+    net->outputs[t].D() -= net->outputs[t].V();
+}
+void set_targets_accelerated(Network net, Tensor<float,2> &targets) {
+  THROW("unimplemented");
+}
+void set_classes(Network net, Tensor<int,1> &targets) {
+  THROW("unimplemented");
+}
+
 }  // namespace ocropus
