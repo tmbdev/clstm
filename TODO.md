@@ -1,0 +1,12 @@
+ - optional Mat in computation
+ - refactor basic utilities into util.h
+ - LSTMOMP option
+ - single mat option
+ - full1 everywhere
+ - profiling option
+ - implement LSTM alternative
+ - implement per-class or per-step weights
+ - OMP parallel training
+ - factor out gradient clipping and NaN checking
+ - factor out clearing of gradients
+ - configurable update methods
