@@ -7,6 +7,7 @@
 #include <memory>
 #include <math.h>
 #include <stdarg.h>
+#include "utils.h"
 
 namespace ocropus {
 map<string, INetworkFactory> network_factories;

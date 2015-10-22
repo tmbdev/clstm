@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string>
 #include "extras.h"
+#include "utils.h"
 
 using std_string = std::string;
 #define string std_string

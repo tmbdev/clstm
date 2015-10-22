@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string>
 #include "extras.h"
+#include "utils.h"
 #include "clstm_compute.h"
 
 using std_string = std::string;

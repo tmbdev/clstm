@@ -12,6 +12,7 @@
 #include <set>
 #include <regex>
 #include "extras.h"
+#include "utils.h"
 
 using namespace Eigen;
 using namespace ocropus;
@@ -97,8 +98,6 @@ wstring separate_chars(const wstring &s, const wstring &charsep) {
 }
 
 int main1(int argc, char **argv) {
-  srandomize();
-
   int ntrain = getienv("ntrain", 10000000);
   int save_every = getienv("save_every", 10000);
   string save_name = getsenv("save_name", "_ocr");
@@ -178,7 +177,7 @@ int main1(int argc, char **argv) {
       clstm.net->attr.set("trial", trial);
       clstm.save(fname);
     }
-    int sample = irandom() % fnames.size();
+    int sample = lrand48() % fnames.size();
     string fname = fnames[sample];
     string base = basename(fname);
     wstring gt = separate_chars(read_text32(base + ".gt.txt"), charsep);

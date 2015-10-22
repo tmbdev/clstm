@@ -11,6 +11,7 @@
 #include <iostream>
 #include <set>
 #include "extras.h"
+#include "utils.h"
 
 using namespace Eigen;
 using namespace ocropus;
@@ -99,7 +100,7 @@ int main1(int argc, char **argv) {
   int start = clstm.net->attr.get("trial", getienv("start", -1)) + 1;
   if (start > 0) print("start", start);
   for (int trial = start; trial < ntrain; trial++) {
-    int sample = irandom() % samples.size();
+    int sample = lrand48() % samples.size();
     if (trial > 0 && test_samples.size() > 0 && test_every > 0 &&
         trial % test_every == 0) {
       double errors = 0.0;

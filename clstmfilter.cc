@@ -11,6 +11,7 @@
 #include <iostream>
 #include <set>
 #include "extras.h"
+#include "utils.h"
 
 using namespace Eigen;
 using namespace ocropus;

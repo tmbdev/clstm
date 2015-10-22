@@ -32,6 +32,7 @@ extern "C" {
 #include <map>
 #include "pytensor.h"
 #include "extras.h"
+#include "utils.h"
 
 namespace ocropus {
 using namespace std;
