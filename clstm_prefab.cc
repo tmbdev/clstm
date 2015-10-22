@@ -109,7 +109,7 @@ Network make_net(const string &kind, const Assoc &args) {
   } else {
     result = layer(kind, args.get("ninput"), args.get("noutput"), args, {});
   }
-  if (!result) throwf("%s: no such network or layer", kind.c_str());
+  if (!result) throwf("no such network or layer: %s", kind.c_str());
   result->attr.set("kind", kind);
   return result;
 }

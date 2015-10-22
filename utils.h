@@ -18,16 +18,6 @@
 #include <iostream>
 
 namespace ocropus {
-// simplistic sprintf for strings
-
-inline string stringf(const char *format, ...) {
-  static char buf[4096];
-  va_list v;
-  va_start(v, format);
-  vsnprintf(buf, sizeof(buf), format, v);
-  va_end(v);
-  return string(buf);
-}
 
 // get current time down to usec precision as a double
 
@@ -148,7 +138,7 @@ inline double getrenv(const char *name, double dflt = 0, bool logscale = true) {
     report_params(name, lo);
     return lo;
   } else {
-    throwf("bad format for getrenv");
+    THROW("bad format for getrenv");
     return 0;
   }
 }
@@ -165,9 +155,27 @@ inline double getuenv(const char *name, double dflt = 0) {
     report_params(name, lo);
     return lo;
   } else {
-    throwf("bad format for getuenv");
+    THROW("bad format for getuenv");
     return 0;
   }
+}
+
+inline string stringf(const char *format, ...) {
+  static char buf[4096];
+  va_list v;
+  va_start(v, format);
+  vsnprintf(buf, sizeof(buf), format, v);
+  va_end(v);
+  return string(buf);
+}
+
+inline void throwf(const char *format, ...) {
+  static char buf[1024];
+  va_list arglist;
+  va_start(arglist, format);
+  vsprintf(buf, format, arglist);
+  va_end(arglist);
+  THROW(buf);
 }
 
 }

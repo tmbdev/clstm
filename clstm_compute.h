@@ -60,23 +60,13 @@ inline int argmax(const Tensor1 &m) {
 inline Float sum(const Tensor1 &m) { return reduction_(m.sum()); }
 inline Float sum(const Tensor2 &m) { return reduction_(m.sum()); }
 
-template <typename F, typename T>
-void each(F f, T &a) {
-  f(a);
-}
-template <typename F, typename T, typename... Args>
-void each(F f, T &a, Args &&... args) {
-  f(a);
-  each(f, args...);
-}
+inline Float tanh_(Float x) { return tanh(x); }
+inline Float relu_(Float x) { return x <= 0 ? 0 : x; }
+inline Float heavi_(Float x) { return x <= 0 ? 0 : 1; }
 
 #ifndef MAXEXP
 #define MAXEXP 30
 #endif
-
-inline Float tanh_(Float x) { return tanh(x); }
-inline Float relu_(Float x) { return x <= 0 ? 0 : x; }
-inline Float heavi_(Float x) { return x <= 0 ? 0 : 1; }
 
 inline Float limexp(Float x) {
 #if 1

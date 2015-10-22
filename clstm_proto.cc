@@ -2,6 +2,7 @@
 // See clstm.proto for the protocol buffer definitions used here.
 
 #include "clstm.h"
+#include "utils.h"
 #include <assert.h>
 #include <iostream>
 #include <vector>
@@ -17,30 +18,6 @@
 #else
 #include "clstm.pb.h"
 #endif
-
-namespace {
-inline void throwf(const char *format, ...) {
-  static char buf[1024];
-  va_list arglist;
-  va_start(arglist, format);
-  vsprintf(buf, format, arglist);
-  va_end(arglist);
-  THROW(buf);
-}
-
-inline void print() { std::cout << std::endl; }
-
-template <class T>
-inline void print(const T &arg) {
-  std::cout << arg << std::endl;
-}
-
-template <class T, typename... Args>
-inline void print(T arg, Args... args) {
-  std::cout << arg << " ";
-  print(args...);
-}
-}
 
 namespace ocropus {
 using std::cout;
@@ -187,7 +164,7 @@ void save_as_proto(const string &fname, INetwork *net) {
 Network load_as_proto(const string &fname) {
   ifstream stream;
   stream.open(fname, ios::binary);
-  if (!stream) throwf("%s: cannot open", fname.c_str());
+  if (!stream) throwf("cannot open: %s", fname.c_str());
   unique_ptr<clstm::NetworkProto> proto;
   proto.reset(new clstm::NetworkProto());
   if (proto->ParseFromIstream(&stream) == false) {

@@ -364,7 +364,6 @@ void set_classes(INetwork *net, Tensor<int,1> &targets) {
 #include <png.h>
 #undef __sigsetjmp
 
-#define ERROR(X) THROW(X)
 #define CHECK_CONDITION(X)         \
   do {                             \
     if (!(X)) THROW("CHECK: " #X); \
@@ -389,28 +388,28 @@ void read_png(Tensor<unsigned char, 3> &image, FILE *fp) {
   png_infop info_ptr, end_info;
   png_colorp palette;
 
-  if (!fp) ERROR("fp not defined");
+  if (!fp) THROW("fp not defined");
 
   // Allocate the 3 data structures
   if ((png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL,
                                         NULL, NULL)) == NULL)
-    ERROR("png_ptr not made");
+    THROW("png_ptr not made");
 
   if ((info_ptr = png_create_info_struct(png_ptr)) == NULL) {
     png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
-    ERROR("info_ptr not made");
+    THROW("info_ptr not made");
   }
 
   if ((end_info = png_create_info_struct(png_ptr)) == NULL) {
     png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
-    ERROR("end_info not made");
+    THROW("end_info not made");
   }
 
   // Set up png setjmp error handling
 
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
-    ERROR("internal png error");
+    THROW("internal png error");
   }
 
   png_init_io(png_ptr, fp);
@@ -444,18 +443,18 @@ void read_png(Tensor<unsigned char, 3> &image, FILE *fp) {
     d = bit_depth;
   } else if (spp == 2) {
     d = 2 * bit_depth;
-    ERROR("there shouldn't be 2 spp!");
+    THROW("there shouldn't be 2 spp!");
   } else if (spp == 3) {
     d = 4 * bit_depth;
   } else { /* spp == 4 */
     d = 4 * bit_depth;
-    ERROR("there shouldn't be 4 spp!");
+    THROW("there shouldn't be 4 spp!");
   }
 
   /* Remove if/when this is implemented for all bit_depths */
   if (spp == 3 && bit_depth != 8) {
     fprintf(stderr, "Help: spp = 3 and depth = %d != 8\n!!", bit_depth);
-    ERROR("not implemented for this depth");
+    THROW("not implemented for this depth");
   }
 
   Tensor<int,2> color_map;
@@ -525,22 +524,22 @@ void write_png(FILE *fp, Tensor<unsigned char,3> &image) {
   int rank = image.rank();
   CHECK_ARG(image.rank() == 2 || (image.rank() == 3 && image.dimension(2) == 3));
 
-  if (!fp) ERROR("stream not open");
+  if (!fp) THROW("stream not open");
 
   /* Allocate the 2 data structures */
   if ((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL,
                                          NULL, NULL)) == NULL)
-    ERROR("png_ptr not made");
+    THROW("png_ptr not made");
 
   if ((info_ptr = png_create_info_struct(png_ptr)) == NULL) {
     png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
-    ERROR("info_ptr not made");
+    THROW("info_ptr not made");
   }
 
   /* Set up png setjmp error handling */
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
-    ERROR("internal png error");
+    THROW("internal png error");
   }
 
   png_init_io(png_ptr, fp);

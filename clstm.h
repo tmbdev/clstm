@@ -26,9 +26,6 @@ using std::shared_ptr;
 using std::unique_ptr;
 using std::function;
 
-void throwf(const char *format, ...);
-extern char exception_message[256];
-
 // A string that automatically converts to numbers when needed;
 // used for holding parameter values.
 class String : public std::string {
@@ -62,7 +59,7 @@ class Assoc : public std::map<std::string, String> {
     auto it = this->find(key);
     if (it == this->end()) {
       if (super) return super->get(key);
-      throwf("missing parameter: %s", key.c_str());
+      THROW("missing parameter");
     }
     return it->second;
   }

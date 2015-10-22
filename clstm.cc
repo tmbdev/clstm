@@ -23,15 +23,6 @@ inline double now() {
 }
 
 namespace ocropus {
-char exception_message[256];
-
-void throwf(const char *format, ...) {
-  va_list arglist;
-  va_start(arglist, format);
-  vsprintf(exception_message, format, arglist);
-  va_end(arglist);
-  THROW(exception_message);
-}
 
 void rinit(Params &m, int r, int c, Assoc &attr, string prefix="") {
   m.resize(r,c);
@@ -471,9 +462,10 @@ struct GenericNPLSTM : INetwork {
     this->ni = ni;
     this->no = no;
     this->nf = nf;
-    each([this, no, nf](Params &w) {
-      rinit(w, no, nf, attr);
-    }, WEIGHTS);
+    rinit(WGI, no, nf, attr);
+    rinit(WGF, no, nf, attr);
+    rinit(WGO, no, nf, attr);
+    rinit(WCI, no, nf, attr);
   }
   void postLoad() {
     no = ROWS(WGI);
