@@ -62,8 +62,12 @@ else:
 # With debug=1, the code will be compiled suitable for debugging.
 
 if option("profile", 0):
-    env.Append(CXXFLAGS="-g -pg -fno-inline".split())
-    env.Append(CCFLAGS="-g -pg".split())
+    if option("profile", 0)>1:
+        env.Append(CXXFLAGS="-g -pg -fno-inline".split())
+        env.Append(CCFLAGS="-g -pg -fno-inline".split())
+    else:
+        env.Append(CXXFLAGS="-g -pg -O2".split())
+        env.Append(CCFLAGS="-g -pg -O2".split())
     env.Append(LINKFLAGS="-g -pg".split())
 elif option("debug", 0)>0:
     if option("debug", 0)>1:
@@ -169,7 +173,6 @@ pyswig = swigenv.SharedLibrary("_clstm.so",
                                 "clstm.pb.cc", "clstm_compute.cc",
                                "clstm_prefab.cc", "ctc.cc"],
                                LIBS=libs)
-all += [pyswig]
 Alias('pyswig', [pyswig])
 
 destlib = distutils.sysconfig.get_config_var("DESTLIB")

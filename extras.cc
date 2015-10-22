@@ -88,6 +88,8 @@ void gauss1d(Tensor<T,1> &out, Tensor<T,1> &in, float sigma) {
   for (int i = 0; i < mask.dimension(0); i++) total += mask(i);
   for (int i = 0; i < mask.dimension(0); i++) mask(i) /= total;
 
+  T *in_ = in.data();
+  float *mask_ = mask.data();
   // apply it
   int n = in.size();
   for (int i = 0; i < n; i++) {
@@ -96,7 +98,7 @@ void gauss1d(Tensor<T,1> &out, Tensor<T,1> &in, float sigma) {
       int index = i + j - range;
       if (index < 0) index = 0;
       if (index >= n) index = n - 1;
-      total += in(index) * mask(j);  // it's symmetric
+      total += in_[index] * mask_[j];  // it's symmetric
     }
     out(i) = T(total);
   }

@@ -15,9 +15,11 @@ extern int useten;
 #ifdef LSTM_DOUBLE
 typedef double Float;
 typedef Eigen::MatrixXd Mat;
+typedef Eigen::VectorXd Vec;
 #else
 typedef float Float;
 typedef Eigen::MatrixXf Mat;
+typedef Eigen::VectorXf Vec;
 #endif
 
 using Eigen::Tensor;
@@ -102,38 +104,34 @@ inline Float log_add(Float x, Float y) {
 inline Float log_mul(Float x, Float y) { return x + y; }
 
 struct Batch {
-protected:
-  Mat values, derivs;
-public:
-  Float &v(int i, int j) { return values(i,j); }
-  Float &d(int i, int j) { return derivs(i,j); }
-  int rows() const { return values.rows(); }
-  int cols() const { return values.cols(); }
-  Ten2 V() { return Ten2(values.data(), values.rows(), values.cols()); }
-  Ten2 D() { return Ten2(derivs.data(), derivs.rows(), derivs.cols()); }
+  Mat v,d;
+  int rows() const { return v.rows(); }
+  int cols() const { return v.cols(); }
+  Ten2 V() { return Ten2(v.data(), v.rows(), v.cols()); }
+  Ten2 D() { return Ten2(d.data(), d.rows(), d.cols()); }
   void setZero(int n, int m) {
-    values.setZero(n, m);
-    derivs.setZero(n, m);
+    v.setZero(n, m);
+    d.setZero(n, m);
   }
   void resize(int n, int m) { setZero(n, m); }
   void clear() {
-    values.setZero();
-    derivs.setZero();
+    v.setZero();
+    d.setZero();
   }
-  void zeroGrad() { derivs.setZero(rows(), cols()); }
+  void zeroGrad() { d.setZero(rows(), cols()); }
   void gradientClip(Float clip) {
     assert(clip>0);
     for(int i=0; i<rows(); i++) {
       for(int j=0; j<cols(); j++) {
-        derivs(i,j) = fmax(-clip, fmin(clip, derivs(i,j)));
+        d(i,j) = fmax(-clip, fmin(clip, d(i,j)));
       }
     }
   }
 };
 struct Params : Batch {
   void update(Float lr, Float mom) {
-    values += lr * derivs;
-    derivs *= mom;
+    v += lr * d;
+    d *= mom;
   }
 };
 

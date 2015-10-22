@@ -1,0 +1,36 @@
+#!/bin/sh
+set -x
+export hidden=50
+export lrate=1e-2
+
+export ntrain=2001
+export report_every=2000
+echo 'hello	hello' > _filter.txt
+
+scons -s -c clsmtfiltertrain
+scons -s -j 4 profile=1 usemat=0 clstmfiltertrain
+mv clstmfiltertrain clstmfiltertrain-ten
+time ./clstmfiltertrain-ten _filter.txt
+mv gmon.out clstmfiltertrain-ten.out
+
+scons -s -c clstmfiltertrain
+scons -s -j 4 profile=1 usemat=1 clstmfiltertrain
+mv clstmfiltertrain clstmfiltertrain-mat
+time ./clstmfiltertrain-mat _filter.txt
+mv gmon.out clstmfiltertrain-mat.out
+
+export ntrain=201
+export report_every=200
+echo misc/textline.bin.png > _ocrtest.txt
+
+scons -s -c clstmocrtrain
+scons -s -j 4 profile=1 usemat=0 clstmocrtrain
+mv clstmocrtrain clstmocrtrain-ten
+time ./clstmocrtrain-ten _ocrtest.txt
+mv gmon.out clstmocrtrain-ten.out
+
+scons -s -c clstmocrtrain
+scons -s -j 4 profile=1 usemat=1 clstmocrtrain
+mv clstmocrtrain clstmocrtrain-mat
+time ./clstmocrtrain-mat _ocrtest.txt
+mv gmon.out clstmocrtrain-mat.out

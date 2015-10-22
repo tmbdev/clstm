@@ -132,31 +132,30 @@ inline Eigen::Sizes<2> S(int i, int j) { return Eigen::Sizes<2>({i, j}); }
 
 template <class F>
 void forward_full1(Batch &y, Params &W1, Batch &x) {
+  Float (*f)(Float) = F::nonlin;
 #ifndef USEMAT
   int n = W1.V().dimension(0), m = W1.V().dimension(1);
   int bs = x.V().dimension(1);
-  Float (*f)(Float) = F::nonlin;
   y.V() =
       (W1.V().slice(ar(0, 1), ar(n, m - 1)).contract(x.V(), axes(1, 0)) +
        W1.V().chip(0, 1).reshape(ar(n, 1)).broadcast(ar(1, bs))).unaryExpr(f);
 #else
   y.v = (CBUTFIRST(W1.v) * x.v).colwise() + CFIRST(W1.v);
-  F::f(y.v);
+  y.v = y.v.unaryExpr(f);
 #endif
 }
 template <class F>
 void backward_full1(Batch &y, Params &W1, Batch &x, Float gc) {
+  Float (*g)(Float) = F::yderiv;
 #ifndef USEMAT
   int n = W1.V().dimension(0), m = W1.V().dimension(1);
-  Float (*g)(Float) = F::yderiv;
   Tensor2 temp = y.D() * y.V().unaryExpr(g);
   x.D() = W1.V().slice(ar(0, 1), ar(n, m - 1)).contract(temp, axes(0, 0));
   W1.D().slice(ar(0, 1), ar(n, m - 1)) += temp.contract(x.V(), axes(1, 1));
   W1.D().chip(0, 1) += temp.sum(ar(1));
 #else
   Mat temp;
-  temp = y.d;
-  F::df(temp, y.v);
+  temp.array() = y.d.array() * y.v.array().unaryExpr(g);
   x.d = CBUTFIRST(W1.v).transpose() * temp;
   int bs = y.v.cols();
   auto d_W = CBUTFIRST(W1.d);
@@ -181,23 +180,22 @@ template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x,
 
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
-#ifndef USEMAT
   Float (*f)(Float) = F::nonlin;
+#ifndef USEMAT
   y.V() = W.V().contract(x.V(), axes(1, 0)).unaryExpr(f);
 #else
-  y.v = nonlin<F>(W.v * x.v);
+  y.v = (W.v * x.v).unaryExpr(f);;
 #endif
 }
 template <class F>
 void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
-#ifndef USEMAT
   Float (*g)(Float) = F::yderiv;
+#ifndef USEMAT
   Tensor2 temp = y.V().unaryExpr(g) * y.D();
   x.D() += W.V().contract(temp, axes(0, 0));
   W.D() += temp.contract(x.V(), axes(1, 1));
 #else
-  Mat temp = yprime<F>(y.v).array() * y.d.array();
-  gradient_clip(temp, gc);
+  Mat temp = y.d.array() * y.v.unaryExpr(g).array();
   x.d += W.v.transpose() * temp;
   W.d += temp * x.v.transpose();
 #endif
@@ -217,11 +215,11 @@ template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x,
 // softmax
 
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
+  Float (*f)(Float) = limexp;
 #ifndef USEMAT
   int n = W1.V().dimension(0);
   int m = W1.V().dimension(1);
   int bs = z.V().dimension(1);
-  Float (*f)(Float) = limexp;
   z.V() =
       (W1.V().slice(ar(0, 1), ar(n, m - 1)).contract(x.V(), axes(1, 0)) +
        W1.V().chip(0, 1).reshape(ar(n, 1)).broadcast(ar(1, bs))).unaryExpr(f);
@@ -234,7 +232,6 @@ void forward_softmax(Batch &z, Params &W1, Batch &x) {
   int n = ROWS(W1.v);
   int m = COLS(W1.v);
   int bs = COLS(x.v);
-  Float (*f)(Float) = limexp;
   z.v = ((CBUTFIRST(W1.v) * x.v).colwise() + CFIRST(W1.v)).unaryExpr(f);
   for (int b = 0; b < bs; b++) {
     double total = 0.0;
@@ -421,23 +418,23 @@ void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
 
 template <class H>
 void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
-#ifndef USEMAT
   Float (*f)(Float) = H::nonlin;
+#ifndef USEMAT
   out.V() = state.V().unaryExpr(f) * go.V();
 #else
-  out.v = nonlin<H>(state.v).array() * go.v.array();
+  out.v = state.v.unaryExpr(f).array() * go.v.array();
 #endif
 }
 template <class H>
 void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
-#ifndef USEMAT
   Float (*f)(Float) = H::nonlin;
   auto g = [](Float x) { return H::yderiv(H::nonlin(x)); };
+#ifndef USEMAT
   go.D() += state.V().unaryExpr(f) * out.D();
   state.D() += state.V().unaryExpr(g) * go.V() * out.D();
 #else
-  go.d.array() += nonlin<H>(state.v).array() * out.d.array();
-  state.d.array() += xprime<H>(state.v).array() * go.v.array() * out.d.array();
+  go.d.array() += state.v.unaryExpr(f).array() * out.d.array();
+  state.d.array() += state.v.unaryExpr(g).array() * go.v.array() * out.d.array();
 #endif
 }
 
