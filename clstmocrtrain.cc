@@ -97,21 +97,118 @@ wstring separate_chars(const wstring &s, const wstring &charsep) {
   return result;
 }
 
+struct Dataset {
+  vector<string> fnames;
+  wstring charsep = utf8_to_utf32(getsenv("charsep", ""));
+  int size() { return fnames.size(); }
+  Dataset() {}
+  Dataset(string file_list) {
+    readFileList(file_list);
+  }
+  void readFileList(string file_list) {
+    read_lines(fnames, file_list);
+  }
+  void getCodec(Codec &codec) {
+    vector<string> gtnames;
+    for (auto s : fnames) gtnames.push_back(basename(s) + ".gt.txt");
+    codec.build(gtnames, charsep);
+  }
+  void readSample(Tensor<float,2> &raw,wstring &gt,int index) {
+    string fname = fnames[index];
+    string base = basename(fname);
+    gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
+    read_png(raw, fname.c_str());
+    raw = -raw + Float(1);
+  }
+};
+
+pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset) {
+  double count = 0.0;
+  double errors = 0.0;
+  for (int test = 0; test < testset.size(); test++) {
+    Tensor<float, 2> raw;
+    wstring gt;
+    testset.readSample(raw, gt, test);
+    wstring pred = clstm.predict(raw);
+    count += gt.size();
+    errors += levenshtein(pred, gt);
+  }
+  return make_pair(count, errors);
+}
+
+// A class encapsulating "report every ..." type logic.
+// This will generally report every `every` steps, as well
+// as when the `upto` value is reached. It can be disabled
+// by setting `enabled` to false.
+
+struct Trigger {
+  bool finished = false;
+  bool enabled = true;
+  int count = 0;
+  int every = 1;
+  int upto = 0;
+  int next = 0;
+  int last_trigger = 0;
+  int current_trigger = 0;
+  Trigger(int every,int upto=-1, int start=0) :
+    every(every), upto(upto), count(start) {
+  }
+  Trigger &skip0() {
+    next += every;
+    return *this;
+  }
+  Trigger &enable(bool flag) {
+    enabled = flag;
+    return *this;
+  }
+  void rotate() {
+    last_trigger = current_trigger;
+    current_trigger = count;
+  }
+  int since() {
+    return count - last_trigger;
+  }
+  bool check() {
+    assert(!finished);
+    if (upto>0 && count >= upto-1) {
+      finished = true;
+      rotate();
+      return true;
+    }
+    if (every == 0) return false;
+    if (count >= next) {
+      while(count >= next) next += every;
+      rotate();
+      return true;
+    } else {
+      return false;
+    }
+  }
+  bool operator()(int current) {
+    assert(!finished);
+    assert(current>=count);
+    count = current;
+    return check();
+  }
+  bool operator+=(int incr) {
+    return operator()(count+incr);
+  }
+  bool operator++() {
+    return operator()(count+1);
+  }
+};
+
 int main1(int argc, char **argv) {
   int ntrain = getienv("ntrain", 10000000);
-  int save_every = getienv("save_every", 10000);
   string save_name = getsenv("save_name", "_ocr");
-  int report_every = getienv("report_every", 100);
-  int display_every = getienv("display_every", 0);
   int report_time = getienv("report_time", 0);
-  int test_every = getienv("test_every", 10000);
-  wstring charsep = utf8_to_utf32(getsenv("charsep", ""));
 
   if (argc < 2 || argc > 3) THROW("... training [testing]");
-  vector<string> fnames, test_fnames;
-  read_lines(fnames, argv[1]);
-  if (argc > 2) read_lines(test_fnames, argv[2]);
-  print("got", fnames.size(), "files,", test_fnames.size(), "tests");
+  Dataset trainingset(argv[1]);
+  assert(trainingset.size()>0);
+  Dataset testset;
+  if (argc>2) testset.readFileList(argv[2]);
+  print("got", trainingset.size(), "files,", testset.size(), "tests");
 
   string load_name = getsenv("load", "");
 
@@ -121,9 +218,7 @@ int main1(int argc, char **argv) {
     clstm.load(load_name);
   } else {
     Codec codec;
-    vector<string> gtnames;
-    for (auto s : fnames) gtnames.push_back(basename(s) + ".gt.txt");
-    codec.build(gtnames, charsep);
+    trainingset.getCodec(codec);
     print("got", codec.size(), "classes");
 
     clstm.target_height = int(getrenv("target_height", 48));
@@ -142,51 +237,34 @@ int main1(int argc, char **argv) {
   double start_time = now();
   int start = clstm.net->attr.get("trial", getienv("start", -1)) + 1;
   if (start > 0) print("start", start);
+
+  Trigger test_trigger(getienv("test_every", 10000), -1, start);
+  test_trigger.skip0();
+  Trigger save_trigger(getienv("save_every", 10000), ntrain, start);
+  save_trigger.enable(save_name!="").skip0();
+  Trigger report_trigger(getienv("report_every", 100), ntrain, start);
+  Trigger display_trigger(getienv("display_every", 0), ntrain, start);
+
   for (int trial = start; trial < ntrain; trial++) {
-    if (trial > 0 && test_fnames.size() > 0 && test_every > 0 &&
-        trial % test_every == 0) {
-      double errors = 0.0;
-      double count = 0.0;
-      for (int test = 0; test < test_fnames.size(); test++) {
-        string fname = test_fnames[test];
-        string base = basename(fname);
-        wstring gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
-        Tensor<float,2> raw;
-        read_png(raw, fname.c_str());
-        raw = -raw + Float(1);
-        wstring pred = clstm.predict(raw);
-        count += gt.size();
-        errors += levenshtein(pred, gt);
-      }
-      test_error = errors / count;
-      print("ERROR", trial, test_error, "   ", errors, count);
-    }
-    if (save_every == 0 && test_error < best_error) {
-      best_error = test_error;
-      string fname = save_name + ".clstm";
-      print("saving best performing network so far", fname, "error rate: ",
-            best_error);
-      clstm.net->attr.set("trial", trial);
-      clstm.save(fname);
-    }
-    bool do_save = (save_every > 0 && trial % save_every == 0);
-    do_save = (do_save || (trial == ntrain - 1));
-    do_save = (do_save && (save_name != ""));
-    if (trial > 0 && do_save) {
-      string fname = save_name + "-" + to_string(trial) + ".clstm";
-      clstm.net->attr.set("trial", trial);
-      clstm.save(fname);
-    }
-    int sample = lrand48() % fnames.size();
-    string fname = fnames[sample];
-    string base = basename(fname);
-    wstring gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
+
+    int sample = lrand48() % trainingset.size();
     Tensor<float,2> raw;
-    read_png(raw, fname.c_str());
-    raw = -raw + Float(1);
+    wstring gt;
+    trainingset.readSample(raw, gt, sample);
     wstring pred = clstm.train(raw, gt);
+
+    if (report_trigger(trial)) {
+      print(trial);
+      print("TRU", gt);
+      print("ALN", clstm.aligned_utf8());
+      print("OUT", utf32_to_utf8(pred));
+      if (trial > 0 && report_time)
+        print("steptime", (now() - start_time) / report_trigger.since());
+      start_time = now();
+    }
+
 #ifndef NODISPLAY
-    if (display_every > 0 && trial % display_every == 0) {
+    if (display_trigger(trial)) {
       py.evalf("clf");
       show(py, clstm.net->inputs, 411);
       show(py, clstm.net->outputs, 412);
@@ -194,14 +272,28 @@ int main1(int argc, char **argv) {
       show(py, clstm.aligned, 414);
     }
 #endif
-    if (report_every > 0 && trial % report_every == 0) {
-      print(trial);
-      print("TRU", gt);
-      print("ALN", clstm.aligned_utf8());
-      print("OUT", utf32_to_utf8(pred));
-      if (trial > 0 && report_time)
-        print("steptime", (now() - start_time) / report_every);
-      start_time = now();
+
+    if (test_trigger(trial)) {
+      auto tse = test_set_error(clstm, testset);
+      double errors = tse.first;
+      double count = tse.second;
+      test_error = errors / count;
+      print("ERROR", trial, test_error, "   ", errors, count);
+      if (test_error<best_error) {
+        best_error = test_error;
+        string fname = save_name + ".clstm";
+        print("saving best performing network so far", fname, "error rate: ",
+              best_error);
+        clstm.net->attr.set("trial", trial);
+        clstm.save(fname);
+      }
+    }
+
+    if (save_trigger(trial)) {
+      string fname = save_name + "-" + to_string(trial) + ".clstm";
+      print("saving", fname);
+      clstm.net->attr.set("trial", trial);
+      clstm.save(fname);
     }
   }
 
