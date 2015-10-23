@@ -93,68 +93,6 @@ pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset) {
   return make_pair(count, errors);
 }
 
-// A class encapsulating "report every ..." type logic.
-// This will generally report every `every` steps, as well
-// as when the `upto` value is reached. It can be disabled
-// by setting `enabled` to false.
-
-struct Trigger {
-  bool finished = false;
-  bool enabled = true;
-  int count = 0;
-  int every = 1;
-  int upto = 0;
-  int next = 0;
-  int last_trigger = 0;
-  int current_trigger = 0;
-  Trigger(int every,int upto=-1, int start=0) :
-    every(every), upto(upto), count(start) {
-  }
-  Trigger &skip0() {
-    next += every;
-    return *this;
-  }
-  Trigger &enable(bool flag) {
-    enabled = flag;
-    return *this;
-  }
-  void rotate() {
-    last_trigger = current_trigger;
-    current_trigger = count;
-  }
-  int since() {
-    return count - last_trigger;
-  }
-  bool check() {
-    assert(!finished);
-    if (upto>0 && count >= upto-1) {
-      finished = true;
-      rotate();
-      return true;
-    }
-    if (every == 0) return false;
-    if (count >= next) {
-      while(count >= next) next += every;
-      rotate();
-      return true;
-    } else {
-      return false;
-    }
-  }
-  bool operator()(int current) {
-    assert(!finished);
-    assert(current>=count);
-    count = current;
-    return check();
-  }
-  bool operator+=(int incr) {
-    return operator()(count+incr);
-  }
-  bool operator++() {
-    return operator()(count+1);
-  }
-};
-
 int main1(int argc, char **argv) {
   int ntrain = getienv("ntrain", 10000000);
   string save_name = getsenv("save_name", "_ocr");

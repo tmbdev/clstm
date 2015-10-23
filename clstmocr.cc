@@ -39,17 +39,6 @@ inline float scaled_log(float x) {
   return (l + thresh) / thresh;
 }
 
-void write_text(const string fname, const wstring &data) {
-  string utf8 = utf32_to_utf8(data);
-  ofstream stream(fname);
-  stream << utf8 << endl;
-}
-
-void write_text(const string fname, const string &data) {
-  ofstream stream(fname);
-  stream << data << endl;
-}
-
 int main1(int argc, char **argv) {
   if (argc != 2) THROW("give text file as an argument");
   const char *fname = argv[1];

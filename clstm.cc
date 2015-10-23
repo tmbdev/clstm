@@ -529,4 +529,48 @@ void set_classes(Network net, Tensor<int,1> &targets) {
   THROW("unimplemented");
 }
 
+static void get_allparams(vector<vector<Params*>> &allparams, vector<Network> &networks) {
+  allparams.resize(networks.size());
+  for(int i=0; i<allparams.size(); i++) {
+    Network net = networks[i];
+    walk_params(net, [i,&allparams](const string &s, Params *p) {
+      allparams[i].push_back(p);
+    });
+    assert(allparams[i].size() == allparams[0].size());
+  }
+}
+
+void share_deltas(vector<Network> networks) {
+  vector<vector<Params*>> allparams;
+  get_allparams(allparams, networks);
+  int n = allparams.size();
+  int m = allparams[0].size();
+  for(int i=1; n; i++) {
+    for(int j=0; j<m; j++) {
+      allparams[0][j]->D() += allparams[i][j]->D();
+    }
+    for(int j=0; j<m; j++) {
+      allparams[i][j]->D() = allparams[0][j]->D();
+    }
+  }
+}
+
+void average_weights(vector<Network> networks) {
+  vector<vector<Params*>> allparams;
+  get_allparams(allparams, networks);
+  int n = allparams.size();
+  int m = allparams[0].size();
+  for(int i=1; i<n; i++) {
+    for(int j=0; j<m; j++) {
+      allparams[0][j]->V() += allparams[i][j]->V();
+    }
+    for(int j=0; j<m; j++) {
+      allparams[0][j]->V() = allparams[0][j]->V() * Float(1.0/n);
+    }
+    for(int j=0; j<m; j++) {
+      allparams[i][j]->V() = allparams[0][j]->V();
+    }
+  }
+}
+
 }  // namespace ocropus
