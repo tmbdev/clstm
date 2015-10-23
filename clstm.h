@@ -110,12 +110,6 @@ class INetwork {
   void enroll(Sequence &s, const char *name) { states[name] = &s; }
   void enroll(Params &p, const char *name) { parameters[name] = &p; }
 
-  // Clip and reset gradients in this node.
-  void gradientClipParameters(Float value);
-  void gradientClipStates(Float value);
-  void zeroGradsStates();
-  void zeroGradsParameters();
-
   // Learning rate and momentum used for training.
   int nseq = 0;
   int nsteps = 0;

@@ -237,13 +237,13 @@ void test_net(Testcase &tc) {
 struct TestFullSigmoid : Testcase {
   void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
   void backward() {
-    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0);
+    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
   }
 };
 struct TestFullTanh : Testcase {
   void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
   void backward() {
-    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0);
+    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
   }
 };
 struct TestFull1Sigmoid : Testcase {
@@ -254,7 +254,7 @@ struct TestFull1Sigmoid : Testcase {
   }
   void forward() { forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
   void backward() {
-    backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0);
+    backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
   }
 };
 struct TestFull1Tanh : Testcase {
@@ -265,7 +265,7 @@ struct TestFull1Tanh : Testcase {
   }
   void forward() { forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
   void backward() {
-    backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0], 100.0);
+    backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
   }
 };
 struct TestStack : Testcase {

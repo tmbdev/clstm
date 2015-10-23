@@ -29,6 +29,6 @@ for i in range(ntest):
     net.forward()
     preds = net.outputs.array()[:, 1, 0]
     err = abs(amax(abs(ys - preds)))
-    assert (err < 0.1)
+    assert (err < 0.1), err
     maxerr = maximum(err, maxerr)
 print "OK", maxerr

@@ -63,27 +63,6 @@ void walk_networks(Network net, NetworkFun f, const string &prefix) {
   }
 }
 
-void INetwork::gradientClipParameters(Float value) {
-  for (auto it : parameters) {
-    gradient_clip(*it.second, value);
-  }
-}
-void INetwork::gradientClipStates(Float value) {
-  for (auto it : states) {
-    gradient_clip(*it.second, value);
-  }
-}
-void INetwork::zeroGradsParameters() {
-  for (auto it : parameters) {
-    it.second->zeroGrad();
-  }
-}
-void INetwork::zeroGradsStates() {
-  for (auto it : states) {
-    it.second->zeroGrad();
-  }
-}
-
 map<string, ILayerFactory> layer_factories;
 
 Network make_layer(const string &kind) {
@@ -189,7 +168,10 @@ Float INetwork::effective_lr() {
 void sgd_update(Network net) {
   Float lr = net->effective_lr();
   Float momentum = net->attr.get("momentum", 0.9);
-  Float clip_at = net->attr.get("gradient_clip", 10.0);
+  Float gc = net->attr.get("gradient_clip", 100.0);
+  Float sgc = net->attr.get("state_gradient_clip", 100.0);
+  for (auto it : net->parameters) it.second->gradientClip(gc);
+  for (auto it : net->states) it.second->gradientClip(sgc);
   for (auto it : net->parameters) it.second->update(lr, momentum);
   for (int i = 0; i < net->sub.size(); i++) sgd_update(net->sub[i]);
   net->nseq = 0;
@@ -285,7 +267,7 @@ struct Full : INetwork {
   }
   void backward() {
     for (int t = outputs.size() - 1; t >= 0; t--) {
-      backward_full1<NONLIN>(outputs[t], W1, inputs[t], 1000.0);
+      backward_full1<NONLIN>(outputs[t], W1, inputs[t]);
     }
     nsteps += outputs.size();
     nseq += 1;
@@ -437,7 +419,6 @@ struct GenericNPLSTM : INetwork {
 #define SEQUENCES gi, gf, go, ci, state
   Sequence source, SEQUENCES;
   Params WEIGHTS;
-  Float gradient_clipping = 10.0;
   int ni, no, nf;
   int nsteps = 0;
   int nseq = 0;
@@ -496,10 +477,10 @@ struct GenericNPLSTM : INetwork {
     for (int t = N - 1; t >= 0; t--) {
       backward_nonlingate<H>(out[t], state[t], go[t]);
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
-      backward_full<G>(ci[t], WCI, source[t], gradient_clipping);
-      backward_full<F>(go[t], WGO, source[t], gradient_clipping);
-      backward_full<F>(gf[t], WGF, source[t], gradient_clipping);
-      backward_full<F>(gi[t], WGI, source[t], gradient_clipping);
+      backward_full<G>(ci[t], WCI, source[t]);
+      backward_full<F>(go[t], WGO, source[t]);
+      backward_full<F>(gf[t], WGF, source[t]);
+      backward_full<F>(gi[t], WGI, source[t]);
       backward_stack1(source[t], inputs[t], out, t - 1);
     }
     nsteps += N;

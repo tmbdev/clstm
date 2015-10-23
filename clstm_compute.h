@@ -110,6 +110,7 @@ struct Batch {
   }
   void zeroGrad() { d.setZero(rows(), cols()); }
   void gradientClip(Float clip) {
+    if (clip>=1e6) return;
     assert(clip>0);
     for(int i=0; i<rows(); i++) {
       for(int j=0; j<cols(); j++) {
@@ -166,16 +167,15 @@ struct Sequence {
   void zeroGrad() {
     for (int t = 0; t < steps.size(); t++) steps[t].zeroGrad();
   }
+  void gradientClip(Float gc) {
+    for(int i=0;i<steps.size(); i++)
+      steps[i].gradientClip(gc);
+  }
 };
 
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 
-void gradient_clip(Sequence &s, Float m = 100.0);
-void gradient_clip(Batch &b, Float m = 100.0);
-void gradient_clip(Mat &d, Float m = 100.0);
-
-// FIXME: refactor into forward_/backward_
 struct NoNonlin {
   static constexpr const char *kind = "Linear";
   static inline Float nonlin(Float x) { return x; }
@@ -208,7 +208,7 @@ void backward_reverse(Sequence &y, Sequence &x);
 template <class F>
 void forward_full1(Batch &y, Params &W, Batch &x);
 template <class F>
-void backward_full1(Batch &y, Params &W, Batch &x, Float gc);
+void backward_full1(Batch &y, Params &W, Batch &x);
 
 void forward_softmax(Batch &z, Params &W1, Batch &x);
 void backward_softmax(Batch &z, Params &W1, Batch &x);
@@ -224,13 +224,12 @@ void forward_nonlingate(Batch &out, Batch &state, Batch &go);
 template <class H>
 void backward_nonlingate(Batch &out, Batch &state, Batch &go);
 
-// FIXME: replace these in LSTM; eliminate gradient_clip here
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last);
 void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last);
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x);
 template <class F>
-void backward_full(Batch &y, Params &W, Batch &x, Float gc);
+void backward_full(Batch &y, Params &W, Batch &x);
 
 void rinit(Batch &m, int no, int ni, Float s, const string mode = "unif", Float offset=0.0);
 void rinit(Sequence &m, int no, int ni, Float s, const string mode = "unif", Float offset=0.0);

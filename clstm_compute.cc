@@ -94,23 +94,6 @@ bool anynan(Sequence &a) {
   return false;
 }
 
-// clipping
-
-void gradient_clip(Sequence &s, Float m) {
-  if (m < 0) return;
-  for (int t = 0; t < s.size(); t++) {
-    s[t].D() =
-        s[t].D().unaryExpr([m](Float x) { return x > m ? m : x < -m ? -m : x; });
-  }
-}
-
-void gradient_clip(Ten2 d, Float m) {
-  if (m < 0) return;
-  d = d.unaryExpr([m](Float x) { return x > m ? m : x < -m ? -m : x; });
-}
-
-void gradient_clip(Batch &b, Float m) { gradient_clip(b.D(), m); }
-
 // helper functions for Eigen::Tensor axes and sizes
 
 inline array<Eigen::IndexPair<int>, 1> axes(int i, int j) {
@@ -145,7 +128,7 @@ void forward_full1(Batch &y, Params &W1, Batch &x) {
 #endif
 }
 template <class F>
-void backward_full1(Batch &y, Params &W1, Batch &x, Float gc) {
+void backward_full1(Batch &y, Params &W1, Batch &x) {
   Float (*g)(Float) = F::yderiv;
 #ifndef USEMAT
   int n = W1.V().dimension(0), m = W1.V().dimension(1);
@@ -168,13 +151,10 @@ template void forward_full1<NoNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full1<NoNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-template void backward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x,
-                                            Float gc);
-template void backward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x,
-                                         Float gc);
-template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x,
-                                         Float gc);
+template void backward_full1<NoNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x);
 
 // full layers without constant offset
 
@@ -188,7 +168,7 @@ void forward_full(Batch &y, Params &W, Batch &x) {
 #endif
 }
 template <class F>
-void backward_full(Batch &y, Params &W, Batch &x, Float gc) {
+void backward_full(Batch &y, Params &W, Batch &x) {
   Float (*g)(Float) = F::yderiv;
 #ifndef USEMAT
   Tensor2 temp = y.V().unaryExpr(g) * y.D();
@@ -204,13 +184,10 @@ template void forward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
 template void forward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x, Float gc);
-template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x,
-                                           Float gc);
-template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x,
-                                        Float gc);
-template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x,
-                                        Float gc);
+template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
 
 // softmax
 
