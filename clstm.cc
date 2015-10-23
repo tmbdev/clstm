@@ -15,12 +15,6 @@
 #define MAXEXP 30
 #endif
 
-#include <sys/time.h>
-inline double now() {
-  struct timeval tv;
-  gettimeofday(&tv, nullptr);
-  return tv.tv_sec + 1e-6 * tv.tv_usec;
-}
 
 namespace ocropus {
 
@@ -149,21 +143,21 @@ using Eigen::Ref;
 bool no_update = false;
 bool verbose = false;
 
-void set_inputs(INetwork *net, Sequence &inputs) {
+void set_inputs(Network net, Sequence &inputs) {
   net->inputs.resize(inputs.size());
   for (int t = 0; t < net->inputs.size(); t++) {
     net->inputs[t] = inputs[t];
     net->inputs[t].zeroGrad();
   }
 }
-void set_targets(INetwork *net, Sequence &targets) {
+void set_targets(Network net, Sequence &targets) {
   int N = net->outputs.size();
   assert(N == targets.size());
   assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++)
     net->outputs[t].D() = targets[t].V() - net->outputs[t].V();
 }
-void set_classes(INetwork *net, Classes &classes) {
+void set_classes(Network net, Classes &classes) {
   int N = net->outputs.size();
   assert(N == classes.size());
   assert(net->outputs.size() == N);
@@ -192,14 +186,14 @@ Float INetwork::effective_lr() {
   return lr;
 }
 
-void INetwork::update() {
-  Float lr = effective_lr();
-  Float momentum = attr.get("momentum", 0.9);
-  Float clip_at = attr.get("gradient_clip", 10.0);
-  for (auto it : parameters) it.second->update(lr, momentum);
-  for (int i = 0; i < sub.size(); i++) sub[i]->update();
-  nseq = 0;
-  nsteps = 0;
+void sgd_update(Network net) {
+  Float lr = net->effective_lr();
+  Float momentum = net->attr.get("momentum", 0.9);
+  Float clip_at = net->attr.get("gradient_clip", 10.0);
+  for (auto it : net->parameters) it.second->update(lr, momentum);
+  for (int i = 0; i < net->sub.size(); i++) sgd_update(net->sub[i]);
+  net->nseq = 0;
+  net->nsteps = 0;
 }
 
 void Codec::set(const vector<int> &a) {

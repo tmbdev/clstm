@@ -55,7 +55,7 @@ double test_net(Network net) {
   for (int i = 0; i < ntest; i++) {
     Sequence xs, ys;
     gentest(xs, ys);
-    set_inputs(net.get(), xs);
+    set_inputs(net, xs);
     net->forward();
     if (getienv("verbose", 0)) {
       for (int t = 0; t < xs.size(); t++) cout << xs[t].v(0, 0);
@@ -82,11 +82,11 @@ int main(int argc, char **argv) {
   for (int i = 0; i < ntrain; i++) {
     Sequence xs, ys;
     gentest(xs, ys);
-    set_inputs(net.get(), xs);
+    set_inputs(net, xs);
     net->forward();
-    set_targets(net.get(), ys);
+    set_targets(net, ys);
     net->backward();
-    net->update();
+    sgd_update(net);
   }
   test_net(net);
   print("saving");

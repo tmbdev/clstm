@@ -128,7 +128,6 @@ struct INetwork {
     virtual void setLearningRate(Float lr, Float momentum) = 0;
     virtual void forward() = 0;
     virtual void backward() = 0;
-    virtual void update() = 0;
     virtual void initialize();
     virtual ~INetwork();
     Sequence inputs;
@@ -141,9 +140,10 @@ struct INetwork {
     virtual void add(std::shared_ptr<INetwork> net);
 };
 
-void set_inputs(INetwork *net, Sequence &inputs);
-void set_targets(INetwork *net, Sequence &targets);
-void set_classes(INetwork *net, Classes &classes);
+void sgd_update(Network net);
+void set_inputs(Network net, Sequence &inputs);
+void set_targets(Network net, Sequence &targets);
+void set_classes(Network net, Classes &classes);
 void mktargets(Sequence &seq, Classes &targets, int ndim);
 
 std::shared_ptr<INetwork> make_layer(string);

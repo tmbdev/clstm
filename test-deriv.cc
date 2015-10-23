@@ -118,7 +118,7 @@ void test_net(Network net) {
       for (int b = 0; b < bs; b++) {
         Minimizer minerr;
         for (float h = 1e-6; h < 1.0; h *= 10) {
-          set_inputs(&*net, xs);
+          set_inputs(net, xs);
           net->forward();
           double out1 = err(net->outputs, ys);
           net->inputs[t].v(i, b) += h;
@@ -126,9 +126,9 @@ void test_net(Network net) {
           double out2 = err(net->outputs, ys);
           double num_deriv = (out2 - out1) / h;
 
-          set_inputs(&*net, xs);
+          set_inputs(net, xs);
           net->forward();
-          set_targets(&*net, ys);
+          set_targets(net, ys);
           net->backward();
           double a_deriv = net->inputs[t].d(i, b);
           double error = fabs(1.0 - num_deriv / a_deriv / -2.0);
@@ -141,10 +141,10 @@ void test_net(Network net) {
     }
   }
 
-  set_inputs(&*net, xs);
+  set_inputs(net, xs);
   net->forward();
   double out = err(net->outputs, ys);
-  set_targets(&*net, ys);
+  set_targets(net, ys);
   zero_grad(net);
   net->backward();
   get_params(params, net);

@@ -7,3 +7,4 @@
  - implement LSTM alternative
  - implement per-class or per-step weights
  - OMP parallel training
+ - add convolutional layers

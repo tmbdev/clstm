@@ -74,7 +74,7 @@ struct CLSTMText {
     for (int t = 0; t < aligned.size(); t++)
       net->outputs[t].D() = aligned[t].V() - net->outputs[t].V();
     net->backward();
-    net->update();
+    sgd_update(net);
     Classes output_classes;
     trivial_decode(output_classes, net->outputs);
     return net->codec.decode(output_classes);
@@ -144,7 +144,7 @@ struct CLSTMOCR {
     for (int t = 0; t < aligned.size(); t++)
       net->outputs[t].D() = aligned[t].V() - net->outputs[t].V();
     net->backward();
-    net->update();
+    sgd_update(net);
     Classes outputs;
     trivial_decode(outputs, net->outputs);
     return net->codec.decode(outputs);

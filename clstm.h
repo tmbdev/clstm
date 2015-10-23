@@ -121,7 +121,6 @@ class INetwork {
   int nsteps = 0;
   Float effective_lr();
   virtual void setLearningRate(Float lr, Float momentum);
-  virtual void update();
 
   // Misc parameters for construction, saving.
   Assoc attr;
@@ -158,11 +157,18 @@ void walk_networks(Network net, NetworkFun f, const string &prefix = "");
 void network_info(Network net, string prefix = "");
 
 // setting inputs and outputs
-void set_inputs(INetwork *net, Sequence &inputs);
-void set_targets(INetwork *net, Sequence &targets);
-void set_targets_accelerated(INetwork *net, Sequence &targets);
-void set_classes(INetwork *net, Classes &classes);
-void set_classes(INetwork *net, BatchClasses &classes);
+void set_classes(Network net, BatchClasses &classes);
+void set_classes(Network net, Classes &classes);
+void set_classes(Network net, Tensor<int,1> &targets);
+void set_inputs(Network net, Sequence &inputs);
+void set_inputs(Network net, Tensor<float,2> &inputs);
+void set_targets_accelerated(Network net, Sequence &targets);
+void set_targets_accelerated(Network net, Tensor<float,2> &targets);
+void set_targets(Network net, Sequence &targets);
+void set_targets(Network net, Tensor<float,2> &targets);
+
+// update methods
+void sgd_update(Network net);
 
 // instantiating layers and networks
 
@@ -180,7 +186,7 @@ Network make_net(const string &kind, const Assoc &params);
 Network make_net_init(const string &kind, const std::string &params);
 
 // new, proto-based I/O
-Network proto_clone_net(INetwork *net);
+Network proto_clone_net(Network net);
 void debug_as_proto(INetwork *net, bool do_weights = false);
 void write_as_proto(std::ostream &output, INetwork *net);
 void save_as_proto(const string &fname, INetwork *net);
@@ -201,12 +207,6 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
 void trivial_decode(Classes &cs, Sequence &outputs, int batch = 0);
 void trivial_decode(Classes &cs, Sequence &outputs, int batch,
                     vector<int> *locs);
-
-// setting inputs and outputs
-void set_inputs(Network net, Tensor<float,2> &inputs);
-void set_targets(Network net, Tensor<float,2> &targets);
-void set_targets_accelerated(Network net, Tensor<float,2> &targets);
-void set_classes(Network net, Tensor<int,1> &targets);
 
 // single sequence training functions
 void mktargets(Tensor<float,2> &seq, Tensor<int,1> &targets, int ndim);

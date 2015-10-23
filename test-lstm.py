@@ -18,7 +18,7 @@ for i in range(ntrain):
     net.forward()
     net.outputs.dset(ys.reshape(N, 2, 1) - net.outputs.array())
     net.backward()
-    net.update()
+    clstm.sgd_update(net)
 print "testing", ntest, "random instances"
 maxerr = 0.0
 for i in range(ntest):
