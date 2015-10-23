@@ -16,6 +16,7 @@
 #include <glob.h>
 #include "pstring.h"
 #include <iostream>
+#include <fstream>
 
 namespace ocropus {
 
@@ -36,6 +37,49 @@ inline void glob(vector<string> &result, const string &arg) {
     result.push_back(buf.gl_pathv[i]);
   }
   if (buf.gl_pathc > 0) globfree(&buf);
+}
+
+inline string basename(string s) {
+  int start = 0;
+  for (;;) {
+    auto pos = s.find("/", start);
+    if (pos == string::npos) break;
+    start = pos + 1;
+  }
+  auto pos = s.find(".", start);
+  if (pos == string::npos)
+    return s;
+  else
+    return s.substr(0, pos);
+}
+
+inline string read_text(string fname, int maxsize = 65536) {
+  char buf[maxsize];
+  buf[maxsize - 1] = 0;
+  ifstream stream(fname);
+  stream.read(buf, maxsize - 1);
+  int n = stream.gcount();
+  while (n > 0 && buf[n - 1] == '\n') n--;
+  return string(buf, n);
+}
+
+inline wstring read_text32(string fname, int maxsize = 65536) {
+  char buf[maxsize];
+  buf[maxsize - 1] = 0;
+  ifstream stream(fname);
+  stream.read(buf, maxsize - 1);
+  int n = stream.gcount();
+  while (n > 0 && buf[n - 1] == '\n') n--;
+  return utf8_to_utf32(string(buf, n));
+}
+
+inline void read_lines(vector<string> &lines, string fname) {
+  ifstream stream(fname);
+  string line;
+  lines.clear();
+  while (getline(stream, line)) {
+    lines.push_back(line);
+  }
 }
 
 // print the arguments to cout

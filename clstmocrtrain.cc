@@ -32,40 +32,6 @@ using std::regex_replace;
 #define string std_string
 #define wstring std_wstring
 
-string basename(string s) {
-  int start = 0;
-  for (;;) {
-    auto pos = s.find("/", start);
-    if (pos == string::npos) break;
-    start = pos + 1;
-  }
-  auto pos = s.find(".", start);
-  if (pos == string::npos)
-    return s;
-  else
-    return s.substr(0, pos);
-}
-
-string read_text(string fname, int maxsize = 65536) {
-  char buf[maxsize];
-  buf[maxsize - 1] = 0;
-  ifstream stream(fname);
-  stream.read(buf, maxsize - 1);
-  int n = stream.gcount();
-  while (n > 0 && buf[n - 1] == '\n') n--;
-  return string(buf, n);
-}
-
-wstring read_text32(string fname, int maxsize = 65536) {
-  char buf[maxsize];
-  buf[maxsize - 1] = 0;
-  ifstream stream(fname);
-  stream.read(buf, maxsize - 1);
-  int n = stream.gcount();
-  while (n > 0 && buf[n - 1] == '\n') n--;
-  return utf8_to_utf32(string(buf, n));
-}
-
 #ifndef NODISPLAY
 void show(PyServer &py, Sequence &s, int subplot = 0, int batch=0) {
   Tensor<float,2> temp;
@@ -77,15 +43,6 @@ void show(PyServer &py, Sequence &s, int subplot = 0, int batch=0) {
   py.imshowT(temp, "cmap=cm.hot");
 }
 #endif
-
-void read_lines(vector<string> &lines, string fname) {
-  ifstream stream(fname);
-  string line;
-  lines.clear();
-  while (getline(stream, line)) {
-    lines.push_back(line);
-  }
-}
 
 wstring separate_chars(const wstring &s, const wstring &charsep) {
   if (charsep == L"") return s;
