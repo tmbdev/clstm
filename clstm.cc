@@ -540,12 +540,25 @@ static void get_allparams(vector<vector<Params*>> &allparams, vector<Network> &n
   }
 }
 
-void share_deltas(vector<Network> networks) {
+void distribute_weights(vector<Network> &networks, int from) {
   vector<vector<Params*>> allparams;
   get_allparams(allparams, networks);
   int n = allparams.size();
   int m = allparams[0].size();
-  for(int i=1; n; i++) {
+  for(int i=0; i<n; i++) {
+    if (i==from) continue;
+    for(int j=0; j<m; j++) {
+      allparams[i][j]->V() = allparams[from][j]->V();
+    }
+  }
+}
+
+void share_deltas(vector<Network> &networks) {
+  vector<vector<Params*>> allparams;
+  get_allparams(allparams, networks);
+  int n = allparams.size();
+  int m = allparams[0].size();
+  for(int i=1; i<n; i++) {
     for(int j=0; j<m; j++) {
       allparams[0][j]->D() += allparams[i][j]->D();
     }
@@ -555,7 +568,7 @@ void share_deltas(vector<Network> networks) {
   }
 }
 
-void average_weights(vector<Network> networks) {
+void average_weights(vector<Network> &networks) {
   vector<vector<Params*>> allparams;
   get_allparams(allparams, networks);
   int n = allparams.size();
@@ -564,13 +577,11 @@ void average_weights(vector<Network> networks) {
     for(int j=0; j<m; j++) {
       allparams[0][j]->V() += allparams[i][j]->V();
     }
-    for(int j=0; j<m; j++) {
-      allparams[0][j]->V() = allparams[0][j]->V() * Float(1.0/n);
-    }
-    for(int j=0; j<m; j++) {
-      allparams[i][j]->V() = allparams[0][j]->V();
-    }
   }
+  for(int j=0; j<m; j++) {
+    allparams[0][j]->V() = allparams[0][j]->V() * Float(1.0/n);
+  }
+  distribute_weights(networks);
 }
 
 }  // namespace ocropus

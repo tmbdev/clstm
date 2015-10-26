@@ -205,8 +205,9 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
 // single sequence training functions
 void mktargets(Tensor<float,2> &seq, Tensor<int,1> &targets, int ndim);
 
-void share_deltas(vector<Network> networks);
-void average_weights(vector<Network> networks);
+void share_deltas(vector<Network> &networks);
+void average_weights(vector<Network> &networks);
+void distribute_weights(vector<Network> &networks, int from=0);
 }
 
 namespace {

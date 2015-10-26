@@ -108,7 +108,7 @@ struct CLSTMText {
 };
 
 struct CLSTMOCR {
-  unique_ptr<INormalizer> normalizer;
+  shared_ptr<INormalizer> normalizer;
   Network net;
   int target_height = 48;
   int nclasses = -1;
@@ -132,7 +132,7 @@ struct CLSTMOCR {
     normalizer.reset(make_CenterNormalizer());
     normalizer->target_height = target_height;
   }
-  std::wstring train(Tensor<float,2> &raw, const std::wstring &target) {
+  std::wstring fwdbwd(Tensor<float,2> &raw, const std::wstring &target) {
     normalizer->measure(raw);
     normalizer->normalize(image, raw);
     set_inputs(net, image);
@@ -144,10 +144,17 @@ struct CLSTMOCR {
     for (int t = 0; t < aligned.size(); t++)
       net->outputs[t].D() = aligned[t].V() - net->outputs[t].V();
     net->backward();
-    sgd_update(net);
     Classes outputs;
     trivial_decode(outputs, net->outputs);
     return net->codec.decode(outputs);
+  }
+  void update() {
+    sgd_update(net);
+  }
+  std::wstring train(Tensor<float,2> &raw, const std::wstring &target) {
+    std::wstring result = fwdbwd(raw, target);
+    update();
+    return result;
   }
   std::string aligned_utf8() {
     Classes outputs;

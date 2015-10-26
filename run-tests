@@ -4,7 +4,7 @@ export PS4='
 >>>>>>> '
 trap "echo TEST FAILED" EXIT
 set -x
-export seed=0.1423
+export seed=0.7733
 scons -s -c; rm -f *.o *.a
 scons -j 4 clstmocrtrain clstmfiltertrain clstmfilter clstmocr test-lstm
 ./test-lstm

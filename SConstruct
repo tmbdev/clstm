@@ -77,7 +77,7 @@ elif option("debug", 0)>0:
     env.Append(CCFLAGS="-g".split())
     env.Append(LINKFLAGS="-g".split())
 else:
-    env.Append(CXXFLAGS="-g -O3 -finline".split())
+    env.Append(CXXFLAGS="-g -O3 -DNDEBUG -finline".split())
     env.Append(CCFLAGS="-g".split())
 
 # Extra layers (old layers or testing)
