@@ -1,8 +1,15 @@
 #ifndef clstm_compute__
 #define clstm_compute__
 
-#include <vector>
+#include <array>
+#include <Eigen/Dense>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <unordered_map>
 #include <unsupported/Eigen/CXX11/Tensor>
+#include <vector>
 
 namespace ocropus {
 using namespace std;
@@ -21,6 +28,8 @@ typedef float Float;
 typedef Eigen::MatrixXf Mat;
 typedef Eigen::VectorXf Vec;
 #endif
+
+typedef Eigen::Map<Mat> MatMap;
 
 using Eigen::Tensor;
 using Eigen::TensorMap;
@@ -93,12 +102,124 @@ inline Float log_add(Float x, Float y) {
 
 inline Float log_mul(Float x, Float y) { return x + y; }
 
+
+using namespace std;
+using Eigen::Tensor;
+using Eigen::TensorMap;
+using Eigen::TensorRef;
+using Eigen::DSizes;
+using Eigen::Index;
+using Eigen::array;
+typedef Eigen::Map<Eigen::MatrixXf> MatrixMap;
+
+extern unordered_map<Float*,int> refcounts;
+
+struct Context {};
+
+struct tensor2 {
+  Eigen::array<int,2> dims;
+  Context *context = nullptr;
+  Float *ptr = nullptr;
+
+  tensor2() {}
+  tensor2(const tensor2 &other) { 
+    *this = other;
+  }
+  tensor2(TensorRef<Tensor<Float,2>> other) { }
+  ~tensor2() { 
+    decref();
+  }
+
+  void incref() {
+    if(!ptr) return;
+    refcounts[ptr]++;
+  }
+  void decref() {
+    if(!ptr) return;
+    if(--refcounts[ptr]>0) return;
+    refcounts.erase(ptr);
+    free(ptr);
+    ptr = nullptr;
+  }
+
+  void setContext(Context *context) { 
+    decref();
+    ptr = nullptr;
+    this->context = context;
+  }
+  int dimension(int i) const {
+    return dims[i];
+  }
+  int rows() {
+    return dims[0];
+  }
+  int cols() {
+    return dims[1];
+  }
+  Float &operator()(int i, int j) {
+    return (**this)(i,j);
+  }
+  void resize(int n, int m) { 
+    decref();
+    ptr = (Float*)malloc(n * m * sizeof(Float));
+    refcounts[ptr] = 1;
+    dims[0] = n; 
+    dims[1] = m;
+  }
+  int total_size() {
+    return dims[0] * dims[1];
+  }
+  TensorMap<Tensor<Float,2>> operator*() {
+    return TensorMap<Tensor<Float,2>>(ptr, dims[0], dims[1]);
+  }
+  void operator=(const tensor2 &other) {
+    if(other.ptr==nullptr) {
+      decref();
+      return;
+    }
+    if(context==nullptr) {
+      resize(other.dimension(0), other.dimension(1));
+      memcpy(ptr, other.ptr, total_size() * sizeof(Float));
+    } else {
+      throw "unimplemented";
+    }
+  }
+  void share(const tensor2 &other) {
+    if(context==other.context) {
+      const_cast<tensor2&>(other).incref();
+      decref();
+      ptr = other.ptr;
+    } else {
+      throw "unimplemented";
+    }
+  }
+  Float *data() {
+    return ptr;
+  }
+  void setConstant(int n, int m, Float c) {
+    resize(n,m);
+    for(int N=n*m, i=0; i<N; i++) ptr[i] = c;
+  }
+  void setZero(int n, int m) {
+    setConstant(n, m, 0);
+  }
+  void setZero() {
+    for(int N=rows()*cols(), i=0; i<N; i++) ptr[i] = 0;
+  }
+  // MatrixMap &matrix() { }
+};
+
 struct Batch {
-  Mat v,d;
-  int rows() const { return v.rows(); }
-  int cols() const { return v.cols(); }
+  tensor2 v;
+  tensor2 d;
+  int rows() const { return v.dimension(0); }
+  int cols() const { return v.dimension(1); }
   Ten2 V() { return Ten2(v.data(), v.rows(), v.cols()); }
   Ten2 D() { return Ten2(d.data(), d.rows(), d.cols()); }
+#ifdef USEMAT
+  Mat &MV() { return *(Mat*)0; }
+  Mat &MD() { return *(Mat*)0; }
+#endif
   void setZero(int n, int m) {
     v.setZero(n, m);
     d.setZero(n, m);
@@ -110,6 +231,7 @@ struct Batch {
   }
   void zeroGrad() { d.setZero(rows(), cols()); }
   void gradientClip(Float clip) {
+    Ten2 d = *this->d;
     if (clip>=1e6) return;
     assert(clip>0);
     for(int i=0; i<rows(); i++) {
@@ -121,8 +243,10 @@ struct Batch {
 };
 struct Params : Batch {
   void update(Float lr, Float mom) {
-    v += lr * d;
-    d *= mom;
+    Ten2 v = *this->v;
+    Ten2 d = *this->d;
+    v += d * lr;
+    d = d * mom;
   }
 };
 

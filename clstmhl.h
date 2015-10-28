@@ -57,9 +57,10 @@ struct CLSTMText {
     int index = 0;
     for (int i = 0; i < neps; i++) seq[index++].clear();
     for (int pos = 0; pos < cs.size(); pos++) {
-      seq[index].clear();
-      seq[index++].v(cs[pos], 0) = 1.0;
-      for (int i = 0; i < neps; i++) seq[index++].clear();
+      Ten2 v = *seq[index++].v;
+      v.setZero();
+      v(cs[pos], 0) = 1.0;
+      for (int i = 0; i < neps; i++) seq[index++].v.setZero();
     }
     assert(index == seq.size());
     seq.check();

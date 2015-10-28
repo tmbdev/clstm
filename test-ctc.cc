@@ -47,7 +47,7 @@ void ctc_align_targets(Tensor2 &posteriors, Tensor2 &outputs,
 }
 
 inline void transpose(Tensor2 &a) {
-  array<int, 2> axes({1, 0});
+  Eigen::array<int, 2> axes({1, 0});
   Tensor2 temp = a.shuffle(axes);
   a = temp;
 }

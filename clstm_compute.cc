@@ -11,6 +11,8 @@ using std::cerr;
 #define CFIRST(M) (M).col(0)
 #endif
 
+unordered_map<Float*,int> refcounts;
+
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 
