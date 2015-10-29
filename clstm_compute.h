@@ -114,7 +114,40 @@ typedef Eigen::Map<Eigen::MatrixXf> MatrixMap;
 
 extern unordered_map<Float*,int> refcounts;
 
-struct Context {};
+struct Context {
+};
+struct ThreadPoolContext : Context {
+  Eigen::ThreadPoolDevice *device = nullptr;
+};
+struct GpuContext : Context {
+  Eigen::GpuDevice *device = nullptr;
+};
+
+template <class LHS>
+struct ContextSetter {
+  Context *context;
+  LHS lhs;
+  ContextSetter(Context *context, LHS lhs) : context(context), lhs(lhs) {}
+  template <class RHS>
+  void operator=(RHS rhs) {
+    if(!context) {
+      lhs = rhs;
+    } else if(typeid(context)==typeid(ThreadPoolContext)) {
+      Eigen::ThreadPoolDevice *device = dynamic_cast<ThreadPoolContext*>(context)->device;
+      lhs.device(*device) = rhs;
+    } else if(typeid(context)==typeid(GpuContext)) {
+      Eigen::GpuDevice *device = dynamic_cast<GpuContext*>(context)->device;
+      lhs.device(*device) = rhs;
+    } else {
+      THROW("unknown context");
+    }
+  };
+};
+
+template <class LHS>
+ContextSetter<LHS> operator>>(Context *context, LHS lhs) {
+  return ContextSetter<LHS>(context, lhs);
+}
 
 struct tensor2 {
   Eigen::array<int,2> dims;
@@ -146,6 +179,9 @@ struct tensor2 {
     decref();
     ptr = nullptr;
     this->context = context;
+  }
+  void convertToContext(Context *ncontext) {
+    THROW("unimplemented");
   }
   int dimension(int i) const {
     return dims[i];
@@ -184,11 +220,26 @@ struct tensor2 {
       throw "unimplemented";
     }
   }
-  void share(const tensor2 &other) {
+  template <class RHS>
+  void operator=(RHS rhs) {
+    **this = rhs;
+  }
+  void share(tensor2 &other) {
     if(context==other.context) {
-      const_cast<tensor2&>(other).incref();
+      other.incref();
       decref();
       ptr = other.ptr;
+    } else {
+      throw "unimplemented";
+    }
+  }
+  void take(tensor2 &other) {
+    if(context==other.context) {
+      other.incref();
+      decref();
+      ptr = other.ptr;
+      other.decref();
+      other.ptr = nullptr;
     } else {
       throw "unimplemented";
     }
@@ -212,14 +263,14 @@ struct tensor2 {
 struct Batch {
   tensor2 v;
   tensor2 d;
-  int rows() const { return v.dimension(0); }
-  int cols() const { return v.dimension(1); }
   Ten2 V() { return Ten2(v.data(), v.rows(), v.cols()); }
   Ten2 D() { return Ten2(d.data(), d.rows(), d.cols()); }
 #ifdef USEMAT
   Mat &MV() { return *(Mat*)0; }
   Mat &MD() { return *(Mat*)0; }
 #endif
+  int rows() const { return v.dimension(0); }
+  int cols() const { return v.dimension(1); }
   void setZero(int n, int m) {
     v.setZero(n, m);
     d.setZero(n, m);
