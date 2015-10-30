@@ -14,6 +14,8 @@ using Eigen::TensorRef;
 using Eigen::DSizes;
 using Eigen::Index;
 using Eigen::array;
+using std::shared_ptr;
+using std::unique_ptr;
 
 #define ROWS(A) (A).rows()
 #define COLS(A) (A).cols()
@@ -88,12 +90,19 @@ inline Eigen::Sizes<1> S(int i) { return Eigen::Sizes<1>({i}); }
 inline Eigen::Sizes<2> S(int i, int j) { return Eigen::Sizes<2>({i, j}); }
 
 struct Context {
+  virtual int gpu() { return -1; }
 };
 struct ThreadPoolContext : Context {
-  Eigen::ThreadPoolDevice *device = nullptr;
+  unique_ptr<Eigen::ThreadPool> pool;
+  unique_ptr<Eigen::ThreadPoolDevice> device;
+  ThreadPoolContext(int n=4) {
+    pool.reset(new Eigen::ThreadPool(n));
+    device.reset(new Eigen::ThreadPoolDevice(pool.get(), n));
+  }
 };
 struct GpuContext : Context {
-  Eigen::GpuDevice *device = nullptr;
+  virtual int gpu() { return 0; }
+  shared_ptr<Eigen::GpuDevice> device;
 };
 
 extern std::unordered_map<Float*,int> refcounts;
@@ -124,9 +133,11 @@ ContextSetter<LHS> operator>>(Context *context, LHS lhs) {
   return ContextSetter<LHS>(context, lhs);
 }
 
+extern shared_ptr<Context> default_context;
+
 struct tensor2 {
   Eigen::array<int,2> dims;
-  Context *context = nullptr;
+  shared_ptr<Context> context = default_context;
   Float *ptr = nullptr;
 
   tensor2() {}
@@ -150,12 +161,12 @@ struct tensor2 {
     ptr = nullptr;
   }
 
-  void setContext(Context *context) { 
+  void setContext(shared_ptr<Context> context) {
     decref();
     ptr = nullptr;
     this->context = context;
   }
-  void convertToContext(Context *ncontext) {
+  void convertToContext(shared_ptr<Context> context) {
     THROW("unimplemented");
   }
   int dimension(int i) const {
@@ -188,7 +199,7 @@ struct tensor2 {
       decref();
       return;
     }
-    if(context==nullptr) {
+    if(context->gpu()<0) {
       resize(other.dimension(0), other.dimension(1));
       memcpy(ptr, other.ptr, total_size() * sizeof(Float));
     } else {

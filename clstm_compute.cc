@@ -13,6 +13,8 @@ using std::cerr;
 
 unordered_map<Float*,int> refcounts;
 
+shared_ptr<Context> default_context(new ThreadPoolContext(4));
+
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 

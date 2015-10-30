@@ -41,6 +41,7 @@ prefix = option('prefix', "/usr/local")
 
 env = Environment()
 env.Append(CPPDEFINES={'THROW': 'throw', 'CATCH': 'catch', 'TRY': 'try'})
+env.Append(CPPDEFINES={'EIGEN_USE_THREADS': '1'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
 if option("double", 0):
@@ -107,6 +108,7 @@ else:
     env.Append(CPPDEFINES={'NODISPLAY': 1})
 
 env.Append(LIBS=["png", "protobuf"])
+env.Append(LIBS=["pthread"])
 
 # We need to compile the protocol buffer definition as part of the build.
 
