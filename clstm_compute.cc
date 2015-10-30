@@ -37,7 +37,6 @@ inline double randn() {
 }
 }
 
-
 void rinit(Ten2 m, Float s, const string mode, Float offset) {
   if (mode == "unif") {
     for(int i=0; i<rows(m); i++)
@@ -86,6 +85,7 @@ bool anynan(Ten2 a) {
       if (isnan(x)) return true;
     }
   }
+  return false;
 }
 
 bool anynan(Batch &a) { return anynan(a.V()) || anynan(a.D()); }
@@ -95,23 +95,6 @@ bool anynan(Sequence &a) {
     if (anynan(a[i])) return true;
   return false;
 }
-
-// helper functions for Eigen::Tensor axes and sizes
-
-inline array<Eigen::IndexPair<int>, 1> axes(int i, int j) {
-  array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
-  return result;
-}
-
-inline array<ptrdiff_t, 1> ar(int i) { return array<ptrdiff_t, 1>({i}); }
-
-inline array<ptrdiff_t, 2> ar(int i, int j) {
-  return array<ptrdiff_t, 2>({i, j});
-}
-
-inline Eigen::Sizes<1> S(int i) { return Eigen::Sizes<1>({i}); }
-
-inline Eigen::Sizes<2> S(int i, int j) { return Eigen::Sizes<2>({i, j}); }
 
 // full layers with constant offset
 
