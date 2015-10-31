@@ -2,9 +2,12 @@
 #include <iostream>
 
 // FIXME: factor out nonlinearities
+// FIXME: remove _full(...) calls
 
 namespace ocropus {
 using std::cerr;
+
+Context default_context;
 
 inline Eigen::array<Eigen::IndexPair<int>, 1> axispairs(int i, int j) {
   Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
