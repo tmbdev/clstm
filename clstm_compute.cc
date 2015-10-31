@@ -6,6 +6,19 @@
 namespace ocropus {
 using std::cerr;
 
+inline Eigen::array<Eigen::IndexPair<int>, 1> axes(int i, int j) {
+  Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
+  return result;
+}
+
+inline Eigen::array<ptrdiff_t, 1> indexes(int i) { 
+  return Eigen::array<ptrdiff_t, 1>({i}); 
+}
+
+inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
+  return Eigen::array<ptrdiff_t, 2>({i, j});
+}
+
 #ifdef USEMAT
 #define CBUTFIRST(M) (M).block(0, 1, (M).rows(), (M).cols() - 1)
 #define CFIRST(M) (M).col(0)
@@ -106,8 +119,8 @@ void forward_full1(Batch &y, Params &W1, Batch &x) {
   int n = W1.V().dimension(0), m = W1.V().dimension(1);
   int bs = x.V().dimension(1);
   y.V() =
-      (W1.V().slice(ar(0, 1), ar(n, m - 1)).contract(x.V(), axes(1, 0)) +
-       W1.V().chip(0, 1).reshape(ar(n, 1)).broadcast(ar(1, bs))).unaryExpr(f);
+      (W1.V().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.V(), axes(1, 0)) +
+       W1.V().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
 #else
   y.v = (CBUTFIRST(W1.v) * x.v).colwise() + CFIRST(W1.v);
   y.v = y.v.unaryExpr(f);
@@ -119,9 +132,9 @@ void backward_full1(Batch &y, Params &W1, Batch &x) {
 #ifndef USEMAT
   int n = W1.V().dimension(0), m = W1.V().dimension(1);
   EigenTensor2 temp = y.D() * y.V().unaryExpr(g);
-  x.D() = W1.V().slice(ar(0, 1), ar(n, m - 1)).contract(temp, axes(0, 0));
-  W1.D().slice(ar(0, 1), ar(n, m - 1)) += temp.contract(x.V(), axes(1, 1));
-  W1.D().chip(0, 1) += temp.sum(ar(1));
+  x.D() = W1.V().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axes(0, 0));
+  W1.D().slice(indexes(0, 1), indexes(n, m - 1)) += temp.contract(x.V(), axes(1, 1));
+  W1.D().chip(0, 1) += temp.sum(indexes(1));
 #else
   Mat temp;
   temp.array() = y.d.array() * y.v.array().unaryExpr(g);
@@ -184,8 +197,8 @@ void forward_softmax(Batch &z, Params &W1, Batch &x) {
   int m = W1.V().dimension(1);
   int bs = z.V().dimension(1);
   z.V() =
-      (W1.V().slice(ar(0, 1), ar(n, m - 1)).contract(x.V(), axes(1, 0)) +
-       W1.V().chip(0, 1).reshape(ar(n, 1)).broadcast(ar(1, bs))).unaryExpr(f);
+      (W1.V().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.V(), axes(1, 0)) +
+       W1.V().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
   for (int b = 0; b < bs; b++) {
     double total = 0.0;
     for (int i = 0; i < n; i++) total += z.V()(i, b);
@@ -207,8 +220,8 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
 #ifndef USEMAT
   int n = W1.V().dimension(0), m = W1.V().dimension(1);
   int bs = z.V().dimension(1);
-  x.D() = W1.V().slice(ar(0, 1), ar(n, m - 1)).contract(z.D(), axes(0, 0));
-  W1.D().slice(ar(0, 1), ar(n, m - 1)) += z.D().contract(x.V(), axes(1, 1));
+  x.D() = W1.V().slice(indexes(0, 1), indexes(n, m - 1)).contract(z.D(), axes(0, 0));
+  W1.D().slice(indexes(0, 1), indexes(n, m - 1)) += z.D().contract(x.V(), axes(1, 1));
   for (int i = 0; i < n; i++)
     for (int b = 0; b < bs; b++) W1.D()(i, 0) += z.D()(i, b);
 #else
@@ -230,8 +243,8 @@ void forward_stack(Batch &z, Batch &x, Batch &y) {
 #ifndef USEMAT
   int nx = x.V().dimension(0), ny = y.V().dimension(0);
   int bs = x.V().dimension(1);
-  z.V().slice(ar(0, 0), ar(nx, bs)) = x.V();
-  z.V().slice(ar(nx, 0), ar(ny, bs)) = y.V();
+  z.V().slice(indexes(0, 0), indexes(nx, bs)) = x.V();
+  z.V().slice(indexes(nx, 0), indexes(ny, bs)) = y.V();
 #else
   assert(x.cols() == y.cols());
   int nx = x.rows();
@@ -245,8 +258,8 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
 #ifndef USEMAT
   int nx = x.V().dimension(0), ny = y.V().dimension(0);
   int bs = x.V().dimension(1);
-  x.D() += z.D().slice(ar(0, 0), ar(nx, bs));
-  y.D() += z.D().slice(ar(nx, 0), ar(ny, bs));
+  x.D() += z.D().slice(indexes(0, 0), indexes(nx, bs));
+  y.D() += z.D().slice(indexes(nx, 0), indexes(ny, bs));
 #else
   assert(x.cols() == y.cols());
   int nx = x.rows();
@@ -263,11 +276,11 @@ void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 #ifndef USEMAT
   int nx = x.V().dimension(0), ny = y[0].V().dimension(0);
   int bs = x.V().dimension(1);
-  z.V().slice(ar(0, 0), ar(nx, bs)) = x.V();
+  z.V().slice(indexes(0, 0), indexes(nx, bs)) = x.V();
   if (last >= 0)
-    z.V().slice(ar(nx, 0), ar(ny, bs)) = y[last].V();
+    z.V().slice(indexes(nx, 0), indexes(ny, bs)) = y[last].V();
   else
-    z.V().slice(ar(nx, 0), ar(ny, bs)).setZero();
+    z.V().slice(indexes(nx, 0), indexes(ny, bs)).setZero();
 #else
   assert(x.cols() == y.cols());
   int nx = x.rows();
@@ -284,8 +297,8 @@ void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 #ifndef USEMAT
   int nx = x.V().dimension(0), ny = y[0].V().dimension(0);
   int bs = x.V().dimension(1);
-  x.D() += z.D().slice(ar(0, 0), ar(nx, bs));
-  if (last >= 0) y[last].D() += z.D().slice(ar(nx, 0), ar(ny, bs));
+  x.D() += z.D().slice(indexes(0, 0), indexes(nx, bs));
+  if (last >= 0) y[last].D() += z.D().slice(indexes(nx, 0), indexes(ny, bs));
 #else
   assert(x.cols() == y.cols());
   int nx = x.rows();
@@ -302,12 +315,12 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
 #ifndef USEMAT
   int nx = inp.V().dimension(0), ny = out[0].V().dimension(0);
   int bs = inp.V().dimension(1);
-  all.V().slice(ar(0, 0), ar(1, bs)).setConstant(Float(1));
-  all.V().slice(ar(1, 0), ar(nx, bs)) = inp.V();
+  all.V().slice(indexes(0, 0), indexes(1, bs)).setConstant(Float(1));
+  all.V().slice(indexes(1, 0), indexes(nx, bs)) = inp.V();
   if (last >= 0)
-    all.V().slice(ar(1 + nx, 0), ar(ny, bs)) = out[last].V();
+    all.V().slice(indexes(1 + nx, 0), indexes(ny, bs)) = out[last].V();
   else
-    all.V().slice(ar(1 + nx, 0), ar(ny, bs)).setZero();
+    all.V().slice(indexes(1 + nx, 0), indexes(ny, bs)).setZero();
 #else
   assert(inp.cols() == out.cols());
   int bs = inp.cols();
@@ -326,8 +339,8 @@ void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
 #ifndef USEMAT
   int nx = inp.V().dimension(0), ny = out[0].V().dimension(0);
   int bs = inp.V().dimension(1);
-  inp.D() += all.D().slice(ar(1, 0), ar(nx, bs));
-  if (last >= 0) out[last].D() += all.D().slice(ar(1 + nx, 0), ar(ny, bs));
+  inp.D() += all.D().slice(indexes(1, 0), indexes(nx, bs));
+  if (last >= 0) out[last].D() += all.D().slice(indexes(1 + nx, 0), indexes(ny, bs));
 #else
   assert(inp.cols() == out.cols());
   int bs = inp.cols();

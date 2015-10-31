@@ -66,23 +66,6 @@ inline int argmax(const EigenTensor1 &m) {
 inline Float sum(const EigenTensor1 &m) { return reduction(m.sum()); }
 inline Float sum(const EigenTensor2 &m) { return reduction(m.sum()); }
 
-// helper functions for Eigen::Tensor axes and sizes
-
-inline Eigen::array<Eigen::IndexPair<int>, 1> axes(int i, int j) {
-  Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
-  return result;
-}
-
-inline Eigen::array<ptrdiff_t, 1> ar(int i) { return Eigen::array<ptrdiff_t, 1>({i}); }
-
-inline Eigen::array<ptrdiff_t, 2> ar(int i, int j) {
-  return Eigen::array<ptrdiff_t, 2>({i, j});
-}
-
-inline Eigen::Sizes<1> S(int i) { return Eigen::Sizes<1>({i}); }
-
-inline Eigen::Sizes<2> S(int i, int j) { return Eigen::Sizes<2>({i, j}); }
-
 #if 0
 struct Context {
   virtual int gpu() { return -1; }
