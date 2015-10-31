@@ -134,7 +134,7 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
   stargets.resize(targets.size());
   for (int t = 0; t < stargets.size(); t++) {
     stargets[t].resize(nclasses, 1);
-    stargets[t].V().setConstant(0);
+    stargets[t].v().setConstant(0);
     stargets[t].v(targets[t], 0) = 1.0;
   }
   ctc_align_targets(posteriors, outputs, stargets);
@@ -161,7 +161,7 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
   int mc = -1;
   int mt = -1;
   while (t < N) {
-    int index = argmax(outputs[t].V().chip(batch,1));
+    int index = argmax(outputs[t].v().chip(batch,1));
     float v = outputs[t].v(index, batch);
     if (index == 0) {
       // NB: there should be a 0 at the end anyway

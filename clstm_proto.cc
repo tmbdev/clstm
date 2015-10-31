@@ -33,7 +33,7 @@ bool proto_verbose =
     getenv("clstm_proto_verbose") && atoi(getenv("clstm_proto_verbose"));
 
 void proto_of_params(clstm::Array *array, Params &params, bool weights = true) {
-  TensorMap2 a = params.V();
+  TensorMap2 a = params.v();
   array->add_dim(rows(a));
   array->add_dim(cols(a));
   if (!weights) return;
@@ -46,7 +46,7 @@ void params_of_proto(Params &params, const clstm::Array *array) {
     throwf("bad format (Mat, %s, %d)", array->name().c_str(),
            array->dim_size());
   params.setZero(array->dim(0), array->dim(1));
-  TensorMap2 a = params.V();
+  TensorMap2 a = params.v();
   if (array->value_size() > 0) {
     if (array->value_size() != a.size()) THROW("bad size (Mat)");
     int k = 0;

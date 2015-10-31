@@ -47,12 +47,6 @@ inline Float log_mul(Float x, Float y) { return x + y; }
 struct Batch {
   Tensor2 v;
   Tensor2 d;
-  TensorMap2 V() { return TensorMap2(v.data(), v.rows(), v.cols()); }
-  TensorMap2 D() { return TensorMap2(d.data(), d.rows(), d.cols()); }
-#ifdef USEMAT
-  Mat &MV() { return *(Mat*)0; }
-  Mat &MD() { return *(Mat*)0; }
-#endif
   int rows() const { return v.dimension(0); }
   int cols() const { return v.dimension(1); }
   void setZero(int n, int m) {
@@ -78,10 +72,8 @@ struct Batch {
 };
 struct Params : Batch {
   void update(Float lr, Float mom) {
-    TensorMap2 v = *this->v;
-    TensorMap2 d = *this->d;
-    v += d * lr;
-    d = d * mom;
+    v() += d() * lr;
+    d() = d() * mom;
   }
 };
 

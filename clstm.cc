@@ -134,14 +134,14 @@ void set_targets(Network net, Sequence &targets) {
   assert(N == targets.size());
   assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++)
-    net->outputs[t].D() = targets[t].V() - net->outputs[t].V();
+    net->outputs[t].d() = targets[t].v() - net->outputs[t].v();
 }
 void set_classes(Network net, Classes &classes) {
   int N = net->outputs.size();
   assert(N == classes.size());
   assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++) {
-    net->outputs[t].D() = -net->outputs[t].V();
+    net->outputs[t].d() = -net->outputs[t].v();
     net->outputs[t].d(classes[t],0) += 1;
   }
 }
@@ -338,14 +338,14 @@ struct Stacked : INetwork {
     for (int n = sub.size() - 1; n >= 0; n--) {
       if (n + 1 == sub.size())
         for (int t = 0; t < outputs.size(); t++)
-          sub[n]->outputs[t].D() = outputs[t].D();
+          sub[n]->outputs[t].d() = outputs[t].d();
       else
         for (int t = 0; t < sub[n + 1]->inputs.size(); t++)
-          sub[n]->outputs[t].D() = sub[n + 1]->inputs[t].D();
+          sub[n]->outputs[t].d() = sub[n + 1]->inputs[t].d();
       sub[n]->backward();
     }
     for (int t = 0; t < sub[0]->inputs.size(); t++)
-      inputs[t].D() = sub[0]->inputs[t].D();
+      inputs[t].d() = sub[0]->inputs[t].d();
   }
 };
 REGISTER(Stacked);
@@ -406,8 +406,8 @@ struct Parallel : INetwork {
     sub[0]->backward();
     sub[1]->backward();
     for (int t = 0; t < N; t++) {
-      inputs[t].D() = sub[0]->inputs[t].D();
-      inputs[t].D() += sub[1]->inputs[t].D();
+      inputs[t].d() = sub[0]->inputs[t].d();
+      inputs[t].d() += sub[1]->inputs[t].d();
     }
   }
 };
@@ -520,7 +520,7 @@ void set_targets(Network net, Tensor<float,2> &targets) {
   for (int t = 0; t < N; t++)
     for (int i = 0; i < d; i++) net->outputs[t].d(i, 0) = targets(t, i);
   for (int t = 0; t < net->outputs.size(); t++)
-    net->outputs[t].D() -= net->outputs[t].V();
+    net->outputs[t].d() -= net->outputs[t].v();
 }
 void set_targets_accelerated(Network net, Tensor<float,2> &targets) {
   THROW("unimplemented");
@@ -548,7 +548,7 @@ void distribute_weights(vector<Network> &networks, int from) {
   for(int i=0; i<n; i++) {
     if (i==from) continue;
     for(int j=0; j<m; j++) {
-      allparams[i][j]->V() = allparams[from][j]->V();
+      allparams[i][j]->v() = allparams[from][j]->v();
     }
   }
 }
@@ -560,10 +560,10 @@ void share_deltas(vector<Network> &networks) {
   int m = allparams[0].size();
   for(int i=1; i<n; i++) {
     for(int j=0; j<m; j++) {
-      allparams[0][j]->D() += allparams[i][j]->D();
+      allparams[0][j]->d() += allparams[i][j]->d();
     }
     for(int j=0; j<m; j++) {
-      allparams[i][j]->D() = allparams[0][j]->D();
+      allparams[i][j]->d() = allparams[0][j]->d();
     }
   }
 }
@@ -575,11 +575,11 @@ void average_weights(vector<Network> &networks) {
   int m = allparams[0].size();
   for(int i=1; i<n; i++) {
     for(int j=0; j<m; j++) {
-      allparams[0][j]->V() += allparams[i][j]->V();
+      allparams[0][j]->v() += allparams[i][j]->v();
     }
   }
   for(int j=0; j<m; j++) {
-    allparams[0][j]->V() = allparams[0][j]->V() * Float(1.0/n);
+    allparams[0][j]->v() = allparams[0][j]->v() * Float(1.0/n);
   }
   distribute_weights(networks);
 }
