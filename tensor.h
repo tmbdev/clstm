@@ -66,60 +66,22 @@ inline int argmax(const EigenTensor1 &m) {
 inline Float sum(const EigenTensor1 &m) { return reduction(m.sum()); }
 inline Float sum(const EigenTensor2 &m) { return reduction(m.sum()); }
 
-#if 0
-struct Context {
-  virtual int gpu() { return -1; }
-};
-struct ThreadPoolContext : Context {
-  unique_ptr<Eigen::ThreadPool> pool;
-  unique_ptr<Eigen::ThreadPoolDevice> device;
-  ThreadPoolContext(int n=4) {
-    pool.reset(new Eigen::ThreadPool(n));
-    device.reset(new Eigen::ThreadPoolDevice(pool.get(), n));
-  }
-};
-struct GpuContext : Context {
-  virtual int gpu() { return 0; }
-  shared_ptr<Eigen::GpuDevice> device;
-};
-
-template <class LHS>
-struct ContextSetter {
-  Context *context;
-  LHS lhs;
-  ContextSetter(Context *context, LHS lhs) : context(context), lhs(lhs) {}
-  template <class RHS>
-  void operator=(RHS rhs) {
-    if(!context) {
-      lhs = rhs;
-    } else if(typeid(context)==typeid(ThreadPoolContext)) {
-      Eigen::ThreadPoolDevice *device = dynamic_cast<ThreadPoolContext*>(context)->device;
-      lhs.device(*device) = rhs;
-    } else if(typeid(context)==typeid(GpuContext)) {
-      Eigen::GpuDevice *device = dynamic_cast<GpuContext*>(context)->device;
-      lhs.device(*device) = rhs;
-    } else {
-      THROW("unknown context");
-    }
-  };
-};
-
-template <class LHS>
-ContextSetter<LHS> operator>>(Context *context, LHS lhs) {
-  return ContextSetter<LHS>(context, lhs);
-}
-#endif
+// A simple Tensor class that handles multiple device
+// types a bit more transparently. It handles allocation/deallocation,
+// plus assignment.
 
 struct Tensor2 {
+  Eigen::ThreadPoolDevice *tpdev = nullptr;
+  Eigen::GpuDevice *gpudev = nullptr;
   int dims[2];
   Float *ptr = nullptr;
 
   Tensor2() {}
-  Tensor2(const Tensor2 &other) { 
+  Tensor2(const Tensor2 &other) {
     *this = other;
   }
   Tensor2(TensorRef<Tensor<Float,2>> other) { }
-  ~Tensor2() { 
+  ~Tensor2() {
     clear();
   }
   void clear() {
@@ -129,10 +91,10 @@ struct Tensor2 {
     dims[0] = 0;
     dims[1] = 0;
   }
-  void resize(int n, int m) { 
+  void resize(int n, int m) {
     clear();
     ptr = (Float*)malloc(n * m * sizeof(Float));
-    dims[0] = n; 
+    dims[0] = n;
     dims[1] = m;
   }
   Float *data() {
@@ -167,11 +129,25 @@ struct Tensor2 {
   // call.
   template <class RHS>
   void operator=(RHS rhs) {
-    map() = rhs;
+    if (0) ;
+#ifdef EIGEN_USE_THREADS
+    else if(tpdev) map().device(*tpdev) = rhs;
+#endif
+#ifdef EIGEN_USE_GPU
+    else if(gpudev) map().device(*gpudev) = rhs;
+#endif
+    else map() = rhs;
   }
   template <class RHS>
   void operator+=(RHS rhs) {
-    map() += rhs;
+    if (0) ;
+#ifdef EIGEN_USE_THREADS
+    else if(tpdev) map().device(*tpdev) += rhs;
+#endif
+#ifdef EIGEN_USE_GPU
+    else if(gpudev) map().device(*gpudev) += rhs;
+#endif
+    else map() += rhs;
   }
 
   Float &operator()(int i, int j) {
@@ -192,6 +168,41 @@ struct Tensor2 {
     for(int N=rows()*cols(), i=0; i<N; i++) ptr[i] = 0;
   }
 };
+
+// This is a bit of syntactic sugar that allows us to handle
+// devices for complex LHS expression. For example,
+//
+//    mytensor>> mytensor.slice(...) = ... ;
+//
+// This is a bit roundabout because of the way Eigen handles
+// devices.
+
+template <class LHS>
+struct ContextSetter {
+  Tensor2 *context;
+  LHS lhs;
+  ContextSetter(Tensor2 *context, LHS lhs) : context(context), lhs(lhs) {}
+  template <class RHS>
+  void operator=(RHS rhs) {
+    if (0) {
+#ifdef EIGEN_USE_THREADS
+    } else if (context->tpdev) {
+      lhs.device(*context->tpdev) = rhs;
+#endif
+#ifdef EIGEN_USE_GPU
+    } else if (context->gpudev) {
+      lhs.device(*context->gpudev) = rhs;
+#endif
+    } else {
+      lhs = rhs;
+    }
+  };
+};
+
+template <class LHS>
+ContextSetter<LHS> operator>>(Tensor2 &context, LHS lhs) {
+  return ContextSetter<LHS>(&context, lhs);
+}
 
 }
 
