@@ -37,40 +37,34 @@ using Eigen::Tensor;
 using Eigen::TensorMap;
 
 typedef Float Scalar;
-typedef Eigen::Tensor<Float, 1> Tensor1;
-typedef Eigen::Tensor<Float, 2> Tensor2;
-typedef Eigen::TensorMap<Eigen::Tensor<Float, 1>> Ten1;
+typedef Eigen::Tensor<Float, 1> EigenTensor1;
+typedef Eigen::Tensor<Float, 2> EigenTensor2;
+typedef Eigen::TensorMap<Eigen::Tensor<Float, 1>> TensorMap1;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 2>> TensorMap2;
+typedef Eigen::TensorRef<Eigen::Tensor<Float, 1>> TensorRef1;
+typedef Eigen::TensorRef<Eigen::Tensor<Float, 2>> TensorRef2;
 
 inline int rows(const TensorMap2 &m) { return m.dimension(0); }
 inline int cols(const TensorMap2 &m) { return m.dimension(1); }
-inline int size(const Ten1 &m) { return m.dimension(0); }
-inline int rows(const Ten1 &m) { return m.dimension(0); }
-inline int cols(const Ten1 &m) { THROW("cols applied to Ten1"); }
-inline int rows(const Tensor2 &m) { return m.dimension(0); }
-inline int cols(const Tensor2 &m) { return m.dimension(1); }
-inline int size(const Tensor1 &m) { return m.dimension(0); }
-inline int rows(const Tensor1 &m) { return m.dimension(0); }
-inline int cols(const Tensor1 &m) { THROW("cols applied to Ten1"); }
+inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
+inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
 
-inline Float reduction_(const Tensor1 &m) { return m(0); }
-inline Float reduction_(const Ten1 &m) { return m(0); }
-inline Float reduction_(float m) { return m; }
-inline Float maximum(const Tensor1 &m) { return reduction_(m.maximum()); }
-inline Float maximum(const Tensor2 &m) { return reduction_(m.maximum()); }
-inline int argmax(const Tensor1 &m) {
+// inline Float reduction(const EigenTensor1 &m) { return m(0); }
+inline Float reduction(const EigenTensor1 &m) { return m(0); }
+inline Float reduction(const TensorMap1 &m) { return m(0); }
+inline Float reduction(Float m) { return m; }
+inline int argmax(const EigenTensor1 &m) {
   int mi = -1;
   Float mv = m(0);
-  for (int i = 0; i < size(m); i++) {
+  for (int i = 0; i < m.dimension(0); i++) {
     if (m(i) < mv) continue;
     mi = i;
     mv = m(i);
   }
   return mi;
 }
-inline Float sum(const Tensor1 &m) { return reduction_(m.sum()); }
-inline Float sum(const Tensor2 &m) { return reduction_(m.sum()); }
-typedef Eigen::Map<Eigen::MatrixXf> MatrixMap;
+inline Float sum(const EigenTensor1 &m) { return reduction(m.sum()); }
+inline Float sum(const EigenTensor2 &m) { return reduction(m.sum()); }
 
 // helper functions for Eigen::Tensor axes and sizes
 
@@ -89,6 +83,7 @@ inline Eigen::Sizes<1> S(int i) { return Eigen::Sizes<1>({i}); }
 
 inline Eigen::Sizes<2> S(int i, int j) { return Eigen::Sizes<2>({i, j}); }
 
+#if 0
 struct Context {
   virtual int gpu() { return -1; }
 };
@@ -104,8 +99,6 @@ struct GpuContext : Context {
   virtual int gpu() { return 0; }
   shared_ptr<Eigen::GpuDevice> device;
 };
-
-extern std::unordered_map<Float*,int> refcounts;
 
 template <class LHS>
 struct ContextSetter {
@@ -132,12 +125,10 @@ template <class LHS>
 ContextSetter<LHS> operator>>(Context *context, LHS lhs) {
   return ContextSetter<LHS>(context, lhs);
 }
-
-extern shared_ptr<Context> default_context;
+#endif
 
 struct tensor2 {
-  Eigen::array<int,2> dims;
-  shared_ptr<Context> context = default_context;
+  int dims[2];
   Float *ptr = nullptr;
 
   tensor2() {}
@@ -146,28 +137,14 @@ struct tensor2 {
   }
   tensor2(TensorRef<Tensor<Float,2>> other) { }
   ~tensor2() { 
-    decref();
+    clear();
   }
-
-  void incref() {
+  void clear() {
     if(!ptr) return;
-    refcounts[ptr]++;
-  }
-  void decref() {
-    if(!ptr) return;
-    if(--refcounts[ptr]>0) return;
-    refcounts.erase(ptr);
     free(ptr);
     ptr = nullptr;
-  }
-
-  void setContext(shared_ptr<Context> context) {
-    decref();
-    ptr = nullptr;
-    this->context = context;
-  }
-  void convertToContext(shared_ptr<Context> context) {
-    THROW("unimplemented");
+    dims[0] = 0;
+    dims[1] = 0;
   }
   int dimension(int i) const {
     return dims[i];
@@ -182,9 +159,8 @@ struct tensor2 {
     return (**this)(i,j);
   }
   void resize(int n, int m) { 
-    decref();
+    clear();
     ptr = (Float*)malloc(n * m * sizeof(Float));
-    refcounts[ptr] = 1;
     dims[0] = n; 
     dims[1] = m;
   }
@@ -195,40 +171,12 @@ struct tensor2 {
     return TensorMap<Tensor<Float,2>>(ptr, dims[0], dims[1]);
   }
   void operator=(const tensor2 &other) {
-    if(other.ptr==nullptr) {
-      decref();
-      return;
-    }
-    if(context->gpu()<0) {
-      resize(other.dimension(0), other.dimension(1));
-      memcpy(ptr, other.ptr, total_size() * sizeof(Float));
-    } else {
-      throw "unimplemented";
-    }
+    resize(other.dimension(0), other.dimension(1));
+    memcpy(ptr, other.ptr, total_size() * sizeof(Float));
   }
   template <class RHS>
   void operator=(RHS rhs) {
     **this = rhs;
-  }
-  void share(tensor2 &other) {
-    if(context==other.context) {
-      other.incref();
-      decref();
-      ptr = other.ptr;
-    } else {
-      throw "unimplemented";
-    }
-  }
-  void take(tensor2 &other) {
-    if(context==other.context) {
-      other.incref();
-      decref();
-      ptr = other.ptr;
-      other.decref();
-      other.ptr = nullptr;
-    } else {
-      throw "unimplemented";
-    }
   }
   Float *data() {
     return ptr;
@@ -243,7 +191,6 @@ struct tensor2 {
   void setZero() {
     for(int N=rows()*cols(), i=0; i<N; i++) ptr[i] = 0;
   }
-  // MatrixMap &matrix() { }
 };
 
 }

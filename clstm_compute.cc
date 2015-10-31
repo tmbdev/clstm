@@ -11,9 +11,8 @@ using std::cerr;
 #define CFIRST(M) (M).col(0)
 #endif
 
-unordered_map<Float*,int> refcounts;
-
-shared_ptr<Context> default_context(new ThreadPoolContext(4));
+// unordered_map<Float*,int> refcounts;
+// shared_ptr<Context> default_context(new ThreadPoolContext(4));
 
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
@@ -119,7 +118,7 @@ void backward_full1(Batch &y, Params &W1, Batch &x) {
   Float (*g)(Float) = F::yderiv;
 #ifndef USEMAT
   int n = W1.V().dimension(0), m = W1.V().dimension(1);
-  Tensor2 temp = y.D() * y.V().unaryExpr(g);
+  EigenTensor2 temp = y.D() * y.V().unaryExpr(g);
   x.D() = W1.V().slice(ar(0, 1), ar(n, m - 1)).contract(temp, axes(0, 0));
   W1.D().slice(ar(0, 1), ar(n, m - 1)) += temp.contract(x.V(), axes(1, 1));
   W1.D().chip(0, 1) += temp.sum(ar(1));
@@ -158,7 +157,7 @@ template <class F>
 void backward_full(Batch &y, Params &W, Batch &x) {
   Float (*g)(Float) = F::yderiv;
 #ifndef USEMAT
-  Tensor2 temp = y.V().unaryExpr(g) * y.D();
+  EigenTensor2 temp = y.V().unaryExpr(g) * y.D();
   x.D() += W.V().contract(temp, axes(0, 0));
   W.D() += temp.contract(x.V(), axes(1, 1));
 #else
