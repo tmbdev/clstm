@@ -116,9 +116,9 @@ template <class F>
 void forward_full1(Batch &y, Params &W1, Batch &x) {
   Float (*f)(Float) = F::nonlin;
 #ifndef USEMAT
-  int n = W1.v().dimension(0), m = W1.v().dimension(1);
-  int bs = x.v().dimension(1);
-  y.v() =
+  int n = W1.v.dimension(0), m = W1.v.dimension(1);
+  int bs = x.v.dimension(1);
+  y.v =
       (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axes(1, 0)) +
        W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
 #else
@@ -130,9 +130,9 @@ template <class F>
 void backward_full1(Batch &y, Params &W1, Batch &x) {
   Float (*g)(Float) = F::yderiv;
 #ifndef USEMAT
-  int n = W1.v().dimension(0), m = W1.v().dimension(1);
+  int n = W1.v.dimension(0), m = W1.v.dimension(1);
   EigenTensor2 temp = y.d() * y.v().unaryExpr(g);
-  x.d() = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axes(0, 0));
+  x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axes(0, 0));
   W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += temp.contract(x.v(), axes(1, 1));
   W1.d().chip(0, 1) += temp.sum(indexes(1));
 #else
@@ -161,7 +161,7 @@ template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
   Float (*f)(Float) = F::nonlin;
 #ifndef USEMAT
-  y.v() = W.v().contract(x.v(), axes(1, 0)).unaryExpr(f);
+  y.v = W.v().contract(x.v(), axes(1, 0)).unaryExpr(f);
 #else
   y.v = (W.v * x.v).unaryExpr(f);;
 #endif
@@ -171,8 +171,8 @@ void backward_full(Batch &y, Params &W, Batch &x) {
   Float (*g)(Float) = F::yderiv;
 #ifndef USEMAT
   EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
-  x.d() += W.v().contract(temp, axes(0, 0));
-  W.d() += temp.contract(x.v(), axes(1, 1));
+  x.d += W.v().contract(temp, axes(0, 0));
+  W.d += temp.contract(x.v(), axes(1, 1));
 #else
   Mat temp = y.d.array() * y.v.unaryExpr(g).array();
   x.d += W.v.transpose() * temp;
@@ -193,16 +193,16 @@ template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
   Float (*f)(Float) = limexp;
 #ifndef USEMAT
-  int n = W1.v().dimension(0);
-  int m = W1.v().dimension(1);
-  int bs = z.v().dimension(1);
-  z.v() =
+  int n = W1.v.dimension(0);
+  int m = W1.v.dimension(1);
+  int bs = z.v.dimension(1);
+  z.v =
       (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axes(1, 0)) +
        W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
   for (int b = 0; b < bs; b++) {
     double total = 0.0;
     for (int i = 0; i < n; i++) total += z.v()(i, b);
-    for (int i = 0; i < n; i++) z.v()(i, b) /= total;
+    for (int i = 0; i < n; i++) z.v(i, b) /= total;
   }
 #else
   int n = ROWS(W1.v);
@@ -218,12 +218,12 @@ void forward_softmax(Batch &z, Params &W1, Batch &x) {
 }
 void backward_softmax(Batch &z, Params &W1, Batch &x) {
 #ifndef USEMAT
-  int n = W1.v().dimension(0), m = W1.v().dimension(1);
-  int bs = z.v().dimension(1);
-  x.d() = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(z.d(), axes(0, 0));
+  int n = W1.v.dimension(0), m = W1.v.dimension(1);
+  int bs = z.v.dimension(1);
+  x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(z.d(), axes(0, 0));
   W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += z.d().contract(x.v(), axes(1, 1));
   for (int i = 0; i < n; i++)
-    for (int b = 0; b < bs; b++) W1.d()(i, 0) += z.d()(i, b);
+    for (int b = 0; b < bs; b++) W1.d(i, 0) += z.d()(i, b);
 #else
   x.d = CBUTFIRST(W1.v).transpose() * z.d;
   auto d_W = CBUTFIRST(W1.d);
@@ -241,8 +241,8 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
 
 void forward_stack(Batch &z, Batch &x, Batch &y) {
 #ifndef USEMAT
-  int nx = x.v().dimension(0), ny = y.v().dimension(0);
-  int bs = x.v().dimension(1);
+  int nx = x.v.dimension(0), ny = y.v.dimension(0);
+  int bs = x.v.dimension(1);
   z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
   z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y.v();
 #else
@@ -256,10 +256,10 @@ void forward_stack(Batch &z, Batch &x, Batch &y) {
 }
 void backward_stack(Batch &z, Batch &x, Batch &y) {
 #ifndef USEMAT
-  int nx = x.v().dimension(0), ny = y.v().dimension(0);
-  int bs = x.v().dimension(1);
-  x.d() += z.d().slice(indexes(0, 0), indexes(nx, bs));
-  y.d() += z.d().slice(indexes(nx, 0), indexes(ny, bs));
+  int nx = x.v.dimension(0), ny = y.v.dimension(0);
+  int bs = x.v.dimension(1);
+  x.d += z.d().slice(indexes(0, 0), indexes(nx, bs));
+  y.d += z.d().slice(indexes(nx, 0), indexes(ny, bs));
 #else
   assert(x.cols() == y.cols());
   int nx = x.rows();
@@ -274,8 +274,8 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
 
 void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 #ifndef USEMAT
-  int nx = x.v().dimension(0), ny = y[0].v().dimension(0);
-  int bs = x.v().dimension(1);
+  int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
+  int bs = x.v.dimension(1);
   z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
   if (last >= 0)
     z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y[last].v();
@@ -295,10 +295,10 @@ void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 }
 void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 #ifndef USEMAT
-  int nx = x.v().dimension(0), ny = y[0].v().dimension(0);
-  int bs = x.v().dimension(1);
-  x.d() += z.d().slice(indexes(0, 0), indexes(nx, bs));
-  if (last >= 0) y[last].d() += z.d().slice(indexes(nx, 0), indexes(ny, bs));
+  int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
+  int bs = x.v.dimension(1);
+  x.d += z.d().slice(indexes(0, 0), indexes(nx, bs));
+  if (last >= 0) y[last].d += z.d().slice(indexes(nx, 0), indexes(ny, bs));
 #else
   assert(x.cols() == y.cols());
   int nx = x.rows();
@@ -313,8 +313,8 @@ void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
 #ifndef USEMAT
-  int nx = inp.v().dimension(0), ny = out[0].v().dimension(0);
-  int bs = inp.v().dimension(1);
+  int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
+  int bs = inp.v.dimension(1);
   all.v().slice(indexes(0, 0), indexes(1, bs)).setConstant(Float(1));
   all.v().slice(indexes(1, 0), indexes(nx, bs)) = inp.v();
   if (last >= 0)
@@ -337,10 +337,10 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
 }
 void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
 #ifndef USEMAT
-  int nx = inp.v().dimension(0), ny = out[0].v().dimension(0);
-  int bs = inp.v().dimension(1);
-  inp.d() += all.d().slice(indexes(1, 0), indexes(nx, bs));
-  if (last >= 0) out[last].d() += all.d().slice(indexes(1 + nx, 0), indexes(ny, bs));
+  int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
+  int bs = inp.v.dimension(1);
+  inp.d += all.d().slice(indexes(1, 0), indexes(nx, bs));
+  if (last >= 0) out[last].d += all.d().slice(indexes(1 + nx, 0), indexes(ny, bs));
 #else
   assert(inp.cols() == out.cols());
   int bs = inp.cols();
@@ -360,7 +360,7 @@ void forward_reverse(Sequence &y, Sequence &x) {
 }
 void backward_reverse(Sequence &y, Sequence &x) {
   int N = x.size();
-  for (int i = 0; i < N; i++) x[N - i - 1].d() += y[i].d();
+  for (int i = 0; i < N; i++) x[N - i - 1].d += y[i].d();
 }
 
 // combine the delayed gated state with the gated input
@@ -368,8 +368,8 @@ void backward_reverse(Sequence &y, Sequence &x) {
 void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
                       int last, Batch &gf) {
 #ifndef USEMAT
-  state.v() = ci.v() * gi.v();
-  if (last >= 0) state.v() += gf.v() * states[last].v();
+  state.v = ci.v() * gi.v();
+  if (last >= 0) state.v += gf.v() * states[last].v();
 #else
   state.v = ci.v.array() * gi.v.array();
   if (last >= 0) state.v.array() += gf.v.array() * states[last].v.array();
@@ -378,10 +378,10 @@ void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
 void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
                        int last, Batch &gf) {
 #ifndef USEMAT
-  if (last >= 0) states[last].d() += state.d() * gf.v();
-  if (last >= 0) gf.d() += state.d() * states[last].v();
-  gi.d() += state.d() * ci.v();
-  ci.d() += state.d() * gi.v();
+  if (last >= 0) states[last].d += state.d() * gf.v();
+  if (last >= 0) gf.d += state.d() * states[last].v();
+  gi.d += state.d() * ci.v();
+  ci.d += state.d() * gi.v();
 #else
   if (last >= 0) states[last].d.array() += state.d.array() * gf.v.array();
   if (last >= 0) gf.d.array() += state.d.array() * states[last].v.array();
@@ -396,7 +396,7 @@ template <class H>
 void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
   Float (*f)(Float) = H::nonlin;
 #ifndef USEMAT
-  out.v() = state.v().unaryExpr(f) * go.v();
+  out.v = state.v().unaryExpr(f) * go.v();
 #else
   out.v = state.v.unaryExpr(f).array() * go.v.array();
 #endif
@@ -406,8 +406,8 @@ void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
   Float (*f)(Float) = H::nonlin;
   auto g = [](Float x) { return H::yderiv(H::nonlin(x)); };
 #ifndef USEMAT
-  go.d() += state.v().unaryExpr(f) * out.d();
-  state.d() += state.v().unaryExpr(g) * go.v() * out.d();
+  go.d += state.v().unaryExpr(f) * out.d();
+  state.d += state.v().unaryExpr(g) * go.v() * out.d();
 #else
   go.d.array() += state.v.unaryExpr(f).array() * out.d.array();
   state.d.array() += state.v.unaryExpr(g).array() * go.v.array() * out.d.array();

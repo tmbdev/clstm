@@ -158,9 +158,20 @@ struct Tensor2 {
   TensorMap2 operator()() {
     return **this;
   }
+  TensorMap2 map() {
+    return **this;
+  }
+
+  // For convenience, we're forwarding a bunch of assignment-related
+  // operators so that we can wrap them up with the .device(...)
+  // call.
   template <class RHS>
   void operator=(RHS rhs) {
-    **this = rhs;
+    map() = rhs;
+  }
+  template <class RHS>
+  void operator+=(RHS rhs) {
+    map() += rhs;
   }
 
   Float &operator()(int i, int j) {
