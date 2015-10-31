@@ -47,8 +47,8 @@ inline Float log_mul(Float x, Float y) { return x + y; }
 struct Batch {
   tensor2 v;
   tensor2 d;
-  Ten2 V() { return Ten2(v.data(), v.rows(), v.cols()); }
-  Ten2 D() { return Ten2(d.data(), d.rows(), d.cols()); }
+  TensorMap2 V() { return TensorMap2(v.data(), v.rows(), v.cols()); }
+  TensorMap2 D() { return TensorMap2(d.data(), d.rows(), d.cols()); }
 #ifdef USEMAT
   Mat &MV() { return *(Mat*)0; }
   Mat &MD() { return *(Mat*)0; }
@@ -66,7 +66,7 @@ struct Batch {
   }
   void zeroGrad() { d.setZero(rows(), cols()); }
   void gradientClip(Float clip) {
-    Ten2 d = *this->d;
+    TensorMap2 d = *this->d;
     if (clip>=1e6) return;
     assert(clip>0);
     for(int i=0; i<rows(); i++) {
@@ -78,8 +78,8 @@ struct Batch {
 };
 struct Params : Batch {
   void update(Float lr, Float mom) {
-    Ten2 v = *this->v;
-    Ten2 d = *this->d;
+    TensorMap2 v = *this->v;
+    TensorMap2 d = *this->d;
     v += d * lr;
     d = d * mom;
   }

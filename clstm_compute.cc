@@ -39,7 +39,7 @@ inline double randn() {
 }
 }
 
-void rinit(Ten2 m, Float s, const string mode, Float offset) {
+void rinit(TensorMap2 m, Float s, const string mode, Float offset) {
   if (mode == "unif") {
     for(int i=0; i<rows(m); i++)
       for(int j=0;j<cols(m); j++)
@@ -80,7 +80,7 @@ void rinit(Sequence &m, int N, int r, int c, Float s, const string mode, Float o
 
 // checking for NaNs in different objects
 
-bool anynan(Ten2 a) {
+bool anynan(TensorMap2 a) {
   for (int j = 0; j < rows(a); j++) {
     for (int k = 0; k < cols(a); k++) {
       float x = a(j, k);

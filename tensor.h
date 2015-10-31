@@ -40,10 +40,10 @@ typedef Float Scalar;
 typedef Eigen::Tensor<Float, 1> Tensor1;
 typedef Eigen::Tensor<Float, 2> Tensor2;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 1>> Ten1;
-typedef Eigen::TensorMap<Eigen::Tensor<Float, 2>> Ten2;
+typedef Eigen::TensorMap<Eigen::Tensor<Float, 2>> TensorMap2;
 
-inline int rows(const Ten2 &m) { return m.dimension(0); }
-inline int cols(const Ten2 &m) { return m.dimension(1); }
+inline int rows(const TensorMap2 &m) { return m.dimension(0); }
+inline int cols(const TensorMap2 &m) { return m.dimension(1); }
 inline int size(const Ten1 &m) { return m.dimension(0); }
 inline int rows(const Ten1 &m) { return m.dimension(0); }
 inline int cols(const Ten1 &m) { THROW("cols applied to Ten1"); }
