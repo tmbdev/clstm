@@ -129,6 +129,16 @@ struct Tensor2 {
     dims[0] = 0;
     dims[1] = 0;
   }
+  void resize(int n, int m) { 
+    clear();
+    ptr = (Float*)malloc(n * m * sizeof(Float));
+    dims[0] = n; 
+    dims[1] = m;
+  }
+  Float *data() {
+    return ptr;
+  }
+
   int dimension(int i) const {
     return dims[i];
   }
@@ -138,31 +148,27 @@ struct Tensor2 {
   int cols() {
     return dims[1];
   }
-  Float &operator()(int i, int j) {
-    return (**this)(i,j);
-  }
-  void resize(int n, int m) { 
-    clear();
-    ptr = (Float*)malloc(n * m * sizeof(Float));
-    dims[0] = n; 
-    dims[1] = m;
-  }
   int total_size() {
     return dims[0] * dims[1];
   }
-  TensorMap<Tensor<Float,2>> operator*() {
-    return TensorMap<Tensor<Float,2>>(ptr, dims[0], dims[1]);
+
+  TensorMap2 operator*() {
+    return TensorMap2(ptr, dims[0], dims[1]);
   }
-  void operator=(const Tensor2 &other) {
-    resize(other.dimension(0), other.dimension(1));
-    memcpy(ptr, other.ptr, total_size() * sizeof(Float));
+  TensorMap2 operator()() {
+    return **this;
   }
   template <class RHS>
   void operator=(RHS rhs) {
     **this = rhs;
   }
-  Float *data() {
-    return ptr;
+
+  Float &operator()(int i, int j) {
+    return (**this)(i,j);
+  }
+  void operator=(const Tensor2 &other) {
+    resize(other.dimension(0), other.dimension(1));
+    memcpy(ptr, other.ptr, total_size() * sizeof(Float));
   }
   void setConstant(int n, int m, Float c) {
     resize(n,m);
