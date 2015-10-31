@@ -45,8 +45,8 @@ inline Float log_add(Float x, Float y) {
 inline Float log_mul(Float x, Float y) { return x + y; }
 
 struct Batch {
-  tensor2 v;
-  tensor2 d;
+  Tensor2 v;
+  Tensor2 d;
   TensorMap2 V() { return TensorMap2(v.data(), v.rows(), v.cols()); }
   TensorMap2 D() { return TensorMap2(d.data(), d.rows(), d.cols()); }
 #ifdef USEMAT

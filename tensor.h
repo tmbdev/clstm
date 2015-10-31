@@ -110,16 +110,16 @@ ContextSetter<LHS> operator>>(Context *context, LHS lhs) {
 }
 #endif
 
-struct tensor2 {
+struct Tensor2 {
   int dims[2];
   Float *ptr = nullptr;
 
-  tensor2() {}
-  tensor2(const tensor2 &other) { 
+  Tensor2() {}
+  Tensor2(const Tensor2 &other) { 
     *this = other;
   }
-  tensor2(TensorRef<Tensor<Float,2>> other) { }
-  ~tensor2() { 
+  Tensor2(TensorRef<Tensor<Float,2>> other) { }
+  ~Tensor2() { 
     clear();
   }
   void clear() {
@@ -153,7 +153,7 @@ struct tensor2 {
   TensorMap<Tensor<Float,2>> operator*() {
     return TensorMap<Tensor<Float,2>>(ptr, dims[0], dims[1]);
   }
-  void operator=(const tensor2 &other) {
+  void operator=(const Tensor2 &other) {
     resize(other.dimension(0), other.dimension(1));
     memcpy(ptr, other.ptr, total_size() * sizeof(Float));
   }
