@@ -6,7 +6,7 @@
 namespace ocropus {
 using std::cerr;
 
-inline Eigen::array<Eigen::IndexPair<int>, 1> axes(int i, int j) {
+inline Eigen::array<Eigen::IndexPair<int>, 1> axispairs(int i, int j) {
   Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
   return result;
 }
@@ -119,7 +119,7 @@ void forward_full1(Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = x.v.dimension(1);
   y.v =
-      (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axes(1, 0)) +
+      (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axispairs(1, 0)) +
        W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
 #else
   y.v = (CBUTFIRST(W1.v) * x.v).colwise() + CFIRST(W1.v);
@@ -132,8 +132,8 @@ void backward_full1(Batch &y, Params &W1, Batch &x) {
 #ifndef USEMAT
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   EigenTensor2 temp = y.d() * y.v().unaryExpr(g);
-  x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axes(0, 0));
-  W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += temp.contract(x.v(), axes(1, 1));
+  x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axispairs(0, 0));
+  W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += temp.contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1) += temp.sum(indexes(1));
 #else
   Mat temp;
@@ -161,7 +161,7 @@ template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
   Float (*f)(Float) = F::nonlin;
 #ifndef USEMAT
-  y.v = W.v().contract(x.v(), axes(1, 0)).unaryExpr(f);
+  y.v = W.v().contract(x.v(), axispairs(1, 0)).unaryExpr(f);
 #else
   y.v = (W.v * x.v).unaryExpr(f);;
 #endif
@@ -171,8 +171,8 @@ void backward_full(Batch &y, Params &W, Batch &x) {
   Float (*g)(Float) = F::yderiv;
 #ifndef USEMAT
   EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
-  x.d += W.v().contract(temp, axes(0, 0));
-  W.d += temp.contract(x.v(), axes(1, 1));
+  x.d += W.v().contract(temp, axispairs(0, 0));
+  W.d += temp.contract(x.v(), axispairs(1, 1));
 #else
   Mat temp = y.d.array() * y.v.unaryExpr(g).array();
   x.d += W.v.transpose() * temp;
@@ -197,13 +197,21 @@ void forward_softmax(Batch &z, Params &W1, Batch &x) {
   int m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
   z.v =
-      (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axes(1, 0)) +
+      (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axispairs(1, 0)) +
        W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
+#if 1
+  EigenTensor2 sums = z.v().sum(indexes(0)).reshape(indexes(1,m));
+  z.v = z.v() / sums.broadcast(indexes(n,1));
+#elif 1
+  // this expression doesn't work, probably needs an "eval"
+  z.v = z.v() / z.v().sum(indexes(0)).reshape(indexes(1,m)).broadcast(indexes(n,1));
+#else
   for (int b = 0; b < bs; b++) {
     double total = 0.0;
     for (int i = 0; i < n; i++) total += z.v()(i, b);
     for (int i = 0; i < n; i++) z.v(i, b) /= total;
   }
+#endif
 #else
   int n = ROWS(W1.v);
   int m = COLS(W1.v);
@@ -220,10 +228,14 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
 #ifndef USEMAT
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
-  x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(z.d(), axes(0, 0));
-  W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += z.d().contract(x.v(), axes(1, 1));
+  x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(z.d(), axispairs(0, 0));
+  W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += z.d().contract(x.v(), axispairs(1, 1));
+#if 1
+  W1.d().chip(0, 1) += z.d().sum(indexes(1));
+#else
   for (int i = 0; i < n; i++)
     for (int b = 0; b < bs; b++) W1.d(i, 0) += z.d()(i, b);
+#endif
 #else
   x.d = CBUTFIRST(W1.v).transpose() * z.d;
   auto d_W = CBUTFIRST(W1.d);
