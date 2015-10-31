@@ -228,6 +228,11 @@ struct ContextSetter {
 };
 
 template <class LHS>
+ContextSetter<LHS> operator>>(Context &context, LHS lhs) {
+  return ContextSetter<LHS>(&context, lhs);
+}
+
+template <class LHS>
 ContextSetter<LHS> operator>>(Context *context, LHS lhs) {
   return ContextSetter<LHS>(context, lhs);
 }
