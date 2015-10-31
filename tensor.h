@@ -159,13 +159,13 @@ struct Tensor2 {
   }
   void setConstant(int n, int m, Float c) {
     resize(n,m);
-    for(int N=n*m, i=0; i<N; i++) ptr[i] = c;
+    map().setConstant(c);
   }
   void setZero(int n, int m) {
     setConstant(n, m, 0);
   }
   void setZero() {
-    for(int N=rows()*cols(), i=0; i<N; i++) ptr[i] = 0;
+    map().setZero();
   }
 };
 
