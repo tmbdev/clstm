@@ -97,6 +97,42 @@ struct Context {
 #endif
     else lhs += rhs;
   }
+
+  template <class LHS, class RHS>
+  void scale(LHS lhs, RHS rhs) {
+    if (0) ;
+#ifdef EIGEN_USE_THREADS
+    else if(tpdev) lhs.device(*tpdev) *= rhs;
+#endif
+#ifdef EIGEN_USE_GPU
+    else if(gpudev) lhs.device(*gpudev) *= rhs;
+#endif
+    else lhs *= rhs;
+  }
+
+  template <class LHS, class RHS>
+  void decrement(LHS lhs, RHS rhs) {
+    if (0) ;
+#ifdef EIGEN_USE_THREADS
+    else if(tpdev) lhs.device(*tpdev) -= rhs;
+#endif
+#ifdef EIGEN_USE_GPU
+    else if(gpudev) lhs.device(*gpudev) -= rhs;
+#endif
+    else lhs -= rhs;
+  }
+
+  template <class LHS, class RHS>
+  void invscale(LHS lhs, RHS rhs) {
+    if (0) ;
+#ifdef EIGEN_USE_THREADS
+    else if(tpdev) lhs.device(*tpdev) /= rhs;
+#endif
+#ifdef EIGEN_USE_GPU
+    else if(gpudev) lhs.device(*gpudev) /= rhs;
+#endif
+    else lhs /= rhs;
+  }
 };
 
 extern Context default_context;
