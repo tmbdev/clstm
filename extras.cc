@@ -38,34 +38,6 @@ extern "C" {
 namespace ocropus {
 using namespace std;
 
-template <class T, class S>
-inline void getd0(Tensor<T,2> &image, Tensor<S,1> &slice, int index) {
-  slice.resize(image.dimension(1));
-  for (int i = 0; i < image.dimension(1); i++)
-    slice(i) = (S)image(index, i);
-}
-
-template <class T, class S>
-inline void getd1(Tensor<T,2> &image, Tensor<S,1> &slice, int index) {
-  slice.resize(image.dimension(0));
-  for (int i = 0; i < image.dimension(0); i++)
-    slice(i) = (S)image(i, index);
-}
-
-template <class T, class S>
-inline void putd0(Tensor<T,2> &image, Tensor<S,1> &slice, int index) {
-  assert(slice.rank() == 1 && slice.dimension(0) == image.dimension(1));
-  for (int i = 0; i < image.dimension(1); i++)
-    image(index, i) = (T)slice(i);
-}
-
-template <class T, class S>
-inline void putd1(Tensor<T,2> &image, Tensor<S,1> &slice, int index) {
-  assert(slice.rank() == 1 && slice.dimension(0) == image.dimension(0));
-  for (int i = 0; i < image.dimension(0); i++)
-    image(i, index) = (T)slice(i);
-}
-
 template <class T,int N>
 inline TensorMap<Tensor<T,N>>TM(Tensor<T,N> &t) {
     return TensorMap<Tensor<T,N>>(t.data(), t.dimensions());
@@ -127,54 +99,45 @@ template void gauss1d(Tensor<float,1> &v, float sigma);
 ///
 /// The mask is computed to 3 sigma.
 
-template <class T>
-void gauss2d(Tensor<T,2> &a, float sx, float sy) {
-  Tensor<float,1> r, s;
+void gauss2d(TensorMap2 a, float sx, float sy) {
+  Tensor<Float,1> r, s;
   for (int i = 0; i < a.dimension(0); i++) {
-    getd0(a, r, i);
+    r = a.chip(i,0);
     gauss1d(s, r, sy);
-    putd0(a, s, i);
+    a.chip(i,0) = s;
   }
   for (int j = 0; j < a.dimension(1); j++) {
-    getd1(a, r, j);
+    r = a.chip(j,1);
     gauss1d(s, r, sx);
-    putd1(a, s, j);
+    a.chip(j,1) = s;
   }
 }
 
-template void gauss2d(Tensor<unsigned char,2> &image, float sx, float sy);
-template void gauss2d(Tensor<float,2> &image, float sx, float sy);
+void gauss2d(TensorMap2 image, float sx, float sy);
 
-template <class T>
-inline T &xref(Tensor<T,2> &a, int x, int y) {
-  if (x < 0)
-    x = 0;
-  else if (x >= a.dimension(0))
-    x = a.dimension(0) - 1;
-  if (y < 0)
-    y = 0;
-  else if (y >= a.dimension(1))
-    y = a.dimension(1) - 1;
-  return a(x, y);
+inline int clip(int x, int n) {
+  if(x<0) return 0;
+  if(x>=n) return n-1;
+  return x;
 }
 
-template <class T>
-inline T bilin(Tensor<T,2> &a, float x, float y) {
+inline Float bilin(TensorMap2 a, float x, float y) {
+  int w = a.dimension(0), h = a.dimension(1);
   int i = (int)floor(x);
   int j = (int)floor(y);
   float l = x - i;
   float m = y - j;
-  float s00 = xref(a, i, j);
-  float s01 = xref(a, i, j + 1);
-  float s10 = xref(a, i + 1, j);
-  float s11 = xref(a, i + 1, j + 1);
-  return (T)((1.0 - l) * ((1.0 - m) * s00 + m * s01) +
+  float s00 = a(clip(i,w),clip(j,h));
+  float s01 = a(clip(i,w),clip(j+1,h));
+  float s10 = a(clip(i+1,w),clip(j,h));
+  float s11 = a(clip(i+1,w),clip(j+1,h));
+  return ((1.0 - l) * ((1.0 - m) * s00 + m * s01) +
              l * ((1.0 - m) * s10 + m * s11));
 }
 
 struct NoNormalizer : INormalizer {
-  void measure(Tensor<float,2> &line) {}
-  void normalize(Tensor<float,2> &out, Tensor<float,2> &in) {
+  void measure(TensorMap2 line) {}
+  void normalize(Tensor2 &out, TensorMap2 in) {
     assert(in.dimension(1) == target_height);
     out = in;
   }
@@ -188,7 +151,7 @@ struct MeanNormalizer : INormalizer {
     range = getrenv("norm_range", 1.0);
     if (verbose) print("mean_normalizer", range, vscale);
   }
-  void measure(Tensor<float,2> &line) {
+  void measure(TensorMap2 line) {
     {
       double sy = 0, s1 = 0;
       for (int i = 0; i < line.dimension(0); i++) {
@@ -210,7 +173,7 @@ struct MeanNormalizer : INormalizer {
       y_mad = sy / s1;
     }
   }
-  void normalize(Tensor<float,2> &out, Tensor<float,2> &in) {
+  void normalize(Tensor2 &out, TensorMap2 in) {
     float actual = vscale * 2 * range * y_mad;
     float scale = actual / target_height;
     cerr << "normalize: " << y_mean << " " << y_mad << " " << actual << endl;
@@ -219,14 +182,15 @@ struct MeanNormalizer : INormalizer {
     out.resize(nw, nh);
     for (int i = 0; i < nw; i++) {
       for (int j = 0; j < nh; j++) {
-        out(i, j) =
-            bilin(in, scale * i, scale * (j - target_height / 2) + y_mean);
+        float x = scale * i;
+        float y = scale * (j - target_height / 2) + y_mean;
+        out(i, j) = bilin(in, x, y);
       }
     }
   }
 };
 
-void argmax1(Tensor<float,1> &m, Tensor<float,2> &a) {
+void argmax1(Tensor<float,1> &m, TensorMap2 a) {
   m.resize(a.dimension(0));
   for (int i = 0; i < a.dimension(0); i++) {
     float mv = a(i, 0);
@@ -240,7 +204,7 @@ void argmax1(Tensor<float,1> &m, Tensor<float,2> &a) {
   }
 }
 
-inline void add_smear(Tensor<float,2> &smooth, Tensor<float,2> &line) {
+inline void add_smear(TensorMap2 smooth, TensorMap2 line) {
   int w = line.dimension(0);
   int h = line.dimension(1);
   for (int j = 0; j < h; j++) {
@@ -263,15 +227,15 @@ struct CenterNormalizer : INormalizer {
     smooth1d = getrenv("norm_smooth1d", 0.3);
     if (verbose) print("center_normalizer", range, smooth2d, smooth1d);
   }
-  void measure(Tensor<float,2> &line) {
-    Tensor<float,2> smooth, smooth2;
+  void measure(TensorMap2 line) {
+    Tensor2 smooth, smooth2;
     int w = line.dimension(0);
     int h = line.dimension(1);
     smooth = line;
-    gauss2d(smooth, h * smooth2d, h * 0.5);
-    add_smear(smooth, line);  // just to avoid singularities
+    gauss2d(smooth(), h * smooth2d, h * 0.5);
+    add_smear(smooth(), line);  // just to avoid singularities
     Tensor<float,1> a(w);
-    argmax1(a, smooth);
+    argmax1(a, smooth());
     gauss1d(center, a, h * smooth1d);
     float s1 = 0.0;
     float sy = 0.0;
@@ -284,6 +248,7 @@ struct CenterNormalizer : INormalizer {
     float mad = sy / s1;
     r = int(range * mad + 1);
     if (py) {
+#ifdef FIXME
       print("r", r);
       py->eval("ion(); clf()");
       py->eval("subplot(211)");
@@ -292,9 +257,10 @@ struct CenterNormalizer : INormalizer {
       py->imshowT(smooth, "cmap=cm.gray,interpolation='nearest'");
       py->plot(center);
       py->eval("print ginput(999)");
+#endif
     }
   }
-  void normalize(Tensor<float,2> &out, Tensor<float,2> &in) {
+  void normalize(Tensor2 &out, TensorMap2 in) {
     int w = in.dimension(0);
     if (w != center.dimension(0)) THROW("measure doesn't match normalize");
     float scale = (2.0 * r) / target_height;
@@ -554,7 +520,7 @@ inline double clip(double value, double lo, double hi) {
   return value<lo?lo:value>hi?hi:value;
 }
 
-void read_png(Tensor<float,2> &image, const char *name) {
+void read_png(Tensor2 &image, const char *name) {
   Tensor<unsigned char,3> temp;
   FILE *stream = fopen(name, "r");
   if (!stream) THROW("error on open");
@@ -568,7 +534,7 @@ void read_png(Tensor<float,2> &image, const char *name) {
     }
   }
 }
-void write_png(const char *name, Tensor<float,2> &image) {
+void write_png(const char *name, TensorMap2 image) {
   Tensor<unsigned char,3> temp;
   temp.resize(image.dimension(0), image.dimension(1), 3);
   for(int i=0; i<temp.dimension(0); i++) {

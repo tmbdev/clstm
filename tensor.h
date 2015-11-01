@@ -170,6 +170,9 @@ struct Tensor2 {
     dims[0] = n;
     dims[1] = m;
   }
+  void like(TensorMap2 other) {
+    resize(other.dimension(0), other.dimension(1));
+  }
   Float *data() {
     return ptr;
   }
@@ -220,6 +223,10 @@ struct Tensor2 {
   void operator=(const Tensor2 &other) {
     resize(other.dimension(0), other.dimension(1));
     memcpy(ptr, other.ptr, total_size() * sizeof(Float));
+  }
+  void operator=(TensorMap2 other) {
+    resize(other.dimension(0), other.dimension(1));
+    memcpy(ptr, other.data(), total_size() * sizeof(Float));
   }
   void setConstant(int n, int m, Float c) {
     resize(n,m);

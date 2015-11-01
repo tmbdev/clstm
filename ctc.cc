@@ -131,9 +131,8 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
                        Classes &targets) {
   int nclasses = outputs.rows();
   Sequence stargets;
-  stargets.resize(targets.size());
+  stargets.resize(targets.size(), nclasses, 1);
   for (int t = 0; t < stargets.size(); t++) {
-    stargets[t].resize(nclasses, 1);
     stargets[t].v().setConstant(0);
     stargets[t].v(targets[t], 0) = 1.0;
   }
@@ -141,9 +140,9 @@ void ctc_align_targets(Sequence &posteriors, Sequence &outputs,
 }
 
 void mktargets(Sequence &seq, Classes &transcript, int ndim) {
-  seq.resize(2 * transcript.size() + 1);
+  seq.resize(2 * transcript.size() + 1, ndim, 1);
   for (int t = 0; t < seq.size(); t++) {
-    seq[t].setZero(ndim, 1);
+    seq[t].v.setZero();
     if (t % 2 == 1)
       seq[t].v(transcript[(t - 1) / 2],0) = 1;
     else

@@ -55,13 +55,13 @@ int main1(int argc, char **argv) {
   ifstream stream(fname);
   string line;
   while (getline(stream, line)) {
-    Tensor<float,2> raw;
+    Tensor2 raw;
     string fname = line;
     string basename = fname.substr(0, fname.find_last_of("."));
     read_png(raw, fname.c_str());
-    raw = -raw + Float(1.0);
+    raw = -raw() + Float(1.0);
     if (!conf) {
-      string out = clstm.predict_utf8(raw);
+      string out = clstm.predict_utf8(raw());
       cout << line << "\t" << out << endl;
       if (save_text) {
         write_text(basename + ".txt", out);
@@ -69,7 +69,7 @@ int main1(int argc, char **argv) {
     } else {
       cout << "file " << line << endl;
       vector<CharPrediction> preds;
-      clstm.predict(preds, raw);
+      clstm.predict(preds, raw());
       for (int i = 0; i < preds.size(); i++) {
         CharPrediction p = preds[i];
         const char *sep = "\t";
@@ -79,16 +79,16 @@ int main1(int argc, char **argv) {
     if (output == "text") {
       // nothing else to do
     } else if (output == "logs") {
-      Tensor<float,2> outputs;
+      Tensor2 outputs;
       clstm.get_outputs(outputs);
       for (int t = 0; t < outputs.dimension(0); t++)
         for (int c = 0; c < outputs.dimension(1); c++)
           outputs(t, c) = scaled_log(outputs(t, c));
-      write_png((basename + ".lp.png").c_str(), outputs);
+      write_png((basename + ".lp.png").c_str(), outputs());
     } else if (output == "posteriors") {
-      Tensor<float,2> outputs;
+      Tensor2 outputs;
       clstm.get_outputs(outputs);
-      write_png((basename + ".p.png").c_str(), outputs);
+      write_png((basename + ".p.png").c_str(), outputs());
     } else {
       THROW("unknown output format");
     }

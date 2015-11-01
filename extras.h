@@ -38,8 +38,8 @@ struct INormalizer {
   float vscale = 1.0;
   virtual ~INormalizer() {}
   virtual void getparams(bool verbose = false) {}
-  virtual void measure(Tensor<float,2> &line) = 0;
-  virtual void normalize(Tensor<float,2> &out, Tensor<float,2> &in) = 0;
+  virtual void measure(TensorMap2 line) = 0;
+  virtual void normalize(Tensor2 &out, TensorMap2 in) = 0;
   virtual void setPyServer(void *p) {}
 };
 
@@ -48,10 +48,8 @@ INormalizer *make_NoNormalizer();
 INormalizer *make_MeanNormalizer();
 INormalizer *make_CenterNormalizer();
 
-void read_png(Tensor<unsigned char,3> &image, FILE *fp);
-void write_png(FILE *fp, Tensor<float,3> &image);
-void read_png(Tensor<float,2> &image, const char *name);
-void write_png(const char *name, Tensor<float,2> &image);
+void read_png(Tensor2 &image, const char *name);
+void write_png(const char *name, TensorMap2 image);
 }
 
 #endif

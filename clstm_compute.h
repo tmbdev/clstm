@@ -96,7 +96,6 @@ struct Sequence {
     }
   }
   int size() const { return steps.size(); }
-  void resize(int n) { resize(n, 1, 1); }
   void resize(int N, int n, int m) {
     steps.resize(N);
     for (int t = 0; t < N; t++) {
@@ -107,7 +106,7 @@ struct Sequence {
     resize(other.size(), other.rows(), other.cols());
   }
   void copy(const Sequence &other) {
-    resize(other.size());
+    like(other);
     for (int t = 0; t < other.size(); t++) steps[t] = other[t];
   }
   Batch &operator[](int i) { return steps[i]; }

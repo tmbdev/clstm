@@ -167,15 +167,24 @@ void forward_softmax(Batch &z, Params &W1, Batch &x) {
   int n = W1.v.dimension(0);
   int m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
-  z.v =
-      (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axispairs(1, 0)) +
-       W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
-#if 1
-  EigenTensor2 sums = z.v().sum(indexes(0)).reshape(indexes(1,m));
-  z.v = z.v() / sums.broadcast(indexes(n,1));
+  assert(n == z.v.dimension(0));
+  assert(n >= 2);
+  z.v = (W1.v()
+             .slice(indexes(0, 1), indexes(n, m - 1))
+             .contract(x.v(), axispairs(1, 0)) +
+         W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs)))
+            .unaryExpr(f);
+#if 0
+  EigenTensor1 sums = z.v().sum(indexes(0));
+  assert(sums.dimension(0)==bs);
+  z.v = z.v() / sums.reshape(indexes(1,bs)).broadcast(indexes(n,1));;
 #else
-  // this expression doesn't work, probably needs an "eval"
-  z.v = z.v() / z.v().sum(indexes(0)).reshape(indexes(1,m)).broadcast(indexes(n,1));
+  TensorMap2 v = z.v();
+  for (int b = 0; b < bs; b++) {
+    double total = 0.0;
+    for (int i = 0; i < n; i++) total += v(i, b);
+    for (int i = 0; i < n; i++) v(i, b) /= total;
+  }
 #endif
 }
 void backward_softmax(Batch &z, Params &W1, Batch &x) {

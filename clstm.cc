@@ -123,7 +123,7 @@ bool no_update = false;
 bool verbose = false;
 
 void set_inputs(Network net, Sequence &inputs) {
-  net->inputs.resize(inputs.size());
+  net->inputs.like(inputs);
   for (int t = 0; t < net->inputs.size(); t++) {
     net->inputs[t] = inputs[t];
     net->inputs[t].zeroGrad();
@@ -460,11 +460,19 @@ struct GenericNPLSTM : INetwork {
     outputs.resize(N, no, bs);
     for (int t = 0; t < N; t++) {
       int bs = COLS(inputs[t]);
+#if 1
       forward_stack1(source[t], inputs[t], outputs, t - 1);
       forward_full<F>(gi[t], WGI, source[t]);
       forward_full<F>(gf[t], WGF, source[t]);
       forward_full<F>(go[t], WGO, source[t]);
       forward_full<G>(ci[t], WCI, source[t]);
+#else
+      forward_stack(source[t], inputs[t], outputs, t - 1);
+      forward_full1<F>(gi[t], WGI, source[t]);
+      forward_full1<F>(gf[t], WGF, source[t]);
+      forward_full1<F>(go[t], WGO, source[t]);
+      forward_full1<G>(ci[t], WCI, source[t]);
+#endif
       forward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
       forward_nonlingate<H>(outputs[t], state[t], go[t]);
     }
@@ -477,11 +485,19 @@ struct GenericNPLSTM : INetwork {
     for (int t = N - 1; t >= 0; t--) {
       backward_nonlingate<H>(out[t], state[t], go[t]);
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
+#if 1
       backward_full<G>(ci[t], WCI, source[t]);
       backward_full<F>(go[t], WGO, source[t]);
       backward_full<F>(gf[t], WGF, source[t]);
       backward_full<F>(gi[t], WGI, source[t]);
       backward_stack1(source[t], inputs[t], out, t - 1);
+#else
+      backward_full1<G>(ci[t], WCI, source[t]);
+      backward_full1<F>(go[t], WGO, source[t]);
+      backward_full1<F>(gf[t], WGF, source[t]);
+      backward_full1<F>(gi[t], WGI, source[t]);
+      backward_stack(source[t], inputs[t], out, t - 1);
+#endif
     }
     nsteps += N;
     nseq += 1;
@@ -507,14 +523,14 @@ void save_net(const string &file, Network net) {
 }
 Network load_net(const string &file) { return load_as_proto(file); }
 
-void set_inputs(Network net, Tensor<float,2> &inputs) {
+void set_inputs(Network net, TensorMap2 inputs) {
   int N = inputs.dimension(0);
   int d = inputs.dimension(1);
   net->inputs.resize(N,d,1);
   for (int t = 0; t < N; t++)
     for (int i = 0; i < d; i++) net->inputs[t].v(i, 0) = inputs(t, i);
 }
-void set_targets(Network net, Tensor<float,2> &targets) {
+void set_targets(Network net, TensorMap2 targets) {
   int N = targets.dimension(0);
   int d = targets.dimension(1);
   for (int t = 0; t < N; t++)

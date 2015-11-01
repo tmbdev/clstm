@@ -66,7 +66,6 @@ double test_net(Network net) {
       cout << endl;
     }
     Float err = maxerr(net->outputs, ys);
-    assert(err < 0.1);
     if (err > merr) merr = err;
   }
   return merr;
@@ -96,5 +95,10 @@ int main(int argc, char **argv) {
   net = load_net("__test__.clstm");
   double merr = test_net(net);
   unlink("__test__.clstm");
-  print("OK", merr);
+  if (merr>0.1) {
+    print("FAILED", merr);
+    exit(1);
+  } else {
+    print("OK", merr);
+  }
 }

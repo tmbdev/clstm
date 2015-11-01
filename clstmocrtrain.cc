@@ -70,12 +70,12 @@ struct Dataset {
     for (auto s : fnames) gtnames.push_back(basename(s) + ".gt.txt");
     codec.build(gtnames, charsep);
   }
-  void readSample(Tensor<float,2> &raw,wstring &gt,int index) {
+  void readSample(Tensor2 &raw,wstring &gt,int index) {
     string fname = fnames[index];
     string base = basename(fname);
     gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
     read_png(raw, fname.c_str());
-    raw = -raw + Float(1);
+    raw = -raw() + Float(1);
   }
 };
 
@@ -83,10 +83,10 @@ pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset) {
   double count = 0.0;
   double errors = 0.0;
   for (int test = 0; test < testset.size(); test++) {
-    Tensor<float, 2> raw;
+    Tensor2 raw;
     wstring gt;
     testset.readSample(raw, gt, test);
-    wstring pred = clstm.predict(raw);
+    wstring pred = clstm.predict(raw());
     count += gt.size();
     errors += levenshtein(pred, gt);
   }
@@ -143,10 +143,10 @@ int main1(int argc, char **argv) {
   for (int trial = start; trial < ntrain; trial++) {
 
     int sample = lrand48() % trainingset.size();
-    Tensor<float,2> raw;
+    Tensor2 raw;
     wstring gt;
     trainingset.readSample(raw, gt, sample);
-    wstring pred = clstm.train(raw, gt);
+    wstring pred = clstm.train(raw(), gt);
 
     if (report_trigger(trial)) {
       print(trial);

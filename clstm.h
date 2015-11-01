@@ -155,11 +155,11 @@ void set_classes(Network net, BatchClasses &classes);
 void set_classes(Network net, Classes &classes);
 void set_classes(Network net, Tensor<int,1> &targets);
 void set_inputs(Network net, Sequence &inputs);
-void set_inputs(Network net, Tensor<float,2> &inputs);
+void set_inputs(Network net, TensorMap2 inputs);
 void set_targets_accelerated(Network net, Sequence &targets);
-void set_targets_accelerated(Network net, Tensor<float,2> &targets);
+void set_targets_accelerated(Network net, TensorMap2 targets);
 void set_targets(Network net, Sequence &targets);
-void set_targets(Network net, Tensor<float,2> &targets);
+void set_targets(Network net, TensorMap2 targets);
 
 // update methods
 void sgd_update(Network net);
@@ -203,7 +203,7 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
                     vector<int> *locs);
 
 // single sequence training functions
-void mktargets(Tensor<float,2> &seq, Tensor<int,1> &targets, int ndim);
+void mktargets(Tensor2 &seq, Tensor<int,1> &targets, int ndim);
 
 void share_deltas(vector<Network> &networks);
 void average_weights(vector<Network> &networks);

@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "tensor.h"
 
 namespace ocropus {
 
@@ -99,7 +100,7 @@ struct CLSTMText {
   std::string predict_utf8(const std::string &in) {
     return utf32_to_utf8(predict(utf8_to_utf32(in)));
   }
-  void get_outputs(Tensor<float,2> &outputs) {
+  void get_outputs(Tensor2 &outputs) {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
     for (int t = 0; t < outputs.dimension(0); t++)
@@ -114,7 +115,7 @@ struct CLSTMOCR {
   int target_height = 48;
   int nclasses = -1;
   Sequence aligned, targets;
-  Tensor<float,2> image;
+  Tensor2 image;
   void setLearningRate(float lr, float mom) { net->setLearningRate(lr, mom); }
   void load(const std::string &fname) {
     net = load_net(fname);
@@ -133,10 +134,11 @@ struct CLSTMOCR {
     normalizer.reset(make_CenterNormalizer());
     normalizer->target_height = target_height;
   }
-  std::wstring fwdbwd(Tensor<float,2> &raw, const std::wstring &target) {
+  std::wstring fwdbwd(TensorMap2 raw, const std::wstring &target) {
     normalizer->measure(raw);
+    image.like(raw);
     normalizer->normalize(image, raw);
-    set_inputs(net, image);
+    set_inputs(net, image());
     net->forward();
     Classes transcript;
     net->codec.encode(transcript, target);
@@ -152,7 +154,7 @@ struct CLSTMOCR {
   void update() {
     sgd_update(net);
   }
-  std::wstring train(Tensor<float,2> &raw, const std::wstring &target) {
+  std::wstring train(TensorMap2 raw, const std::wstring &target) {
     std::wstring result = fwdbwd(raw, target);
     update();
     return result;
@@ -163,22 +165,24 @@ struct CLSTMOCR {
     std::wstring temp = net->codec.decode(outputs);
     return utf32_to_utf8(temp);
   }
-  std::string train_utf8(Tensor<float,2> &raw, const std::string &target) {
+  std::string train_utf8(TensorMap2 raw, const std::string &target) {
     return utf32_to_utf8(train(raw, utf8_to_utf32(target)));
   }
-  std::wstring predict(Tensor<float,2> &raw, vector<int> *where = 0) {
+  std::wstring predict(TensorMap2 raw, vector<int> *where = 0) {
     normalizer->measure(raw);
+    image.like(raw);
     normalizer->normalize(image, raw);
-    set_inputs(net, image);
+    set_inputs(net, image());
     net->forward();
     Classes outputs;
     trivial_decode(outputs, net->outputs, 0, where);
     return net->codec.decode(outputs);
   }
-  void predict(vector<CharPrediction> &preds, Tensor<float,2> &raw) {
+  void predict(vector<CharPrediction> &preds, TensorMap2 raw) {
     normalizer->measure(raw);
+    image.like(raw);
     normalizer->normalize(image, raw);
-    set_inputs(net, image);
+    set_inputs(net, image());
     net->forward();
     Classes outputs;
     vector<int> where;
@@ -193,10 +197,10 @@ struct CLSTMOCR {
       preds.push_back(pred);
     }
   }
-  std::string predict_utf8(Tensor<float,2> &raw) {
+  std::string predict_utf8(TensorMap2 raw) {
     return utf32_to_utf8(predict(raw));
   }
-  void get_outputs(Tensor<float,2> &outputs) {
+  void get_outputs(Tensor2 &outputs) {
     Sequence &o = net->outputs;
     outputs.resize(int(o.size()), int(o[0].rows()));
     for (int t = 0; t < outputs.dimension(0); t++)
