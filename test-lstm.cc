@@ -74,7 +74,6 @@ double test_net(Network net) {
 int main(int argc, char **argv) {
   Network net = make_net_init("lstm1", "ninput=1:nhidden=4:noutput=2");
   net->setLearningRate(1e-4, 0.9);
-  network_info(net);
   save_net("__test0__.clstm", net);
   unlink("__test0__.clstm");
   print("training 1:4:2 network to learn delay");
@@ -87,7 +86,14 @@ int main(int argc, char **argv) {
     net->backward();
     sgd_update(net);
   }
-  test_net(net);
+  network_detail(net);
+  double merr0 = test_net(net);
+  if (merr0>0.1) {
+    print("FAILED (pre-save)", merr0);
+    exit(1);
+  } else {
+    print("OK (pre-save)", merr0);
+  }
   print("saving");
   save_net("__test__.clstm", net);
   net.reset();

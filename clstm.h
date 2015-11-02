@@ -149,6 +149,7 @@ void walk_params(Network net, ParamsFun f, const string &prefix = "");
 void walk_states(Network net, StateFun f, const string &prefix = "");
 void walk_networks(Network net, NetworkFun f, const string &prefix = "");
 void network_info(Network net, string prefix = "");
+void network_detail(Network net, string prefix = "");
 
 // setting inputs and outputs
 void set_classes(Network net, BatchClasses &classes);

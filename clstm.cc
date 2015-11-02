@@ -238,6 +238,27 @@ void network_info(Network net, string prefix) {
   for (auto s : net->sub) network_info(s, nprefix);
 }
 
+void network_detail(Network net, string prefix) {
+  string nprefix = prefix + "." + net->kind;
+  Float learning_rate = net->attr.get("learning_rate");
+  Float momentum = net->attr.get("momentum");
+  cout << nprefix << ": " << learning_rate << " " << momentum << " ";
+  cout << "in " << net->inputs.size() << " " << net->ninput() << " ";
+  cout << "out " << net->outputs.size() << " " << net->noutput() << endl;
+  for (auto p : net->parameters) {
+    cout << nprefix << "    " << p.first << " " 
+         << p.second->rows() << " " 
+         << p.second->cols() << endl;
+  }
+  for (auto p : net->states) {
+    cout << nprefix << "    " << p.first << " " 
+         << p.second->size() << " " 
+         << p.second->rows() << " " 
+         << p.second->cols() << endl;
+  }
+  for (auto s : net->sub) network_detail(s, nprefix);
+}
+
 Sequence *get_state_by_name(Network net, string name) {
   Sequence *result = nullptr;
   walk_states(net, [&result, &name](const string &prefix, Sequence *s) {
@@ -426,27 +447,45 @@ struct GenericNPLSTM : INetwork {
   int ninput() { return ni; }
   GenericNPLSTM() {
     ENROLL(WGI, WGF, WGO, WCI);
-    ENROLL(gi, gf, go, ci, state);
+    ENROLL(gi, gf, go, ci, state, source);
   }
   void initialize() {
     int ni = attr.get("ninput");
     int no = attr.get("noutput");
+#ifdef HOMOG
+    cerr << "HOMOG\n";
     int nf = 1 + ni + no;
+#else
+    cerr << "NON-HOMOG\n";
+    int nf = ni + no;
+#endif
     string mode = attr.get("weight_mode", "pos");
     float weight_dev = attr.get("weight_dev", 0.01);
     this->ni = ni;
     this->no = no;
     this->nf = nf;
+#ifdef HOMOG
     rinit(WGI, no, nf, attr);
     rinit(WGF, no, nf, attr);
     rinit(WGO, no, nf, attr);
     rinit(WCI, no, nf, attr);
+#else
+    rinit(WGI, no, nf+1, attr);
+    rinit(WGF, no, nf+1, attr);
+    rinit(WGO, no, nf+1, attr);
+    rinit(WCI, no, nf+1, attr);
+#endif
   }
   void postLoad() {
-    no = ROWS(WGI);
-    nf = COLS(WGI);
-    assert(nf > no);
+    no = WGI.rows();
+#ifdef HOMOG
+    nf = WGI.cols();
     ni = nf - no - 1;
+#else
+    nf = WGI.cols()-1;
+    ni = nf - no;
+#endif
+    assert(nf > no);
   }
   void forward() {
     int N = inputs.size();
@@ -459,8 +498,7 @@ struct GenericNPLSTM : INetwork {
     ci.resize(N, no, bs);
     outputs.resize(N, no, bs);
     for (int t = 0; t < N; t++) {
-      int bs = COLS(inputs[t]);
-#if 1
+#ifdef HOMOG
       forward_stack1(source[t], inputs[t], outputs, t - 1);
       forward_full<F>(gi[t], WGI, source[t]);
       forward_full<F>(gf[t], WGF, source[t]);
@@ -485,7 +523,7 @@ struct GenericNPLSTM : INetwork {
     for (int t = N - 1; t >= 0; t--) {
       backward_nonlingate<H>(out[t], state[t], go[t]);
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
-#if 1
+#ifdef HOMOG
       backward_full<G>(ci[t], WCI, source[t]);
       backward_full<F>(go[t], WGO, source[t]);
       backward_full<F>(gf[t], WGF, source[t]);

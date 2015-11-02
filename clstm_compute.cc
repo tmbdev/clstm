@@ -115,6 +115,9 @@ void forward_full1(Batch &y, Params &W1, Batch &x) {
   Float (*f)(Float) = F::nonlin;
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = x.v.dimension(1);
+  assert(y.rows() == n);
+  assert(y.cols() == x.cols());
+  assert(x.rows() == m-1);
   y.v =
       (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axispairs(1, 0)) +
        W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
@@ -123,8 +126,8 @@ template <class F>
 void backward_full1(Batch &y, Params &W1, Batch &x) {
   Float (*g)(Float) = F::yderiv;
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
-  EigenTensor2 temp = y.d() * y.v().unaryExpr(g);
-  x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axispairs(0, 0));
+  EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
+  x.d += W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axispairs(0, 0));
   W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += temp.contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1) += temp.sum(indexes(1));
 }
@@ -141,6 +144,9 @@ template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x);
 
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x) {
+  assert(y.rows() == W.rows());
+  assert(y.cols() == x.cols());
+  assert(x.rows() == W.cols());
   Float (*f)(Float) = F::nonlin;
   y.v = W.v().contract(x.v(), axispairs(1, 0)).unaryExpr(f);
 }
@@ -200,6 +206,8 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
 void forward_stack(Batch &z, Batch &x, Batch &y) {
   int nx = x.v.dimension(0), ny = y.v.dimension(0);
   int bs = x.v.dimension(1);
+  assert(z.rows() == x.rows() + y.rows());
+  assert(z.cols() == x.cols() && z.cols() == y.cols());
   z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
   z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y.v();
 }
@@ -215,6 +223,8 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
 void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
+  assert(z.rows() == x.rows() + y.rows());
+  assert(z.cols() == x.cols() && z.cols() == y.cols());
   z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
   if (last >= 0)
     z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y[last].v();
@@ -233,6 +243,8 @@ void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
   int bs = inp.v.dimension(1);
+  assert(all.rows() == 1 + inp.rows() + out.rows());
+  assert(all.cols() == inp.cols() && all.cols() == out.cols());
   all.v().slice(indexes(0, 0), indexes(1, bs)).setConstant(Float(1));
   all.v().slice(indexes(1, 0), indexes(nx, bs)) = inp.v();
   if (last >= 0)

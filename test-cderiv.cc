@@ -36,9 +36,14 @@ double randu() {
 
 void randseq(Sequence &a, int N, int n, int m) {
   a.resize(N, n, m);
-  for (int t = 0; t < N; t++)
-    for (int i = 0; i < n; i++)
-      for (int j = 0; j < m; j++) a[t].v(i, j) = randu();
+  for (int t = 0; t < N; t++) {
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < m; j++) {
+        a[t].v(i, j) = randu();
+        a[t].d(i, j) = randu();
+      }
+    }
+  }
 }
 
 void randparams(ParamVec &a, const vector<vector<int>> &specs) {
@@ -51,6 +56,7 @@ void randparams(ParamVec &a, const vector<vector<int>> &specs) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
         a[k].v(i, j) = randu();
+        a[k].d(i, j) = randu();
       }
     }
   }
@@ -331,6 +337,40 @@ struct TestNonlingate : Testcase {
   }
 };
 
+inline Eigen::array<ptrdiff_t, 1> indexes(int i) { 
+  return Eigen::array<ptrdiff_t, 1>({i}); 
+}
+
+inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
+  return Eigen::array<ptrdiff_t, 2>({i, j});
+}
+
+void test_full() {
+  print("comparing full and full1");
+  Sequence inputs;
+  ParamVec ps;
+  Sequence outputs;
+  randseq(inputs, 1, 7, 4);
+  randparams(ps, {{3, 8}});
+  randseq(outputs, 2, 3, 4);
+  Batch inputs1;
+  inputs1.resize(8, 4);
+  inputs1.v().slice(indexes(0, 0), indexes(1, 4)).setConstant(Float(1));
+  inputs1.v().slice(indexes(1, 0), indexes(7, 4)) = inputs[0].v();
+  forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
+  forward_full<SigmoidNonlin>(outputs[1], ps[0], inputs1);
+  EigenTensor1 err = (outputs[0].v()-outputs[1].v()).abs().maximum();
+  assert(err(0) < 0.001);
+  print("OK", err(0));
+  backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
+  backward_full<SigmoidNonlin>(outputs[1], ps[0], inputs1);
+  EigenTensor1 derr =
+    (inputs[0].d() - inputs1.d().slice(indexes(1,0), indexes(7,4)))
+      .abs().maximum();
+  // assert(derr(0) < 0.001);
+  print("OK", derr(0));
+}
+
 int main(int argc, char **argv) {
   TRY {
     test_net(*new TestFullSigmoid);
@@ -343,6 +383,7 @@ int main(int argc, char **argv) {
     test_net(*new TestReverse);
     test_net(*new TestStatemem);
     test_net(*new TestNonlingate);
+    test_full();
   }
   CATCH(const char *message) { print("ERROR", message); }
 }

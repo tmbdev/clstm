@@ -62,23 +62,30 @@ else:
 # With profile=1, the code will be compiled suitable for profiling and debug.
 # With debug=1, the code will be compiled suitable for debugging.
 
-if option("profile", 0):
-    if option("profile", 0)>1:
-        env.Append(CXXFLAGS="-g -pg -fno-inline".split())
-        env.Append(CCFLAGS="-g -pg -fno-inline".split())
-    else:
-        env.Append(CXXFLAGS="-g -pg -O2".split())
-        env.Append(CCFLAGS="-g -pg -O2".split())
+profile = option("profile", 0)
+debug = option("debug", 0)
+
+if profile>1:
+    env.Append(CXXFLAGS="-g -pg -fno-inline".split())
+    env.Append(CCFLAGS="-g -pg -fno-inline".split())
     env.Append(LINKFLAGS="-g -pg".split())
-elif option("debug", 0)>0:
-    if option("debug", 0)>1:
-      env.Append(CXXFLAGS="-g -fno-inline".split())
-    else:
-      env.Append(CXXFLAGS="-g".split())
+elif profile>0:
+    env.Append(CXXFLAGS="-g -pg -O2".split())
+    env.Append(CCFLAGS="-g -pg -O2".split())
+    env.Append(LINKFLAGS="-g -pg".split())
+elif debug>1:
+    env.Append(CXXFLAGS="-g -fno-inline".split())
     env.Append(CCFLAGS="-g".split())
     env.Append(LINKFLAGS="-g".split())
+elif debug>0:
+    env.Append(CXXFLAGS="-g".split())
+    env.Append(CCFLAGS="-g".split())
+    env.Append(LINKFLAGS="-g".split())
+elif debug<0:
+    env.Append(CXXFLAGS="-g -O4 -DNDEBUG -finline".split())
+    env.Append(CCFLAGS="-g".split())
 else:
-    env.Append(CXXFLAGS="-g -O3 -DNDEBUG -finline".split())
+    env.Append(CXXFLAGS="-g -O3".split())
     env.Append(CCFLAGS="-g".split())
 
 # Extra layers (old layers or testing)
