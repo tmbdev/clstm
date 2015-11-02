@@ -240,18 +240,6 @@ void test_net(Testcase &tc) {
   print("OK", maxinerr.value, maxparamerr.value);
 }
 
-struct TestFullSigmoid : Testcase {
-  void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
-  void backward() {
-    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
-  }
-};
-struct TestFullTanh : Testcase {
-  void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
-  void backward() {
-    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
-  }
-};
 struct TestFull1Sigmoid : Testcase {
   virtual void init() {
     randseq(inputs, 1, 7, 4);
@@ -292,6 +280,19 @@ struct TestStackDelay : Testcase {
   void forward() { forward_stack(outputs[0], inputs[0], inputs, 1); }
   void backward() { backward_stack(outputs[0], inputs[0], inputs, 1); }
 };
+#ifdef DEPRECATED
+struct TestFullSigmoid : Testcase {
+  void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
+  void backward() {
+    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
+  }
+};
+struct TestFullTanh : Testcase {
+  void forward() { forward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
+  void backward() {
+    backward_full<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
+  }
+};
 struct TestStack1Delay : Testcase {
   virtual void init() {
     randseq(inputs, 2, 7, 4);
@@ -301,6 +302,7 @@ struct TestStack1Delay : Testcase {
   void forward() { forward_stack1(outputs[0], inputs[0], inputs, 1); }
   void backward() { backward_stack1(outputs[0], inputs[0], inputs, 1); }
 };
+#endif
 struct TestReverse : Testcase {
   virtual void init() {
     randseq(inputs, 5, 7, 4);
@@ -345,6 +347,7 @@ inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
   return Eigen::array<ptrdiff_t, 2>({i, j});
 }
 
+#ifdef DEPRECATED
 void test_full() {
   print("comparing full and full1");
   Sequence inputs;
@@ -370,20 +373,23 @@ void test_full() {
   // assert(derr(0) < 0.001);
   print("OK", derr(0));
 }
+#endif
 
 int main(int argc, char **argv) {
   TRY {
-    test_net(*new TestFullSigmoid);
-    test_net(*new TestFullTanh);
     test_net(*new TestFull1Sigmoid);
     test_net(*new TestFull1Tanh);
     test_net(*new TestStack);
     test_net(*new TestStackDelay);
-    test_net(*new TestStack1Delay);
     test_net(*new TestReverse);
     test_net(*new TestStatemem);
     test_net(*new TestNonlingate);
+#ifdef DEPRECATED
+    test_net(*new TestFullSigmoid);
+    test_net(*new TestFullTanh);
+    test_net(*new TestStack1Delay);
     test_full();
+#endif
   }
   CATCH(const char *message) { print("ERROR", message); }
 }

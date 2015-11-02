@@ -174,12 +174,14 @@ void forward_nonlingate(Batch &out, Batch &state, Batch &go);
 template <class H>
 void backward_nonlingate(Batch &out, Batch &state, Batch &go);
 
+#ifdef DEPRECATED
 void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last);
 void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last);
 template <class F>
 void forward_full(Batch &y, Params &W, Batch &x);
 template <class F>
 void backward_full(Batch &y, Params &W, Batch &x);
+#endif
 
 void rinit(Batch &m, int no, int ni, Float s, const string mode = "unif", Float offset=0.0);
 void rinit(Sequence &m, int no, int ni, Float s, const string mode = "unif", Float offset=0.0);

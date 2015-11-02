@@ -453,10 +453,8 @@ struct GenericNPLSTM : INetwork {
     int ni = attr.get("ninput");
     int no = attr.get("noutput");
 #ifdef HOMOG
-    cerr << "HOMOG\n";
     int nf = 1 + ni + no;
 #else
-    cerr << "NON-HOMOG\n";
     int nf = ni + no;
 #endif
     string mode = attr.get("weight_mode", "pos");
@@ -498,19 +496,11 @@ struct GenericNPLSTM : INetwork {
     ci.resize(N, no, bs);
     outputs.resize(N, no, bs);
     for (int t = 0; t < N; t++) {
-#ifdef HOMOG
-      forward_stack1(source[t], inputs[t], outputs, t - 1);
-      forward_full<F>(gi[t], WGI, source[t]);
-      forward_full<F>(gf[t], WGF, source[t]);
-      forward_full<F>(go[t], WGO, source[t]);
-      forward_full<G>(ci[t], WCI, source[t]);
-#else
       forward_stack(source[t], inputs[t], outputs, t - 1);
       forward_full1<F>(gi[t], WGI, source[t]);
       forward_full1<F>(gf[t], WGF, source[t]);
       forward_full1<F>(go[t], WGO, source[t]);
       forward_full1<G>(ci[t], WCI, source[t]);
-#endif
       forward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
       forward_nonlingate<H>(outputs[t], state[t], go[t]);
     }
@@ -523,19 +513,11 @@ struct GenericNPLSTM : INetwork {
     for (int t = N - 1; t >= 0; t--) {
       backward_nonlingate<H>(out[t], state[t], go[t]);
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
-#ifdef HOMOG
-      backward_full<G>(ci[t], WCI, source[t]);
-      backward_full<F>(go[t], WGO, source[t]);
-      backward_full<F>(gf[t], WGF, source[t]);
-      backward_full<F>(gi[t], WGI, source[t]);
-      backward_stack1(source[t], inputs[t], out, t - 1);
-#else
       backward_full1<G>(ci[t], WCI, source[t]);
       backward_full1<F>(go[t], WGO, source[t]);
       backward_full1<F>(gf[t], WGF, source[t]);
       backward_full1<F>(gi[t], WGI, source[t]);
       backward_stack(source[t], inputs[t], out, t - 1);
-#endif
     }
     nsteps += N;
     nseq += 1;

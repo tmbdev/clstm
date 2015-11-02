@@ -140,32 +140,6 @@ template void backward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
 template void backward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x);
 template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x);
 
-// full layers without constant offset
-
-template <class F>
-void forward_full(Batch &y, Params &W, Batch &x) {
-  assert(y.rows() == W.rows());
-  assert(y.cols() == x.cols());
-  assert(x.rows() == W.cols());
-  Float (*f)(Float) = F::nonlin;
-  y.v = W.v().contract(x.v(), axispairs(1, 0)).unaryExpr(f);
-}
-template <class F>
-void backward_full(Batch &y, Params &W, Batch &x) {
-  Float (*g)(Float) = F::yderiv;
-  EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
-  x.d += W.v().contract(temp, axispairs(0, 0));
-  W.d += temp.contract(x.v(), axispairs(1, 1));
-}
-template void forward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
-
 // softmax
 
 void forward_softmax(Batch &z, Params &W1, Batch &x) {
@@ -238,27 +212,6 @@ void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   if (last >= 0) y[last].d += z.d().slice(indexes(nx, 0), indexes(ny, bs));
 }
 
-// stacking with delay and adding a constant
-
-void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
-  int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
-  int bs = inp.v.dimension(1);
-  assert(all.rows() == 1 + inp.rows() + out.rows());
-  assert(all.cols() == inp.cols() && all.cols() == out.cols());
-  all.v().slice(indexes(0, 0), indexes(1, bs)).setConstant(Float(1));
-  all.v().slice(indexes(1, 0), indexes(nx, bs)) = inp.v();
-  if (last >= 0)
-    all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)) = out[last].v();
-  else
-    all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)).setZero();
-}
-void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
-  int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
-  int bs = inp.v.dimension(1);
-  inp.d += all.d().slice(indexes(1, 0), indexes(nx, bs));
-  if (last >= 0) out[last].d += all.d().slice(indexes(1 + nx, 0), indexes(ny, bs));
-}
-
 // reverse sequences
 
 void forward_reverse(Sequence &y, Sequence &x) {
@@ -316,3 +269,53 @@ template void backward_nonlingate<NoNonlin>(Batch &out, Batch &state,
 template void backward_nonlingate<ReluNonlin>(Batch &out, Batch &state,
                                               Batch &go);
 }
+
+#ifdef DEPRECATED
+// full layers without constant offset
+
+template <class F>
+void forward_full(Batch &y, Params &W, Batch &x) {
+  assert(y.rows() == W.rows());
+  assert(y.cols() == x.cols());
+  assert(x.rows() == W.cols());
+  Float (*f)(Float) = F::nonlin;
+  y.v = W.v().contract(x.v(), axispairs(1, 0)).unaryExpr(f);
+}
+template <class F>
+void backward_full(Batch &y, Params &W, Batch &x) {
+  Float (*g)(Float) = F::yderiv;
+  EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
+  x.d += W.v().contract(temp, axispairs(0, 0));
+  W.d += temp.contract(x.v(), axispairs(1, 1));
+}
+template void forward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
+template void forward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
+template void forward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
+template void forward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
+template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
+
+// stacking with delay and adding a constant
+
+void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
+  int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
+  int bs = inp.v.dimension(1);
+  assert(all.rows() == 1 + inp.rows() + out.rows());
+  assert(all.cols() == inp.cols() && all.cols() == out.cols());
+  all.v().slice(indexes(0, 0), indexes(1, bs)).setConstant(Float(1));
+  all.v().slice(indexes(1, 0), indexes(nx, bs)) = inp.v();
+  if (last >= 0)
+    all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)) = out[last].v();
+  else
+    all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)).setZero();
+}
+void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
+  int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
+  int bs = inp.v.dimension(1);
+  inp.d += all.d().slice(indexes(1, 0), indexes(nx, bs));
+  if (last >= 0) out[last].d += all.d().slice(indexes(1 + nx, 0), indexes(ny, bs));
+}
+#endif
+
