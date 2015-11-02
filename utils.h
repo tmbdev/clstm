@@ -114,6 +114,8 @@ inline void print(T arg, Args... args) {
   print(args...);
 }
 
+#define PRINT(...) print(__FILE__, __LINE__, __VA_ARGS__)
+
 inline string getdef(std::map<string, string> &m, const string &key,
                      const string &dflt) {
   auto it = m.find(key);

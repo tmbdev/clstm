@@ -136,8 +136,6 @@ for program in programs:
     all += [env.Program(program, [program + ".cc"], LIBS=[libclstm] + libs)]
     Default(program)
 
-env.Program("test-forward", ["test-forward.cc"], LIBS=[libclstm] + libs)
-
 # env.Program("fstfun", "fstfun.cc", LIBS=[libclstm]+libs+["fst","dl"])
 
 Alias('install-lib',
@@ -171,6 +169,7 @@ all += [env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)]
+all += [env.Program("test-timing", ["test-timing.cc"], LIBS=[libclstm] + libs)]
 
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"

@@ -140,8 +140,28 @@ struct Context {
 #endif
     else lhs /= rhs;
   }
+  virtual bool isgpu() {
+    return false;
+  }
+  virtual void *malloc(int n) {
+    return ::malloc(n);
+  }
+  virtual void free(void *p) {
+    ::free(p);
+  }
+  virtual void memcpyToDevice(void *dest, void *src, int nbytes) {
+    memcpy(dest, src, nbytes);
+  }
+  virtual void memcpyFromDevice(void *dest, void *src, int nbytes) {
+    memcpy(dest, src, nbytes);
+  }
+  virtual void memcpyDevice(void *dest, void *src, int nbytes) {
+    memcpy(dest, src, nbytes);
+  }
 };
 
+
+#ifdef EIGEN_USE_THREADS
 struct ThreadedContext : public Context {
   unique_ptr<Eigen::ThreadPool> pool;
   ThreadedContext(int n) {
@@ -149,6 +169,36 @@ struct ThreadedContext : public Context {
     tpdev.reset(new Eigen::ThreadPoolDevice(pool.get(), n));
   }
 };
+#endif
+
+#ifdef EIGEN_USE_GPU
+struct GpuContext : public Context {
+  unique_ptr<Eigen::CudaStreamDevice> stream;
+  GpuContext() {
+    gpudev.reset(new Eigen::GpuDevice(stream.get()));
+  }
+  bool isgpu() {
+    return true;
+  }
+  void *malloc(int n) {
+    void *p = nullptr;
+    return cudaMalloc(&p, n);
+    return p;
+  }
+  void free(void *p) {
+    cudaFree(p);
+  }
+  void memcpyToDevice(void *dest, void *src, int nbytes) {
+    cudaMemcpy(dest, src, nbytes, cudaMemcpyHostToDevice);
+  }
+  void memcpyFromDevice(void *dest, void *src, int nbytes) {
+    cudaMemcpy(dest, src, nbytes, cudaMemcpyDeviceToHost);
+  }
+  void memcpyDevice(void *dest, void *src, int nbytes) {
+    cudaMemcpy(dest, src, nbytes, cudaMemcpyDeviceToDevice);
+  }
+}
+#endif
 
 extern Context *default_context;
 
@@ -174,14 +224,14 @@ struct Tensor2 {
   }
   void clear() {
     if(!ptr) return;
-    free(ptr);
+    context->free(ptr);
     ptr = nullptr;
     dims[0] = 0;
     dims[1] = 0;
   }
   void resize(int n, int m) {
     clear();
-    ptr = (Float*)malloc(n * m * sizeof(Float));
+    ptr = (Float*)context->malloc(n * m * sizeof(Float));
     dims[0] = n;
     dims[1] = m;
   }
@@ -235,13 +285,27 @@ struct Tensor2 {
   Float &operator()(int i, int j) {
     return (**this)(i,j);
   }
-  void operator=(const Tensor2 &other) {
-    resize(other.dimension(0), other.dimension(1));
-    memcpy(ptr, other.ptr, total_size() * sizeof(Float));
-  }
   void operator=(TensorMap2 other) {
     resize(other.dimension(0), other.dimension(1));
-    memcpy(ptr, other.data(), total_size() * sizeof(Float));
+    int nbytes = total_size() * sizeof(Float);
+    context->memcpyToDevice(ptr, other.data(), nbytes);
+  }
+  void operator=(const Tensor2 &other) {
+    resize(other.dimension(0), other.dimension(1));
+    int nbytes = total_size() * sizeof(Float);
+    if (context->isgpu()) {
+      if(other.context->isgpu()) {
+        context->memcpyDevice(ptr, other.ptr, nbytes);
+      } else {
+        context->memcpyToDevice(ptr, other.ptr, nbytes);
+      }
+    } else {
+      if(other.context->isgpu()) {
+        context->memcpyFromDevice(ptr, other.ptr, nbytes);
+      } else {
+        memcpy(ptr, other.ptr, nbytes);
+      }
+    }
   }
   void setConstant(int n, int m, Float c) {
     resize(n,m);
