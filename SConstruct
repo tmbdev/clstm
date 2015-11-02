@@ -41,7 +41,6 @@ prefix = option('prefix', "/usr/local")
 
 env = Environment()
 env.Append(CPPDEFINES={'THROW': 'throw', 'CATCH': 'catch', 'TRY': 'try'})
-env.Append(CPPDEFINES={'EIGEN_USE_THREADS': '1'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
 if option("double", 0):
@@ -49,6 +48,14 @@ if option("double", 0):
 
 if option("testthreads", 0):
     env.Append(CPPDEFINES={'TEST_THREADS': '1'})
+
+if option("threads", 1):
+  env.Append(CPPDEFINES={'EIGEN_USE_THREADS': '1'})
+  env.Append(LIBS=["pthread"])
+
+if option("gpu", 1):
+  env.Append(CPPDEFINES={'EIGEN_USE_GPU': '1'})
+  env.Append(LIBS=["cublas","cuda","cudart"])
 
 # With omp=1 support, Eigen and other parts of the code may use
 # multi-threading.
@@ -115,7 +122,6 @@ else:
     env.Append(CPPDEFINES={'NODISPLAY': 1})
 
 env.Append(LIBS=["png", "protobuf"])
-env.Append(LIBS=["pthread"])
 
 # We need to compile the protocol buffer definition as part of the build.
 

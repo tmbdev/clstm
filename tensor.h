@@ -182,7 +182,7 @@ struct GpuContext : public Context {
   }
   void *malloc(int n) {
     void *p = nullptr;
-    return cudaMalloc(&p, n);
+    cudaMalloc(&p, n);
     return p;
   }
   void free(void *p) {
@@ -197,7 +197,7 @@ struct GpuContext : public Context {
   void memcpyDevice(void *dest, void *src, int nbytes) {
     cudaMemcpy(dest, src, nbytes, cudaMemcpyDeviceToDevice);
   }
-}
+};
 #endif
 
 extern Context *default_context;
