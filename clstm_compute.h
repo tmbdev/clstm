@@ -77,6 +77,11 @@ struct Params : Batch {
   }
 };
 
+template <class RHS>
+auto operator>>(Batch &b, RHS rhs) -> decltype(b.v >> rhs) {
+  return b.v >> rhs;
+}
+
 // typedef vector<Mat> Sequence;
 struct Sequence {
   vector<Batch> steps;

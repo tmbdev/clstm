@@ -7,7 +7,13 @@
 namespace ocropus {
 using std::cerr;
 
+#ifdef TEST_THREADS
+// This is just used for running the entire library multithreaded.
+// For most normal LSTM models, this makes things slower, not faster.
+Context *default_context = new ThreadedContext(4);
+#else
 Context *default_context = new Context();
+#endif
 
 inline Eigen::array<Eigen::IndexPair<int>, 1> axispairs(int i, int j) {
   Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
@@ -167,8 +173,8 @@ void backward_softmax(Batch &z, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
   x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(z.d(), axispairs(0, 0));
-  W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += z.d().contract(x.v(), axispairs(1, 1));
-  W1.d().chip(0, 1) += z.d().sum(indexes(1));
+  W1>> W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += z.d().contract(x.v(), axispairs(1, 1));
+  W1>> W1.d().chip(0, 1) += z.d().sum(indexes(1));
 }
 
 // stacking
@@ -178,8 +184,8 @@ void forward_stack(Batch &z, Batch &x, Batch &y) {
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
   assert(z.cols() == x.cols() && z.cols() == y.cols());
-  z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
-  z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y.v();
+  z>> z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
+  z>> z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y.v();
 }
 void backward_stack(Batch &z, Batch &x, Batch &y) {
   int nx = x.v.dimension(0), ny = y.v.dimension(0);
@@ -195,11 +201,11 @@ void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
   assert(z.cols() == x.cols() && z.cols() == y.cols());
-  z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
+  z>> z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
   if (last >= 0)
-    z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y[last].v();
+    z>> z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y[last].v();
   else
-    z.v().slice(indexes(nx, 0), indexes(ny, bs)).setZero();
+    z>> z.v().slice(indexes(nx, 0), indexes(ny, bs)).setZero();
 }
 void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
@@ -300,12 +306,12 @@ void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   int bs = inp.v.dimension(1);
   assert(all.rows() == 1 + inp.rows() + out.rows());
   assert(all.cols() == inp.cols() && all.cols() == out.cols());
-  all.v().slice(indexes(0, 0), indexes(1, bs)).setConstant(Float(1));
-  all.v().slice(indexes(1, 0), indexes(nx, bs)) = inp.v();
+  v>> all.v().slice(indexes(0, 0), indexes(1, bs)).setConstant(Float(1));
+  v>> all.v().slice(indexes(1, 0), indexes(nx, bs)) = inp.v();
   if (last >= 0)
-    all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)) = out[last].v();
+    v>> all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)) = out[last].v();
   else
-    all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)).setZero();
+    v>> all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)).setZero();
 }
 void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
   int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);

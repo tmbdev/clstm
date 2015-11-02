@@ -70,9 +70,16 @@ struct Context {
   // The Tensor contains information about which device
   // it is associated with. Only one of these may be set
   // (we could use boost::variant, but we only have
-  // two classes, so this is simpler)
-  Eigen::ThreadPoolDevice *tpdev = nullptr;
-  Eigen::GpuDevice *gpudev = nullptr;
+  // two classes, so this is simpler).
+  // We still have subtypes for GpuContext and ThreadContext,
+  // but because Eigen::Tensor uses ad hoc polymorphism,
+  // the main computations need to be expanded inline here.
+#ifdef EIGEN_USE_THREADS
+  unique_ptr<Eigen::ThreadPoolDevice> tpdev;
+#endif
+#ifdef EIGEN_USE_GPU
+  unique_ptr<Eigen::GpuDevice> gpudev;
+#endif
 
   template <class LHS, class RHS>
   void assign(LHS lhs, RHS rhs) {
@@ -132,6 +139,14 @@ struct Context {
     else if(gpudev) lhs.device(*gpudev) /= rhs;
 #endif
     else lhs /= rhs;
+  }
+};
+
+struct ThreadedContext : public Context {
+  unique_ptr<Eigen::ThreadPool> pool;
+  ThreadedContext(int n) {
+    pool.reset(new Eigen::ThreadPool(n));
+    tpdev.reset(new Eigen::ThreadPoolDevice(pool.get(), n));
   }
 };
 
