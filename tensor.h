@@ -135,14 +135,14 @@ struct Context {
   }
 };
 
-extern Context default_context;
+extern Context *default_context;
 
 // A simple Tensor class that handles multiple device
 // types a bit more transparently. It handles allocation/deallocation,
 // plus assignment.
 
 struct Tensor2 {
-  Context *context = &default_context;
+  Context *context = default_context;
 
   // The data and dimensions of this tensor. Data is always
   // heap allocated and not shared.

@@ -7,7 +7,7 @@
 namespace ocropus {
 using std::cerr;
 
-Context default_context;
+Context *default_context = new Context();
 
 inline Eigen::array<Eigen::IndexPair<int>, 1> axispairs(int i, int j) {
   Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
@@ -22,14 +22,10 @@ inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
   return Eigen::array<ptrdiff_t, 2>({i, j});
 }
 
-// unordered_map<Float*,int> refcounts;
-// shared_ptr<Context> default_context(new ThreadPoolContext(4));
-
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 
 // random initialization of sequences etc.
-
 
 namespace {
 double state = getenv("seed")?atof(getenv("seed")):0.1;
