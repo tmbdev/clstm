@@ -174,7 +174,7 @@ void forward_softmax(Batch &z, Params &W1, Batch &x) {
              .contract(x.v(), axispairs(1, 0)) +
          W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs)))
             .unaryExpr(f);
-#if 0
+#if 1
   EigenTensor1 sums = z.v().sum(indexes(0));
   assert(sums.dimension(0)==bs);
   z.v = z.v() / sums.reshape(indexes(1,bs)).broadcast(indexes(n,1));;
