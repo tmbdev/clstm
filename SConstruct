@@ -53,7 +53,7 @@ if option("threads", 1):
   env.Append(CPPDEFINES={'EIGEN_USE_THREADS': '1'})
   env.Append(LIBS=["pthread"])
 
-if option("gpu", 1):
+if option("gpu", 0):
   env.Append(CPPDEFINES={'EIGEN_USE_GPU': '1'})
   env.Append(LIBS=["cublas","cuda","cudart"])
 
@@ -95,6 +95,18 @@ else:
     env.Append(CXXFLAGS="-g -O3".split())
     env.Append(CCFLAGS="-g".split())
 
+# Hack for linking some libraries statically.
+
+abslibs = """/usr/lib/x86_64-linux-gnu/libpng12.a
+/usr/lib/x86_64-linux-gnu/libprotobuf.a
+/usr/lib/x86_64-linux-gnu/libz.a"""
+
+if not option("static", 0):
+    env.Append(LIBS=["png", "protobuf"])
+else:
+    abslibs = [File(x) for x in abslibs.split()]
+    env.Append(LIBS=abslibs)
+
 # Extra layers (old layers or testing)
 
 if option("extras", 0):
@@ -120,8 +132,6 @@ if option("display", 0):
     env.Append(CPPDEFINES={'add_raw': option("add_raw", 'add')})
 else:
     env.Append(CPPDEFINES={'NODISPLAY': 1})
-
-env.Append(LIBS=["png", "protobuf"])
 
 # We need to compile the protocol buffer definition as part of the build.
 

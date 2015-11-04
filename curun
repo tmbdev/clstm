@@ -1,0 +1,6 @@
+#!/bin/sh
+for dev in /dev/nv*; do
+  devs="$devs --device=$dev:$dev"
+done
+uid=${uid:-$(id -u)}
+docker run --privileged --rm -u $uid -v $(pwd):/work -w=/work -e PATH=.:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin -i -t tmbdev/ubuntu-cuda "$@"
