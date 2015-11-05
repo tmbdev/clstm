@@ -19,6 +19,16 @@
 #include <fstream>
 
 namespace ocropus {
+using std::string;
+using std::wstring;
+using std::vector;
+using std::istream;
+using std::ostream;
+using std::ifstream;
+using std::ofstream;
+using std::endl;
+using std::cout;
+using std::cerr;
 
 // get current time down to usec precision as a double
 

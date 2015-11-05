@@ -7,24 +7,28 @@
 #ifndef ocropus_lstm_
 #define ocropus_lstm_
 
+#include <initializer_list>
 #include <vector>
 #include <string>
-#include <iostream>
 #include <typeinfo>
 #include <memory>
 #include <map>
-#include <random>
+
 #include "clstm_compute.h"
-#include <initializer_list>
 #include "enroll.h"
+#include "batches.h"
 
 namespace ocropus {
 using std::string;
+using std::wstring;
 using std::vector;
 using std::map;
 using std::shared_ptr;
 using std::unique_ptr;
 using std::function;
+
+typedef vector<int> Classes;
+typedef vector<Classes> BatchClasses;
 
 // A string that automatically converts to numbers when needed;
 // used for holding parameter values.

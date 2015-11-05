@@ -23,15 +23,36 @@ using std::unique_ptr;
 
 #ifdef LSTM_DOUBLE
 typedef double Float;
-typedef Eigen::MatrixXd Mat;
-typedef Eigen::VectorXd Vec;
 #else
 typedef float Float;
-typedef Eigen::MatrixXf Mat;
-typedef Eigen::VectorXf Vec;
 #endif
 
-typedef Eigen::Map<Mat> MatMap;
+// Mathematical helper functions.
+
+inline Float tanh_(Float x) { return tanh(x); }
+inline Float relu_(Float x) { return x <= 0 ? 0 : x; }
+inline Float heavi_(Float x) { return x <= 0 ? 0 : 1; }
+
+#ifndef MAXEXP
+#define MAXEXP 30
+#endif
+
+inline Float limexp(Float x) {
+  if (x < -MAXEXP) return exp(-MAXEXP);
+  if (x > MAXEXP) return exp(MAXEXP);
+  return exp(x);
+}
+
+inline Float sigmoid(Float x) {
+  return 1.0 / (1.0 + limexp(-x));
+}
+
+inline Float log_add(Float x, Float y) {
+  if (abs(x - y) > 10) return fmax(x, y);
+  return log(exp(x - y) + 1) + y;
+}
+
+inline Float log_mul(Float x, Float y) { return x + y; }
 
 using Eigen::Tensor;
 using Eigen::TensorMap;

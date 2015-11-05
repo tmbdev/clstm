@@ -114,8 +114,6 @@ int register_layer(const char *name) {
 #define C(X, Y) X##Y
 #define REGISTER(X) int C(status_, X) = register_layer<X>(#X);
 
-Mat debugmat;
-
 using namespace std;
 using Eigen::Ref;
 
