@@ -12,19 +12,6 @@
 using namespace ocropus;
 using std::initializer_list;
 
-void mat_of_ten2_t(Mat &result, EigenTensor2 &ten) {
-  result.resize(ten.dimension(1), ten.dimension(0));
-  for (int i = 0; i < result.rows(); i++)
-    for (int j = 0; j < result.cols(); j++) result(i, j) = ten(j, i);
-}
-
-void ten2_of_mat_t(EigenTensor2 &result, Mat &m) {
-  assert(result.dimension(0) == m.cols());
-  assert(result.dimension(1) == m.rows());
-  for (int i = 0; i < m.cols(); i++)
-    for (int j = 0; j < m.rows(); j++) result(i, j) = m(j, i);
-}
-
 void sequence_of_tensor(Sequence &result, EigenTensor2 &data) {
   result.resize(rows(data), cols(data), 1);
   for (int i = 0; i < rows(data); i++)

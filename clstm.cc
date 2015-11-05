@@ -23,7 +23,7 @@ void rinit(Params &m, int r, int c, Assoc &attr, string prefix="") {
   float s = attr.get(prefix+"init_scale", 0.01);
   string mode = attr.get(prefix+"init_mode", "negbiased");
   float offset = attr.get(prefix+"init_offset", 0.0);
-  rinit(m, r, c, s, mode, offset);
+  rinit(m, r, c, s, mode.c_str(), offset);
 }
 
 Assoc::Assoc(const string &s) {

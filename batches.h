@@ -87,6 +87,13 @@ struct Sequence {
   }
 };
 
+void rinit(Batch &m, int no, int ni, Float s, const char *mode = "unif", Float offset=0.0);
+void rinit(Params &m, int N, int no, int ni, Float s, const char *mode = "pos", Float offset=0.0);
+void rinit(Sequence &m, int no, int ni, Float s, const char *mode = "unif", Float offset=0.0);
+bool anynan(Batch &a);
+bool anynan(Params &a);
+bool anynan(Sequence &a);
+
 }
 
 #endif

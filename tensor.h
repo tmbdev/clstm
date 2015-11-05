@@ -385,6 +385,43 @@ ContextSetter<LHS> operator>>(Tensor2 &tensor, LHS lhs) {
   return ContextSetter<LHS>(tensor.context, lhs);
 }
 
+// Nonlinearities (for parameterizing layers).
+
+struct NoNonlin {
+  static constexpr const char *kind = "Linear";
+  static inline Float nonlin(Float x) { return x; }
+  static inline Float yderiv(Float y) { return 1; }
+};
+struct SigmoidNonlin {
+  static constexpr const char *kind = "Sigmoid";
+  static inline Float nonlin(Float x) { return sigmoid(x); }
+  static inline Float yderiv(Float y) { return y * (1 - y); }
+};
+struct TanhNonlin {
+  static constexpr const char *kind = "Tanh";
+  static inline Float nonlin(Float x) { return tanh(x); }
+  static inline Float yderiv(Float y) { return 1 - y * y; }
+};
+struct ReluNonlin {
+  static constexpr const char *kind = "Relu";
+  static inline Float nonlin(Float x) { return relu_(x); }
+  static inline Float yderiv(Float y) { return heavi_(y); }
+};
+
+template <class S, class T>
+inline void transpose(S &dest, T &src) {
+  dest.resize(src.dimension(1), src.dimension(0));
+  for (int i = 0; i < dest.dimension(0); i++)
+    for (int j = 0; j < dest.dimension(1); j++) dest(i, j) = src(j, i);
+}
+
+template <class T>
+inline void transpose(T &a) {
+  T temp;
+  transpose(temp, a);
+  a = temp;
+}
+
 }
 
 #endif

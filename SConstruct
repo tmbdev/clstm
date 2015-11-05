@@ -141,7 +141,8 @@ env.Protoc("clstm.proto")
 
 libs = env["LIBS"]
 libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
-          "extras.cc", "clstm.pb.cc", "clstm_compute.cc"]
+          "tensor.cc", "batches.cc", "extras.cc", "clstm.pb.cc", 
+          "clstm_compute.cc"]
 libclstm = env.StaticLibrary("clstm", source = libsrc)
 
 all = [libclstm]

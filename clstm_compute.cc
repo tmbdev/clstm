@@ -7,6 +7,11 @@
 namespace ocropus {
 using std::cerr;
 
+template <class RHS>
+auto operator>>(Batch &b, RHS rhs) -> decltype(b.v >> rhs) {
+  return b.v >> rhs;
+}
+
 #ifdef TEST_THREADS
 // This is just used for running the entire library multithreaded.
 // For most normal LSTM models, this makes things slower, not faster.
@@ -30,85 +35,6 @@ inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
 
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
-
-// random initialization of sequences etc.
-
-namespace {
-double state = getenv("seed")?atof(getenv("seed")):0.1;
-
-inline double randu() {
-  state = 189843.9384938 * cos(state*193.3498);
-  state -= floor(state);
-  return state;
-}
-inline double randn() {
-  double u1 = randu();
-  double u2 = randu();
-  double r = -2*log(u1);
-  double theta = 2*M_PI*u2;
-  double z0 = r * cos(theta);
-  return z0;
-}
-}
-
-void rinit(TensorMap2 m, Float s, const string mode, Float offset) {
-  if (mode == "unif") {
-    for(int i=0; i<rows(m); i++)
-      for(int j=0;j<cols(m); j++)
-        m(i,j) = 2 * s * randu() - s + offset;
-  } else if (mode == "negbiased") {
-    for(int i=0; i<rows(m); i++)
-      for(int j=0;j<cols(m); j++)
-        m(i,j) = 3 * s * randu() - 2 * s + offset;
-  } else if (mode == "pos") {
-    for(int i=0; i<rows(m); i++)
-      for(int j=0;j<cols(m); j++)
-        m(i,j) = s * randu() + offset;
-  } else if (mode == "neg") {
-    for(int i=0; i<rows(m); i++)
-      for(int j=0;j<cols(m); j++)
-        m(i,j) = - s * randu() + offset;
-  } else if (mode == "normal") {
-    for(int i=0; i<rows(m); i++)
-      for(int j=0;j<cols(m); j++)
-        m(i,j) = s * randn() + offset;
-  }
-}
-
-void rinit(Params &m, int r, int c, Float s, const string mode, Float offset) {
-  m.resize(r,c);
-  rinit(m.v(), s, mode, offset);
-}
-void rinit(Batch &m, int r, int c, Float s, const string mode, Float offset) {
-  m.resize(r,c);
-  rinit(m.v(), s, mode, offset);
-}
-void rinit(Sequence &m, int N, int r, int c, Float s, const string mode, Float offset) {
-  m.resize(N,r,c);
-  for(int t=0; t<N; t++)
-    rinit(m[t].v(), s, mode, offset);
-}
-
-
-// checking for NaNs in different objects
-
-bool anynan(TensorMap2 a) {
-  for (int j = 0; j < rows(a); j++) {
-    for (int k = 0; k < cols(a); k++) {
-      float x = a(j, k);
-      if (isnan(x)) return true;
-    }
-  }
-  return false;
-}
-
-bool anynan(Batch &a) { return anynan(a.v()) || anynan(a.d()); }
-
-bool anynan(Sequence &a) {
-  for (int i = 0; i < a.size(); i++)
-    if (anynan(a[i])) return true;
-  return false;
-}
 
 // full layers with constant offset
 
