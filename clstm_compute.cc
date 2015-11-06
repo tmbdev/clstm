@@ -36,11 +36,41 @@ inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
 typedef vector<int> Classes;
 typedef vector<Classes> BatchClasses;
 
+typedef Float (*FloatFun)(Float);
+
+struct Nonlinearity {
+  FloatFun nonlin;
+  FloatFun yderiv;
+  FloatFun xderiv;
+};
+
+Nonlinearity nonlinearities[] = {
+  {
+    [](Float x) { return x; },
+    [](Float y) { return Float(1); },
+    [](Float x) { return Float(1); },
+  },
+  {
+    [](Float x) { return sigmoid(x); },
+    [](Float y) { return y * (1-y); },
+    [](Float x) { Float y = sigmoid(x); return y * (1-y); }
+  },
+  {
+    [](Float x) { return tanh(x); },
+    [](Float y) { return 1 - y*y; },
+    [](Float x) { Float y = tanh(x); return 1 - y*y; }
+  },
+  {
+    [](Float x) { return x<0?0:x; },
+    [](Float y) { return Float(y<=0?0:1); },
+    [](Float x) { return Float(x<=0?0:1); }
+  }
+};
+
 // full layers with constant offset
 
-template <class F>
-void forward_full1(Batch &y, Params &W1, Batch &x) {
-  Float (*f)(Float) = F::nonlin;
+void forward_full1(Batch &y, Params &W1, Batch &x, Nonlin nl) {
+  Float (*f)(Float) = nonlinearities[nl].nonlin;
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = x.v.dimension(1);
   assert(y.rows() == n);
@@ -50,23 +80,14 @@ void forward_full1(Batch &y, Params &W1, Batch &x) {
       (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axispairs(1, 0)) +
        W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
 }
-template <class F>
-void backward_full1(Batch &y, Params &W1, Batch &x) {
-  Float (*g)(Float) = F::yderiv;
+void backward_full1(Batch &y, Params &W1, Batch &x, Nonlin nl) {
+  Float (*g)(Float) = nonlinearities[nl].yderiv;
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
   x.d += W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axispairs(0, 0));
   W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += temp.contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1) += temp.sum(indexes(1));
 }
-template void forward_full1<NoNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full1<NoNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full1<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full1<TanhNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full1<ReluNonlin>(Batch &y, Params &W, Batch &x);
 
 // softmax
 
@@ -168,34 +189,17 @@ void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
 
 // nonlinear gated output
 
-template <class H>
-void forward_nonlingate(Batch &out, Batch &state, Batch &go) {
-  Float (*f)(Float) = H::nonlin;
+void forward_nonlingate(Batch &out, Batch &state, Batch &go, Nonlin nl) {
+  Float (*f)(Float) = nonlinearities[nl].nonlin;
   out.v = state.v().unaryExpr(f) * go.v();
 }
-template <class H>
-void backward_nonlingate(Batch &out, Batch &state, Batch &go) {
-  Float (*f)(Float) = H::nonlin;
-  auto g = [](Float x) { return H::yderiv(H::nonlin(x)); };
+void backward_nonlingate(Batch &out, Batch &state, Batch &go, Nonlin nl) {
+  Float (*f)(Float) = nonlinearities[nl].nonlin;
+  Float (*g)(Float) = nonlinearities[nl].xderiv;
   go.d += state.v().unaryExpr(f) * out.d();
   state.d += state.v().unaryExpr(g) * go.v() * out.d();
 }
 
-template void forward_nonlingate<TanhNonlin>(Batch &out, Batch &state,
-                                             Batch &go);
-template void forward_nonlingate<SigmoidNonlin>(Batch &out, Batch &state,
-                                                Batch &go);
-template void forward_nonlingate<NoNonlin>(Batch &out, Batch &state, Batch &go);
-template void forward_nonlingate<ReluNonlin>(Batch &out, Batch &state,
-                                             Batch &go);
-template void backward_nonlingate<TanhNonlin>(Batch &out, Batch &state,
-                                              Batch &go);
-template void backward_nonlingate<SigmoidNonlin>(Batch &out, Batch &state,
-                                                 Batch &go);
-template void backward_nonlingate<NoNonlin>(Batch &out, Batch &state,
-                                            Batch &go);
-template void backward_nonlingate<ReluNonlin>(Batch &out, Batch &state,
-                                              Batch &go);
 }
 
 #ifdef DEPRECATED

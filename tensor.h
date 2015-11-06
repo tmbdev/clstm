@@ -385,6 +385,20 @@ ContextSetter<LHS> operator>>(Tensor2 &tensor, LHS lhs) {
   return ContextSetter<LHS>(tensor.context, lhs);
 }
 
+template <class S, class T>
+inline void transpose(S &dest, T &src) {
+  dest.resize(src.dimension(1), src.dimension(0));
+  for (int i = 0; i < dest.dimension(0); i++)
+    for (int j = 0; j < dest.dimension(1); j++) dest(i, j) = src(j, i);
+}
+
+template <class T>
+inline void transpose(T &a) {
+  T temp;
+  transpose(temp, a);
+  a = temp;
+}
+
 // Nonlinearities (for parameterizing layers).
 
 struct NoNonlin {
@@ -408,19 +422,6 @@ struct ReluNonlin {
   static inline Float yderiv(Float y) { return heavi_(y); }
 };
 
-template <class S, class T>
-inline void transpose(S &dest, T &src) {
-  dest.resize(src.dimension(1), src.dimension(0));
-  for (int i = 0; i < dest.dimension(0); i++)
-    for (int j = 0; j < dest.dimension(1); j++) dest(i, j) = src(j, i);
-}
-
-template <class T>
-inline void transpose(T &a) {
-  T temp;
-  transpose(temp, a);
-  a = temp;
-}
 
 }
 

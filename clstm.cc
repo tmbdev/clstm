@@ -265,7 +265,7 @@ Sequence *get_state_by_name(Network net, string name) {
   return result;
 }
 
-template <class NONLIN>
+template <int NONLIN>
 struct Full : INetwork {
   Params W1;
   int nseq = 0;
@@ -281,25 +281,25 @@ struct Full : INetwork {
   void forward() {
     outputs.resize(inputs.size(), W1.rows(), inputs.cols());
     for (int t = 0; t < inputs.size(); t++) {
-      forward_full1<NONLIN>(outputs[t], W1, inputs[t]);
+      forward_full1(outputs[t], W1, inputs[t], NONLIN);
     }
   }
   void backward() {
     for (int t = outputs.size() - 1; t >= 0; t--) {
-      backward_full1<NONLIN>(outputs[t], W1, inputs[t]);
+      backward_full1(outputs[t], W1, inputs[t], NONLIN);
     }
     nsteps += outputs.size();
     nseq += 1;
   }
 };
 
-typedef Full<NoNonlin> LinearLayer;
+typedef Full<LIN> LinearLayer;
 REGISTER(LinearLayer);
-typedef Full<SigmoidNonlin> SigmoidLayer;
+typedef Full<SIG> SigmoidLayer;
 REGISTER(SigmoidLayer);
-typedef Full<TanhNonlin> TanhLayer;
+typedef Full<TANH> TanhLayer;
 REGISTER(TanhLayer);
-typedef Full<ReluNonlin> ReluLayer;
+typedef Full<RELU> ReluLayer;
 REGISTER(ReluLayer);
 
 struct SoftmaxLayer : INetwork {
@@ -432,7 +432,7 @@ struct Parallel : INetwork {
 };
 REGISTER(Parallel);
 
-template <class F = SigmoidNonlin, class G = TanhNonlin, class H = TanhNonlin>
+template <int F = SIG, int G = TANH, int H = TANH>
 struct GenericNPLSTM : INetwork {
 #define WEIGHTS WGI, WGF, WGO, WCI
 #define SEQUENCES gi, gf, go, ci, state
@@ -495,12 +495,12 @@ struct GenericNPLSTM : INetwork {
     outputs.resize(N, no, bs);
     for (int t = 0; t < N; t++) {
       forward_stack(source[t], inputs[t], outputs, t - 1);
-      forward_full1<F>(gi[t], WGI, source[t]);
-      forward_full1<F>(gf[t], WGF, source[t]);
-      forward_full1<F>(go[t], WGO, source[t]);
-      forward_full1<G>(ci[t], WCI, source[t]);
+      forward_full1(gi[t], WGI, source[t], F);
+      forward_full1(gf[t], WGF, source[t], F);
+      forward_full1(go[t], WGO, source[t], F);
+      forward_full1(ci[t], WCI, source[t], G);
       forward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
-      forward_nonlingate<H>(outputs[t], state[t], go[t]);
+      forward_nonlingate(outputs[t], state[t], go[t], H);
     }
   }
   void backward() {
@@ -509,12 +509,12 @@ struct GenericNPLSTM : INetwork {
     Sequence out;
     out.copy(outputs);
     for (int t = N - 1; t >= 0; t--) {
-      backward_nonlingate<H>(out[t], state[t], go[t]);
+      backward_nonlingate(out[t], state[t], go[t], H);
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
-      backward_full1<G>(ci[t], WCI, source[t]);
-      backward_full1<F>(go[t], WGO, source[t]);
-      backward_full1<F>(gf[t], WGF, source[t]);
-      backward_full1<F>(gi[t], WGI, source[t]);
+      backward_full1(ci[t], WCI, source[t], G);
+      backward_full1(go[t], WGO, source[t], F);
+      backward_full1(gf[t], WGF, source[t], F);
+      backward_full1(gi[t], WGI, source[t], F);
       backward_stack(source[t], inputs[t], out, t - 1);
     }
     nsteps += N;
@@ -524,16 +524,16 @@ struct GenericNPLSTM : INetwork {
 typedef GenericNPLSTM<> NPLSTM;
 REGISTER(NPLSTM);
 
-typedef GenericNPLSTM<SigmoidNonlin, TanhNonlin, NoNonlin> LINNPLSTM;
+typedef GenericNPLSTM<SIG, TANH, LIN> LINNPLSTM;
 REGISTER(LINNPLSTM);
 
-typedef GenericNPLSTM<SigmoidNonlin, ReluNonlin, TanhNonlin> RELUTANHNPLSTM;
+typedef GenericNPLSTM<SIG, RELU, TANH> RELUTANHNPLSTM;
 REGISTER(RELUTANHNPLSTM);
 
-typedef GenericNPLSTM<SigmoidNonlin, ReluNonlin, NoNonlin> RELUNPLSTM;
+typedef GenericNPLSTM<SIG, RELU, LIN> RELUNPLSTM;
 REGISTER(RELUNPLSTM);
 
-typedef GenericNPLSTM<SigmoidNonlin, ReluNonlin, ReluNonlin> RELU2NPLSTM;
+typedef GenericNPLSTM<SIG, RELU, RELU> RELU2NPLSTM;
 REGISTER(RELU2NPLSTM);
 
 void save_net(const string &file, Network net) {

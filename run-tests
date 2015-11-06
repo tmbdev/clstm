@@ -15,9 +15,9 @@ scons -j 4 double=1 debug=1 test-cderiv test-deriv test-ctc
 ./test-cderiv
 ./test-deriv
 ./test-ctc
-scons -s -c pyswig
-scons pyswig
-python test-lstm.py
-set +x
-scons -s -c all pyswig
+#scons -s -c pyswig
+#scons pyswig
+#python test-lstm.py
+#set +x
+#scons -s -c all pyswig
 trap "echo ALL TESTS PASS" EXIT

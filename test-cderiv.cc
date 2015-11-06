@@ -246,9 +246,9 @@ struct TestFull1Sigmoid : Testcase {
     randseq(targets, 1, 3, 4);
     randparams(ps, {{3, 8}});
   }
-  void forward() { forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
+  void forward() { forward_full1(outputs[0], ps[0], inputs[0], SIG); }
   void backward() {
-    backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
+    backward_full1(outputs[0], ps[0], inputs[0], SIG);
   }
 };
 struct TestFull1Tanh : Testcase {
@@ -257,9 +257,9 @@ struct TestFull1Tanh : Testcase {
     randseq(targets, 1, 3, 4);
     randparams(ps, {{3, 8}});
   }
-  void forward() { forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]); }
+  void forward() { forward_full1(outputs[0], ps[0], inputs[0], TANH); }
   void backward() {
-    backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
+    backward_full1(outputs[0], ps[0], inputs[0], TANH);
   }
 };
 struct TestStack : Testcase {
@@ -332,10 +332,10 @@ struct TestNonlingate : Testcase {
     randparams(ps, {});
   }
   void forward() {
-    forward_nonlingate<TanhNonlin>(outputs[0], inputs[0], inputs[1]);
+    forward_nonlingate(outputs[0], inputs[0], inputs[1], TANH);
   }
   void backward() {
-    backward_nonlingate<TanhNonlin>(outputs[0], inputs[0], inputs[1]);
+    backward_nonlingate(outputs[0], inputs[0], inputs[1], TANH);
   }
 };
 
