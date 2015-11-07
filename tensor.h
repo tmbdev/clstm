@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <unordered_map>
-#include <Eigen/Dense>
 #include <unsupported/Eigen/CXX11/Tensor>
 
 namespace ocropus {
