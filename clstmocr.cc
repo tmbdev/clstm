@@ -59,7 +59,7 @@ int main1(int argc, char **argv) {
     string fname = line;
     string basename = fname.substr(0, fname.find_last_of("."));
     read_png(raw, fname.c_str());
-    raw = -raw() + Float(1.0);
+    raw() = -raw() + Float(1.0);
     if (!conf) {
       string out = clstm.predict_utf8(raw());
       cout << line << "\t" << out << endl;

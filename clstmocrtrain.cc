@@ -75,7 +75,7 @@ struct Dataset {
     string base = basename(fname);
     gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
     read_png(raw, fname.c_str());
-    raw = -raw() + Float(1);
+    raw() = -raw() + Float(1);
   }
 };
 
