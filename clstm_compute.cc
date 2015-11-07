@@ -7,19 +7,6 @@
 namespace ocropus {
 using std::cerr;
 
-template <class RHS>
-auto operator>>(Batch &b, RHS rhs) -> decltype(b.v >> rhs) {
-  return b.v >> rhs;
-}
-
-#ifdef TEST_THREADS
-// This is just used for running the entire library multithreaded.
-// For most normal LSTM models, this makes things slower, not faster.
-Context *default_context = new ThreadedContext(4);
-#else
-Context *default_context = new Context();
-#endif
-
 inline Eigen::array<Eigen::IndexPair<int>, 1> axispairs(int i, int j) {
   Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
   return result;
@@ -32,9 +19,6 @@ inline Eigen::array<ptrdiff_t, 1> indexes(int i) {
 inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
   return Eigen::array<ptrdiff_t, 2>({i, j});
 }
-
-typedef vector<int> Classes;
-typedef vector<Classes> BatchClasses;
 
 typedef Float (*FloatFun)(Float);
 
@@ -67,9 +51,11 @@ Nonlinearity nonlinearities[] = {
   }
 };
 
+#define DEFMETHOD(NAME) void NAME
+
 // full layers with constant offset
 
-void forward_full1(Batch &y, Params &W1, Batch &x, Nonlin nl) {
+DEFMETHOD(forward_full1)(Batch &y, Params &W1, Batch &x, Nonlin nl) {
   Float (*f)(Float) = nonlinearities[nl].nonlin;
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = x.v.dimension(1);
@@ -80,7 +66,7 @@ void forward_full1(Batch &y, Params &W1, Batch &x, Nonlin nl) {
       (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axispairs(1, 0)) +
        W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
 }
-void backward_full1(Batch &y, Params &W1, Batch &x, Nonlin nl) {
+DEFMETHOD(backward_full1)(Batch &y, Params &W1, Batch &x, Nonlin nl) {
   Float (*g)(Float) = nonlinearities[nl].yderiv;
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
@@ -91,7 +77,7 @@ void backward_full1(Batch &y, Params &W1, Batch &x, Nonlin nl) {
 
 // softmax
 
-void forward_softmax(Batch &z, Params &W1, Batch &x) {
+DEFMETHOD(forward_softmax)(Batch &z, Params &W1, Batch &x) {
   Float (*f)(Float) = limexp;
   int n = W1.v.dimension(0);
   int m = W1.v.dimension(1);
@@ -103,38 +89,29 @@ void forward_softmax(Batch &z, Params &W1, Batch &x) {
              .contract(x.v(), axispairs(1, 0)) +
          W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs)))
             .unaryExpr(f);
-#if 1
   EigenTensor1 sums = z.v().sum(indexes(0));
   assert(sums.dimension(0)==bs);
   z.v = z.v() / sums.reshape(indexes(1,bs)).broadcast(indexes(n,1));;
-#else
-  TensorMap2 v = z.v();
-  for (int b = 0; b < bs; b++) {
-    double total = 0.0;
-    for (int i = 0; i < n; i++) total += v(i, b);
-    for (int i = 0; i < n; i++) v(i, b) /= total;
-  }
-#endif
 }
-void backward_softmax(Batch &z, Params &W1, Batch &x) {
+DEFMETHOD(backward_softmax)(Batch &z, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
   x.d = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(z.d(), axispairs(0, 0));
-  W1>> W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += z.d().contract(x.v(), axispairs(1, 1));
-  W1>> W1.d().chip(0, 1) += z.d().sum(indexes(1));
+  W1.d().slice(indexes(0, 1), indexes(n, m - 1)) += z.d().contract(x.v(), axispairs(1, 1));
+  W1.d().chip(0, 1) += z.d().sum(indexes(1));
 }
 
 // stacking
 
-void forward_stack(Batch &z, Batch &x, Batch &y) {
+DEFMETHOD(forward_stack)(Batch &z, Batch &x, Batch &y) {
   int nx = x.v.dimension(0), ny = y.v.dimension(0);
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
   assert(z.cols() == x.cols() && z.cols() == y.cols());
-  z>> z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
-  z>> z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y.v();
+  z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
+  z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y.v();
 }
-void backward_stack(Batch &z, Batch &x, Batch &y) {
+DEFMETHOD(backward_stack)(Batch &z, Batch &x, Batch &y) {
   int nx = x.v.dimension(0), ny = y.v.dimension(0);
   int bs = x.v.dimension(1);
   x.d += z.d().slice(indexes(0, 0), indexes(nx, bs));
@@ -143,18 +120,18 @@ void backward_stack(Batch &z, Batch &x, Batch &y) {
 
 // stacking with delay
 
-void forward_stack(Batch &z, Batch &x, Sequence &y, int last) {
+DEFMETHOD(forward_stack)(Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
   assert(z.cols() == x.cols() && z.cols() == y.cols());
-  z>> z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
+  z.v().slice(indexes(0, 0), indexes(nx, bs)) = x.v();
   if (last >= 0)
-    z>> z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y[last].v();
+    z.v().slice(indexes(nx, 0), indexes(ny, bs)) = y[last].v();
   else
-    z>> z.v().slice(indexes(nx, 0), indexes(ny, bs)).setZero();
+    z.v().slice(indexes(nx, 0), indexes(ny, bs)).setZero();
 }
-void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
+DEFMETHOD(backward_stack)(Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
   x.d += z.d().slice(indexes(0, 0), indexes(nx, bs));
@@ -163,23 +140,23 @@ void backward_stack(Batch &z, Batch &x, Sequence &y, int last) {
 
 // reverse sequences
 
-void forward_reverse(Sequence &y, Sequence &x) {
+DEFMETHOD(forward_reverse)(Sequence &y, Sequence &x) {
   int N = x.size();
   for (int i = 0; i < N; i++) y[N - i - 1] = x[i];
 }
-void backward_reverse(Sequence &y, Sequence &x) {
+DEFMETHOD(backward_reverse)(Sequence &y, Sequence &x) {
   int N = x.size();
   for (int i = 0; i < N; i++) x[N - i - 1].d += y[i].d();
 }
 
 // combine the delayed gated state with the gated input
 
-void forward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
+DEFMETHOD(forward_statemem)(Batch &state, Batch &ci, Batch &gi, Sequence &states,
                       int last, Batch &gf) {
   state.v = ci.v() * gi.v();
   if (last >= 0) state.v += gf.v() * states[last].v();
 }
-void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
+DEFMETHOD(backward_statemem)(Batch &state, Batch &ci, Batch &gi, Sequence &states,
                        int last, Batch &gf) {
   if (last >= 0) states[last].d += state.d() * gf.v();
   if (last >= 0) gf.d += state.d() * states[last].v();
@@ -189,11 +166,11 @@ void backward_statemem(Batch &state, Batch &ci, Batch &gi, Sequence &states,
 
 // nonlinear gated output
 
-void forward_nonlingate(Batch &out, Batch &state, Batch &go, Nonlin nl) {
+DEFMETHOD(forward_nonlingate)(Batch &out, Batch &state, Batch &go, Nonlin nl) {
   Float (*f)(Float) = nonlinearities[nl].nonlin;
   out.v = state.v().unaryExpr(f) * go.v();
 }
-void backward_nonlingate(Batch &out, Batch &state, Batch &go, Nonlin nl) {
+DEFMETHOD(backward_nonlingate)(Batch &out, Batch &state, Batch &go, Nonlin nl) {
   Float (*f)(Float) = nonlinearities[nl].nonlin;
   Float (*g)(Float) = nonlinearities[nl].xderiv;
   go.d += state.v().unaryExpr(f) * out.d();
@@ -201,53 +178,4 @@ void backward_nonlingate(Batch &out, Batch &state, Batch &go, Nonlin nl) {
 }
 
 }
-
-#ifdef DEPRECATED
-// full layers without constant offset
-
-template <class F>
-void forward_full(Batch &y, Params &W, Batch &x) {
-  assert(y.rows() == W.rows());
-  assert(y.cols() == x.cols());
-  assert(x.rows() == W.cols());
-  Float (*f)(Float) = F::nonlin;
-  y.v = W.v().contract(x.v(), axispairs(1, 0)).unaryExpr(f);
-}
-template <class F>
-void backward_full(Batch &y, Params &W, Batch &x) {
-  Float (*g)(Float) = F::yderiv;
-  EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
-  x.d += W.v().contract(temp, axispairs(0, 0));
-  W.d += temp.contract(x.v(), axispairs(1, 1));
-}
-template void forward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
-template void forward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<NoNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<SigmoidNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<TanhNonlin>(Batch &y, Params &W, Batch &x);
-template void backward_full<ReluNonlin>(Batch &y, Params &W, Batch &x);
-
-// stacking with delay and adding a constant
-
-void forward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
-  int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
-  int bs = inp.v.dimension(1);
-  assert(all.rows() == 1 + inp.rows() + out.rows());
-  assert(all.cols() == inp.cols() && all.cols() == out.cols());
-  v>> all.v().slice(indexes(0, 0), indexes(1, bs)).setConstant(Float(1));
-  v>> all.v().slice(indexes(1, 0), indexes(nx, bs)) = inp.v();
-  if (last >= 0)
-    v>> all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)) = out[last].v();
-  else
-    v>> all.v().slice(indexes(1 + nx, 0), indexes(ny, bs)).setZero();
-}
-void backward_stack1(Batch &all, Batch &inp, Sequence &out, int last) {
-  int nx = inp.v.dimension(0), ny = out[0].v.dimension(0);
-  int bs = inp.v.dimension(1);
-  inp.d += all.d().slice(indexes(1, 0), indexes(nx, bs));
-  if (last >= 0) out[last].d += all.d().slice(indexes(1 + nx, 0), indexes(ny, bs));
-}
-#endif
 
