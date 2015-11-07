@@ -277,8 +277,8 @@ struct TestStackDelay : Testcase {
     randseq(targets, 1, 14, 4);
     randparams(ps, {});
   }
-  void forward() { forward_stack(outputs[0], inputs[0], inputs, 1); }
-  void backward() { backward_stack(outputs[0], inputs[0], inputs, 1); }
+  void forward() { forward_stack_delay(outputs[0], inputs[0], inputs, 1); }
+  void backward() { backward_stack_delay(outputs[0], inputs[0], inputs, 1); }
 };
 #ifdef DEPRECATED
 struct TestFullSigmoid : Testcase {

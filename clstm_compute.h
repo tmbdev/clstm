@@ -13,17 +13,10 @@ typedef int Nonlin;
 // DEFGENERIC(NAME, arglist)
 // DEFMETHOD(NAME)(arglist) {body}
 
-#if 0
 #define DEFGENERIC(NAME, ARGS) void NAME ARGS
 #define DEFMETHOD(NAME) void NAME
 #define BEGINMETHODS
 #define ENDMETHODS
-#else
-#define DEFGENERIC(NAME, ARGS) void (*NAME) ARGS;
-#define DEFMETHOD(NAME) ; NAME = [] /* (args) { body } */
-#define BEGINMETHODS static int _dummy = [] {
-#define ENDMETHODS ; return 0; } ();
-#endif
 
 DEFGENERIC(forward_stack,(Batch &, Batch &, Batch &));
 DEFGENERIC(backward_stack,(Batch &, Batch &, Batch &));

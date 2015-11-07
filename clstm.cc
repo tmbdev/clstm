@@ -494,7 +494,7 @@ struct GenericNPLSTM : INetwork {
     ci.resize(N, no, bs);
     outputs.resize(N, no, bs);
     for (int t = 0; t < N; t++) {
-      forward_stack(source[t], inputs[t], outputs, t - 1);
+      forward_stack_delay(source[t], inputs[t], outputs, t - 1);
       forward_full1(gi[t], WGI, source[t], F);
       forward_full1(gf[t], WGF, source[t], F);
       forward_full1(go[t], WGO, source[t], F);
@@ -515,7 +515,7 @@ struct GenericNPLSTM : INetwork {
       backward_full1(go[t], WGO, source[t], F);
       backward_full1(gf[t], WGF, source[t], F);
       backward_full1(gi[t], WGI, source[t], F);
-      backward_stack(source[t], inputs[t], out, t - 1);
+      backward_stack_delay(source[t], inputs[t], out, t - 1);
     }
     nsteps += N;
     nseq += 1;
