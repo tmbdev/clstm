@@ -1,11 +1,8 @@
 #include "clstm_compute.h"
-#include <iostream>
 
 // FIXME: factor out nonlinearities
-// FIXME: remove _full(...) calls
 
 namespace ocropus {
-using std::cerr;
 
 inline Eigen::array<Eigen::IndexPair<int>, 1> axispairs(int i, int j) {
   Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
@@ -51,7 +48,7 @@ Nonlinearity nonlinearities[] = {
   }
 };
 
-#define DEFMETHOD(NAME) void NAME
+BEGINMETHODS
 
 // full layers with constant offset
 
@@ -120,7 +117,7 @@ DEFMETHOD(backward_stack)(Batch &z, Batch &x, Batch &y) {
 
 // stacking with delay
 
-DEFMETHOD(forward_stack)(Batch &z, Batch &x, Sequence &y, int last) {
+DEFMETHOD(forward_stack_delay)(Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
@@ -131,7 +128,7 @@ DEFMETHOD(forward_stack)(Batch &z, Batch &x, Sequence &y, int last) {
   else
     z.v().slice(indexes(nx, 0), indexes(ny, bs)).setZero();
 }
-DEFMETHOD(backward_stack)(Batch &z, Batch &x, Sequence &y, int last) {
+DEFMETHOD(backward_stack_delay)(Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
   x.d += z.d().slice(indexes(0, 0), indexes(nx, bs));
@@ -176,6 +173,8 @@ DEFMETHOD(backward_nonlingate)(Batch &out, Batch &state, Batch &go, Nonlin nl) {
   go.d += state.v().unaryExpr(f) * out.d();
   state.d += state.v().unaryExpr(g) * go.v() * out.d();
 }
+
+ENDMETHODS
 
 }
 

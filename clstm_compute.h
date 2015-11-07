@@ -10,24 +10,35 @@ using namespace std;
 enum { LIN = 0, SIG = 1, TANH = 2, RELU = 3 };
 typedef int Nonlin;
 
-#define DEFGENERIC(NAME, ARGS) void NAME ARGS
+// DEFGENERIC(NAME, arglist)
+// DEFMETHOD(NAME)(arglist) {body}
 
-DEFGENERIC(forward_stack,(Batch &z, Batch &x, Batch &y));
-DEFGENERIC(backward_stack,(Batch &z, Batch &x, Batch &y));
-DEFGENERIC(forward_stack,(Batch &z, Batch &x, Sequence &y, int last));
-DEFGENERIC(backward_stack,(Batch &z, Batch &x, Sequence &y, int last));
-DEFGENERIC(forward_reverse,(Sequence &y, Sequence &x));
-DEFGENERIC(backward_reverse,(Sequence &y, Sequence &x));
-DEFGENERIC(forward_full1,(Batch &y, Params &W, Batch &x, Nonlin nl));
-DEFGENERIC(backward_full1,(Batch &y, Params &W, Batch &x, Nonlin nl));
-DEFGENERIC(forward_softmax,(Batch &z, Params &W1, Batch &x));
-DEFGENERIC(backward_softmax,(Batch &z, Params &W1, Batch &x));
-DEFGENERIC(forward_softmax,(Sequence &outputs, Params &W1, Sequence &inputs));
-DEFGENERIC(backward_softmax,(Sequence &outputs, Params &W1, Sequence &inputs));
-DEFGENERIC(forward_statemem,(Batch &state, Batch &ci, Batch &gi, Sequence &states, int last, Batch &gf));
-DEFGENERIC(backward_statemem,(Batch &state, Batch &ci, Batch &gi, Sequence &states, int last, Batch &gf));
-DEFGENERIC(forward_nonlingate,(Batch &out, Batch &state, Batch &go, Nonlin nl));
-DEFGENERIC(backward_nonlingate,(Batch &out, Batch &state, Batch &go, Nonlin nl));
+#if 0
+#define DEFGENERIC(NAME, ARGS) void NAME ARGS
+#define DEFMETHOD(NAME) void NAME
+#define BEGINMETHODS
+#define ENDMETHODS
+#else
+#define DEFGENERIC(NAME, ARGS) void (*NAME) ARGS;
+#define DEFMETHOD(NAME) ; NAME = [] /* (args) { body } */
+#define BEGINMETHODS static int _dummy = [] {
+#define ENDMETHODS ; return 0; } ();
+#endif
+
+DEFGENERIC(forward_stack,(Batch &, Batch &, Batch &));
+DEFGENERIC(backward_stack,(Batch &, Batch &, Batch &));
+DEFGENERIC(forward_stack_delay,(Batch &, Batch &, Sequence &, int));
+DEFGENERIC(backward_stack_delay,(Batch &, Batch &, Sequence &, int));
+DEFGENERIC(forward_reverse,(Sequence &, Sequence &));
+DEFGENERIC(backward_reverse,(Sequence &, Sequence &));
+DEFGENERIC(forward_full1,(Batch &, Params &, Batch &, Nonlin));
+DEFGENERIC(backward_full1,(Batch &, Params &, Batch &, Nonlin));
+DEFGENERIC(forward_softmax,(Batch &, Params &, Batch &));
+DEFGENERIC(backward_softmax,(Batch &, Params &, Batch &));
+DEFGENERIC(forward_statemem,(Batch &, Batch &, Batch &gi, Sequence &, int, Batch &));
+DEFGENERIC(backward_statemem,(Batch &, Batch &, Batch &gi, Sequence &, int, Batch &));
+DEFGENERIC(forward_nonlingate,(Batch &, Batch &, Batch &, int));
+DEFGENERIC(backward_nonlingate,(Batch &, Batch &, Batch &, int));
 
 }
 
