@@ -11,16 +11,21 @@ using namespace std;
 enum { LIN = 0, SIG = 1, TANH = 2, RELU = 3 };
 typedef int Nonlin;
 
-struct Device {};
+extern Eigen::DefaultDevice default_device;
 
-// DEFGENERIC(NAME, arglist)
-// DEFMETHOD(NAME)(arglist) {body}
+// This bit of macro and template magic allows us to
+// transparently select between CPU and GPU versions of
+// computations. The computations themselves are
+// expressed using standard Eigen::Tensor notation and
+// devices in clstm_compute.cc. Only clstm_compute.cc
+// needs to be compiled with nvcc, greatly cutting down
+// on the exposure to incompatibilities and bugs in nvcc.
 
 #define DEFGENERIC(NAME, ...) \
 template <typename... Args> \
 void NAME(Args&&... args) { \
-  extern void NAME(Device *,__VA_ARGS__); \
-  NAME(nullptr, std::forward<Args>(args)...); \
+  extern void NAME(Eigen::DefaultDevice *,__VA_ARGS__); \
+  NAME(&default_device, std::forward<Args>(args)...); \
 }
 
 DEFGENERIC(forward_stack, Batch &, Batch &, Batch &);
