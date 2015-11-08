@@ -25,36 +25,11 @@ inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
   return Eigen::array<ptrdiff_t, 2>({i, j});
 }
 
-typedef Float (*FloatFun)(Float);
-
-struct Nonlinearity {
-  FloatFun nonlin;
-  FloatFun yderiv;
-  FloatFun xderiv;
-};
-
-Nonlinearity nonlinearities[] = {
-  {
-    [](Float x) { return x; },
-    [](Float y) { return Float(1); },
-    [](Float x) { return Float(1); },
-  },
-  {
-    [](Float x) { return sigmoid(x); },
-    [](Float y) { return y * (1-y); },
-    [](Float x) { Float y = sigmoid(x); return y * (1-y); }
-  },
-  {
-    [](Float x) { return tanh(x); },
-    [](Float y) { return 1 - y*y; },
-    [](Float x) { Float y = tanh(x); return 1 - y*y; }
-  },
-  {
-    [](Float x) { return x<0?0:x; },
-    [](Float y) { return Float(y<=0?0:1); },
-    [](Float x) { return Float(x<=0?0:1); }
-  }
-};
+// Non-linearities. These can either be run "in place"
+// on the output of a linear layer, or as a regular 
+// step. When run "in place", there is a separate backwards
+// step that, unlike regular backwards steps, doesn't add
+// to the delta on the input but just sets it.
 
 void forward_identity(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v();
@@ -145,41 +120,16 @@ void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
 
 // full layers with nonlinearities
 
-#if 1
 void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, Nonlin nl) {
   forward_lin1(dev, y, W1, x);
   forward_nonlin(dev, y, y, nl);
 }
-#else
-void forward_full1(Device *dev,Batch &y, Params &W1, Batch &x, Nonlin nl) {
-  Float (*f)(Float) = nonlinearities[nl].nonlin;
-  int n = W1.v.dimension(0), m = W1.v.dimension(1);
-  int bs = x.v.dimension(1);
-  assert(y.rows() == n);
-  assert(y.cols() == x.cols());
-  assert(x.rows() == m-1);
-  y.v().device(*dev) =
-      (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axispairs(1, 0)) +
-       W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs))).unaryExpr(f);
-}
-#endif
 
 
-#if 1
 void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x, Nonlin nl) {
   backward_nonlin(dev, y, nl);
   backward_lin1(dev, y, W1, x);
 }
-#else
-void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x, Nonlin nl) {
-  Float (*g)(Float) = nonlinearities[nl].yderiv;
-  int n = W1.v.dimension(0), m = W1.v.dimension(1);
-  EigenTensor2 temp = y.v().unaryExpr(g) * y.d();
-  x.d().device(*dev) += W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(temp, axispairs(0, 0));
-  W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) += temp.contract(x.v(), axispairs(1, 1));
-  W1.d().chip(0, 1).device(*dev) += temp.sum(indexes(1));
-}
-#endif
 
 // softmax
 
@@ -282,21 +232,13 @@ void backward_gate(Device *dev, Batch &out, Batch &nlstate, Batch &go) {
 
 // nonlinear gated output
 
-#if 1
 void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
   Batch temp;
   temp.resize(out.rows(), out.cols());
   forward_nonlin(dev, temp, state, nl);
   forward_gate(dev, out, temp, go);
 }
-#else
-void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, Nonlin nl) {
-  Float (*f)(Float) = nonlinearities[nl].nonlin;
-  out.v().device(*dev) = state.v().unaryExpr(f) * go.v();
-}
-#endif
 
-#if 1
 void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
   Batch temp;
   temp.resize(out.rows(), out.cols());
@@ -304,14 +246,6 @@ void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int n
   backward_gate(dev, out, temp, go);
   backward_nonlin(dev, temp, state, nl);
 }
-#else
-void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, Nonlin nl) {
-  Float (*f)(Float) = nonlinearities[nl].nonlin;
-  Float (*g)(Float) = nonlinearities[nl].xderiv;
-  go.d().device(*dev) += state.v().unaryExpr(f) * out.d();
-  state.d().device(*dev) += state.v().unaryExpr(g) * go.v() * out.d();
-}
-#endif
 
 }
 
