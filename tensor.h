@@ -168,15 +168,20 @@ struct Tensor2 {
     int nbytes = total_size() * sizeof(Float);
     memcpy(ptr, other.ptr, nbytes);
   }
+  void setConstant(Float c) {
+    int N = total_size();
+    for(int i=0; i<N; i++) ptr[i] = c;
+  }
   void setConstant(int n, int m, Float c) {
     resize(n,m);
-    map().setConstant(c);
+    setConstant(c);
   }
   void setZero(int n, int m) {
-    setConstant(n, m, 0);
+    resize(n,m);
+    setConstant(0);
   }
   void setZero() {
-    map().setZero();
+    setConstant(0);
   }
 };
 

@@ -12,17 +12,28 @@ typedef DEVICE Device;
 
 Eigen::DefaultDevice default_device;
 
-inline Eigen::array<Eigen::IndexPair<int>, 1> axispairs(int i, int j) {
-  Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};
+#ifdef __CUDACC__
+#define HOSTDEV __host__ __device__
+#else
+#define HOSTDEV
+#endif
+
+typedef Eigen::IndexPair<int> IndexPair;
+typedef Eigen::array<IndexPair, 1> Axes1;
+typedef Eigen::array<ptrdiff_t, 1> Indexes1;
+typedef Eigen::array<ptrdiff_t, 2> Indexes2;
+
+HOSTDEV inline Axes1 axispairs(int i, int j) {
+  Axes1 result = {IndexPair(i, j)};
   return result;
 }
 
-inline Eigen::array<ptrdiff_t, 1> indexes(int i) { 
-  return Eigen::array<ptrdiff_t, 1>({i}); 
+HOSTDEV inline Indexes1 indexes(int i) { 
+  return Indexes1({i}); 
 }
 
-inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
-  return Eigen::array<ptrdiff_t, 2>({i, j});
+HOSTDEV inline Indexes2 indexes(int i, int j) {
+  return Indexes2({i, j});
 }
 
 // Non-linearities. These can either be run "in place"

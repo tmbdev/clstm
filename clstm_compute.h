@@ -1,7 +1,6 @@
 #ifndef clstm_compute__
 #define clstm_compute__
 
-#include "utils.h"
 #include "batches.h"
 #include <utility>
 

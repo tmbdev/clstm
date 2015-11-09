@@ -138,7 +138,7 @@ else:
 env.Protoc("clstm.proto")
 
 env.Object("clstm_compute_nvidia.o", "clstm_compute_nvidia.cc",
-           CXX="/usr/local/cuda/bin/nvcc --std=c++11 -x cu -DEIGEN_USE_CUDA")
+           CXX="/usr/local/cuda/bin/nvcc --std=c++11 -x cu -DEIGEN_USE_CUDA --expt-relaxed-constexpr")
 
 # Build the CLSTM library.
 
