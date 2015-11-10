@@ -5,4 +5,5 @@
 #ifndef __CUDACC__
 #error "not compiling in CUDA mode"
 #endif
+
 #include "clstm_compute.cc"

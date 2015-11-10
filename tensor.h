@@ -124,9 +124,16 @@ public:
     dims[0] = 0;
     dims[1] = 0;
   }
+  int getGpu() {
+    return gpu;
+  }
   void setGpu(int n) {
     clear();
+#ifdef CLSTM_CUDA
     gpu = n;
+#else
+    assert(n<0);
+#endif
   }
   void resize(int n, int m) {
     clear();

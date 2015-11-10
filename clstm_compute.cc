@@ -1,4 +1,6 @@
+#include <memory>
 #include "clstm_compute.h"
+#include <unsupported/Eigen/CXX11/Tensor>
 
 // FIXME: factor out nonlinearities
 
@@ -15,6 +17,29 @@ Eigen::DefaultDevice default_device;
 #ifdef __CUDACC__
 #define ONBOTH __host__ __device__
 #define ONDEVICE __device__
+#define MAXGPUS 16
+
+namespace ocropus {
+using std::unique_ptr;
+
+struct EigenGpu {
+  unique_ptr<Eigen::CudaStreamDevice> stream;
+  unique_ptr<Eigen::GpuDevice> dev;
+};
+static EigenGpu devices[MAXGPUS];
+
+Eigen::GpuDevice *gpu_device(int id) {
+  if (id<0) return nullptr;
+  assert(id<MAXGPUS);
+  if (!devices[id].dev) {
+    auto stream = new Eigen::CudaStreamDevice(/*id*/);
+    devices[id].stream.reset(stream);
+    devices[id].dev.reset(new Eigen::CudaDevice(stream));
+  }
+  return devices[id].dev.get();
+}
+}
+
 #else
 #define ONBOTH
 #define ONDEVICE
@@ -30,8 +55,8 @@ ONBOTH inline Axes1 axispairs(int i, int j) {
   return result;
 }
 
-ONBOTH inline Indexes1 indexes(int i) { 
-  return Indexes1({i}); 
+ONBOTH inline Indexes1 indexes(int i) {
+  return Indexes1({i});
 }
 
 ONBOTH inline Indexes2 indexes(int i, int j) {
@@ -39,7 +64,7 @@ ONBOTH inline Indexes2 indexes(int i, int j) {
 }
 
 // Non-linearities. These can either be run "in place"
-// on the output of a linear layer, or as a regular 
+// on the output of a linear layer, or as a regular
 // step. When run "in place", there is a separate backwards
 // step that, unlike regular backwards steps, doesn't add
 // to the delta on the input but just sets it.

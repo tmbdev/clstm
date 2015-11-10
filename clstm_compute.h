@@ -12,6 +12,25 @@ typedef int Nonlin;
 
 extern Eigen::DefaultDevice default_device;
 
+inline int gpu_id(Tensor2 &t) { return t.getGpu(); }
+inline int gpu_id(Batch &b) { return gpu_id(b.v); }
+inline int gpu_id(Sequence &s) { return gpu_id(s[0]); }
+
+#ifdef CLSTM_GPU
+Eigen::GpuDevice *gpu_device(int id);
+#else
+inline Eigen::GpuDevice *gpu_device(int id) {
+  assert(id<0);
+  return nullptr;
+}
+#endif
+
+template <class T>
+inline Eigen::GpuDevice *gpu(T arg) {
+  int id = gpu_id(arg);
+  return gpu_device(id);
+}
+
 // This bit of macro and template magic allows us to
 // transparently select between CPU and GPU versions of
 // computations. The computations themselves are
@@ -20,12 +39,27 @@ extern Eigen::DefaultDevice default_device;
 // needs to be compiled with nvcc, greatly cutting down
 // on the exposure to incompatibilities and bugs in nvcc.
 
+#ifdef CLSTM_GPU
 #define DEFGENERIC(NAME, ...) \
-template <typename... Args> \
-void NAME(Args&&... args) { \
+template <typename Arg, typename... Args> \
+void NAME(Arg &&arg, Args&&... args) { \
   extern void NAME(Eigen::DefaultDevice *,__VA_ARGS__); \
-  NAME(&default_device, std::forward<Args>(args)...); \
+  extern void NAME(Eigen::GpuDevice *,__VA_ARGS__); \
+  Eigen::GpuDevice *dev = gpu_device(gpu_id(arg)); \
+  if (dev) { \
+    NAME(dev, arg, std::forward<Args>(args)...); \
+    return; \
+  } \
+  NAME(&default_device, arg, std::forward<Args>(args)...); \
 }
+#else
+#define DEFGENERIC(NAME, ...) \
+template <typename Arg, typename... Args> \
+void NAME(Arg &&arg, Args&&... args) { \
+  extern void NAME(Eigen::DefaultDevice *,__VA_ARGS__); \
+  NAME(&default_device, arg, std::forward<Args>(args)...); \
+}
+#endif
 
 DEFGENERIC(forward_stack, Batch &, Batch &, Batch &);
 DEFGENERIC(backward_stack, Batch &, Batch &, Batch &);
