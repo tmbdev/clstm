@@ -56,11 +56,6 @@ void rinit(TensorMap2 m, Float s, const char *mode_, Float offset) {
   }
 }
 
-void rinit(Params &m, int r, int c, Float s, const char *mode, Float offset) {
-  m.resize(r,c);
-  rinit(m.v(), s, mode, offset);
-}
-
 void rinit(Batch &m, int r, int c, Float s, const char *mode, Float offset) {
   m.resize(r,c);
   rinit(m.v(), s, mode, offset);

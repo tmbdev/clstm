@@ -83,8 +83,8 @@ inline int argmax(const EigenTensor1 &m) {
   }
   return mi;
 }
-inline Float sum(const EigenTensor1 &m) { return reduction(m.sum()); }
-inline Float sum(const EigenTensor2 &m) { return reduction(m.sum()); }
+//inline Float sum(const EigenTensor1 &m) { return reduction(m.sum()); }
+//inline Float sum(const EigenTensor2 &m) { return reduction(m.sum()); }
 
 // A simple Tensor class that handles multiple device
 // types a bit more transparently. It handles allocation/deallocation,

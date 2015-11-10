@@ -13,9 +13,11 @@ typedef DEVICE Device;
 Eigen::DefaultDevice default_device;
 
 #ifdef __CUDACC__
-#define HOSTDEV __host__ __device__
+#define ONBOTH __host__ __device__
+#define ONDEVICE __device__
 #else
-#define HOSTDEV
+#define ONBOTH
+#define ONDEVICE
 #endif
 
 typedef Eigen::IndexPair<int> IndexPair;
@@ -23,16 +25,16 @@ typedef Eigen::array<IndexPair, 1> Axes1;
 typedef Eigen::array<ptrdiff_t, 1> Indexes1;
 typedef Eigen::array<ptrdiff_t, 2> Indexes2;
 
-HOSTDEV inline Axes1 axispairs(int i, int j) {
+ONBOTH inline Axes1 axispairs(int i, int j) {
   Axes1 result = {IndexPair(i, j)};
   return result;
 }
 
-HOSTDEV inline Indexes1 indexes(int i) { 
+ONBOTH inline Indexes1 indexes(int i) { 
   return Indexes1({i}); 
 }
 
-HOSTDEV inline Indexes2 indexes(int i, int j) {
+ONBOTH inline Indexes2 indexes(int i, int j) {
   return Indexes2({i, j});
 }
 
@@ -52,7 +54,7 @@ void forward_tanh(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v().tanh();
 }
 void forward_relu(Device *dev, Batch &y, Batch &x) {
-  y.v().device(*dev) = x.v().unaryExpr([](Float x) { return x<=0?0:x; });
+  y.v().device(*dev) = x.v().cwiseMax(Float(0));
 }
 void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   switch(nl) {
@@ -74,8 +76,11 @@ void backward_tanh(Device *dev, Batch &y) {
   y.d().device(*dev) = (-y.v()*y.v() + Float(1)) * y.d();
 }
 void backward_relu(Device *dev, Batch &y) {
-  y.d().device(*dev) = y.d() * 
-    y.v().unaryExpr([](Float y) { return Float(y<=0?0:1); });
+#ifdef LSTM_DOUBLE
+  y.d().device(*dev) = y.d() * (y.v()>0.0).cast<Float>();
+#else
+  y.d().device(*dev) = y.d() * (y.v()>0.0f).cast<Float>();
+#endif
 }
 void backward_nonlin(Device *dev, Batch &y, int nl) {
   switch(nl) {
@@ -97,8 +102,11 @@ void backward_tanh(Device *dev, Batch &y, Batch &x) {
   x.d().device(*dev) += (-y.v()*y.v() + Float(1)) * y.d();
 }
 void backward_relu(Device *dev, Batch &y, Batch &x) {
-  x.d().device(*dev) += y.d() * 
-    y.v().unaryExpr([](Float y) { return Float(y<=0?0:1); });
+#ifdef LSTM_DOUBLE
+  x.d().device(*dev) += y.d() * (y.v()>0.0).cast<Float>();
+#else
+  x.d().device(*dev) += y.d() * (y.v()>0.0f).cast<Float>();
+#endif
 }
 void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   switch(nl) {
@@ -118,9 +126,13 @@ void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   assert(y.rows() == n);
   assert(y.cols() == x.cols());
   assert(x.rows() == m-1);
-  y.v().device(*dev) =
-      (W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(x.v(), axispairs(1, 0)) +
-       W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs)));
+  Indexes2 offsets{0, 1};
+  Indexes2 sizes{n, m-1};
+  Axes1 axes01{IndexPair(1,0)};
+  y.v().device(*dev) = W1.v().slice(offsets, sizes).contract(x.v(), axes01);
+  Indexes2 shape{n, 1};
+  Indexes2 bcast{1, bs};
+  y.v().device(*dev) += W1.v().chip(0, 1).reshape(shape).broadcast(bcast);
 }
 void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
@@ -256,6 +268,11 @@ void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int n
   forward_nonlin(dev, temp, state, nl);
   backward_gate(dev, out, temp, go);
   backward_nonlin(dev, temp, state, nl);
+}
+
+void sgd_update(Device *dev, Params &params, Float lr, Float mom) {
+  params.v() += params.d() * lr;
+  params.d() = params.d() * mom;
 }
 
 }

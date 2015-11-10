@@ -34,12 +34,7 @@ struct Batch {
   }
 };
 
-struct Params : Batch {
-  void update(Float lr, Float mom) {
-    v() += d() * lr;
-    d() = d() * mom;
-  }
-};
+typedef Batch Params;
 
 // typedef vector<Mat> Sequence;
 struct Sequence {

@@ -62,7 +62,8 @@ void ctc_align_targets(EigenTensor2 &posteriors, EigenTensor2 &outputs,
   for (int t1 = 0; t1 < n1; t1++) {
     EigenTensor1 out(nc);
     for (int i = 0; i < nc; i++) out(i) = fmax(lo, outputs(t1, i));
-    out = out / sum(out);
+    EigenTensor1 total = out.sum();
+    out = out / total(0);
     for (int t2 = 0; t2 < n2; t2++) {
       double total = 0.0;
       for (int k = 0; k < nc; k++) total += out(k) * targets(t2, k);

@@ -46,10 +46,7 @@ env["BUILDERS"]["Protoc"] = protoc_builder
 if option("double", 0):
     env.Append(CPPDEFINES={'LSTM_DOUBLE': '1'})
 
-if option("testthreads", 0):
-    env.Append(CPPDEFINES={'TEST_THREADS': '1'})
-
-if option("threads", 1):
+if option("threads", 0):
   env.Append(CPPDEFINES={'EIGEN_USE_THREADS': '1'})
   env.Append(LIBS=["pthread"])
 
@@ -138,7 +135,7 @@ else:
 env.Protoc("clstm.proto")
 
 env.Object("clstm_compute_nvidia.o", "clstm_compute_nvidia.cc",
-           CXX="/usr/local/cuda/bin/nvcc --std=c++11 -x cu -DEIGEN_USE_CUDA --expt-relaxed-constexpr")
+           CXX="/usr/local/cuda/bin/nvcc --arch=sm_35 --std=c++11 -x cu -DEIGEN_USE_GPU --expt-relaxed-constexpr")
 
 # Build the CLSTM library.
 

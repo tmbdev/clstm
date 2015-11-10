@@ -42,6 +42,7 @@ DEFGENERIC(backward_statemem, Batch &, Batch &, Batch &gi, Sequence &, int, Batc
 DEFGENERIC(forward_nonlingate, Batch &, Batch &, Batch &, int);
 DEFGENERIC(backward_nonlingate, Batch &, Batch &, Batch &, int);
 
-}
+DEFGENERIC(sgd_update, Params &,Float lr, Float mom);
+};
 
 #endif

@@ -170,7 +170,7 @@ void sgd_update(Network net) {
   Float sgc = net->attr.get("state_gradient_clip", 100.0);
   for (auto it : net->parameters) it.second->gradientClip(gc);
   for (auto it : net->states) it.second->gradientClip(sgc);
-  for (auto it : net->parameters) it.second->update(lr, momentum);
+  for (auto it : net->parameters) sgd_update(*it.second, lr, momentum);
   for (int i = 0; i < net->sub.size(); i++) sgd_update(net->sub[i]);
   net->nseq = 0;
   net->nsteps = 0;
