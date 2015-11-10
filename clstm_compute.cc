@@ -76,11 +76,8 @@ void backward_tanh(Device *dev, Batch &y) {
   y.d().device(*dev) = (-y.v()*y.v() + Float(1)) * y.d();
 }
 void backward_relu(Device *dev, Batch &y) {
-#ifdef LSTM_DOUBLE
-  y.d().device(*dev) = y.d() * (y.v()>0.0).cast<Float>();
-#else
-  y.d().device(*dev) = y.d() * (y.v()>0.0f).cast<Float>();
-#endif
+  Float zero = 0;
+  y.d().device(*dev) = y.d() * (y.v()>zero).cast<Float>();
 }
 void backward_nonlin(Device *dev, Batch &y, int nl) {
   switch(nl) {
@@ -102,11 +99,8 @@ void backward_tanh(Device *dev, Batch &y, Batch &x) {
   x.d().device(*dev) += (-y.v()*y.v() + Float(1)) * y.d();
 }
 void backward_relu(Device *dev, Batch &y, Batch &x) {
-#ifdef LSTM_DOUBLE
-  x.d().device(*dev) += y.d() * (y.v()>0.0).cast<Float>();
-#else
-  x.d().device(*dev) += y.d() * (y.v()>0.0f).cast<Float>();
-#endif
+  Float zero = 0;
+  x.d().device(*dev) += y.d() * (y.v()>zero).cast<Float>();
 }
 void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   switch(nl) {
@@ -270,9 +264,13 @@ void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int n
   backward_nonlin(dev, temp, state, nl);
 }
 
+void fill(Device *dev, TensorMap2 &a, Float value) {
+  a.device(*dev) = a.constant(value);
+}
+
 void sgd_update(Device *dev, Params &params, Float lr, Float mom) {
-  params.v() += params.d() * lr;
-  params.d() = params.d() * mom;
+  params.v().device(*dev) += params.d() * lr;
+  params.d().device(*dev) = params.d() * mom;
 }
 
 }

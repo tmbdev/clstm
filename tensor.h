@@ -5,6 +5,11 @@
 #include <unordered_map>
 #include <unsupported/Eigen/CXX11/Tensor>
 
+#ifdef CLSTM_GPU
+#include "cuda_runtime.h"
+#include "cuda.h"
+#endif
+
 namespace ocropus {
 
 using Eigen::Tensor;
@@ -83,14 +88,16 @@ inline int argmax(const EigenTensor1 &m) {
   }
   return mi;
 }
-//inline Float sum(const EigenTensor1 &m) { return reduction(m.sum()); }
-//inline Float sum(const EigenTensor2 &m) { return reduction(m.sum()); }
 
 // A simple Tensor class that handles multiple device
 // types a bit more transparently. It handles allocation/deallocation,
 // plus assignment.
 
 struct Tensor2 {
+protected:
+  int gpu = -1;
+
+public:
   // The data and dimensions of this tensor. Data is always
   // heap allocated and not shared.
   int dims[2];
@@ -106,16 +113,34 @@ struct Tensor2 {
   }
   void clear() {
     if(!ptr) return;
-    free(ptr);
+    if (gpu<0) {
+      free(ptr);
+    } else {
+#ifdef CLSTM_CUDA
+      cudaFree(ptr);
+#endif
+    }
     ptr = nullptr;
     dims[0] = 0;
     dims[1] = 0;
   }
+  void setGpu(int n) {
+    clear();
+    gpu = n;
+  }
   void resize(int n, int m) {
     clear();
-    ptr = (Float*)malloc(n * m * sizeof(Float));
     dims[0] = n;
     dims[1] = m;
+    if (gpu<0) {
+      ptr = (Float*)malloc(n * m * sizeof(Float));
+    } else {
+#ifdef CLSTM_CUDA
+      void *p;
+      cudaMalloc(&p, n * m * sizeof(Float));
+      ptr = (Float*)p;
+#endif
+    }
   }
   void like(TensorMap2 other) {
     resize(other.dimension(0), other.dimension(1));
@@ -166,7 +191,19 @@ struct Tensor2 {
   void operator=(const Tensor2 &other) {
     resize(other.dimension(0), other.dimension(1));
     int nbytes = total_size() * sizeof(Float);
-    memcpy(ptr, other.ptr, nbytes);
+#ifdef CLTSTM_GPU
+    if(gpu>=0 && other.gpu>=0) {
+      cudaMemcpy( ptr, other.ptr, nbytes, cudaMemcpyDeviceToDevice);
+    } else if(gpu>=0 && other.gpu<0) {
+      cudaMemcpy( ptr, other.ptr, nbytes, cudaMemcpyHostToDevice ); 
+    } else if(gpu<0 && other.gpu>=0) {
+      cudaMemcpy( ptr, other.ptr, nbytes, cudaMemcpyDeviceToHost);
+#else
+    if (0) {
+#endif
+    } else {
+      memcpy(ptr, other.ptr, nbytes);
+    }
   }
   void setConstant(Float c) {
     int N = total_size();

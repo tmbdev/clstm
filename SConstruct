@@ -50,10 +50,6 @@ if option("threads", 0):
   env.Append(CPPDEFINES={'EIGEN_USE_THREADS': '1'})
   env.Append(LIBS=["pthread"])
 
-if option("gpu", 0):
-  env.Append(CPPDEFINES={'EIGEN_USE_GPU': '1'})
-  env.Append(LIBS=["cublas","cuda","cudart"])
-
 # With omp=1 support, Eigen and other parts of the code may use
 # multi-threading.
 
@@ -134,15 +130,24 @@ else:
 
 env.Protoc("clstm.proto")
 
-env.Object("clstm_compute_nvidia.o", "clstm_compute_nvidia.cc",
-           CXX="/usr/local/cuda/bin/nvcc --arch=sm_35 --std=c++11 -x cu -DEIGEN_USE_GPU --expt-relaxed-constexpr")
+cuda = env.Object("clstm_compute_cuda.o", "clstm_compute_cuda.cc",
+           CXX="/usr/local/cuda/bin/nvcc -arch=sm_35 -std=c++11 -x cu -DEIGEN_USE_GPU --expt-relaxed-constexpr",
+           CXXCOM=env["CXXCOM"]+" 2>&1 | grep error")
+
 
 # Build the CLSTM library.
 
-libs = env["LIBS"]
 libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
           "tensor.cc", "batches.cc", "extras.cc", "clstm.pb.cc", 
           "clstm_compute.cc"]
+if option("gpu", 1):
+  env.Append(LIBS=["cudart","cublas","cuda"])
+  env.Append(LIBPATH=["/usr/local/cuda/lib64"])
+  env.Append(CPPPATH=["/usr/local/cuda/include"])
+  env.Append(CPPDEFINES={'CLSTM_GPU' : 1})
+  libsrc = [cuda] + libsrc
+
+libs = env["LIBS"]
 libclstm = env.StaticLibrary("clstm", source = libsrc)
 
 all = [libclstm]
