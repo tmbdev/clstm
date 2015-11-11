@@ -131,8 +131,7 @@ else:
 env.Protoc("clstm.proto")
 
 cuda = env.Object("clstm_compute_cuda.o", "clstm_compute_cuda.cc",
-           CXX="/usr/local/cuda/bin/nvcc -arch=sm_35 -std=c++11 -x cu -DEIGEN_USE_GPU --expt-relaxed-constexpr",
-           CXXCOM=env["CXXCOM"]+" 2>&1 | grep error")
+           CXX="./nvcc-wrapper")
 
 
 # Build the CLSTM library.
@@ -144,11 +143,11 @@ if option("gpu", 1):
   env.Append(LIBS=["cudart","cublas","cuda"])
   env.Append(LIBPATH=["/usr/local/cuda/lib64"])
   env.Append(CPPPATH=["/usr/local/cuda/include"])
-  env.Append(CPPDEFINES={'CLSTM_GPU' : 1})
+  env.Append(CPPDEFINES={'CLSTM_CUDA' : 1, 'EIGEN_USE_GPU' : 1})
   libsrc = [cuda] + libsrc
 
 libs = env["LIBS"]
-libclstm = env.StaticLibrary("clstm", source = libsrc)
+libclstm = env.StaticLibrary("clstm", libsrc)
 
 all = [libclstm]
 
@@ -192,6 +191,7 @@ all += [env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-timing", ["test-timing.cc"], LIBS=[libclstm] + libs)]
+all += [env.Program("test-gpu", ["test-gpu.cc"], LIBS=[libclstm] + libs)]
 
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"

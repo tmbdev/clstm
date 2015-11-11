@@ -8,18 +8,17 @@ namespace ocropus {
 
 #ifndef DEVICE
 typedef Eigen::DefaultDevice Device;
+Eigen::DefaultDevice default_device;
+
 #else
 typedef DEVICE Device;
 #endif
-
-Eigen::DefaultDevice default_device;
 
 #ifdef __CUDACC__
 #define ONBOTH __host__ __device__
 #define ONDEVICE __device__
 #define MAXGPUS 16
 
-namespace ocropus {
 using std::unique_ptr;
 
 struct EigenGpu {
@@ -34,10 +33,9 @@ Eigen::GpuDevice *gpu_device(int id) {
   if (!devices[id].dev) {
     auto stream = new Eigen::CudaStreamDevice(/*id*/);
     devices[id].stream.reset(stream);
-    devices[id].dev.reset(new Eigen::CudaDevice(stream));
+    devices[id].dev.reset(new Eigen::GpuDevice(stream));
   }
   return devices[id].dev.get();
-}
 }
 
 #else

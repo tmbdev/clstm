@@ -82,6 +82,7 @@ struct Sequence {
   }
 };
 
+void rinit(TensorMap2 m, Float s, const char *mode = "unif", Float offset=0.0);
 void rinit(Batch &m, int no, int ni, Float s, const char *mode = "unif", Float offset=0.0);
 void rinit(Params &m, int N, int no, int ni, Float s, const char *mode = "pos", Float offset=0.0);
 void rinit(Sequence &m, int no, int ni, Float s, const char *mode = "unif", Float offset=0.0);

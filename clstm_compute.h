@@ -16,7 +16,7 @@ inline int gpu_id(Tensor2 &t) { return t.getGpu(); }
 inline int gpu_id(Batch &b) { return gpu_id(b.v); }
 inline int gpu_id(Sequence &s) { return gpu_id(s[0]); }
 
-#ifdef CLSTM_GPU
+#ifdef CLSTM_CUDA
 Eigen::GpuDevice *gpu_device(int id);
 #else
 inline Eigen::GpuDevice *gpu_device(int id) {
@@ -39,7 +39,7 @@ inline Eigen::GpuDevice *gpu(T arg) {
 // needs to be compiled with nvcc, greatly cutting down
 // on the exposure to incompatibilities and bugs in nvcc.
 
-#ifdef CLSTM_GPU
+#ifdef CLSTM_CUDA
 #define DEFGENERIC(NAME, ...) \
 template <typename Arg, typename... Args> \
 void NAME(Arg &&arg, Args&&... args) { \

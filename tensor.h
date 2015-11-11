@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <unsupported/Eigen/CXX11/Tensor>
 
-#ifdef CLSTM_GPU
+#ifdef CLSTM_CUDA
 #include "cuda_runtime.h"
 #include "cuda.h"
 #endif
@@ -198,7 +198,7 @@ public:
   void operator=(const Tensor2 &other) {
     resize(other.dimension(0), other.dimension(1));
     int nbytes = total_size() * sizeof(Float);
-#ifdef CLTSTM_GPU
+#ifdef CLSTM_CUDA
     if(gpu>=0 && other.gpu>=0) {
       cudaMemcpy( ptr, other.ptr, nbytes, cudaMemcpyDeviceToDevice);
     } else if(gpu>=0 && other.gpu<0) {
