@@ -1,17 +1,18 @@
 #!/bin/sh
-set -e
+# set -e
+debug=${debug:-0}
 export PS4='
 >>>>>>> '
 trap "echo TEST FAILED" EXIT
 set -x
-export seed=0.2733
+export seed=0.222
 scons -s -c; rm -f *.o *.a
-scons -j 4 gpu=0 debug=0 clstmocrtrain clstmfiltertrain clstmfilter clstmocr test-lstm
+scons -j 4 gpu=0 debug=$debug clstmocrtrain clstmfiltertrain clstmfilter clstmocr test-lstm
 ./test-lstm
 ./test-filter.sh
 ./test-ocr.sh
 scons -s -c; rm -f *.o *.a
-scons -j 4 gpu=0 double=1 debug=1 test-cderiv test-deriv test-ctc
+scons -j 4 gpu=0 double=1 debug=$debug test-cderiv test-deriv test-ctc
 ./test-cderiv
 ./test-deriv
 ./test-ctc

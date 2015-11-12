@@ -7,8 +7,10 @@
 namespace ocropus {
 using namespace std;
 
-enum { LIN = 0, SIG = 1, TANH = 2, RELU = 3 };
-typedef int Nonlin;
+constexpr int LIN = 0;
+constexpr int SIG = 1;
+constexpr int TANH = 2;
+constexpr int RELU = 3;
 
 extern Eigen::DefaultDevice default_device;
 
@@ -61,18 +63,24 @@ void NAME(Arg &&arg, Args&&... args) { \
 }
 #endif
 
+DEFGENERIC(forward_nonlin, Batch &, Batch &, int);
+DEFGENERIC(backward_nonlin, Batch &, Batch &, int);
+DEFGENERIC(forward_nonlin0, Batch &, int);
+DEFGENERIC(backward_nonlin0, Batch &, int);
+DEFGENERIC(forward_lin1, Batch &, Params &, Batch &);
+DEFGENERIC(backward_lin1, Batch &, Params &, Batch &);
+DEFGENERIC(forward_full1, Batch &, Params &, Batch &, int);
+DEFGENERIC(backward_full1, Batch &, Params &, Batch &, int);
 DEFGENERIC(forward_stack, Batch &, Batch &, Batch &);
 DEFGENERIC(backward_stack, Batch &, Batch &, Batch &);
 DEFGENERIC(forward_stack_delay, Batch &, Batch &, Sequence &, int);
 DEFGENERIC(backward_stack_delay, Batch &, Batch &, Sequence &, int);
 DEFGENERIC(forward_reverse, Sequence &, Sequence &);
 DEFGENERIC(backward_reverse, Sequence &, Sequence &);
-DEFGENERIC(forward_full1, Batch &, Params &, Batch &, Nonlin);
-DEFGENERIC(backward_full1, Batch &, Params &, Batch &, Nonlin);
 DEFGENERIC(forward_softmax, Batch &, Params &, Batch &);
 DEFGENERIC(backward_softmax, Batch &, Params &, Batch &);
-DEFGENERIC(forward_statemem, Batch &, Batch &, Batch &gi, Sequence &, int, Batch &);
-DEFGENERIC(backward_statemem, Batch &, Batch &, Batch &gi, Sequence &, int, Batch &);
+DEFGENERIC(forward_statemem, Batch &, Batch &, Batch &, Sequence &, int, Batch &);
+DEFGENERIC(backward_statemem, Batch &, Batch &, Batch &, Sequence &, int, Batch &);
 DEFGENERIC(forward_nonlingate, Batch &, Batch &, Batch &, int);
 DEFGENERIC(backward_nonlingate, Batch &, Batch &, Batch &, int);
 

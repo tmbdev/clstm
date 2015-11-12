@@ -12,6 +12,17 @@ struct Batch {
   Tensor2 d;
   int rows() const { return v.dimension(0); }
   int cols() const { return v.dimension(1); }
+  void setGpu(int n) {
+    v.setGpu(n);
+    d.setGpu(n);
+  }
+  int getGpu() {
+    return v.getGpu();
+  }
+  void like(Batch &other) {
+    setGpu(other.getGpu());
+    resize(other.rows(), other.cols());
+  }
   void setZero(int n, int m) {
     v.setZero(n, m);
     d.setZero(n, m);

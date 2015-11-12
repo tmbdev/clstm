@@ -107,7 +107,6 @@ public:
   Tensor2(const Tensor2 &other) {
     *this = other;
   }
-  Tensor2(TensorRef<Tensor<Float,2>> other) { }
   ~Tensor2() {
     clear();
   }
@@ -148,6 +147,10 @@ public:
       ptr = (Float*)p;
 #endif
     }
+  }
+  void like(Tensor2 &other) {
+    setGpu(other.getGpu());
+    resize(other.dimension(0), other.dimension(1));
   }
   void like(TensorMap2 other) {
     resize(other.dimension(0), other.dimension(1));
@@ -212,22 +215,56 @@ public:
       memcpy(ptr, other.ptr, nbytes);
     }
   }
-  void setConstant(Float c) {
-    int N = total_size();
-    for(int i=0; i<N; i++) ptr[i] = c;
-  }
-  void setConstant(int n, int m, Float c) {
-    resize(n,m);
-    setConstant(c);
+  void setZero() {
+#ifdef CLSTM_CUDA
+    if (gpu>=0) {
+      cudaMemset(ptr, 0, total_size() * sizeof(Float));
+#else
+    if (0) {
+#endif
+    } else {
+      int N = total_size();
+      for(int i=0; i<N; i++) ptr[i] = 0;
+    }
   }
   void setZero(int n, int m) {
     resize(n,m);
-    setConstant(0);
-  }
-  void setZero() {
-    setConstant(0);
+    setZero();
   }
 };
+
+inline Float asum1(const TensorRef1 &a) {
+  int n = a.dimension(0);
+  Float result = 0.0;
+  for(int i=0; i<n; i++)
+    result += a(i);
+  return result;
+}
+inline Float asum2(const TensorRef2 &a) {
+  int n = a.dimension(0);
+  int m = a.dimension(1);
+  Float result = 0.0;
+  for(int i=0; i<n; i++)
+    for(int j=0; j<m; j++)
+      result += a(i,j);
+  return result;
+}
+inline Float amax1(const TensorRef1 &a) {
+  int n = a.dimension(0);
+  Float result = a(0,0);
+  for(int i=0; i<n; i++)
+    result = fmax(result, a(i));
+  return result;
+}
+inline Float amax2(const TensorRef2 &a) {
+  int n = a.dimension(0);
+  int m = a.dimension(1);
+  Float result = a(0,0);
+  for(int i=0; i<n; i++)
+    for(int j=0; j<m; j++)
+      result = fmax(result, a(i,j));
+  return result;
+}
 
 }
 

@@ -1,6 +1,8 @@
 #include <memory>
 #include "clstm_compute.h"
 #include <unsupported/Eigen/CXX11/Tensor>
+#include <iostream>
+
 
 // FIXME: factor out nonlinearities
 
@@ -28,9 +30,12 @@ struct EigenGpu {
 static EigenGpu devices[MAXGPUS];
 
 Eigen::GpuDevice *gpu_device(int id) {
+  using std::cerr;
+  using std::endl;
   if (id<0) return nullptr;
   assert(id<MAXGPUS);
   if (!devices[id].dev) {
+    cerr << "initializing GPU " << id << endl;
     auto stream = new Eigen::CudaStreamDevice(/*id*/);
     devices[id].stream.reset(stream);
     devices[id].dev.reset(new Eigen::GpuDevice(stream));
@@ -61,11 +66,7 @@ ONBOTH inline Indexes2 indexes(int i, int j) {
   return Indexes2({i, j});
 }
 
-// Non-linearities. These can either be run "in place"
-// on the output of a linear layer, or as a regular
-// step. When run "in place", there is a separate backwards
-// step that, unlike regular backwards steps, doesn't add
-// to the delta on the input but just sets it.
+// Non-linearities.
 
 void forward_identity(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v();
@@ -85,29 +86,6 @@ void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   case SIG: forward_sigmoid(dev, y, x); break;
   case TANH: forward_tanh(dev, y, x); break;
   case RELU: forward_relu(dev, y, x); break;
-  default: abort();
-  }
-}
-
-void backward_identity(Device *dev, Batch &y) {
-  y.d().device(*dev) = y.d();
-}
-void backward_sigmoid(Device *dev, Batch &y) {
-  y.d().device(*dev) = y.v() * (-y.v()+Float(1)) * y.d();
-}
-void backward_tanh(Device *dev, Batch &y) {
-  y.d().device(*dev) = (-y.v()*y.v() + Float(1)) * y.d();
-}
-void backward_relu(Device *dev, Batch &y) {
-  Float zero = 0;
-  y.d().device(*dev) = y.d() * (y.v()>zero).cast<Float>();
-}
-void backward_nonlin(Device *dev, Batch &y, int nl) {
-  switch(nl) {
-  case LIN: backward_identity(dev, y); break;
-  case SIG: backward_sigmoid(dev, y); break;
-  case TANH: backward_tanh(dev, y); break;
-  case RELU: backward_relu(dev, y); break;
   default: abort();
   }
 }
@@ -135,6 +113,52 @@ void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   }
 }
 
+// Forward and backward non-linearities for in-place processing.
+
+void forward_identity0(Device *dev, Batch &y) {
+  y.v().device(*dev) = y.v();
+}
+void forward_sigmoid0(Device *dev, Batch &y) {
+  y.v().device(*dev) = y.v().sigmoid();
+}
+void forward_tanh0(Device *dev, Batch &y) {
+  y.v().device(*dev) = y.v().tanh();
+}
+void forward_relu0(Device *dev, Batch &y) {
+  y.v().device(*dev) = y.v().cwiseMax(Float(0));
+}
+void forward_nonlin0(Device *dev, Batch &y, int nl) {
+  switch(nl) {
+  case LIN: forward_identity0(dev, y); break;
+  case SIG: forward_sigmoid0(dev, y); break;
+  case TANH: forward_tanh0(dev, y); break;
+  case RELU: forward_relu0(dev, y); break;
+  default: abort();
+  }
+}
+
+void backward_identity0(Device *dev, Batch &y) {
+  y.d().device(*dev) = y.d();
+}
+void backward_sigmoid0(Device *dev, Batch &y) {
+  y.d().device(*dev) = y.v() * (-y.v()+Float(1)) * y.d();
+}
+void backward_tanh0(Device *dev, Batch &y) {
+  y.d().device(*dev) = (-y.v()*y.v() + Float(1)) * y.d();
+}
+void backward_relu0(Device *dev, Batch &y) {
+  Float zero = 0;
+  y.d().device(*dev) = y.d() * (y.v()>zero).cast<Float>();
+}
+void backward_nonlin0(Device *dev, Batch &y, int nl) {
+  switch(nl) {
+  case LIN: backward_identity0(dev, y); break;
+  case SIG: backward_sigmoid0(dev, y); break;
+  case TANH: backward_tanh0(dev, y); break;
+  case RELU: backward_relu0(dev, y); break;
+  default: abort();
+  }
+}
 // full layers with constant offset
 
 void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
@@ -160,14 +184,14 @@ void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
 
 // full layers with nonlinearities
 
-void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, Nonlin nl) {
+void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
   forward_lin1(dev, y, W1, x);
-  forward_nonlin(dev, y, y, nl);
+  forward_nonlin0(dev, y, nl);
 }
 
 
-void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x, Nonlin nl) {
-  backward_nonlin(dev, y, nl);
+void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
+  backward_nonlin0(dev, y, nl);
   backward_lin1(dev, y, W1, x);
 }
 

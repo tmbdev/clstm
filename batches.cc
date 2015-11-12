@@ -56,15 +56,23 @@ void rinit(TensorMap2 m, Float s, const char *mode_, Float offset) {
   }
 }
 
+void rinit(Tensor2 &t, int r, int c,Float s, const char *mode_, Float offset) {
+  // use a temperary so that initialization of GPU tensors works
+  Tensor2 temp;
+  temp.resize(r,c);
+  rinit(temp(), s, mode_, offset);
+  t = temp;
+}
+
 void rinit(Batch &m, int r, int c, Float s, const char *mode, Float offset) {
-  m.resize(r,c);
-  rinit(m.v(), s, mode, offset);
+  rinit(m.v, r, c, s, mode, offset);
+  m.zeroGrad();
 }
 
 void rinit(Sequence &m, int N, int r, int c, Float s, const char *mode, Float offset) {
-  m.resize(N,r,c);
+  m.steps.resize(N);
   for(int t=0; t<N; t++)
-    rinit(m[t].v(), s, mode, offset);
+    rinit(m[t], r, c, s, mode, offset);
 }
 
 

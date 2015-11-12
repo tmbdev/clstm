@@ -63,7 +63,7 @@ void test1() {
       {0, 0, 1, 1},  //
   });
   transpose(expected);
-  Float err = reduction((expected - result).abs().maximum());
+  Float err = amax2((expected - result).abs());
   cerr << "ctc test 1 err " << err << "\n";
   assert(err < 1e-4);
 }
@@ -98,7 +98,7 @@ void test2() {
       {0., 0., 0., 0., 0.12029, 1.},
   });
   transpose(expected);
-  Float err = reduction((expected - result).abs().maximum());
+  Float err = amax2((expected - result).abs());
   cerr << "ctc test 2 err " << err << "\n";
   assert(err < 1e-4);
 }
