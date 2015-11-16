@@ -100,7 +100,7 @@ protected:
 public:
   // The data and dimensions of this tensor. Data is always
   // heap allocated and not shared.
-  int dims[2];
+  int dims[2] = {0, 0};
   Float *ptr = nullptr;
 
   Tensor2() {}
@@ -108,9 +108,9 @@ public:
     *this = other;
   }
   ~Tensor2() {
-    clear();
+    reset();
   }
-  void clear() {
+  void reset() {
     if(!ptr) return;
     if (gpu<0) {
       free(ptr);
@@ -127,7 +127,7 @@ public:
     return gpu;
   }
   void setGpu(int n) {
-    clear();
+    reset();
 #ifdef CLSTM_CUDA
     gpu = n;
 #else
@@ -135,7 +135,10 @@ public:
 #endif
   }
   void resize(int n, int m) {
-    clear();
+    assert(ptr==nullptr || (dims[0]>0 && dims[1]>0));
+    if (dims[0]==n && dims[1]==m) return;
+    reset();
+    if (n==0 || m==0) return;
     dims[0] = n;
     dims[1] = m;
     if (gpu<0) {
@@ -145,6 +148,8 @@ public:
       void *p;
       cudaMalloc(&p, n * m * sizeof(Float));
       ptr = (Float*)p;
+#else
+      assert(false && "not compiled for CUDA");
 #endif
     }
   }
@@ -191,7 +196,36 @@ public:
   }
 
   Float &operator()(int i, int j) {
+    assert(gpu<0 && "use get() for gpu access");
     return (**this)(i,j);
+  }
+
+  // accessors that work on GPU
+  Float get(int i, int j) {
+    if (gpu<0) {
+      return (**this)(i,j);
+    } else {
+#ifdef CLSTM_CUDA
+      Float *devptr = ptr + (i + j * dims[0]);
+      Float value;
+      cudaMemcpy( &value , devptr, sizeof (Float), cudaMemcpyDeviceToHost);
+      return value;
+#else
+      THROW("not compiled for GPU");
+#endif
+    }
+  }
+  void put(Float value, int i, int j) {
+    if (gpu<0) {
+      (**this)(i,j) = value;
+    } else {
+#ifdef CLSTM_CUDA
+      Float *devptr = ptr + (i + j * dims[0]);
+      cudaMemcpy(devptr , &value, sizeof (Float), cudaMemcpyDeviceToHost);
+#else
+      THROW("not compiled for GPU");
+#endif
+    }
   }
   void operator=(TensorMap2 other) {
     resize(other.dimension(0), other.dimension(1));

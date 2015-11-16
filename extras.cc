@@ -401,6 +401,7 @@ void read_png(Tensor<unsigned char, 3> &image, FILE *fp) {
     }
   }
 
+  assert(w>0 && h>0);
   image.resize(w, h, 3);
 
   if (spp == 1) {

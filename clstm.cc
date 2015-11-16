@@ -443,6 +443,7 @@ struct GenericNPLSTM : INetwork {
   int nseq = 0;
   int noutput() { return no; }
   int ninput() { return ni; }
+  int gpu = -1;
   GenericNPLSTM() {
     ENROLL(WGI, WGF, WGO, WCI);
     ENROLL(gi, gf, go, ci, state, source);
@@ -460,6 +461,11 @@ struct GenericNPLSTM : INetwork {
     this->ni = ni;
     this->no = no;
     this->nf = nf;
+    gpu = attr.get("gpu", -1);
+    if (gpu>=0) {
+      for(auto w : { WEIGHTS }) w.setGpu(gpu);
+      for(auto s : { SEQUENCES }) s.setGpu(gpu);
+    }
 #ifdef HOMOG
     rinit(WGI, no, nf, attr);
     rinit(WGF, no, nf, attr);

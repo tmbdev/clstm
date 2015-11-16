@@ -49,9 +49,14 @@ typedef Batch Params;
 
 // typedef vector<Mat> Sequence;
 struct Sequence {
+  int gpu = -1;
   vector<Batch> steps;
   Sequence() {}
   Sequence(int N, int r, int b) { resize(N, r, b); }
+  void setGpu(int n) {
+    gpu = n;
+    clear();
+  }
   void clear() { steps.clear(); }
   int rows() const { return steps[0].rows(); }
   int cols() const { return steps[0].cols(); }
@@ -69,6 +74,7 @@ struct Sequence {
   void resize(int N, int n, int m) {
     steps.resize(N);
     for (int t = 0; t < N; t++) {
+      if (steps[t].getGpu()!=gpu) steps[t].setGpu(gpu);
       steps[t].resize(n, m);
     }
   }
