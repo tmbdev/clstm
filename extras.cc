@@ -66,9 +66,10 @@ void gauss1d(Tensor<T,1> &out, Tensor<T,1> &in, float sigma) {
   float *mask_ = mask.data();
   // apply it
   int n = in.size();
+  int m = mask.dimension(0);
   for (int i = 0; i < n; i++) {
     double total = 0.0;
-    for (int j = 0; j < mask.dimension(0); j++) {
+    for (int j = 0; j < m; j++) {
       int index = i + j - range;
       if (index < 0) index = 0;
       if (index >= n) index = n - 1;

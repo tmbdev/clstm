@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/local/cuda/bin/nvcc -arch=sm_30 -std=c++11 -x cu -DEIGEN_USE_GPU --expt-relaxed-constexpr "$@"
