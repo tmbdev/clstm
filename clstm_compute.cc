@@ -11,10 +11,16 @@ namespace ocropus {
 #ifndef DEVICE
 typedef Eigen::DefaultDevice Device;
 Eigen::DefaultDevice default_device;
-
 #else
 typedef DEVICE Device;
 #endif
+
+inline void device_notify(Device *dev, int gpu) {
+  static int count = 0;
+  if (count>0) return;
+  cerr << "using " << typeid(dev).name() << " gpu: " << gpu << "\n";
+  count++;
+}
 
 #ifdef __CUDACC__
 #define ONBOTH __host__ __device__
@@ -42,7 +48,6 @@ Eigen::GpuDevice *gpu_device(int id) {
   }
   return devices[id].dev.get();
 }
-
 #else
 #define ONBOTH
 #define ONDEVICE
@@ -185,6 +190,9 @@ void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
 // full layers with nonlinearities
 
 void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
+  device_notify(dev, y.getGpu());
+  assert(y.getGpu()<0?typeid(dev)==typeid(&default_device):true);
+  assert(y.getGpu()>=0?typeid(dev)!=typeid(&default_device):true);
   forward_lin1(dev, y, W1, x);
   forward_nonlin0(dev, y, nl);
 }
@@ -249,7 +257,7 @@ void forward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last)
   if (last >= 0)
     z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) = y[last].v();
   else
-    z.v().slice(indexes(nx, 0), indexes(ny, bs)).setZero();
+    z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) = y[0].v().constant(0);
 }
 void backward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
@@ -298,6 +306,7 @@ void backward_gate(Device *dev, Batch &out, Batch &nlstate, Batch &go) {
 
 void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
   Batch temp;
+  temp.setGpu(out.getGpu());
   temp.resize(out.rows(), out.cols());
   forward_nonlin(dev, temp, state, nl);
   forward_gate(dev, out, temp, go);
@@ -305,6 +314,7 @@ void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl
 
 void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
   Batch temp;
+  temp.setGpu(out.getGpu());
   temp.resize(out.rows(), out.cols());
   forward_nonlin(dev, temp, state, nl);
   backward_gate(dev, out, temp, go);
@@ -313,6 +323,13 @@ void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int n
 
 void fill(Device *dev, TensorMap2 &a, Float value) {
   a.device(*dev) = a.constant(value);
+}
+
+void clip_gradient(Device *dev, Batch &x, Float clip) {
+  if (clip >= 1e6) return;
+  assert(clip > 0);
+  x.d().device(*dev) = x.d().cwiseMin(clip);
+  x.d().device(*dev) = x.d().cwiseMax(-clip);
 }
 
 void sgd_update(Device *dev, Params &params, Float lr, Float mom) {

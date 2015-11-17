@@ -72,7 +72,12 @@ double test_net(Network net) {
 }
 
 int main(int argc, char **argv) {
-  Network net = make_net_init("lstm1", "ninput=1:nhidden=4:noutput=2");
+  Network net;
+  if (getienv("usegpu", 0)) {
+    net = make_net_init("lstm1", "ninput=1:nhidden=4:noutput=2:gpu=0");
+  } else {
+    net = make_net_init("lstm1", "ninput=1:nhidden=4:noutput=2");
+  }
   net->setLearningRate(1e-4, 0.9);
   save_net("__test0__.clstm", net);
   unlink("__test0__.clstm");

@@ -33,16 +33,6 @@ struct Batch {
     d.setZero();
   }
   void zeroGrad() { d.setZero(rows(), cols()); }
-  void gradientClip(Float clip) {
-    TensorMap2 d = *this->d;
-    if (clip>=1e6) return;
-    assert(clip>0);
-    for(int i=0; i<rows(); i++) {
-      for(int j=0; j<cols(); j++) {
-        d(i,j) = fmax(-clip, fmin(clip, d(i,j)));
-      }
-    }
-  }
 };
 
 typedef Batch Params;
@@ -53,6 +43,9 @@ struct Sequence {
   vector<Batch> steps;
   Sequence() {}
   Sequence(int N, int r, int b) { resize(N, r, b); }
+  int getGpu() {
+    return gpu;
+  }
   void setGpu(int n) {
     gpu = n;
     clear();
@@ -79,11 +72,17 @@ struct Sequence {
     }
   }
   void like(const Sequence &other) {
+    // don't assign GPU status
     resize(other.size(), other.rows(), other.cols());
   }
   void copy(const Sequence &other) {
+    // don't assign GPU status
     like(other);
     for (int t = 0; t < other.size(); t++) steps[t] = other[t];
+  }
+  void operator=(Sequence &other) {
+    // don't assign GPU status
+    copy(other);
   }
   Batch &operator[](int i) { return steps[i]; }
   const Batch &operator[](int i) const { return steps[i]; }
@@ -92,10 +91,6 @@ struct Sequence {
   }
   void zeroGrad() {
     for (int t = 0; t < steps.size(); t++) steps[t].zeroGrad();
-  }
-  void gradientClip(Float gc) {
-    for(int i=0;i<steps.size(); i++)
-      steps[i].gradientClip(gc);
   }
 };
 

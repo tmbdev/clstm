@@ -168,8 +168,13 @@ void sgd_update(Network net) {
   Float momentum = net->attr.get("momentum", 0.9);
   Float gc = net->attr.get("gradient_clip", 100.0);
   Float sgc = net->attr.get("state_gradient_clip", 100.0);
-  for (auto it : net->parameters) it.second->gradientClip(gc);
-  for (auto it : net->states) it.second->gradientClip(sgc);
+  for (auto it : net->parameters) {
+    clip_gradient(*it.second, gc);
+  }
+  for (auto it : net->states) {
+    Sequence &s = *it.second;
+    for(int i=0; i<s.size(); i++) clip_gradient(s[i], sgc);
+  }
   for (auto it : net->parameters) sgd_update(*it.second, lr, momentum);
   for (int i = 0; i < net->sub.size(); i++) sgd_update(net->sub[i]);
   net->nseq = 0;
@@ -357,14 +362,14 @@ struct Stacked : INetwork {
     for (int n = sub.size() - 1; n >= 0; n--) {
       if (n + 1 == sub.size())
         for (int t = 0; t < outputs.size(); t++)
-          sub[n]->outputs[t].d() = outputs[t].d();
+          sub[n]->outputs[t].d = outputs[t].d;
       else
         for (int t = 0; t < sub[n + 1]->inputs.size(); t++)
-          sub[n]->outputs[t].d() = sub[n + 1]->inputs[t].d();
+          sub[n]->outputs[t].d = sub[n + 1]->inputs[t].d;
       sub[n]->backward();
     }
     for (int t = 0; t < sub[0]->inputs.size(); t++)
-      inputs[t].d() = sub[0]->inputs[t].d();
+      inputs[t].d = sub[0]->inputs[t].d;
   }
 };
 REGISTER(Stacked);
@@ -463,9 +468,21 @@ struct GenericNPLSTM : INetwork {
     this->nf = nf;
     gpu = attr.get("gpu", -1);
     if (gpu>=0) {
-      for(auto w : { WEIGHTS }) w.setGpu(gpu);
-      for(auto s : { SEQUENCES }) s.setGpu(gpu);
+      cerr << "LSTM gpu = " << gpu << "\n";
+      WGI.setGpu(gpu);
+      WGF.setGpu(gpu);
+      WGO.setGpu(gpu);
+      WCI.setGpu(gpu);
+      gi.setGpu(gpu);
+      gf.setGpu(gpu);
+      go.setGpu(gpu);
+      ci.setGpu(gpu);
+      state.setGpu(gpu);
+      source.setGpu(gpu);
+      inputs.setGpu(gpu);
+      outputs.setGpu(gpu);
     }
+    assert(WGI.v.getGpu()==gpu);
 #ifdef HOMOG
     rinit(WGI, no, nf, attr);
     rinit(WGF, no, nf, attr);
@@ -477,6 +494,7 @@ struct GenericNPLSTM : INetwork {
     rinit(WGO, no, nf+1, attr);
     rinit(WCI, no, nf+1, attr);
 #endif
+    assert(WGI.v.getGpu()==gpu);
   }
   void postLoad() {
     no = WGI.rows();
@@ -490,6 +508,7 @@ struct GenericNPLSTM : INetwork {
     assert(nf > no);
   }
   void forward() {
+    assert(inputs.getGpu()==gpu);
     int N = inputs.size();
     int bs = inputs.cols();
     source.resize(N, nf, bs);
@@ -499,6 +518,7 @@ struct GenericNPLSTM : INetwork {
     gf.resize(N, no, bs);
     ci.resize(N, no, bs);
     outputs.resize(N, no, bs);
+    assert(inputs.getGpu()==gpu);
     for (int t = 0; t < N; t++) {
       forward_stack_delay(source[t], inputs[t], outputs, t - 1);
       forward_full1(gi[t], WGI, source[t], F);
@@ -513,7 +533,8 @@ struct GenericNPLSTM : INetwork {
     int N = inputs.size();
     int bs = outputs.cols();
     Sequence out;
-    out.copy(outputs);
+    out.setGpu(gpu);
+    out = outputs;
     for (int t = N - 1; t >= 0; t--) {
       backward_nonlingate(out[t], state[t], go[t], H);
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);

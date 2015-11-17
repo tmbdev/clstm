@@ -18,6 +18,11 @@ inline int gpu_id(Tensor2 &t) { return t.getGpu(); }
 inline int gpu_id(Batch &b) { return gpu_id(b.v); }
 inline int gpu_id(Sequence &s) { return gpu_id(s[0]); }
 
+// If this has been compiled with CUDA, there is a gpu_device
+// function in the CUDA-compiled code; otherwise, we default
+// to something that always returns a nullptr for the GPU
+// device.
+
 #ifdef CLSTM_CUDA
 Eigen::GpuDevice *gpu_device(int id);
 #else
@@ -85,6 +90,7 @@ DEFGENERIC(forward_nonlingate, Batch &, Batch &, Batch &, int);
 DEFGENERIC(backward_nonlingate, Batch &, Batch &, Batch &, int);
 
 DEFGENERIC(fill, Tensor2 &,Float value);
+DEFGENERIC(clip_gradient, Batch &,Float value);
 DEFGENERIC(sgd_update, Params &,Float lr, Float mom);
 };
 

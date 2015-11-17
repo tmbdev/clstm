@@ -33,7 +33,9 @@ bool proto_verbose =
     getenv("clstm_proto_verbose") && atoi(getenv("clstm_proto_verbose"));
 
 void proto_of_params(clstm::Array *array, Params &params, bool weights = true) {
-  TensorMap2 a = params.v();
+  Tensor2 temp;
+  temp = params.v; // copy values in case they are on GPU
+  TensorMap2 a = temp();
   array->add_dim(rows(a));
   array->add_dim(cols(a));
   if (!weights) return;
