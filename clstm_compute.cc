@@ -166,12 +166,16 @@ void backward_nonlin0(Device *dev, Batch &y, int nl) {
 }
 // full layers with constant offset
 
+#define CBUTFIRST(M) (M).block(0,1,(M).rows(),(M).cols()-1)
+#define CFIRST(M) (M).col(0)
+
 void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = x.v.dimension(1);
   assert(y.rows() == n);
   assert(y.cols() == x.cols());
   assert(x.rows() == m-1);
+#ifndef USEMAT
   Indexes2 offsets{0, 1};
   Indexes2 sizes{n, m-1};
   Axes1 axes01{IndexPair(1,0)};
@@ -179,12 +183,24 @@ void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   Indexes2 shape{n, 1};
   Indexes2 bcast{1, bs};
   y.v().device(*dev) += W1.v().chip(0, 1).reshape(shape).broadcast(bcast);
+#else
+  y.v.mat() = (CBUTFIRST(W1.v.mat()) * x.v.mat()).colwise() + CFIRST(W1.v.mat());
+#endif
 }
 void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
+#ifndef USEMAT
   x.d().device(*dev) += W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(y.d(), axispairs(0, 0));
   W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) += y.d().contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1).device(*dev) += y.d().sum(indexes(1));
+#else
+  x.d.mat() = CBUTFIRST(W1.v.mat()).transpose() * y.d.mat();
+  int bs = y.v.cols();
+  auto d_W = CBUTFIRST(W1.d.mat());
+  d_W += y.d.mat() * x.v.mat().transpose();
+  auto d_w = CFIRST(W1.d.mat());
+  for (int b = 0; b < bs; b++) d_w += y.d.mat().col(b);
+#endif
 }
 
 // full layers with nonlinearities

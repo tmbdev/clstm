@@ -41,6 +41,7 @@ prefix = option('prefix', "/usr/local")
 
 env = Environment()
 env.Append(CPPDEFINES={'THROW': 'throw', 'CATCH': 'catch', 'TRY': 'try'})
+env.Append(CPPDEFINES={'USEMAT': '1'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
 if option("double", 0):
