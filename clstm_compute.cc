@@ -214,7 +214,7 @@ NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   Indexes2 bcast{1, bs};
   y.v().device(*dev) += W1.v().chip(0, 1).reshape(shape).broadcast(bcast);
 #else
-  y.v.mat() = (CBUTFIRST(W1.v.mat()) * x.v.mat()).colwise() + CFIRST(W1.v.mat());
+  y.v.mat() = (W1.v.mat1() * x.v.mat()).colwise() + W1.v.vec1();
 #endif
 }
 NOINLINE void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
@@ -224,9 +224,9 @@ NOINLINE void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) += y.d().contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1).device(*dev) += y.d().sum(indexes(1));
 #else
-  x.d.mat() += CBUTFIRST(W1.v.mat()).transpose() * y.d.mat();
-  CBUTFIRST(W1.d.mat()) += y.d.mat() * x.v.mat().transpose();
-  CFIRST(W1.d.mat()) += y.d.mat().rowwise().sum();
+  x.d.mat() += W1.v.mat1().transpose() * y.d.mat();
+  W1.d.mat1() += y.d.mat() * x.v.mat().transpose();
+  W1.d.vec1() += y.d.mat().rowwise().sum();
 #endif
 }
 
@@ -263,7 +263,7 @@ NOINLINE void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   assert(sums.dimension(0)==bs);
   z.v().device(*dev) = z.v() / sums.reshape(indexes(1,bs)).broadcast(indexes(n,1));;
 #else
-  z.v.mat() = (CBUTFIRST(W1.v.mat()) * x.v.mat()).colwise() + CFIRST(W1.v.mat());
+  z.v.mat() = (W1.v.mat1() * x.v.mat()).colwise() + W1.v.vec1();
   z.v.mat() = z.v.mat().unaryExpr(f);
   EigenVector sums = z.v.mat().colwise().sum();
   z.v.mat().array().rowwise() /= sums.transpose().array();
@@ -280,9 +280,9 @@ NOINLINE void backward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
       z.d().contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1).device(*dev) += z.d().sum(indexes(1));
 #else
-  x.d.mat() = CBUTFIRST(W1.v.mat()).transpose() * z.d.mat();
-  CBUTFIRST(W1.d.mat()) += z.d.mat() * x.v.mat().transpose();
-  CFIRST(W1.d.mat()) += z.d.mat().rowwise().sum();
+  x.d.mat() = W1.v.mat1().transpose() * z.d.mat();
+  W1.d.mat1() += z.d.mat() * x.v.mat().transpose();
+  W1.d.vec1() += z.d.mat().rowwise().sum();
 #endif
 }
 
