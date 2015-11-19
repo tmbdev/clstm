@@ -158,7 +158,7 @@ void network_detail(Network net, string prefix = "");
 // setting inputs and outputs
 void set_classes(Network net, BatchClasses &classes);
 void set_classes(Network net, Classes &classes);
-void set_classes(Network net, Tensor<int,1> &targets);
+void set_classes(Network net, Tensor<int, 1> &targets);
 void set_inputs(Network net, Sequence &inputs);
 void set_inputs(Network net, TensorMap2 inputs);
 void set_targets_accelerated(Network net, Sequence &targets);
@@ -208,11 +208,11 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
                     vector<int> *locs);
 
 // single sequence training functions
-void mktargets(Tensor2 &seq, Tensor<int,1> &targets, int ndim);
+void mktargets(Tensor2 &seq, Tensor<int, 1> &targets, int ndim);
 
 void share_deltas(vector<Network> &networks);
 void average_weights(vector<Network> &networks);
-void distribute_weights(vector<Network> &networks, int from=0);
+void distribute_weights(vector<Network> &networks, int from = 0);
 }
 
 namespace {

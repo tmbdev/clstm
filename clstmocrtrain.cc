@@ -33,12 +33,11 @@ using std::regex_replace;
 #define wstring std_wstring
 
 #ifndef NODISPLAY
-void show(PyServer &py, Sequence &s, int subplot = 0, int batch=0) {
-  Tensor<float,2> temp;
+void show(PyServer &py, Sequence &s, int subplot = 0, int batch = 0) {
+  Tensor<float, 2> temp;
   temp.resize(s.size(), s.rows());
-  for(int i=0; i<s.size(); i++)
-    for(int j=0; j<s.rows(); j++)
-      temp(i,j) = s[i].v(j,batch);
+  for (int i = 0; i < s.size(); i++)
+    for (int j = 0; j < s.rows(); j++) temp(i, j) = s[i].v(j, batch);
   if (subplot > 0) py.evalf("subplot(%d)", subplot);
   py.imshowT(temp, "cmap=cm.hot");
 }
@@ -59,18 +58,14 @@ struct Dataset {
   wstring charsep = utf8_to_utf32(getsenv("charsep", ""));
   int size() { return fnames.size(); }
   Dataset() {}
-  Dataset(string file_list) {
-    readFileList(file_list);
-  }
-  void readFileList(string file_list) {
-    read_lines(fnames, file_list);
-  }
+  Dataset(string file_list) { readFileList(file_list); }
+  void readFileList(string file_list) { read_lines(fnames, file_list); }
   void getCodec(Codec &codec) {
     vector<string> gtnames;
     for (auto s : fnames) gtnames.push_back(basename(s) + ".gt.txt");
     codec.build(gtnames, charsep);
   }
-  void readSample(Tensor2 &raw,wstring &gt,int index) {
+  void readSample(Tensor2 &raw, wstring &gt, int index) {
     string fname = fnames[index];
     string base = basename(fname);
     gt = separate_chars(read_text32(base + ".gt.txt"), charsep);
@@ -100,9 +95,9 @@ int main1(int argc, char **argv) {
 
   if (argc < 2 || argc > 3) THROW("... training [testing]");
   Dataset trainingset(argv[1]);
-  assert(trainingset.size()>0);
+  assert(trainingset.size() > 0);
   Dataset testset;
-  if (argc>2) testset.readFileList(argv[2]);
+  if (argc > 2) testset.readFileList(argv[2]);
   print("got", trainingset.size(), "files,", testset.size(), "tests");
 
   string load_name = getsenv("load", "");
@@ -136,12 +131,11 @@ int main1(int argc, char **argv) {
   Trigger test_trigger(getienv("test_every", 10000), -1, start);
   test_trigger.skip0();
   Trigger save_trigger(getienv("save_every", 10000), ntrain, start);
-  save_trigger.enable(save_name!="").skip0();
+  save_trigger.enable(save_name != "").skip0();
   Trigger report_trigger(getienv("report_every", 100), ntrain, start);
   Trigger display_trigger(getienv("display_every", 0), ntrain, start);
 
   for (int trial = start; trial < ntrain; trial++) {
-
     int sample = lrand48() % trainingset.size();
     Tensor2 raw;
     wstring gt;
@@ -174,7 +168,7 @@ int main1(int argc, char **argv) {
       double count = tse.second;
       test_error = errors / count;
       print("ERROR", trial, test_error, "   ", errors, count);
-      if (test_error<best_error) {
+      if (test_error < best_error) {
         best_error = test_error;
         string fname = save_name + ".clstm";
         print("saving best performing network so far", fname, "error rate: ",

@@ -247,9 +247,7 @@ struct TestFull1Sigmoid : Testcase {
     randparams(ps, {{3, 8}});
   }
   void forward() { forward_full1(outputs[0], ps[0], inputs[0], SIG); }
-  void backward() {
-    backward_full1(outputs[0], ps[0], inputs[0], SIG);
-  }
+  void backward() { backward_full1(outputs[0], ps[0], inputs[0], SIG); }
 };
 struct TestFull1Tanh : Testcase {
   virtual void init() {
@@ -258,9 +256,7 @@ struct TestFull1Tanh : Testcase {
     randparams(ps, {{3, 8}});
   }
   void forward() { forward_full1(outputs[0], ps[0], inputs[0], TANH); }
-  void backward() {
-    backward_full1(outputs[0], ps[0], inputs[0], TANH);
-  }
+  void backward() { backward_full1(outputs[0], ps[0], inputs[0], TANH); }
 };
 struct TestStack : Testcase {
   virtual void init() {
@@ -331,16 +327,14 @@ struct TestNonlingate : Testcase {
     randseq(targets, 1, 7, 4);
     randparams(ps, {});
   }
-  void forward() {
-    forward_nonlingate(outputs[0], inputs[0], inputs[1], TANH);
-  }
+  void forward() { forward_nonlingate(outputs[0], inputs[0], inputs[1], TANH); }
   void backward() {
     backward_nonlingate(outputs[0], inputs[0], inputs[1], TANH);
   }
 };
 
-inline Eigen::array<ptrdiff_t, 1> indexes(int i) { 
-  return Eigen::array<ptrdiff_t, 1>({i}); 
+inline Eigen::array<ptrdiff_t, 1> indexes(int i) {
+  return Eigen::array<ptrdiff_t, 1>({i});
 }
 
 inline Eigen::array<ptrdiff_t, 2> indexes(int i, int j) {
@@ -362,14 +356,15 @@ void test_full() {
   inputs1.v().slice(indexes(1, 0), indexes(7, 4)) = inputs[0].v();
   forward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
   forward_full<SigmoidNonlin>(outputs[1], ps[0], inputs1);
-  EigenTensor1 err = (outputs[0].v()-outputs[1].v()).abs().maximum();
+  EigenTensor1 err = (outputs[0].v() - outputs[1].v()).abs().maximum();
   assert(err(0) < 0.001);
   print("OK", err(0));
   backward_full1<SigmoidNonlin>(outputs[0], ps[0], inputs[0]);
   backward_full<SigmoidNonlin>(outputs[1], ps[0], inputs1);
   EigenTensor1 derr =
-    (inputs[0].d() - inputs1.d().slice(indexes(1,0), indexes(7,4)))
-      .abs().maximum();
+      (inputs[0].d() - inputs1.d().slice(indexes(1, 0), indexes(7, 4)))
+          .abs()
+          .maximum();
   // assert(derr(0) < 0.001);
   print("OK", derr(0));
 }

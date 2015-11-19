@@ -8,7 +8,7 @@
 // needed).
 
 #ifndef NOINLINE
-#define NOINLINE __attribute__ ((noinline))
+#define NOINLINE __attribute__((noinline))
 #endif
 
 // The host/device directives are only meaningful with CUDACC
@@ -25,7 +25,7 @@ namespace ocropus {
 
 // We can generate code for different Eigen devices by defining
 // the DEVICE macro when compiling this compilation unit.
-// 
+//
 // When no DEVICE is given, we use the Eigen::DefaultDevice
 // and default to some of the Eigen::Matrix routines (which
 // are faster in some cases).
@@ -42,7 +42,7 @@ typedef DEVICE Device;
 
 inline void device_notify(Device *dev, int gpu) {
   static int count = 0;
-  if (count>0) return;
+  if (count > 0) return;
   cerr << "using " << typeid(dev).name() << " gpu: " << gpu << "\n";
   count++;
 }
@@ -65,11 +65,11 @@ static EigenGpu devices[MAXGPUS];
 Eigen::GpuDevice *gpu_device(int id) {
   using std::cerr;
   using std::endl;
-  if (id<0) return nullptr;
-  assert(id<MAXGPUS);
+  if (id < 0) return nullptr;
+  assert(id < MAXGPUS);
   if (!devices[id].dev) {
     cerr << "initializing GPU " << id << endl;
-    assert(id==0 && "only GPU 0 tested / supported so far");
+    assert(id == 0 && "only GPU 0 tested / supported so far");
     auto stream = new Eigen::CudaStreamDevice(/*id*/);
     devices[id].stream.reset(stream);
     devices[id].dev.reset(new Eigen::GpuDevice(stream));
@@ -90,13 +90,9 @@ ONBOTH inline Axes1 axispairs(int i, int j) {
   return result;
 }
 
-ONBOTH inline Indexes1 indexes(int i) {
-  return Indexes1({i});
-}
+ONBOTH inline Indexes1 indexes(int i) { return Indexes1({i}); }
 
-ONBOTH inline Indexes2 indexes(int i, int j) {
-  return Indexes2({i, j});
-}
+ONBOTH inline Indexes2 indexes(int i, int j) { return Indexes2({i, j}); }
 
 // Non-linearities. These come in two versions: regular and in-place.
 // Note that the regular ones use additive backward-deltas, while the
@@ -115,12 +111,21 @@ NOINLINE void forward_relu(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v().cwiseMax(Float(0));
 }
 NOINLINE void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
-  switch(nl) {
-  case LIN: forward_identity(dev, y, x); break;
-  case SIG: forward_sigmoid(dev, y, x); break;
-  case TANH: forward_tanh(dev, y, x); break;
-  case RELU: forward_relu(dev, y, x); break;
-  default: abort();
+  switch (nl) {
+    case LIN:
+      forward_identity(dev, y, x);
+      break;
+    case SIG:
+      forward_sigmoid(dev, y, x);
+      break;
+    case TANH:
+      forward_tanh(dev, y, x);
+      break;
+    case RELU:
+      forward_relu(dev, y, x);
+      break;
+    default:
+      abort();
   }
 }
 
@@ -128,22 +133,31 @@ NOINLINE void backward_identity(Device *dev, Batch &y, Batch &x) {
   x.d().device(*dev) += y.d();
 }
 NOINLINE void backward_sigmoid(Device *dev, Batch &y, Batch &x) {
-  x.d().device(*dev) += y.v() * (-y.v()+Float(1)) * y.d();
+  x.d().device(*dev) += y.v() * (-y.v() + Float(1)) * y.d();
 }
 NOINLINE void backward_tanh(Device *dev, Batch &y, Batch &x) {
-  x.d().device(*dev) += (-y.v()*y.v() + Float(1)) * y.d();
+  x.d().device(*dev) += (-y.v() * y.v() + Float(1)) * y.d();
 }
 NOINLINE void backward_relu(Device *dev, Batch &y, Batch &x) {
   Float zero = 0;
-  x.d().device(*dev) += y.d() * (y.v()>zero).cast<Float>();
+  x.d().device(*dev) += y.d() * (y.v() > zero).cast<Float>();
 }
 NOINLINE void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
-  switch(nl) {
-  case LIN: backward_identity(dev, y, x); break;
-  case SIG: backward_sigmoid(dev, y, x); break;
-  case TANH: backward_tanh(dev, y, x); break;
-  case RELU: backward_relu(dev, y, x); break;
-  default: abort();
+  switch (nl) {
+    case LIN:
+      backward_identity(dev, y, x);
+      break;
+    case SIG:
+      backward_sigmoid(dev, y, x);
+      break;
+    case TANH:
+      backward_tanh(dev, y, x);
+      break;
+    case RELU:
+      backward_relu(dev, y, x);
+      break;
+    default:
+      abort();
   }
 }
 
@@ -162,12 +176,21 @@ NOINLINE void forward_relu0(Device *dev, Batch &y) {
   y.v().device(*dev) = y.v().cwiseMax(Float(0));
 }
 NOINLINE void forward_nonlin0(Device *dev, Batch &y, int nl) {
-  switch(nl) {
-  case LIN: forward_identity0(dev, y); break;
-  case SIG: forward_sigmoid0(dev, y); break;
-  case TANH: forward_tanh0(dev, y); break;
-  case RELU: forward_relu0(dev, y); break;
-  default: abort();
+  switch (nl) {
+    case LIN:
+      forward_identity0(dev, y);
+      break;
+    case SIG:
+      forward_sigmoid0(dev, y);
+      break;
+    case TANH:
+      forward_tanh0(dev, y);
+      break;
+    case RELU:
+      forward_relu0(dev, y);
+      break;
+    default:
+      abort();
   }
 }
 
@@ -175,28 +198,37 @@ NOINLINE void backward_identity0(Device *dev, Batch &y) {
   y.d().device(*dev) = y.d();
 }
 NOINLINE void backward_sigmoid0(Device *dev, Batch &y) {
-  y.d().device(*dev) = y.v() * (-y.v()+Float(1)) * y.d();
+  y.d().device(*dev) = y.v() * (-y.v() + Float(1)) * y.d();
 }
 NOINLINE void backward_tanh0(Device *dev, Batch &y) {
-  y.d().device(*dev) = (-y.v()*y.v() + Float(1)) * y.d();
+  y.d().device(*dev) = (-y.v() * y.v() + Float(1)) * y.d();
 }
 NOINLINE void backward_relu0(Device *dev, Batch &y) {
   Float zero = 0;
-  y.d().device(*dev) = y.d() * (y.v()>zero).cast<Float>();
+  y.d().device(*dev) = y.d() * (y.v() > zero).cast<Float>();
 }
 NOINLINE void backward_nonlin0(Device *dev, Batch &y, int nl) {
-  switch(nl) {
-  case LIN: backward_identity0(dev, y); break;
-  case SIG: backward_sigmoid0(dev, y); break;
-  case TANH: backward_tanh0(dev, y); break;
-  case RELU: backward_relu0(dev, y); break;
-  default: abort();
+  switch (nl) {
+    case LIN:
+      backward_identity0(dev, y);
+      break;
+    case SIG:
+      backward_sigmoid0(dev, y);
+      break;
+    case TANH:
+      backward_tanh0(dev, y);
+      break;
+    case RELU:
+      backward_relu0(dev, y);
+      break;
+    default:
+      abort();
   }
 }
 // Full layers with constant offset
 
 #ifndef CLSTM_ALL_TENSOR
-#define CBUTFIRST(M) (M).block(0,1,(M).rows(),(M).cols()-1)
+#define CBUTFIRST(M) (M).block(0, 1, (M).rows(), (M).cols() - 1)
 #define CFIRST(M) (M).col(0)
 #endif
 
@@ -205,11 +237,11 @@ NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int bs = x.v.dimension(1);
   assert(y.rows() == n);
   assert(y.cols() == x.cols());
-  assert(x.rows() == m-1);
+  assert(x.rows() == m - 1);
 #ifdef CLSTM_ALL_TENSOR
   Indexes2 offsets{0, 1};
-  Indexes2 sizes{n, m-1};
-  Axes1 axes01{IndexPair(1,0)};
+  Indexes2 sizes{n, m - 1};
+  Axes1 axes01{IndexPair(1, 0)};
   y.v().device(*dev) = W1.v.map1().contract(x.v(), axes01);
   Indexes2 shape{n, 1};
   Indexes2 bcast{1, bs};
@@ -233,14 +265,16 @@ NOINLINE void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
 
 // full layers with nonlinearities
 
-NOINLINE void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
-  assert(y.getGpu()<0?typeid(dev)==typeid(&default_device):true);
-  assert(y.getGpu()>=0?typeid(dev)!=typeid(&default_device):true);
+NOINLINE void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x,
+                            int nl) {
+  assert(y.getGpu() < 0 ? typeid(dev) == typeid(&default_device) : true);
+  assert(y.getGpu() >= 0 ? typeid(dev) != typeid(&default_device) : true);
   forward_lin1(dev, y, W1, x);
   forward_nonlin0(dev, y, nl);
 }
 
-NOINLINE void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
+NOINLINE void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x,
+                             int nl) {
   backward_nonlin0(dev, y, nl);
   backward_lin1(dev, y, W1, x);
 }
@@ -256,10 +290,13 @@ NOINLINE void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   assert(n >= 2);
 #ifdef CLSTM_ALL_TENSOR
   z.v().device(*dev) = W1.v.map1().contract(x.v(), axispairs(1, 0));
-  z.v().device(*dev) += W1.v.off1().reshape(indexes(n, 1)).broadcast(indexes(1, bs));
+  z.v().device(*dev) +=
+      W1.v.off1().reshape(indexes(n, 1)).broadcast(indexes(1, bs));
   z.v().device(*dev) = z.v().unaryExpr(f);
   EigenTensor1 sums = z.v().sum(indexes(0));
-  z.v().device(*dev) = z.v() / sums.reshape(indexes(1,bs)).broadcast(indexes(n,1));;
+  z.v().device(*dev) =
+      z.v() / sums.reshape(indexes(1, bs)).broadcast(indexes(n, 1));
+  ;
 #else
   z.v.mat() = (W1.v.mat1() * x.v.mat()).colwise() + W1.v.vec1();
   z.v.mat() = z.v.mat().unaryExpr(f);
@@ -300,7 +337,8 @@ NOINLINE void backward_stack(Device *dev, Batch &z, Batch &x, Batch &y) {
 
 // stacking with delay
 
-NOINLINE void forward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last) {
+NOINLINE void forward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y,
+                                  int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
@@ -310,24 +348,27 @@ NOINLINE void forward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, 
   if (last >= 0)
     z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) = y[last].v();
   else
-    z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) = y[0].v().constant(0);
+    z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) =
+        y[0].v().constant(0);
 #else
-  z.v.mat().block( 0, 0, nx, bs) = x.v.mat();
+  z.v.mat().block(0, 0, nx, bs) = x.v.mat();
   if (last >= 0)
-    z.v.mat().block( nx, 0, ny, bs) = y[last].v.mat();
+    z.v.mat().block(nx, 0, ny, bs) = y[last].v.mat();
   else
-    z.v.mat().block( nx, 0, ny, bs).setZero();  
-#endif  
+    z.v.mat().block(nx, 0, ny, bs).setZero();
+#endif
 }
-NOINLINE void backward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last) {
+NOINLINE void backward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y,
+                                   int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
 #ifdef CLSTM_ALL_TENSOR
   x.d().device(*dev) += z.d().slice(indexes(0, 0), indexes(nx, bs));
-  if (last >= 0) y[last].d().device(*dev) += z.d().slice(indexes(nx, 0), indexes(ny, bs));
+  if (last >= 0)
+    y[last].d().device(*dev) += z.d().slice(indexes(nx, 0), indexes(ny, bs));
 #else
-  x.d.mat() += z.d.mat().block( 0, 0, nx, bs);
-  if (last >= 0) y[last].d.mat() += z.d.mat().block( nx, 0, ny, bs);
+  x.d.mat() += z.d.mat().block(0, 0, nx, bs);
+  if (last >= 0) y[last].d.mat() += z.d.mat().block(nx, 0, ny, bs);
 #endif
 }
 
@@ -344,13 +385,13 @@ NOINLINE void backward_reverse(Device *dev, Sequence &y, Sequence &x) {
 
 // combine the delayed gated state with the gated input
 
-NOINLINE void forward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi, Sequence &states,
-                      int last, Batch &gf) {
+NOINLINE void forward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi,
+                               Sequence &states, int last, Batch &gf) {
   state.v().device(*dev) = ci.v() * gi.v();
   if (last >= 0) state.v().device(*dev) += gf.v() * states[last].v();
 }
-NOINLINE void backward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi, Sequence &states,
-                       int last, Batch &gf) {
+NOINLINE void backward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi,
+                                Sequence &states, int last, Batch &gf) {
   if (last >= 0) states[last].d().device(*dev) += state.d() * gf.v();
   if (last >= 0) gf.d().device(*dev) += state.d() * states[last].v();
   gi.d().device(*dev) += state.d() * ci.v();
@@ -362,14 +403,16 @@ NOINLINE void backward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi,
 NOINLINE void forward_gate(Device *dev, Batch &out, Batch &nlstate, Batch &go) {
   out.v().device(*dev) = nlstate.v() * go.v();
 }
-NOINLINE void backward_gate(Device *dev, Batch &out, Batch &nlstate, Batch &go) {
+NOINLINE void backward_gate(Device *dev, Batch &out, Batch &nlstate,
+                            Batch &go) {
   go.d().device(*dev) += nlstate.v() * out.d();
   nlstate.d().device(*dev) += go.v() * out.d();
 }
 
 // nonlinear gated output
 
-NOINLINE void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
+NOINLINE void forward_nonlingate(Device *dev, Batch &out, Batch &state,
+                                 Batch &go, int nl) {
   Batch temp;
   temp.setGpu(out.getGpu());
   temp.resize(out.rows(), out.cols());
@@ -377,7 +420,8 @@ NOINLINE void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &g
   forward_gate(dev, out, temp, go);
 }
 
-NOINLINE void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
+NOINLINE void backward_nonlingate(Device *dev, Batch &out, Batch &state,
+                                  Batch &go, int nl) {
   Batch temp;
   temp.setGpu(out.getGpu());
   temp.resize(out.rows(), out.cols());
@@ -401,6 +445,4 @@ NOINLINE void sgd_update(Device *dev, Params &params, Float lr, Float mom) {
   params.v().device(*dev) += params.d() * lr;
   params.d().device(*dev) = params.d() * mom;
 }
-
 }
-

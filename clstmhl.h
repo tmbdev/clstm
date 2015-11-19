@@ -151,9 +151,7 @@ struct CLSTMOCR {
     trivial_decode(outputs, net->outputs);
     return net->codec.decode(outputs);
   }
-  void update() {
-    sgd_update(net);
-  }
+  void update() { sgd_update(net); }
   std::wstring train(TensorMap2 raw, const std::wstring &target) {
     std::wstring result = fwdbwd(raw, target);
     update();

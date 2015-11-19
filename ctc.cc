@@ -16,7 +16,8 @@ namespace ocropus {
 using namespace std;
 using Eigen::Ref;
 
-static void forward_algorithm(EigenTensor2 &lr, EigenTensor2 &lmatch, double skip = -5) {
+static void forward_algorithm(EigenTensor2 &lr, EigenTensor2 &lmatch,
+                              double skip = -5) {
   int n = rows(lmatch), m = cols(lmatch);
   lr.resize(n, m);
   EigenTensor1 v(m), w(m);
@@ -144,9 +145,9 @@ void mktargets(Sequence &seq, Classes &transcript, int ndim) {
   for (int t = 0; t < seq.size(); t++) {
     seq[t].v.setZero();
     if (t % 2 == 1)
-      seq[t].v(transcript[(t - 1) / 2],0) = 1;
+      seq[t].v(transcript[(t - 1) / 2], 0) = 1;
     else
-      seq[t].v(0,0) = 1;
+      seq[t].v(0, 0) = 1;
   }
 }
 
@@ -160,7 +161,7 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
   int mc = -1;
   int mt = -1;
   while (t < N) {
-    int index = argmax(outputs[t].v().chip(batch,1));
+    int index = argmax(outputs[t].v().chip(batch, 1));
     float v = outputs[t].v(index, batch);
     if (index == 0) {
       // NB: there should be a 0 at the end anyway

@@ -27,7 +27,7 @@ inline int gpu_id(Sequence &s) { return gpu_id(s[0]); }
 Eigen::GpuDevice *gpu_device(int id);
 #else
 inline Eigen::GpuDevice *gpu_device(int id) {
-  assert(id<0);
+  assert(id < 0);
   return nullptr;
 }
 #endif
@@ -47,25 +47,25 @@ inline Eigen::GpuDevice *gpu(T arg) {
 // on the exposure to incompatibilities and bugs in nvcc.
 
 #ifdef CLSTM_CUDA
-#define DEFGENERIC(NAME, ...) \
-template <typename Arg, typename... Args> \
-void NAME(Arg &&arg, Args&&... args) { \
-  extern void NAME(Eigen::DefaultDevice *,__VA_ARGS__); \
-  extern void NAME(Eigen::GpuDevice *,__VA_ARGS__); \
-  Eigen::GpuDevice *dev = gpu_device(gpu_id(arg)); \
-  if (dev) { \
-    NAME(dev, arg, std::forward<Args>(args)...); \
-    return; \
-  } \
-  NAME(&default_device, arg, std::forward<Args>(args)...); \
-}
+#define DEFGENERIC(NAME, ...)                                \
+  template <typename Arg, typename... Args>                  \
+  void NAME(Arg &&arg, Args &&... args) {                    \
+    extern void NAME(Eigen::DefaultDevice *, __VA_ARGS__);   \
+    extern void NAME(Eigen::GpuDevice *, __VA_ARGS__);       \
+    Eigen::GpuDevice *dev = gpu_device(gpu_id(arg));         \
+    if (dev) {                                               \
+      NAME(dev, arg, std::forward<Args>(args)...);           \
+      return;                                                \
+    }                                                        \
+    NAME(&default_device, arg, std::forward<Args>(args)...); \
+  }
 #else
-#define DEFGENERIC(NAME, ...) \
-template <typename Arg, typename... Args> \
-void NAME(Arg &&arg, Args&&... args) { \
-  extern void NAME(Eigen::DefaultDevice *,__VA_ARGS__); \
-  NAME(&default_device, arg, std::forward<Args>(args)...); \
-}
+#define DEFGENERIC(NAME, ...)                                \
+  template <typename Arg, typename... Args>                  \
+  void NAME(Arg &&arg, Args &&... args) {                    \
+    extern void NAME(Eigen::DefaultDevice *, __VA_ARGS__);   \
+    NAME(&default_device, arg, std::forward<Args>(args)...); \
+  }
 #endif
 
 DEFGENERIC(forward_nonlin, Batch &, Batch &, int);
@@ -84,14 +84,16 @@ DEFGENERIC(forward_reverse, Sequence &, Sequence &);
 DEFGENERIC(backward_reverse, Sequence &, Sequence &);
 DEFGENERIC(forward_softmax, Batch &, Params &, Batch &);
 DEFGENERIC(backward_softmax, Batch &, Params &, Batch &);
-DEFGENERIC(forward_statemem, Batch &, Batch &, Batch &, Sequence &, int, Batch &);
-DEFGENERIC(backward_statemem, Batch &, Batch &, Batch &, Sequence &, int, Batch &);
+DEFGENERIC(forward_statemem, Batch &, Batch &, Batch &, Sequence &, int,
+           Batch &);
+DEFGENERIC(backward_statemem, Batch &, Batch &, Batch &, Sequence &, int,
+           Batch &);
 DEFGENERIC(forward_nonlingate, Batch &, Batch &, Batch &, int);
 DEFGENERIC(backward_nonlingate, Batch &, Batch &, Batch &, int);
 
-DEFGENERIC(fill, Tensor2 &,Float value);
-DEFGENERIC(clip_gradient, Batch &,Float value);
-DEFGENERIC(sgd_update, Params &,Float lr, Float mom);
+DEFGENERIC(fill, Tensor2 &, Float value);
+DEFGENERIC(clip_gradient, Batch &, Float value);
+DEFGENERIC(sgd_update, Params &, Float lr, Float mom);
 };
 
 #endif

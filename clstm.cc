@@ -15,14 +15,13 @@
 #define MAXEXP 30
 #endif
 
-
 namespace ocropus {
 
-void rinit(Params &m, int r, int c, Assoc &attr, string prefix="") {
-  m.resize(r,c);
-  float s = attr.get(prefix+"init_scale", 0.01);
-  string mode = attr.get(prefix+"init_mode", "negbiased");
-  float offset = attr.get(prefix+"init_offset", 0.0);
+void rinit(Params &m, int r, int c, Assoc &attr, string prefix = "") {
+  m.resize(r, c);
+  float s = attr.get(prefix + "init_scale", 0.01);
+  string mode = attr.get(prefix + "init_mode", "negbiased");
+  float offset = attr.get(prefix + "init_offset", 0.0);
   rinit(m, r, c, s, mode.c_str(), offset);
 }
 
@@ -140,7 +139,7 @@ void set_classes(Network net, Classes &classes) {
   assert(net->outputs.size() == N);
   for (int t = 0; t < N; t++) {
     net->outputs[t].d() = -net->outputs[t].v();
-    net->outputs[t].d(classes[t],0) += 1;
+    net->outputs[t].d(classes[t], 0) += 1;
   }
 }
 
@@ -173,7 +172,7 @@ void sgd_update(Network net) {
   }
   for (auto it : net->states) {
     Sequence &s = *it.second;
-    for(int i=0; i<s.size(); i++) clip_gradient(s[i], sgc);
+    for (int i = 0; i < s.size(); i++) clip_gradient(s[i], sgc);
   }
   for (auto it : net->parameters) sgd_update(*it.second, lr, momentum);
   for (int i = 0; i < net->sub.size(); i++) sgd_update(net->sub[i]);
@@ -249,15 +248,12 @@ void network_detail(Network net, string prefix) {
   cout << "in " << net->inputs.size() << " " << net->ninput() << " ";
   cout << "out " << net->outputs.size() << " " << net->noutput() << endl;
   for (auto p : net->parameters) {
-    cout << nprefix << "    " << p.first << " " 
-         << p.second->rows() << " " 
+    cout << nprefix << "    " << p.first << " " << p.second->rows() << " "
          << p.second->cols() << endl;
   }
   for (auto p : net->states) {
-    cout << nprefix << "    " << p.first << " " 
-         << p.second->size() << " " 
-         << p.second->rows() << " " 
-         << p.second->cols() << endl;
+    cout << nprefix << "    " << p.first << " " << p.second->size() << " "
+         << p.second->rows() << " " << p.second->cols() << endl;
   }
   for (auto s : net->sub) network_detail(s, nprefix);
 }
@@ -279,7 +275,7 @@ struct Full : INetwork {
   void initialize() {
     int no = attr.get("noutput");
     int ni = attr.get("ninput");
-    rinit(W1, no, ni+1, attr);
+    rinit(W1, no, ni + 1, attr);
   }
   int noutput() { return W1.rows(); }
   int ninput() { return W1.cols() - 1; }
@@ -467,7 +463,7 @@ struct GenericNPLSTM : INetwork {
     this->no = no;
     this->nf = nf;
     gpu = attr.get("gpu", -1);
-    if (gpu>=0) {
+    if (gpu >= 0) {
       cerr << "LSTM gpu = " << gpu << "\n";
       WGI.setGpu(gpu);
       WGF.setGpu(gpu);
@@ -482,19 +478,19 @@ struct GenericNPLSTM : INetwork {
       inputs.setGpu(gpu);
       outputs.setGpu(gpu);
     }
-    assert(WGI.v.getGpu()==gpu);
+    assert(WGI.v.getGpu() == gpu);
 #ifdef HOMOG
     rinit(WGI, no, nf, attr);
     rinit(WGF, no, nf, attr);
     rinit(WGO, no, nf, attr);
     rinit(WCI, no, nf, attr);
 #else
-    rinit(WGI, no, nf+1, attr);
-    rinit(WGF, no, nf+1, attr);
-    rinit(WGO, no, nf+1, attr);
-    rinit(WCI, no, nf+1, attr);
+    rinit(WGI, no, nf + 1, attr);
+    rinit(WGF, no, nf + 1, attr);
+    rinit(WGO, no, nf + 1, attr);
+    rinit(WCI, no, nf + 1, attr);
 #endif
-    assert(WGI.v.getGpu()==gpu);
+    assert(WGI.v.getGpu() == gpu);
   }
   void postLoad() {
     no = WGI.rows();
@@ -502,13 +498,13 @@ struct GenericNPLSTM : INetwork {
     nf = WGI.cols();
     ni = nf - no - 1;
 #else
-    nf = WGI.cols()-1;
+    nf = WGI.cols() - 1;
     ni = nf - no;
 #endif
     assert(nf > no);
   }
   void forward() {
-    assert(inputs.getGpu()==gpu);
+    assert(inputs.getGpu() == gpu);
     int N = inputs.size();
     int bs = inputs.cols();
     source.resize(N, nf, bs);
@@ -518,7 +514,7 @@ struct GenericNPLSTM : INetwork {
     gf.resize(N, no, bs);
     ci.resize(N, no, bs);
     outputs.resize(N, no, bs);
-    assert(inputs.getGpu()==gpu);
+    assert(inputs.getGpu() == gpu);
     for (int t = 0; t < N; t++) {
       forward_stack_delay(source[t], inputs[t], outputs, t - 1);
       forward_full1(gi[t], WGI, source[t], F);
@@ -571,7 +567,7 @@ Network load_net(const string &file) { return load_as_proto(file); }
 void set_inputs(Network net, TensorMap2 inputs) {
   int N = inputs.dimension(0);
   int d = inputs.dimension(1);
-  net->inputs.resize(N,d,1);
+  net->inputs.resize(N, d, 1);
   for (int t = 0; t < N; t++)
     for (int i = 0; i < d; i++) net->inputs[t].v(i, 0) = inputs(t, i);
 }
@@ -583,18 +579,19 @@ void set_targets(Network net, TensorMap2 targets) {
   for (int t = 0; t < net->outputs.size(); t++)
     net->outputs[t].d() -= net->outputs[t].v();
 }
-void set_targets_accelerated(Network net, Tensor<float,2> &targets) {
+void set_targets_accelerated(Network net, Tensor<float, 2> &targets) {
   THROW("unimplemented");
 }
-void set_classes(Network net, Tensor<int,1> &targets) {
+void set_classes(Network net, Tensor<int, 1> &targets) {
   THROW("unimplemented");
 }
 
-static void get_allparams(vector<vector<Params*>> &allparams, vector<Network> &networks) {
+static void get_allparams(vector<vector<Params *>> &allparams,
+                          vector<Network> &networks) {
   allparams.resize(networks.size());
-  for(int i=0; i<allparams.size(); i++) {
+  for (int i = 0; i < allparams.size(); i++) {
     Network net = networks[i];
-    walk_params(net, [i,&allparams](const string &s, Params *p) {
+    walk_params(net, [i, &allparams](const string &s, Params *p) {
       allparams[i].push_back(p);
     });
     assert(allparams[i].size() == allparams[0].size());
@@ -602,45 +599,45 @@ static void get_allparams(vector<vector<Params*>> &allparams, vector<Network> &n
 }
 
 void distribute_weights(vector<Network> &networks, int from) {
-  vector<vector<Params*>> allparams;
+  vector<vector<Params *>> allparams;
   get_allparams(allparams, networks);
   int n = allparams.size();
   int m = allparams[0].size();
-  for(int i=0; i<n; i++) {
-    if (i==from) continue;
-    for(int j=0; j<m; j++) {
+  for (int i = 0; i < n; i++) {
+    if (i == from) continue;
+    for (int j = 0; j < m; j++) {
       allparams[i][j]->v() = allparams[from][j]->v();
     }
   }
 }
 
 void share_deltas(vector<Network> &networks) {
-  vector<vector<Params*>> allparams;
+  vector<vector<Params *>> allparams;
   get_allparams(allparams, networks);
   int n = allparams.size();
   int m = allparams[0].size();
-  for(int i=1; i<n; i++) {
-    for(int j=0; j<m; j++) {
+  for (int i = 1; i < n; i++) {
+    for (int j = 0; j < m; j++) {
       allparams[0][j]->d() += allparams[i][j]->d();
     }
-    for(int j=0; j<m; j++) {
+    for (int j = 0; j < m; j++) {
       allparams[i][j]->d() = allparams[0][j]->d();
     }
   }
 }
 
 void average_weights(vector<Network> &networks) {
-  vector<vector<Params*>> allparams;
+  vector<vector<Params *>> allparams;
   get_allparams(allparams, networks);
   int n = allparams.size();
   int m = allparams[0].size();
-  for(int i=1; i<n; i++) {
-    for(int j=0; j<m; j++) {
+  for (int i = 1; i < n; i++) {
+    for (int j = 0; j < m; j++) {
       allparams[0][j]->v() += allparams[i][j]->v();
     }
   }
-  for(int j=0; j<m; j++) {
-    allparams[0][j]->v() = allparams[0][j]->v() * Float(1.0/n);
+  for (int j = 0; j < m; j++) {
+    allparams[0][j]->v() = allparams[0][j]->v() * Float(1.0 / n);
   }
   distribute_weights(networks);
 }

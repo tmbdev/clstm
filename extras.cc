@@ -38,22 +38,21 @@ extern "C" {
 namespace ocropus {
 using namespace std;
 
-template <class T,int N>
-inline TensorMap<Tensor<T,N>>TM(Tensor<T,N> &t) {
-    return TensorMap<Tensor<T,N>>(t.data(), t.dimensions());
+template <class T, int N>
+inline TensorMap<Tensor<T, N>> TM(Tensor<T, N> &t) {
+  return TensorMap<Tensor<T, N>>(t.data(), t.dimensions());
 }
-
 
 /// Perform 1D Gaussian convolutions using a FIR filter.
 ///
 /// The mask is computed to 3 sigma.
 
 template <class T>
-void gauss1d(Tensor<T,1> &out, Tensor<T,1> &in, float sigma) {
+void gauss1d(Tensor<T, 1> &out, Tensor<T, 1> &in, float sigma) {
   out.resize(in.dimension(0));
   // make a normalized mask
   int range = 1 + int(3.0 * sigma);
-  Tensor<float,1> mask(2 * range + 1);
+  Tensor<float, 1> mask(2 * range + 1);
   for (int i = 0; i <= range; i++) {
     double y = exp(-i * i / 2.0 / sigma / sigma);
     mask(range + i) = mask(range - i) = y;
@@ -79,46 +78,47 @@ void gauss1d(Tensor<T,1> &out, Tensor<T,1> &in, float sigma) {
   }
 }
 
-template void gauss1d(Tensor<unsigned char,1> &out, Tensor<unsigned char,1> &in, float sigma);
-template void gauss1d(Tensor<float,1> &out, Tensor<float,1> &in, float sigma);
+template void gauss1d(Tensor<unsigned char, 1> &out,
+                      Tensor<unsigned char, 1> &in, float sigma);
+template void gauss1d(Tensor<float, 1> &out, Tensor<float, 1> &in, float sigma);
 
 /// Perform 1D Gaussian convolutions using a FIR filter.
 ///
 /// The mask is computed to 3 sigma.
 
 template <class T>
-void gauss1d(Tensor<T,1> &v, float sigma) {
-  Tensor<T,1> temp;
+void gauss1d(Tensor<T, 1> &v, float sigma) {
+  Tensor<T, 1> temp;
   gauss1d(temp, v, sigma);
   v = temp;
 }
 
-template void gauss1d(Tensor<unsigned char,1> &v, float sigma);
-template void gauss1d(Tensor<float,1> &v, float sigma);
+template void gauss1d(Tensor<unsigned char, 1> &v, float sigma);
+template void gauss1d(Tensor<float, 1> &v, float sigma);
 
 /// Perform 2D Gaussian convolutions using a FIR filter.
 ///
 /// The mask is computed to 3 sigma.
 
 void gauss2d(TensorMap2 a, float sx, float sy) {
-  Tensor<Float,1> r, s;
+  Tensor<Float, 1> r, s;
   for (int i = 0; i < a.dimension(0); i++) {
-    r = a.chip(i,0);
+    r = a.chip(i, 0);
     gauss1d(s, r, sy);
-    a.chip(i,0) = s;
+    a.chip(i, 0) = s;
   }
   for (int j = 0; j < a.dimension(1); j++) {
-    r = a.chip(j,1);
+    r = a.chip(j, 1);
     gauss1d(s, r, sx);
-    a.chip(j,1) = s;
+    a.chip(j, 1) = s;
   }
 }
 
 void gauss2d(TensorMap2 image, float sx, float sy);
 
 inline int clip(int x, int n) {
-  if(x<0) return 0;
-  if(x>=n) return n-1;
+  if (x < 0) return 0;
+  if (x >= n) return n - 1;
   return x;
 }
 
@@ -128,12 +128,12 @@ inline Float bilin(TensorMap2 a, float x, float y) {
   int j = (int)floor(y);
   float l = x - i;
   float m = y - j;
-  float s00 = a(clip(i,w),clip(j,h));
-  float s01 = a(clip(i,w),clip(j+1,h));
-  float s10 = a(clip(i+1,w),clip(j,h));
-  float s11 = a(clip(i+1,w),clip(j+1,h));
+  float s00 = a(clip(i, w), clip(j, h));
+  float s01 = a(clip(i, w), clip(j + 1, h));
+  float s10 = a(clip(i + 1, w), clip(j, h));
+  float s11 = a(clip(i + 1, w), clip(j + 1, h));
   return ((1.0 - l) * ((1.0 - m) * s00 + m * s01) +
-             l * ((1.0 - m) * s10 + m * s11));
+          l * ((1.0 - m) * s10 + m * s11));
 }
 
 struct NoNormalizer : INormalizer {
@@ -191,7 +191,7 @@ struct MeanNormalizer : INormalizer {
   }
 };
 
-void argmax1(Tensor<float,1> &m, TensorMap2 a) {
+void argmax1(Tensor<float, 1> &m, TensorMap2 a) {
   m.resize(a.dimension(0));
   for (int i = 0; i < a.dimension(0); i++) {
     float mv = a(i, 0);
@@ -219,7 +219,7 @@ inline void add_smear(TensorMap2 smooth, TensorMap2 line) {
 
 struct CenterNormalizer : INormalizer {
   pytensor::PyServer *py = 0;
-  Tensor<float,1> center;
+  Tensor<float, 1> center;
   float r = -1;
   void setPyServer(void *p) { this->py = (pytensor::PyServer *)p; }
   void getparams(bool verbose) {
@@ -235,7 +235,7 @@ struct CenterNormalizer : INormalizer {
     smooth = line;
     gauss2d(smooth(), h * smooth2d, h * 0.5);
     add_smear(smooth(), line);  // just to avoid singularities
-    Tensor<float,1> a(w);
+    Tensor<float, 1> a(w);
     argmax1(a, smooth());
     gauss1d(center, a, h * smooth1d);
     float s1 = 0.0;
@@ -389,7 +389,7 @@ void read_png(Tensor<unsigned char, 3> &image, FILE *fp) {
     THROW("not implemented for this depth");
   }
 
-  Tensor<int,2> color_map;
+  Tensor<int, 2> color_map;
 
   if (color_type == PNG_COLOR_TYPE_PALETTE ||
       color_type == PNG_COLOR_MASK_PALETTE) { /* generate a colormap */
@@ -402,7 +402,7 @@ void read_png(Tensor<unsigned char, 3> &image, FILE *fp) {
     }
   }
 
-  assert(w>0 && h>0);
+  assert(w > 0 && h > 0);
   image.resize(w, h, 3);
 
   if (spp == 1) {
@@ -445,7 +445,7 @@ void read_png(Tensor<unsigned char, 3> &image, FILE *fp) {
   png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 }
 
-void write_png(FILE *fp, Tensor<unsigned char,3> &image) {
+void write_png(FILE *fp, Tensor<unsigned char, 3> &image) {
   int d;
   png_byte bit_depth, color_type;
   int w, h;
@@ -455,7 +455,8 @@ void write_png(FILE *fp, Tensor<unsigned char,3> &image) {
   unsigned int default_yres = 300;
 
   int rank = image.rank();
-  CHECK_ARG(image.rank() == 2 || (image.rank() == 3 && image.dimension(2) == 3));
+  CHECK_ARG(image.rank() == 2 ||
+            (image.rank() == 3 && image.dimension(2) == 3));
 
   if (!fp) THROW("stream not open");
 
@@ -490,14 +491,14 @@ void write_png(FILE *fp, Tensor<unsigned char,3> &image) {
                PNG_RESOLUTION_METER);
   png_write_info(png_ptr, info_ptr);
 
-  Tensor<unsigned char,1> rowbuffer;
+  Tensor<unsigned char, 1> rowbuffer;
   rowbuffer.resize(3 * w);
   for (int i = 0; i < h; i++) {
     int k = 0;
     for (int j = 0; j < w; j++) {
       int x = j;
       int y = png_flip ? (h - i - 1) : i;
-      if (d==1) {
+      if (d == 1) {
         int value = image(x, y, 0);
         rowbuffer(k++) = value;
         rowbuffer(k++) = value;
@@ -519,32 +520,35 @@ void write_png(FILE *fp, Tensor<unsigned char,3> &image) {
 }
 
 inline double clip(double value, double lo, double hi) {
-  return value<lo?lo:value>hi?hi:value;
+  return value < lo ? lo : value > hi ? hi : value;
 }
 
 void read_png(Tensor2 &image, const char *name) {
-  Tensor<unsigned char,3> temp;
+  Tensor<unsigned char, 3> temp;
   FILE *stream = fopen(name, "r");
   if (!stream) THROW("error on open");
   read_png(temp, stream);
   fclose(stream);
   image.resize(temp.dimension(0), temp.dimension(1));
-  for(int i=0; i<temp.dimension(0); i++) {
-    for(int j=0; j<temp.dimension(1); j++) {
-      if(temp.dimension(2)==1) image(i,j) = temp(i,j,0);
-      else image(i,j) = (temp(i,j,0) +temp(i,j,1) +temp(i,j,2))/(3*255.0);
+  for (int i = 0; i < temp.dimension(0); i++) {
+    for (int j = 0; j < temp.dimension(1); j++) {
+      if (temp.dimension(2) == 1)
+        image(i, j) = temp(i, j, 0);
+      else
+        image(i, j) =
+            (temp(i, j, 0) + temp(i, j, 1) + temp(i, j, 2)) / (3 * 255.0);
     }
   }
 }
 void write_png(const char *name, TensorMap2 image) {
-  Tensor<unsigned char,3> temp;
+  Tensor<unsigned char, 3> temp;
   temp.resize(image.dimension(0), image.dimension(1), 3);
-  for(int i=0; i<temp.dimension(0); i++) {
-    for(int j=0; j<temp.dimension(1); j++) {
-      unsigned char value = floor(clip(image(i,j)*256,0.0,255.999999));
-      temp(i,j,0) = value;
-      temp(i,j,1) = value;
-      temp(i,j,2) = value;
+  for (int i = 0; i < temp.dimension(0); i++) {
+    for (int j = 0; j < temp.dimension(1); j++) {
+      unsigned char value = floor(clip(image(i, j) * 256, 0.0, 255.999999));
+      temp(i, j, 0) = value;
+      temp(i, j, 1) = value;
+      temp(i, j, 2) = value;
     }
   }
   FILE *stream = fopen(name, "w");

@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
   }
   network_detail(net);
   double merr0 = test_net(net);
-  if (merr0>0.1) {
+  if (merr0 > 0.1) {
     print("FAILED (pre-save)", merr0);
     exit(1);
   } else {
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
   net = load_net("__test__.clstm");
   double merr = test_net(net);
   unlink("__test__.clstm");
-  if (merr>0.1) {
+  if (merr > 0.1) {
     print("FAILED", merr);
     exit(1);
   } else {

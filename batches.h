@@ -16,9 +16,7 @@ struct Batch {
     v.setGpu(n);
     d.setGpu(n);
   }
-  int getGpu() {
-    return v.getGpu();
-  }
+  int getGpu() { return v.getGpu(); }
   void like(Batch &other) {
     setGpu(other.getGpu());
     resize(other.rows(), other.cols());
@@ -43,9 +41,7 @@ struct Sequence {
   vector<Batch> steps;
   Sequence() {}
   Sequence(int N, int r, int b) { resize(N, r, b); }
-  int getGpu() {
-    return gpu;
-  }
+  int getGpu() { return gpu; }
   void setGpu(int n) {
     gpu = n;
     clear();
@@ -67,7 +63,7 @@ struct Sequence {
   void resize(int N, int n, int m) {
     steps.resize(N);
     for (int t = 0; t < N; t++) {
-      if (steps[t].getGpu()!=gpu) steps[t].setGpu(gpu);
+      if (steps[t].getGpu() != gpu) steps[t].setGpu(gpu);
       steps[t].resize(n, m);
     }
   }
@@ -94,14 +90,17 @@ struct Sequence {
   }
 };
 
-void rinit(TensorMap2 m, Float s, const char *mode = "unif", Float offset=0.0);
-void rinit(Batch &m, int no, int ni, Float s, const char *mode = "unif", Float offset=0.0);
-void rinit(Params &m, int N, int no, int ni, Float s, const char *mode = "pos", Float offset=0.0);
-void rinit(Sequence &m, int no, int ni, Float s, const char *mode = "unif", Float offset=0.0);
+void rinit(TensorMap2 m, Float s, const char *mode = "unif",
+           Float offset = 0.0);
+void rinit(Batch &m, int no, int ni, Float s, const char *mode = "unif",
+           Float offset = 0.0);
+void rinit(Params &m, int N, int no, int ni, Float s, const char *mode = "pos",
+           Float offset = 0.0);
+void rinit(Sequence &m, int no, int ni, Float s, const char *mode = "unif",
+           Float offset = 0.0);
 bool anynan(Batch &a);
 bool anynan(Params &a);
 bool anynan(Sequence &a);
-
 }
 
 #endif

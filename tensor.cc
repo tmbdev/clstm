@@ -1,4 +1,3 @@
 #include "tensor.h"
 
-namespace ocropus {
-}
+namespace ocropus {}

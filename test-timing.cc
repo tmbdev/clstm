@@ -33,14 +33,14 @@ double randu() {
   return state;
 }
 
-double uniform(double lo=0.0, double hi=1.0) {
+double uniform(double lo = 0.0, double hi = 1.0) {
   double x = fabs(randu());
-  double result = (hi-lo)*x + lo;
+  double result = (hi - lo) * x + lo;
   PRINT(result);
   return result;
 }
-double exp_uniform(double lo=1.0, double hi=100.0) {
-  assert(lo>0 && hi>lo);
+double exp_uniform(double lo = 1.0, double hi = 100.0) {
+  assert(lo > 0 && hi > lo);
   double result = exp(uniform(log(lo), log(hi)));
   PRINT(result);
   return result;
@@ -90,7 +90,6 @@ struct Timing {
     }
   }
 };
-
 
 inline Eigen::array<Eigen::IndexPair<int>, 1> axispairs(int i, int j) {
   Eigen::array<Eigen::IndexPair<int>, 1> result = {Eigen::IndexPair<int>(i, j)};

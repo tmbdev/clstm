@@ -34,7 +34,7 @@ bool proto_verbose =
 
 void proto_of_params(clstm::Array *array, Params &params, bool weights = true) {
   Tensor2 temp;
-  temp = params.v; // copy values in case they are on GPU
+  temp = params.v;  // copy values in case they are on GPU
   TensorMap2 a = temp();
   array->add_dim(rows(a));
   array->add_dim(cols(a));

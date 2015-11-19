@@ -38,7 +38,6 @@ inline double now() {
   return tv.tv_sec + 1e-6 * tv.tv_usec;
 }
 
-
 inline void glob(vector<string> &result, const string &arg) {
   result.clear();
   glob_t buf;
@@ -270,9 +269,8 @@ struct Trigger {
   int next = 0;
   int last_trigger = 0;
   int current_trigger = 0;
-  Trigger(int every,int upto=-1, int start=0) :
-    every(every), upto(upto), count(start) {
-  }
+  Trigger(int every, int upto = -1, int start = 0)
+      : every(every), upto(upto), count(start) {}
   Trigger &skip0() {
     next += every;
     return *this;
@@ -285,19 +283,17 @@ struct Trigger {
     last_trigger = current_trigger;
     current_trigger = count;
   }
-  int since() {
-    return count - last_trigger;
-  }
+  int since() { return count - last_trigger; }
   bool check() {
     assert(!finished);
-    if (upto>0 && count >= upto-1) {
+    if (upto > 0 && count >= upto - 1) {
       finished = true;
       rotate();
       return true;
     }
     if (every == 0) return false;
     if (count >= next) {
-      while(count >= next) next += every;
+      while (count >= next) next += every;
       rotate();
       return true;
     } else {
@@ -306,18 +302,13 @@ struct Trigger {
   }
   bool operator()(int current) {
     assert(!finished);
-    assert(current>=count);
+    assert(current >= count);
     count = current;
     return check();
   }
-  bool operator+=(int incr) {
-    return operator()(count+incr);
-  }
-  bool operator++() {
-    return operator()(count+1);
-  }
+  bool operator+=(int incr) { return operator()(count + incr); }
+  bool operator++() { return operator()(count + 1); }
 };
-
 }
 
 #endif
