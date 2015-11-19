@@ -3,6 +3,7 @@
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <iostream>
 
+#define NOINLINE __attribute__ ((noinline))
 
 // FIXME: factor out nonlinearities
 
@@ -73,19 +74,19 @@ ONBOTH inline Indexes2 indexes(int i, int j) {
 
 // Non-linearities.
 
-void forward_identity(Device *dev, Batch &y, Batch &x) {
+NOINLINE void forward_identity(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v();
 }
-void forward_sigmoid(Device *dev, Batch &y, Batch &x) {
+NOINLINE void forward_sigmoid(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v().sigmoid();
 }
-void forward_tanh(Device *dev, Batch &y, Batch &x) {
+NOINLINE void forward_tanh(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v().tanh();
 }
-void forward_relu(Device *dev, Batch &y, Batch &x) {
+NOINLINE void forward_relu(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v().cwiseMax(Float(0));
 }
-void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
+NOINLINE void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   switch(nl) {
   case LIN: forward_identity(dev, y, x); break;
   case SIG: forward_sigmoid(dev, y, x); break;
@@ -95,20 +96,20 @@ void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   }
 }
 
-void backward_identity(Device *dev, Batch &y, Batch &x) {
+NOINLINE void backward_identity(Device *dev, Batch &y, Batch &x) {
   x.d().device(*dev) += y.d();
 }
-void backward_sigmoid(Device *dev, Batch &y, Batch &x) {
+NOINLINE void backward_sigmoid(Device *dev, Batch &y, Batch &x) {
   x.d().device(*dev) += y.v() * (-y.v()+Float(1)) * y.d();
 }
-void backward_tanh(Device *dev, Batch &y, Batch &x) {
+NOINLINE void backward_tanh(Device *dev, Batch &y, Batch &x) {
   x.d().device(*dev) += (-y.v()*y.v() + Float(1)) * y.d();
 }
-void backward_relu(Device *dev, Batch &y, Batch &x) {
+NOINLINE void backward_relu(Device *dev, Batch &y, Batch &x) {
   Float zero = 0;
   x.d().device(*dev) += y.d() * (y.v()>zero).cast<Float>();
 }
-void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
+NOINLINE void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   switch(nl) {
   case LIN: backward_identity(dev, y, x); break;
   case SIG: backward_sigmoid(dev, y, x); break;
@@ -120,19 +121,19 @@ void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
 
 // Forward and backward non-linearities for in-place processing.
 
-void forward_identity0(Device *dev, Batch &y) {
+NOINLINE void forward_identity0(Device *dev, Batch &y) {
   y.v().device(*dev) = y.v();
 }
-void forward_sigmoid0(Device *dev, Batch &y) {
+NOINLINE void forward_sigmoid0(Device *dev, Batch &y) {
   y.v().device(*dev) = y.v().sigmoid();
 }
-void forward_tanh0(Device *dev, Batch &y) {
+NOINLINE void forward_tanh0(Device *dev, Batch &y) {
   y.v().device(*dev) = y.v().tanh();
 }
-void forward_relu0(Device *dev, Batch &y) {
+NOINLINE void forward_relu0(Device *dev, Batch &y) {
   y.v().device(*dev) = y.v().cwiseMax(Float(0));
 }
-void forward_nonlin0(Device *dev, Batch &y, int nl) {
+NOINLINE void forward_nonlin0(Device *dev, Batch &y, int nl) {
   switch(nl) {
   case LIN: forward_identity0(dev, y); break;
   case SIG: forward_sigmoid0(dev, y); break;
@@ -142,20 +143,20 @@ void forward_nonlin0(Device *dev, Batch &y, int nl) {
   }
 }
 
-void backward_identity0(Device *dev, Batch &y) {
+NOINLINE void backward_identity0(Device *dev, Batch &y) {
   y.d().device(*dev) = y.d();
 }
-void backward_sigmoid0(Device *dev, Batch &y) {
+NOINLINE void backward_sigmoid0(Device *dev, Batch &y) {
   y.d().device(*dev) = y.v() * (-y.v()+Float(1)) * y.d();
 }
-void backward_tanh0(Device *dev, Batch &y) {
+NOINLINE void backward_tanh0(Device *dev, Batch &y) {
   y.d().device(*dev) = (-y.v()*y.v() + Float(1)) * y.d();
 }
-void backward_relu0(Device *dev, Batch &y) {
+NOINLINE void backward_relu0(Device *dev, Batch &y) {
   Float zero = 0;
   y.d().device(*dev) = y.d() * (y.v()>zero).cast<Float>();
 }
-void backward_nonlin0(Device *dev, Batch &y, int nl) {
+NOINLINE void backward_nonlin0(Device *dev, Batch &y, int nl) {
   switch(nl) {
   case LIN: backward_identity0(dev, y); break;
   case SIG: backward_sigmoid0(dev, y); break;
@@ -169,13 +170,13 @@ void backward_nonlin0(Device *dev, Batch &y, int nl) {
 #define CBUTFIRST(M) (M).block(0,1,(M).rows(),(M).cols()-1)
 #define CFIRST(M) (M).col(0)
 
-void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
+NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = x.v.dimension(1);
   assert(y.rows() == n);
   assert(y.cols() == x.cols());
   assert(x.rows() == m-1);
-#ifndef USEMAT
+#if 0
   Indexes2 offsets{0, 1};
   Indexes2 sizes{n, m-1};
   Axes1 axes01{IndexPair(1,0)};
@@ -187,25 +188,22 @@ void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   y.v.mat() = (CBUTFIRST(W1.v.mat()) * x.v.mat()).colwise() + CFIRST(W1.v.mat());
 #endif
 }
-void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
+NOINLINE void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
-#ifndef USEMAT
+#if 0
   x.d().device(*dev) += W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(y.d(), axispairs(0, 0));
   W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) += y.d().contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1).device(*dev) += y.d().sum(indexes(1));
 #else
-  x.d.mat() = CBUTFIRST(W1.v.mat()).transpose() * y.d.mat();
-  int bs = y.v.cols();
-  auto d_W = CBUTFIRST(W1.d.mat());
-  d_W += y.d.mat() * x.v.mat().transpose();
-  auto d_w = CFIRST(W1.d.mat());
-  for (int b = 0; b < bs; b++) d_w += y.d.mat().col(b);
+  x.d.mat() += CBUTFIRST(W1.v.mat()).transpose() * y.d.mat();
+  CBUTFIRST(W1.d.mat()) += y.d.mat() * x.v.mat().transpose();
+  CFIRST(W1.d.mat()) += y.d.mat().rowwise().sum();
 #endif
 }
 
 // full layers with nonlinearities
 
-void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
+NOINLINE void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
   device_notify(dev, y.getGpu());
   assert(y.getGpu()<0?typeid(dev)==typeid(&default_device):true);
   assert(y.getGpu()>=0?typeid(dev)!=typeid(&default_device):true);
@@ -214,20 +212,21 @@ void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
 }
 
 
-void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
+NOINLINE void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
   backward_nonlin0(dev, y, nl);
   backward_lin1(dev, y, W1, x);
 }
 
 // softmax
 
-void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
+NOINLINE void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   Float (*f)(Float) = limexp;
   int n = W1.v.dimension(0);
   int m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
   assert(n == z.v.dimension(0));
   assert(n >= 2);
+#if 0
   z.v().device(*dev) = (W1.v()
              .slice(indexes(0, 1), indexes(n, m - 1))
              .contract(x.v(), axispairs(1, 0)) +
@@ -236,18 +235,33 @@ void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   EigenTensor1 sums = z.v().sum(indexes(0));
   assert(sums.dimension(0)==bs);
   z.v().device(*dev) = z.v() / sums.reshape(indexes(1,bs)).broadcast(indexes(n,1));;
+#else
+  z.v.mat() = (CBUTFIRST(W1.v.mat()) * x.v.mat()).colwise() + CFIRST(W1.v.mat());
+  z.v.mat() = z.v.mat().unaryExpr(f);
+  EigenVector sums = z.v.mat().colwise().sum();
+  z.v.mat().array().rowwise() /= sums.transpose().array();
+#endif
 }
-void backward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
+NOINLINE void backward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
-  x.d().device(*dev) = W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(z.d(), axispairs(0, 0));
-  W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) += z.d().contract(x.v(), axispairs(1, 1));
+#if 0
+  x.d().device(*dev) = W1.v()
+                           .slice(indexes(0, 1), indexes(n, m - 1))
+                           .contract(z.d(), axispairs(0, 0));
+  W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) +=
+      z.d().contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1).device(*dev) += z.d().sum(indexes(1));
+#else
+  x.d.mat() = CBUTFIRST(W1.v.mat()).transpose() * z.d.mat();
+  CBUTFIRST(W1.d.mat()) += z.d.mat() * x.v.mat().transpose();
+  CFIRST(W1.d.mat()) += z.d.mat().rowwise().sum();
+#endif
 }
 
 // stacking
 
-void forward_stack(Device *dev, Batch &z, Batch &x, Batch &y) {
+NOINLINE void forward_stack(Device *dev, Batch &z, Batch &x, Batch &y) {
   int nx = x.v.dimension(0), ny = y.v.dimension(0);
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
@@ -255,7 +269,7 @@ void forward_stack(Device *dev, Batch &z, Batch &x, Batch &y) {
   z.v().slice(indexes(0, 0), indexes(nx, bs)).device(*dev) = x.v();
   z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) = y.v();
 }
-void backward_stack(Device *dev, Batch &z, Batch &x, Batch &y) {
+NOINLINE void backward_stack(Device *dev, Batch &z, Batch &x, Batch &y) {
   int nx = x.v.dimension(0), ny = y.v.dimension(0);
   int bs = x.v.dimension(1);
   x.d().device(*dev) += z.d().slice(indexes(0, 0), indexes(nx, bs));
@@ -264,43 +278,56 @@ void backward_stack(Device *dev, Batch &z, Batch &x, Batch &y) {
 
 // stacking with delay
 
-void forward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last) {
+NOINLINE void forward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
   assert(z.cols() == x.cols() && z.cols() == y.cols());
+#if 0
   z.v().slice(indexes(0, 0), indexes(nx, bs)).device(*dev) = x.v();
   if (last >= 0)
     z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) = y[last].v();
   else
     z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) = y[0].v().constant(0);
+#else
+  z.v.mat().block( 0, 0, nx, bs) = x.v.mat();
+  if (last >= 0)
+    z.v.mat().block( nx, 0, ny, bs) = y[last].v.mat();
+  else
+    z.v.mat().block( nx, 0, ny, bs).setZero();  
+#endif  
 }
-void backward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last) {
+NOINLINE void backward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
+#if 0
   x.d().device(*dev) += z.d().slice(indexes(0, 0), indexes(nx, bs));
   if (last >= 0) y[last].d().device(*dev) += z.d().slice(indexes(nx, 0), indexes(ny, bs));
+#else
+  x.d.mat() += z.d.mat().block( 0, 0, nx, bs);
+  if (last >= 0) y[last].d.mat() += z.d.mat().block( nx, 0, ny, bs);
+#endif
 }
 
 // reverse sequences
 
-void forward_reverse(Device *dev, Sequence &y, Sequence &x) {
+NOINLINE void forward_reverse(Device *dev, Sequence &y, Sequence &x) {
   int N = x.size();
   for (int i = 0; i < N; i++) y[N - i - 1] = x[i];
 }
-void backward_reverse(Device *dev, Sequence &y, Sequence &x) {
+NOINLINE void backward_reverse(Device *dev, Sequence &y, Sequence &x) {
   int N = x.size();
   for (int i = 0; i < N; i++) x[N - i - 1].d().device(*dev) += y[i].d();
 }
 
 // combine the delayed gated state with the gated input
 
-void forward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi, Sequence &states,
+NOINLINE void forward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi, Sequence &states,
                       int last, Batch &gf) {
   state.v().device(*dev) = ci.v() * gi.v();
   if (last >= 0) state.v().device(*dev) += gf.v() * states[last].v();
 }
-void backward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi, Sequence &states,
+NOINLINE void backward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi, Sequence &states,
                        int last, Batch &gf) {
   if (last >= 0) states[last].d().device(*dev) += state.d() * gf.v();
   if (last >= 0) gf.d().device(*dev) += state.d() * states[last].v();
@@ -310,17 +337,17 @@ void backward_statemem(Device *dev, Batch &state, Batch &ci, Batch &gi, Sequence
 
 // linear gated output
 
-void forward_gate(Device *dev, Batch &out, Batch &nlstate, Batch &go) {
+NOINLINE void forward_gate(Device *dev, Batch &out, Batch &nlstate, Batch &go) {
   out.v().device(*dev) = nlstate.v() * go.v();
 }
-void backward_gate(Device *dev, Batch &out, Batch &nlstate, Batch &go) {
+NOINLINE void backward_gate(Device *dev, Batch &out, Batch &nlstate, Batch &go) {
   go.d().device(*dev) += nlstate.v() * out.d();
   nlstate.d().device(*dev) += go.v() * out.d();
 }
 
 // nonlinear gated output
 
-void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
+NOINLINE void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
   Batch temp;
   temp.setGpu(out.getGpu());
   temp.resize(out.rows(), out.cols());
@@ -328,7 +355,7 @@ void forward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl
   forward_gate(dev, out, temp, go);
 }
 
-void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
+NOINLINE void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &go, int nl) {
   Batch temp;
   temp.setGpu(out.getGpu());
   temp.resize(out.rows(), out.cols());

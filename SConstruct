@@ -139,7 +139,7 @@ cuda = env.Object("clstm_compute_cuda.o", "clstm_compute_cuda.cc",
 
 libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
           "tensor.cc", "batches.cc", "extras.cc", "clstm.pb.cc", 
-          "clstm_compute.cc"]
+          "clstm_compute.cc", "perf.cc"]
 if option("gpu", 0):
   env.Append(LIBS=["cudart","cublas","cuda"])
   env.Append(LIBPATH=["/usr/local/cuda/lib64"])

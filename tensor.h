@@ -69,7 +69,11 @@ typedef Eigen::TensorMap<Eigen::Tensor<Float, 1>> TensorMap1;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 2>> TensorMap2;
 typedef Eigen::TensorRef<Eigen::Tensor<Float, 1>> TensorRef1;
 typedef Eigen::TensorRef<Eigen::Tensor<Float, 2>> TensorRef2;
-typedef Eigen::Map<Eigen::Matrix<Float, Eigen::Dynamic, Eigen::Dynamic>> MatrixMap2;
+
+typedef Eigen::Matrix<Float, Eigen::Dynamic, 1> EigenVector;
+typedef Eigen::Matrix<Float, Eigen::Dynamic, Eigen::Dynamic> EigenMatrix;
+typedef Eigen::Map<EigenVector> VectorMap;
+typedef Eigen::Map<EigenMatrix> MatrixMap;
 
 inline int rows(const TensorMap2 &m) { return m.dimension(0); }
 inline int cols(const TensorMap2 &m) { return m.dimension(1); }
@@ -196,8 +200,8 @@ public:
   TensorMap2 map() {
     return **this;
   }
-  MatrixMap2 mat() {
-    return MatrixMap2(ptr, dims[0], dims[1]);
+  MatrixMap mat() {
+    return MatrixMap(ptr, dims[0], dims[1]);
   }
 
   Float &operator()(int i, int j) {

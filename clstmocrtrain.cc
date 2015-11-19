@@ -196,6 +196,6 @@ int main1(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-  TRY { return main1(argc, argv); }
+  TRY { main1(argc, argv); }
   CATCH(const char *message) { cerr << "FATAL: " << message << endl; }
 }
