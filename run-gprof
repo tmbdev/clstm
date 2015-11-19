@@ -1,0 +1,27 @@
+#!/bin/sh
+
+scons -c
+sed 's/-fno-inline/ -O2 /g' < SConstruct > SConstruct-hacked
+scons -f SConstruct-hacked profile=1 debug=0 clstmocrtrain -j 8
+
+find book -name '*.bin.png' | sort -r > uw3-all
+sed 1,50d uw3-all > uw3-train
+sed 50q uw3-all > uw3-test
+
+set -a
+report_every=10
+save_every=1000
+ntrain=20
+dewarp=center
+display_every=10
+test_every=10000
+display_every=100
+testset=uw3-test.h5
+hidden=100
+lrate=1e-4
+save_name=uw3-500
+report_time=1
+time ./clstmocrtrain uw3-train uw3-test
+rev=$(git rev-parse HEAD)
+gprof clstmocrtrain > $rev.gprof
+gprof2dot $rev.gprof > $rev.dot
