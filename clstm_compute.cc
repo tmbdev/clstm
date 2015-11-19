@@ -3,16 +3,39 @@
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <iostream>
 
-#define NOINLINE __attribute__ ((noinline))
+// The NOINLINE attribute is used before all forward_/backward_ steps
+// to make execution profiles a little more readable.
 
-// FIXME: factor out nonlinearities
+#ifndef NOINLINE
+#define NOINLINE __attribute__ ((noinline))
+#endif
+
+// The host/device directives are only meaningful with CUDACC
+
+#ifdef __CUDACC__
+#define ONBOTH __host__ __device__
+#define ONDEVICE __device__
+#else
+#define ONBOTH
+#define ONDEVICE
+#endif
 
 namespace ocropus {
+
+// We can generate code for different Eigen devices by defining
+// the DEVICE macro when compiling this compilation unit.
+// 
+// When no DEVICE is given, we use the Eigen::DefaultDevice
+// and default to some of the Eigen::Matrix routines (which
+// are faster in some cases).
+//
+// When a DEVICE is given, we use all Tensor operations.
 
 #ifndef DEVICE
 typedef Eigen::DefaultDevice Device;
 Eigen::DefaultDevice default_device;
 #else
+#define CLSTM_ALL_TENSOR
 typedef DEVICE Device;
 #endif
 
@@ -23,10 +46,12 @@ inline void device_notify(Device *dev, int gpu) {
   count++;
 }
 
-#ifdef __CUDACC__
-#define ONBOTH __host__ __device__
-#define ONDEVICE __device__
-#define MAXGPUS 16
+// When compiling with CUDA, we refer to GPUs by integer index outside
+// this code. That ensures that none of the rest of CLSTM has to know
+// about CUDA or nvcc.
+
+#ifdef CLSTM_USE_GPU
+#define MAXGPUS 64
 
 using std::unique_ptr;
 
@@ -43,16 +68,16 @@ Eigen::GpuDevice *gpu_device(int id) {
   assert(id<MAXGPUS);
   if (!devices[id].dev) {
     cerr << "initializing GPU " << id << endl;
+    assert(id==0 && "only GPU 0 tested / supported so far");
     auto stream = new Eigen::CudaStreamDevice(/*id*/);
     devices[id].stream.reset(stream);
     devices[id].dev.reset(new Eigen::GpuDevice(stream));
   }
   return devices[id].dev.get();
 }
-#else
-#define ONBOTH
-#define ONDEVICE
 #endif
+
+// Some utility functions for dealing with Eigen indexes and axes.
 
 typedef Eigen::IndexPair<int> IndexPair;
 typedef Eigen::array<IndexPair, 1> Axes1;
@@ -72,7 +97,9 @@ ONBOTH inline Indexes2 indexes(int i, int j) {
   return Indexes2({i, j});
 }
 
-// Non-linearities.
+// Non-linearities. These come in two versions: regular and in-place.
+// Note that the regular ones use additive backward-deltas, while the
+// in-place ones just modify the deltas in place.
 
 NOINLINE void forward_identity(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v();
@@ -165,10 +192,12 @@ NOINLINE void backward_nonlin0(Device *dev, Batch &y, int nl) {
   default: abort();
   }
 }
-// full layers with constant offset
+// Full layers with constant offset
 
+#ifndef CLSTM_ALL_TENSOR
 #define CBUTFIRST(M) (M).block(0,1,(M).rows(),(M).cols()-1)
 #define CFIRST(M) (M).col(0)
+#endif
 
 NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
@@ -176,7 +205,7 @@ NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   assert(y.rows() == n);
   assert(y.cols() == x.cols());
   assert(x.rows() == m-1);
-#if 0
+#ifdef CLSTM_ALL_TENSOR
   Indexes2 offsets{0, 1};
   Indexes2 sizes{n, m-1};
   Axes1 axes01{IndexPair(1,0)};
@@ -190,7 +219,7 @@ NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
 }
 NOINLINE void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
-#if 0
+#ifdef CLSTM_ALL_TENSOR
   x.d().device(*dev) += W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(y.d(), axispairs(0, 0));
   W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) += y.d().contract(x.v(), axispairs(1, 1));
   W1.d().chip(0, 1).device(*dev) += y.d().sum(indexes(1));
@@ -204,13 +233,11 @@ NOINLINE void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
 // full layers with nonlinearities
 
 NOINLINE void forward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
-  device_notify(dev, y.getGpu());
   assert(y.getGpu()<0?typeid(dev)==typeid(&default_device):true);
   assert(y.getGpu()>=0?typeid(dev)!=typeid(&default_device):true);
   forward_lin1(dev, y, W1, x);
   forward_nonlin0(dev, y, nl);
 }
-
 
 NOINLINE void backward_full1(Device *dev, Batch &y, Params &W1, Batch &x, int nl) {
   backward_nonlin0(dev, y, nl);
@@ -226,7 +253,7 @@ NOINLINE void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   int bs = z.v.dimension(1);
   assert(n == z.v.dimension(0));
   assert(n >= 2);
-#if 0
+#ifdef CLSTM_ALL_TENSOR
   z.v().device(*dev) = (W1.v()
              .slice(indexes(0, 1), indexes(n, m - 1))
              .contract(x.v(), axispairs(1, 0)) +
@@ -245,7 +272,7 @@ NOINLINE void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
 NOINLINE void backward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
-#if 0
+#ifdef CLSTM_ALL_TENSOR
   x.d().device(*dev) = W1.v()
                            .slice(indexes(0, 1), indexes(n, m - 1))
                            .contract(z.d(), axispairs(0, 0));
@@ -283,7 +310,7 @@ NOINLINE void forward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, 
   int bs = x.v.dimension(1);
   assert(z.rows() == x.rows() + y.rows());
   assert(z.cols() == x.cols() && z.cols() == y.cols());
-#if 0
+#ifdef CLSTM_ALL_TENSOR
   z.v().slice(indexes(0, 0), indexes(nx, bs)).device(*dev) = x.v();
   if (last >= 0)
     z.v().slice(indexes(nx, 0), indexes(ny, bs)).device(*dev) = y[last].v();
@@ -300,7 +327,7 @@ NOINLINE void forward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, 
 NOINLINE void backward_stack_delay(Device *dev, Batch &z, Batch &x, Sequence &y, int last) {
   int nx = x.v.dimension(0), ny = y[0].v.dimension(0);
   int bs = x.v.dimension(1);
-#if 0
+#ifdef CLSTM_ALL_TENSOR
   x.d().device(*dev) += z.d().slice(indexes(0, 0), indexes(nx, bs));
   if (last >= 0) y[last].d().device(*dev) += z.d().slice(indexes(nx, 0), indexes(ny, bs));
 #else
@@ -364,18 +391,18 @@ NOINLINE void backward_nonlingate(Device *dev, Batch &out, Batch &state, Batch &
   backward_nonlin(dev, temp, state, nl);
 }
 
-void fill(Device *dev, TensorMap2 &a, Float value) {
+NOINLINE void fill(Device *dev, TensorMap2 &a, Float value) {
   a.device(*dev) = a.constant(value);
 }
 
-void clip_gradient(Device *dev, Batch &x, Float clip) {
+NOINLINE void clip_gradient(Device *dev, Batch &x, Float clip) {
   if (clip >= 1e6) return;
   assert(clip > 0);
   x.d().device(*dev) = x.d().cwiseMin(clip);
   x.d().device(*dev) = x.d().cwiseMax(-clip);
 }
 
-void sgd_update(Device *dev, Params &params, Float lr, Float mom) {
+NOINLINE void sgd_update(Device *dev, Params &params, Float lr, Float mom) {
   params.v().device(*dev) += params.d() * lr;
   params.d().device(*dev) = params.d() * mom;
 }
