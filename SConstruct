@@ -1,4 +1,7 @@
 # -*- Python -*-
+
+# CLSTM requires C++11, and installs in /usr/local by default
+
 import os
 import sys
 import os.path
@@ -10,21 +13,20 @@ import distutils.sysconfig
 def die(msg):
     sys.stderr.write("ERROR " + msg + "\n")
     Exit(1)
-
 def option(name, dflt):
     result = (ARGUMENTS.get(name) or os.environ.get(name, dflt))
     if type(dflt)==int: result = int(result)
     return result
-
 def findonpath(fname, path):
     for dir in path:
         if os.path.exists(os.path.join(dir, fname)):
             return dir
-    raise die("%s: not found" % fname)
+    die("%s: not found" % fname)
+
+# A protocol buffer builder.
 
 def protoc(target, source, env):
     os.system("protoc %s --cpp_out=." % source[0])
-
 def protoemitter(target, source, env):
     for s in source:
         base, _ = os.path.splitext(str(s))
@@ -35,8 +37,6 @@ protoc_builder = Builder(action=protoc,
                          emitter=protoemitter,
                          src_suffix=".proto")
 
-# CLSTM requires C++11, and installes in /usr/local by default
-
 prefix = option('prefix', "/usr/local")
 
 env = Environment()
@@ -44,21 +44,12 @@ env.Append(CPPDEFINES={'THROW': 'throw', 'CATCH': 'catch', 'TRY': 'try'})
 env.Append(CPPDEFINES={'USEMAT': '1'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
+options = option("options", "")
+env["CXX"] = option("CXX", "g++") + " --std=c++11 -Wno-unused-result "+options
+
 if option("double", 0):
     env.Append(CPPDEFINES={'LSTM_DOUBLE': '1'})
 
-if option("threads", 0):
-  env.Append(CPPDEFINES={'EIGEN_USE_THREADS': '1'})
-  env.Append(LIBS=["pthread"])
-
-# With omp=1 support, Eigen and other parts of the code may use
-# multi-threading.
-
-if option("omp", 0):
-    env["CXX"] = option("CXX", "g++") + \
-        " --std=c++11 -Wno-unused-result -fopenmp"
-else:
-    env["CXX"] = option("CXX", "g++") + " --std=c++11 -Wno-unused-result"
 
 # With profile=1, the code will be compiled suitable for profiling and debug.
 # With debug=1, the code will be compiled suitable for debugging.
@@ -66,45 +57,23 @@ else:
 profile = option("profile", 0)
 debug = option("debug", 0)
 
-if profile>1:
-    env.Append(CXXFLAGS="-g -pg -fno-inline".split())
-    env.Append(CCFLAGS="-g -pg -fno-inline".split())
-    env.Append(LINKFLAGS="-g -pg".split())
-elif profile>0:
-    env.Append(CXXFLAGS="-g -pg -O2".split())
+if profile>0:
+    #env.Append(CXXFLAGS="-g -pg -O2".split())
     env.Append(CCFLAGS="-g -pg -O2".split())
     env.Append(LINKFLAGS="-g -pg".split())
 elif debug>1:
-    env.Append(CXXFLAGS="-g -fno-inline".split())
+    #env.Append(CXXFLAGS="-g -fno-inline".split())
     env.Append(CCFLAGS="-g".split())
     env.Append(LINKFLAGS="-g".split())
 elif debug>0:
-    env.Append(CXXFLAGS="-g".split())
+    #env.Append(CXXFLAGS="-g".split())
     env.Append(CCFLAGS="-g".split())
     env.Append(LINKFLAGS="-g".split())
+elif debug==0:
+    #env.Append(CXXFLAGS="-g -O3 -DEIGEN_NO_DEBUG".split())
+    env.Append(CCFLAGS="-g -O3 -DEIGEN_NO_DEBUG".split())
 elif debug<0:
-    env.Append(CXXFLAGS="-g -O4 -DNDEBUG -finline".split())
-    env.Append(CCFLAGS="-g".split())
-else:
-    env.Append(CXXFLAGS="-g -O3".split())
-    env.Append(CCFLAGS="-g".split())
-
-# Hack for linking some libraries statically.
-
-abslibs = """/usr/lib/x86_64-linux-gnu/libpng12.a
-/usr/lib/x86_64-linux-gnu/libprotobuf.a
-/usr/lib/x86_64-linux-gnu/libz.a"""
-
-if not option("static", 0):
-    env.Append(LIBS=["png", "protobuf"])
-else:
-    abslibs = [File(x) for x in abslibs.split()]
-    env.Append(LIBS=abslibs)
-
-# Extra layers (old layers or testing)
-
-if option("extras", 0):
-    env.Append(CPPDEFINES={'CLSTM_EXTRAS': 1})
+    env.Append(CCFLAGS="-g -Ofast -DEIGEN_NO_DEBUG -finline -ffast-math -fno-signaling-nans -funsafe-math-optimizations -ffinite-math-only -march=native".split())
 
 # Try to locate the Eigen include files (they are in different locations
 # on different systems); you can specify an include path for Eigen with
@@ -117,9 +86,11 @@ if option("eigen", "") == "":
         /usr/include/eigen3""".split())
 else:
     inc = findonpath("Eigen/Eigen", [option("eigen")])
-env.Append(CPPPATH=[inc])
 
-# You can enable display debugging with `display=1`
+env.Append(CPPPATH=[inc])
+env.Append(LIBS=["png", "protobuf"])
+
+# You can enable display debugging with `display=1` (probably not working right now)
 
 if option("display", 0):
     env.Append(LIBS=["zmqpp", "zmq"])
@@ -134,12 +105,11 @@ env.Protoc("clstm.proto")
 cuda = env.Object("clstm_compute_cuda.o", "clstm_compute_cuda.cc",
            CXX="./nvcc-wrapper")
 
-
 # Build the CLSTM library.
 
 libsrc = ["clstm.cc", "ctc.cc", "clstm_proto.cc", "clstm_prefab.cc",
           "tensor.cc", "batches.cc", "extras.cc", "clstm.pb.cc", 
-          "clstm_compute.cc", "perf.cc"]
+          "clstm_compute.cc"]
 if option("gpu", 0):
   env.Append(LIBS=["cudart","cublas","cuda"])
   env.Append(LIBPATH=["/usr/local/cuda/lib64"])
@@ -152,8 +122,7 @@ libclstm = env.StaticLibrary("clstm", libsrc)
 
 all = [libclstm]
 
-programs = """clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".split(
-)
+programs = """clstmfilter clstmfiltertrain clstmocr clstmocrtrain""".split()
 for program in programs:
     all += [env.Program(program, [program + ".cc"], LIBS=[libclstm] + libs)]
     Default(program)
@@ -166,25 +135,6 @@ Alias('install-include',
       Install(os.path.join(prefix, "include"), ["clstm.h"]))
 Alias('install',
       ['install-lib', 'install-include'])
-
-# If you have HDF5 installed, set hdf5lib=hdf5_serial (or something like that)
-# and you will get a bunch of command line programs that can be trained from
-# HDF5 data files. This code is messy and may get deprecated eventually.
-
-if option("hdf5lib", "") != "":
-    h5env = env.Clone()
-    inc = findonpath("hdf5.h", """
-        /usr/include
-        /usr/local/include/hdf5/serial
-        /usr/local/include/hdf5
-        /usr/include/hdf5/serial
-        /usr/include/hdf5""".split())
-    h5env.Append(CPPPATH=[inc])
-    h5env.Append(LIBS=["hdf5_cpp"])
-    h5env.Append(LIBS=[option("hdf5lib", "hdf5_serial")])
-    h5env.Prepend(LIBS=[libclstm])
-    for program in "clstmctc clstmseq clstmconv".split():
-        h5env.Program(program, [program + ".cc"])
 
 # A simple test of the C++ LSTM implementation.
 all += [env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)]
