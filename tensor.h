@@ -190,7 +190,6 @@ public:
   //   *x, x(), x.map()
   //
   // Probably the x() is the most natural one to use in most expressions.
-
   TensorMap2 operator*() {
     return TensorMap2(ptr, dims[0], dims[1]);
   }
@@ -200,6 +199,16 @@ public:
   TensorMap2 map() {
     return **this;
   }
+
+  // Convert the tensor to an Eigen Matrix Map
+  MatrixMap mat() {
+    return MatrixMap(ptr, dims[0], dims[1]);
+  }
+
+  // Extract the offset and matrix part from a homogeneous
+  // matrix transformation. This can also be expressed
+  // using slice/chip in Eigen::Tensor, but that turns
+  // out to be significantly slower.
   TensorMap2 map1() {
     return TensorMap2(ptr+dims[0], dims[0], dims[1]-1);
   }
@@ -207,12 +216,9 @@ public:
     return TensorMap1(ptr, dims[0]);
   }
 
-  // Convert the tensor to an Eigen Matrix Map
-  MatrixMap mat() {
-    return MatrixMap(ptr, dims[0], dims[1]);
-  }
-
-  // For homogeneous coordinates, extract the offset and the matrix part.
+  // Extract the offset and matrix part from a homogeneous
+  // matrix transformation, this time using Eigen::Matrix
+  // types.
   MatrixMap mat1() {
     return MatrixMap(ptr+dims[0], dims[0], dims[1]-1);
   }

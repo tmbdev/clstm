@@ -4,7 +4,8 @@
 #include <iostream>
 
 // The NOINLINE attribute is used before all forward_/backward_ steps
-// to make execution profiles a little more readable.
+// to make execution profiles a little more readable (probably not
+// needed).
 
 #ifndef NOINLINE
 #define NOINLINE __attribute__ ((noinline))
@@ -209,10 +210,10 @@ NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   Indexes2 offsets{0, 1};
   Indexes2 sizes{n, m-1};
   Axes1 axes01{IndexPair(1,0)};
-  y.v().device(*dev) = W1.v().slice(offsets, sizes).contract(x.v(), axes01);
+  y.v().device(*dev) = W1.v.map1().contract(x.v(), axes01);
   Indexes2 shape{n, 1};
   Indexes2 bcast{1, bs};
-  y.v().device(*dev) += W1.v().chip(0, 1).reshape(shape).broadcast(bcast);
+  y.v().device(*dev) += W1.v.off1().reshape(shape).broadcast(bcast);
 #else
   y.v.mat() = (W1.v.mat1() * x.v.mat()).colwise() + W1.v.vec1();
 #endif
@@ -220,9 +221,9 @@ NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
 NOINLINE void backward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
 #ifdef CLSTM_ALL_TENSOR
-  x.d().device(*dev) += W1.v().slice(indexes(0, 1), indexes(n, m - 1)).contract(y.d(), axispairs(0, 0));
-  W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) += y.d().contract(x.v(), axispairs(1, 1));
-  W1.d().chip(0, 1).device(*dev) += y.d().sum(indexes(1));
+  x.d().device(*dev) += W1.v.map1().contract(y.d(), axispairs(0, 0));
+  W1.d.map1().device(*dev) += y.d().contract(x.v(), axispairs(1, 1));
+  W1.d.off1().device(*dev) += y.d().sum(indexes(1));
 #else
   x.d.mat() += W1.v.mat1().transpose() * y.d.mat();
   W1.d.mat1() += y.d.mat() * x.v.mat().transpose();
@@ -254,13 +255,10 @@ NOINLINE void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   assert(n == z.v.dimension(0));
   assert(n >= 2);
 #ifdef CLSTM_ALL_TENSOR
-  z.v().device(*dev) = (W1.v()
-             .slice(indexes(0, 1), indexes(n, m - 1))
-             .contract(x.v(), axispairs(1, 0)) +
-         W1.v().chip(0, 1).reshape(indexes(n, 1)).broadcast(indexes(1, bs)))
-            .unaryExpr(f);
+  z.v().device(*dev) = W1.v.map1().contract(x.v(), axispairs(1, 0));
+  z.v().device(*dev) += W1.v.off1().reshape(indexes(n, 1)).broadcast(indexes(1, bs));
+  z.v().device(*dev) = z.v().unaryExpr(f);
   EigenTensor1 sums = z.v().sum(indexes(0));
-  assert(sums.dimension(0)==bs);
   z.v().device(*dev) = z.v() / sums.reshape(indexes(1,bs)).broadcast(indexes(n,1));;
 #else
   z.v.mat() = (W1.v.mat1() * x.v.mat()).colwise() + W1.v.vec1();
@@ -273,12 +271,9 @@ NOINLINE void backward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   int n = W1.v.dimension(0), m = W1.v.dimension(1);
   int bs = z.v.dimension(1);
 #ifdef CLSTM_ALL_TENSOR
-  x.d().device(*dev) = W1.v()
-                           .slice(indexes(0, 1), indexes(n, m - 1))
-                           .contract(z.d(), axispairs(0, 0));
-  W1.d().slice(indexes(0, 1), indexes(n, m - 1)).device(*dev) +=
-      z.d().contract(x.v(), axispairs(1, 1));
-  W1.d().chip(0, 1).device(*dev) += z.d().sum(indexes(1));
+  x.d().device(*dev) = W1.v.map1().contract(z.d(), axispairs(0, 0));
+  W1.d.map1().device(*dev) += z.d().contract(x.v(), axispairs(1, 1));
+  W1.d.off1().device(*dev) += z.d().sum(indexes(1));
 #else
   x.d.mat() = W1.v.mat1().transpose() * z.d.mat();
   W1.d.mat1() += z.d.mat() * x.v.mat().transpose();
