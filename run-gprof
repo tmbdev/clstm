@@ -1,8 +1,7 @@
 #!/bin/sh
 
 scons -c
-sed 's/-fno-inline/ -O2 /g' < SConstruct > SConstruct-hacked
-scons -f SConstruct-hacked profile=1 debug=0 clstmocrtrain -j 8
+scons profile=1 -j 4 clstmocrtrain
 
 find book -name '*.bin.png' | sort -r > uw3-all
 sed 1,50d uw3-all > uw3-train
@@ -24,4 +23,5 @@ report_time=1
 time ./clstmocrtrain uw3-train uw3-test
 rev=$(git rev-parse HEAD)
 gprof clstmocrtrain > $rev.gprof
-gprof2dot $rev.gprof > $rev.dot
+gprof2dot -s -n 0.5 $rev.gprof > $rev.dot
+xdot $rev.dot &
