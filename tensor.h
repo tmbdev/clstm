@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include <unsupported/Eigen/CXX11/Tensor>
+#include <Eigen/Dense>
 
 #ifdef CLSTM_CUDA
 #include "cuda_runtime.h"
@@ -68,6 +69,7 @@ typedef Eigen::TensorMap<Eigen::Tensor<Float, 1>> TensorMap1;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 2>> TensorMap2;
 typedef Eigen::TensorRef<Eigen::Tensor<Float, 1>> TensorRef1;
 typedef Eigen::TensorRef<Eigen::Tensor<Float, 2>> TensorRef2;
+typedef Eigen::Map<Eigen::Matrix<Float, Eigen::Dynamic, Eigen::Dynamic>> MatrixMap2;
 
 inline int rows(const TensorMap2 &m) { return m.dimension(0); }
 inline int cols(const TensorMap2 &m) { return m.dimension(1); }
@@ -193,6 +195,9 @@ public:
   }
   TensorMap2 map() {
     return **this;
+  }
+  MatrixMap2 mat() {
+    return MatrixMap2(ptr, dims[0], dims[1]);
   }
 
   Float &operator()(int i, int j) {
