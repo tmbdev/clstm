@@ -10,13 +10,22 @@ using std::vector;
 struct Batch {
   Tensor2 v;
   Tensor2 d;
+  virtual ~Batch() {}
   int rows() const { return v.dimension(0); }
   int cols() const { return v.dimension(1); }
+  int getGpu() { return v.getGpu(); }
+  void clear() {
+    v.setZero();
+    d.setZero();
+  }
+  void zeroGrad() { d.setZero(rows(), cols()); }
+};
+
+ struct BatchStorage : Batch {
   void setGpu(int n) {
     v.setGpu(n);
     d.setGpu(n);
   }
-  int getGpu() { return v.getGpu(); }
   void like(Batch &other) {
     setGpu(other.getGpu());
     resize(other.rows(), other.cols());
@@ -26,19 +35,14 @@ struct Batch {
     d.setZero(n, m);
   }
   void resize(int n, int m) { setZero(n, m); }
-  void clear() {
-    v.setZero();
-    d.setZero();
-  }
-  void zeroGrad() { d.setZero(rows(), cols()); }
-};
+ };
 
-typedef Batch Params;
+typedef BatchStorage Params;
 
 // typedef vector<Mat> Sequence;
 struct Sequence {
   int gpu = -1;
-  vector<Batch> steps;
+  vector<BatchStorage> steps;
   Sequence() {}
   Sequence(int N, int r, int b) { resize(N, r, b); }
   int getGpu() { return gpu; }
@@ -74,7 +78,7 @@ struct Sequence {
   void copy(const Sequence &other) {
     // don't assign GPU status
     like(other);
-    for (int t = 0; t < other.size(); t++) steps[t] = other[t];
+    for (int t = 0; t < other.size(); t++) steps[t] = other.steps[t];
   }
   void operator=(Sequence &other) {
     // don't assign GPU status

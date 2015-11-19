@@ -413,21 +413,21 @@ NOINLINE void backward_gate(Device *dev, Batch &out, Batch &nlstate,
 
 NOINLINE void forward_nonlingate(Device *dev, Batch &out, Batch &state,
                                  Batch &go, int nl) {
-  Batch temp;
+  BatchStorage temp;
   temp.setGpu(out.getGpu());
   temp.resize(out.rows(), out.cols());
-  forward_nonlin(dev, temp, state, nl);
-  forward_gate(dev, out, temp, go);
+  forward_nonlin(dev, (Batch&)temp, state, nl);
+  forward_gate(dev, out, (Batch&)temp, go);
 }
 
 NOINLINE void backward_nonlingate(Device *dev, Batch &out, Batch &state,
                                   Batch &go, int nl) {
-  Batch temp;
+  BatchStorage temp;
   temp.setGpu(out.getGpu());
   temp.resize(out.rows(), out.cols());
-  forward_nonlin(dev, temp, state, nl);
-  backward_gate(dev, out, temp, go);
-  backward_nonlin(dev, temp, state, nl);
+  forward_nonlin(dev, (Batch&)temp, state, nl);
+  backward_gate(dev, out, (Batch&)temp, go);
+  backward_nonlin(dev, (Batch&)temp, state, nl);
 }
 
 NOINLINE void fill(Device *dev, TensorMap2 &a, Float value) {
