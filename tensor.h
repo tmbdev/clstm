@@ -102,21 +102,6 @@ inline int cols(const TensorMap2 &m) { return m.dimension(1); }
 inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
 inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
 
-// inline Float reduction(const EigenTensor1 &m) { return m(0); }
-inline Float reduction(const EigenTensor1 &m) { return m(0); }
-inline Float reduction(const TensorMap1 &m) { return m(0); }
-inline Float reduction(Float m) { return m; }
-inline int argmax(const EigenTensor1 &m) {
-  int mi = -1;
-  Float mv = m(0);
-  for (int i = 0; i < m.dimension(0); i++) {
-    if (m(i) < mv) continue;
-    mi = i;
-    mv = m(i);
-  }
-  return mi;
-}
-
 // A simple Tensor class that handles multiple device
 // types a bit more transparently. It handles allocation/deallocation,
 // plus assignment.
@@ -318,6 +303,16 @@ inline Float amax1(const TensorRef1 &a) {
   Float result = a(0, 0);
   for (int i = 0; i < n; i++) result = fmax(result, a(i));
   return result;
+}
+inline int argmax(const TensorRef1 &m) {
+  int mi = -1;
+  Float mv = m(0);
+  for (int i = 0; i < m.dimension(0); i++) {
+    if (m(i) < mv) continue;
+    mi = i;
+    mv = m(i);
+  }
+  return mi;
 }
 inline Float amax2(const TensorRef2 &a) {
   int n = a.dimension(0);
