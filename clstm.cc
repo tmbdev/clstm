@@ -120,6 +120,7 @@ bool no_update = false;
 bool verbose = false;
 
 void set_inputs(Network net, Sequence &inputs) {
+  // FIXME replace with operator in Sequence
   net->inputs.like(inputs);
   for (int t = 0; t < net->inputs.size(); t++) {
     net->inputs[t] = inputs[t];
@@ -130,6 +131,7 @@ void set_targets(Network net, Sequence &targets) {
   int N = net->outputs.size();
   assert(N == targets.size());
   assert(net->outputs.size() == N);
+  // FIXME remove TensorMap operations
   for (int t = 0; t < N; t++)
     net->outputs[t].d() = targets[t].v() - net->outputs[t].v();
 }
@@ -137,6 +139,7 @@ void set_classes(Network net, Classes &classes) {
   int N = net->outputs.size();
   assert(N == classes.size());
   assert(net->outputs.size() == N);
+  // FIXME remove TensorMap operations
   for (int t = 0; t < N; t++) {
     net->outputs[t].d() = -net->outputs[t].v();
     net->outputs[t].d(classes[t], 0) += 1;

@@ -102,22 +102,30 @@ struct Tensor2 {
   int gpu = -1;
 
  public:
-  // The data and dimensions of this tensor. Data is always
-  // heap allocated and not shared.
+  // The data and dimensions of this tensor.
+
   int dims[2] = {0, 0};
   Float *ptr = nullptr;
+
+  // The tensor data may be owned (usually by a Sequence);
+  // in that case, it isn't deallocated when the tensor goes
+  // out of scope.
+  void *owner = nullptr;
+  bool resizeable = true;
 
   Tensor2() {}
   Tensor2(const Tensor2 &other) { *this = other; }
   ~Tensor2() { reset(); }
   void reset() {
     if (!ptr) return;
-    if (gpu < 0) {
-      free(ptr);
-    } else {
+    if (!owner) {
+      if (gpu < 0) {
+	free(ptr);
+      } else {
 #ifdef CLSTM_CUDA
-      cudaFree(ptr);
+	cudaFree(ptr);
 #endif
+      }
     }
     ptr = nullptr;
     dims[0] = 0;
@@ -134,7 +142,10 @@ struct Tensor2 {
   }
   void resize(int n, int m) {
     assert(ptr == nullptr || (dims[0] > 0 && dims[1] > 0));
+    // resizing to the same size is always allowed
     if (dims[0] == n && dims[1] == m) return;
+    assert(resizeable);
+    assert(ptr==nullptr || !owner);
     reset();
     if (n == 0 || m == 0) return;
     dims[0] = n;

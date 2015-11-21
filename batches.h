@@ -69,6 +69,8 @@ struct Sequence {
     for (int t = 0; t < N; t++) {
       if (steps[t].getGpu() != gpu) steps[t].setGpu(gpu);
       steps[t].resize(n, m);
+      steps[t].v.resizeable = false;
+      steps[t].d.resizeable = false;
     }
   }
   void like(const Sequence &other) {
@@ -84,7 +86,9 @@ struct Sequence {
     // don't assign GPU status
     copy(other);
   }
-  Batch &operator[](int i) { return steps[i]; }
+  Batch &operator[](int i) {
+    return steps[i];
+  }
   const Batch &operator[](int i) const { return steps[i]; }
   void zero() {
     for (int t = 0; t < steps.size(); t++) steps[t].clear();
