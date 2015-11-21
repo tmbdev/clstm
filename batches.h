@@ -21,7 +21,7 @@ struct Batch {
   void zeroGrad() { d.setZero(rows(), cols()); }
 };
 
- struct BatchStorage : Batch {
+struct BatchStorage : Batch {
   void setGpu(int n) {
     v.setGpu(n);
     d.setGpu(n);
@@ -35,7 +35,7 @@ struct Batch {
     d.setZero(n, m);
   }
   void resize(int n, int m) { setZero(n, m); }
- };
+};
 
 typedef BatchStorage Params;
 
@@ -99,13 +99,13 @@ struct Sequence {
 };
 
 void rinit(TensorMap2 m, Float s, const char *mode = "unif",
-           Float offset = 0.0);
+  Float offset = 0.0);
 void rinit(Batch &m, int no, int ni, Float s, const char *mode = "unif",
-           Float offset = 0.0);
+  Float offset = 0.0);
 void rinit(Params &m, int N, int no, int ni, Float s, const char *mode = "pos",
-           Float offset = 0.0);
+  Float offset = 0.0);
 void rinit(Sequence &m, int no, int ni, Float s, const char *mode = "unif",
-           Float offset = 0.0);
+  Float offset = 0.0);
 bool anynan(Batch &a);
 bool anynan(Params &a);
 bool anynan(Sequence &a);
