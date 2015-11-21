@@ -1,6 +1,30 @@
 #ifndef ocropus_tensor_
 #define ocropus_tensor_
 
+// A tensor storage class for computations within CLSTM.
+// There are several tensor and matrix classes used within CLSTM:
+//
+// - Tensor2: the basic CLSTM tensor class
+// - TensorMap2: the Eigen TensorMap class (used for Eigen computations)
+// - EigenTensor2: native Eigen storage, only works on CPU
+// - MatrixMap: Eigen mapping of Matrix used for CPU computations (slightly faster)
+//
+// Other storage:
+//
+// - Batch: a pair of Tensor2 instances for activations and derivatives
+// - Params: a pair of Tensor2 instances for weights and derivatives
+// - Sequence: a sequence of Batches, may use a rank 3 tensor internally
+//
+// Why is this so complicated? There are a number of constraints:
+//
+// - We need to use Eigen::Tensor for compatibility with TensorFlow
+// - Eigen::Tensor uses overloading and templates for genericity
+// - We want to compile only GPU code with nvcc (since nvcc is otherwise buggy)
+// - We don't want two separate versions of the numerical functions.
+// - The code was developed incrementally from a non-GPU version.
+// - The GPU code imposes some special constraints in order to run efficiently.
+// - Eigen::Tensor is slow for some cases where Eigen::Matrix is fast.
+
 #include <memory>
 #include <unordered_map>
 #include <unsupported/Eigen/CXX11/Tensor>
