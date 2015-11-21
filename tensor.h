@@ -97,10 +97,12 @@ typedef Eigen::Matrix<Float, Eigen::Dynamic, Eigen::Dynamic> EigenMatrix;
 typedef Eigen::Map<EigenVector> VectorMap;
 typedef Eigen::Map<EigenMatrix> MatrixMap;
 
+#if 0
 inline int rows(const TensorMap2 &m) { return m.dimension(0); }
 inline int cols(const TensorMap2 &m) { return m.dimension(1); }
 inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
 inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
+#endif
 
 // A simple Tensor class that handles multiple device
 // types a bit more transparently. It handles allocation/deallocation,

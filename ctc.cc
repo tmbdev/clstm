@@ -16,6 +16,11 @@ namespace ocropus {
 using namespace std;
 using Eigen::Ref;
 
+inline int rows(const TensorMap2 &m) { return m.dimension(0); }
+inline int cols(const TensorMap2 &m) { return m.dimension(1); }
+inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
+inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
+
 static void forward_algorithm(EigenTensor2 &lr, EigenTensor2 &lmatch,
                               double skip = -5) {
   int n = rows(lmatch), m = cols(lmatch);
@@ -161,7 +166,7 @@ void trivial_decode(Classes &cs, Sequence &outputs, int batch,
   int mc = -1;
   int mt = -1;
   while (t < N) {
-    int index = argmax(outputs[t].v().chip(batch, 1).eval());
+    int index = argmax(outputs[t].v().chip(batch, 1));
     float v = outputs[t].v(index, batch);
     if (index == 0) {
       // NB: there should be a 0 at the end anyway

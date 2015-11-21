@@ -36,11 +36,12 @@ void proto_of_params(clstm::Array *array, Params &params, bool weights = true) {
   Tensor2 temp;
   temp = params.v;  // copy values in case they are on GPU
   TensorMap2 a = temp();
-  array->add_dim(rows(a));
-  array->add_dim(cols(a));
+  int n = a.dimension(0), m = a.dimension(1);
+  array->add_dim(n);
+  array->add_dim(m); 
   if (!weights) return;
-  for (int i = 0; i < rows(a); i++)
-    for (int j = 0; j < cols(a); j++) array->add_value(a(i, j));
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < m; j++) array->add_value(a(i, j));
 }
 
 void params_of_proto(Params &params, const clstm::Array *array) {
@@ -52,8 +53,8 @@ void params_of_proto(Params &params, const clstm::Array *array) {
   if (array->value_size() > 0) {
     if (array->value_size() != a.size()) THROW("bad size (Mat)");
     int k = 0;
-    for (int i = 0; i < rows(a); i++)
-      for (int j = 0; j < cols(a); j++) a(i, j) = array->value(k++);
+    for (int i = 0; i < a.dimension(0); i++)
+      for (int j = 0; j < a.dimension(1); j++) a(i, j) = array->value(k++);
   }
 }
 

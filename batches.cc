@@ -30,24 +30,25 @@ namespace ocropus {
 
 // Random initializations with different distributions.
 
-void rinit(TensorMap2 m, Float s, const char *mode_, Float offset) {
+void rinit(TensorMap2 a, Float s, const char *mode_, Float offset) {
+  int n = a.dimension(0), m = a.dimension(1);
   std::string mode(mode_);
   if (mode == "unif") {
-    for (int i = 0; i < rows(m); i++)
-      for (int j = 0; j < cols(m); j++) m(i, j) = 2 * s * randu() - s + offset;
+    for (int i = 0; i < n; i++)
+      for (int j = 0; j < m; j++) a(i, j) = 2 * s * randu() - s + offset;
   } else if (mode == "negbiased") {
-    for (int i = 0; i < rows(m); i++)
-      for (int j = 0; j < cols(m); j++)
-        m(i, j) = 3 * s * randu() - 2 * s + offset;
+    for (int i = 0; i < n; i++)
+      for (int j = 0; j < m; j++)
+        a(i, j) = 3 * s * randu() - 2 * s + offset;
   } else if (mode == "pos") {
-    for (int i = 0; i < rows(m); i++)
-      for (int j = 0; j < cols(m); j++) m(i, j) = s * randu() + offset;
+    for (int i = 0; i < n; i++)
+      for (int j = 0; j < m; j++) a(i, j) = s * randu() + offset;
   } else if (mode == "neg") {
-    for (int i = 0; i < rows(m); i++)
-      for (int j = 0; j < cols(m); j++) m(i, j) = -s * randu() + offset;
+    for (int i = 0; i < n; i++)
+      for (int j = 0; j < m; j++) a(i, j) = -s * randu() + offset;
   } else if (mode == "normal") {
-    for (int i = 0; i < rows(m); i++)
-      for (int j = 0; j < cols(m); j++) m(i, j) = s * randn() + offset;
+    for (int i = 0; i < n; i++)
+      for (int j = 0; j < m; j++) a(i, j) = s * randn() + offset;
   }
 }
 
@@ -73,8 +74,8 @@ void rinit(Sequence &m, int N, int r, int c, Float s, const char *mode,
 // checking for NaNs in different objects
 
 bool anynan(TensorMap2 a) {
-  for (int j = 0; j < rows(a); j++) {
-    for (int k = 0; k < cols(a); k++) {
+  for (int j = 0; j < a.dimension(0); j++) {
+    for (int k = 0; k < a.dimension(1); k++) {
       float x = a(j, k);
       if (isnan(x)) return true;
     }

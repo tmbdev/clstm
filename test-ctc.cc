@@ -12,6 +12,11 @@
 using namespace ocropus;
 using std::initializer_list;
 
+inline int rows(const TensorMap2 &m) { return m.dimension(0); }
+inline int cols(const TensorMap2 &m) { return m.dimension(1); }
+inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
+inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
+
 void sequence_of_tensor(Sequence &result, EigenTensor2 &data) {
   result.resize(rows(data), cols(data), 1);
   for (int i = 0; i < rows(data); i++)
