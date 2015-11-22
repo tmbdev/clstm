@@ -121,15 +121,22 @@ struct Tensor2 {
   // The tensor data may be owned (usually by a Sequence);
   // in that case, it isn't deallocated when the tensor goes
   // out of scope.
-  void *owner = nullptr;
+  bool displaced = false;
   bool resizeable = true;
 
   Tensor2() {}
   Tensor2(const Tensor2 &other) { *this = other; }
   ~Tensor2() { reset(); }
+  void displaceTo(Float *ptr, int n, int m,int gpu=-1) {
+    displaced = true;
+    this->gpu = gpu;
+    this->ptr = ptr;
+    dims[0] = n;
+    dims[1] = m;
+  }
   void reset() {
     if (!ptr) return;
-    if (!owner) {
+    if (!displaced) {
       if (gpu < 0) {
 	free(ptr);
       } else {
@@ -138,6 +145,7 @@ struct Tensor2 {
 #endif
       }
     }
+    displaced = false;
     ptr = nullptr;
     dims[0] = 0;
     dims[1] = 0;
@@ -156,7 +164,7 @@ struct Tensor2 {
     // resizing to the same size is always allowed
     if (dims[0] == n && dims[1] == m) return;
     assert(resizeable);
-    assert(ptr==nullptr || !owner);
+    assert(ptr==nullptr || !displaced);
     reset();
     if (n == 0 || m == 0) return;
     dims[0] = n;
