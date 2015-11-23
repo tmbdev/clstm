@@ -2,6 +2,7 @@
 #define ocropus_batches__
 
 #include <vector>
+#include <array>
 #include "tensor.h"
 
 namespace ocropus {
@@ -43,16 +44,40 @@ typedef BatchStorage Params;
 struct Sequence {
   int gpu = -1;
   vector<BatchStorage> steps;
-  Sequence() {}
-  Sequence(int N, int r, int b) { resize(N, r, b); }
+  Float *data = nullptr;
+  int dims[4] = {0,0,0,0};
+  Sequence() {
+  }
+  Sequence(int N, int r, int b) {
+    resize(N, r, b);
+  }
   int getGpu() { return gpu; }
   void setGpu(int n) {
     gpu = n;
     clear();
   }
-  void clear() { steps.clear(); }
+  void clear() {
+    steps.clear();
+    if(data) free(data);
+    data = nullptr;
+    dims[0] = 0;
+    dims[1] = 0;
+    dims[2] = 0;
+    dims[3] = 0;
+  }
+  void allocate(int N, int n, int m) {
+    if (data) clear();
+    dims[0] = n;
+    dims[1] = m;
+    dims[2] = 2;
+    dims[3] = N;
+    data = (Float*)malloc(total_size() * sizeof *data);
+  }
+
+  int size() const { return steps.size(); }
   int rows() const { return steps[0].rows(); }
   int cols() const { return steps[0].cols(); }
+  int total_size() const { return dims[0] * dims[1] * dims[2] * dims[3]; }
   void check() const {
     int N = steps.size();
     if (N == 0) return;
@@ -63,14 +88,27 @@ struct Sequence {
       assert(steps[t].cols() == steps[0].cols());
     }
   }
-  int size() const { return steps.size(); }
   void resize(int N, int n, int m) {
-    steps.resize(N);
-    for (int t = 0; t < N; t++) {
-      if (steps[t].getGpu() != gpu) steps[t].setGpu(gpu);
-      steps[t].resize(n, m);
-      steps[t].v.resizeable = false;
-      steps[t].d.resizeable = false;
+    if (N==size() && n==rows() && m==cols()) {
+      for (int t = 0; t < N; t++) {
+	steps[t].v.setZero();
+	steps[t].d.setZero();
+      }
+    } else {
+      clear();
+      allocate(N, n, m);
+      steps.resize(N);
+      for (int t = 0; t < N; t++) {
+#if 0
+	if (steps[t].getGpu() != gpu) steps[t].setGpu(gpu);
+	steps[t].resize(n, m);
+	steps[t].v.resizeable = false;
+	steps[t].d.resizeable = false;
+#else
+	steps[t].v.displaceTo(data + (n*m)*(2*t), n, m, gpu);
+	steps[t].d.displaceTo(data + (n*m)*(2*t+1), n, m, gpu);
+#endif
+      }
     }
   }
   void like(const Sequence &other) {
