@@ -5,6 +5,7 @@
 #include <memory>
 #include <math.h>
 #include <string>
+#include <cmath>
 #include "extras.h"
 #include "utils.h"
 #include "clstm_compute.h"
@@ -44,6 +45,7 @@ void randseq(Sequence &a, int N, int n, int m) {
       }
     }
   }
+  a.check();
 }
 
 void randparams(ParamVec &a, const vector<vector<int>> &specs) {
@@ -118,7 +120,7 @@ double mse(Sequence &out, Sequence &target) {
 }
 
 struct Minimizer {
-  double value = 1e9;
+  double value = INFINITY;
   double param = 0;
   void add(double value, double param = NAN) {
     if (value >= this->value) return;
@@ -128,7 +130,7 @@ struct Minimizer {
 };
 
 struct Maximizer {
-  double value = -1e9;
+  double value = -INFINITY;
   double param = 0;
   void add(double value, double param = NAN) {
     if (value <= this->value) return;
@@ -229,6 +231,7 @@ void test_net(Testcase &tc) {
             print(k, i, j, ":", error, h, "/", num_deriv, a_deriv, out1, out);
           minerr.add(error, h);
         }
+        maxparamerr.add(minerr.value);
       }
     }
   }

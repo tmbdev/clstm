@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include "tensor.h"
+#include "utils.h"
 
 namespace ocropus {
 using std::vector;
@@ -45,11 +46,16 @@ struct Sequence {
   int gpu = -1;
   vector<BatchStorage> steps;
   Float *data = nullptr;
-  int dims[4] = {0,0,0,0};
-  Sequence() {
+  int dims[4] = {0, 0, 0, 0};
+  Sequence() {}
+  Sequence(int N, int r, int b) { resize(N, r, b); }
+  Sequence(Sequence &other) {
+    like(other);
+    copy(other);
   }
-  Sequence(int N, int r, int b) {
-    resize(N, r, b);
+  Sequence(const Sequence &other) {
+    like((Sequence&)other);
+    copy((Sequence&)other);
   }
   int getGpu() const { return gpu; }
   void setGpu(int n) {
@@ -58,7 +64,7 @@ struct Sequence {
   }
   void clear() {
     steps.clear();
-    if(data) free(data);
+    if (data) free(data);
     data = nullptr;
     dims[0] = 0;
     dims[1] = 0;
@@ -71,7 +77,7 @@ struct Sequence {
     dims[1] = m;
     dims[2] = 2;
     dims[3] = N;
-    data = (Float*)malloc(total_size() * sizeof *data);
+    data = (Float *)malloc(total_size() * sizeof *data);
   }
 
   int size() const { return dims[3]; }
@@ -80,15 +86,22 @@ struct Sequence {
   int total_size() const { return dims[0] * dims[1] * dims[2] * dims[3]; }
   int nbytes() const { return total_size() * sizeof *data; }
   void check() const {
-    assert(dims[3]==0?!data:true);
-    assert(!data?dims[3]==0:true);
-    if(!data) return;
+    // the data pointer must be null iff the sequence has zero length
+    assert(dims[3] == 0 ? !data : true);
+    assert(!data ? dims[3] == 0 : true);
+    if (!data) return;
+    // batches must have non-zero size
     assert(steps[0].rows() > 0);
     assert(steps[0].cols() > 0);
-    int N = dims[3];
+    int N = size();
+    int n = rows();
+    int m = cols();
     for (int t = 0; t < N; t++) {
+      // all batches must be displaced to the right locations and consistent
       assert(steps[t].v.displaced);
       assert(steps[t].d.displaced);
+      assert(steps[t].v.ptr==data + (n * m) * (2 * t));
+      assert(steps[t].d.ptr==data + (n * m) * (2 * t + 1));
       assert(steps[t].v.getGpu() == getGpu());
       assert(steps[t].rows() == steps[0].rows());
       assert(steps[t].cols() == steps[0].cols());
@@ -96,34 +109,33 @@ struct Sequence {
   }
   void resize(int N, int n, int m) {
     check();
-    if (N==size() && n==rows() && m==cols()) {
+    if (N == size() && n == rows() && m == cols()) {
       for (int t = 0; t < N; t++) {
-	steps[t].v.setZero();
-	steps[t].d.setZero();
+        steps[t].v.setZero();
+        steps[t].d.setZero();
       }
     } else {
       clear();
       allocate(N, n, m);
       steps.resize(N);
       for (int t = 0; t < N; t++) {
-	steps[t].v.displaceTo(data + (n*m)*(2*t), n, m, gpu);
-	steps[t].d.displaceTo(data + (n*m)*(2*t+1), n, m, gpu);
+        steps[t].v.displaceTo(data + (n * m) * (2 * t), n, m, gpu);
+        steps[t].d.displaceTo(data + (n * m) * (2 * t + 1), n, m, gpu);
       }
     }
   }
   void like(const Sequence &other) {
     resize(other.size(), other.rows(), other.cols());
   }
+  
   void copy(const Sequence &other) {
+    other.check();
     like(other);
-    for (int t = 0; t < other.size(); t++) steps[t] = other.steps[t];
+    check();
+    memcpy_gpu(data, gpu, other.data, other.gpu, nbytes());
   }
-  void operator=(Sequence &other) {
-    copy(other);
-  }
-  Batch &operator[](int i) {
-    return steps[i];
-  }
+  void operator=(Sequence &other) { copy(other); }
+  Batch &operator[](int i) { return steps[i]; }
   const Batch &operator[](int i) const { return steps[i]; }
   void zero() {
     for (int t = 0; t < steps.size(); t++) steps[t].clear();
@@ -134,16 +146,18 @@ struct Sequence {
 };
 
 void rinit(TensorMap2 m, Float s, const char *mode = "unif",
-  Float offset = 0.0);
+           Float offset = 0.0);
 void rinit(Batch &m, int no, int ni, Float s, const char *mode = "unif",
-  Float offset = 0.0);
+           Float offset = 0.0);
 void rinit(Params &m, int N, int no, int ni, Float s, const char *mode = "pos",
-  Float offset = 0.0);
+           Float offset = 0.0);
 void rinit(Sequence &m, int no, int ni, Float s, const char *mode = "unif",
-  Float offset = 0.0);
+           Float offset = 0.0);
 bool anynan(Batch &a);
 bool anynan(Params &a);
 bool anynan(Sequence &a);
+
+inline int gpu_id2() { return 0; }
 }
 
 #endif

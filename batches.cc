@@ -38,8 +38,7 @@ void rinit(TensorMap2 a, Float s, const char *mode_, Float offset) {
       for (int j = 0; j < m; j++) a(i, j) = 2 * s * randu() - s + offset;
   } else if (mode == "negbiased") {
     for (int i = 0; i < n; i++)
-      for (int j = 0; j < m; j++)
-        a(i, j) = 3 * s * randu() - 2 * s + offset;
+      for (int j = 0; j < m; j++) a(i, j) = 3 * s * randu() - 2 * s + offset;
   } else if (mode == "pos") {
     for (int i = 0; i < n; i++)
       for (int j = 0; j < m; j++) a(i, j) = s * randu() + offset;

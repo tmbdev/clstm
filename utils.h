@@ -6,7 +6,6 @@
 #ifndef ocropus_clstm_utils_
 #define ocropus_clstm_utils_
 
-#include "clstm.h"
 #include <string>
 #include <sys/time.h>
 #include <math.h>

@@ -7,7 +7,8 @@
 // - Tensor2: the basic CLSTM tensor class
 // - TensorMap2: the Eigen TensorMap class (used for Eigen computations)
 // - EigenTensor2: native Eigen storage, only works on CPU
-// - MatrixMap: Eigen mapping of Matrix used for CPU computations (slightly faster)
+// - MatrixMap: Eigen mapping of Matrix used for CPU computations (slightly
+// faster)
 //
 // Other storage:
 //
@@ -24,6 +25,13 @@
 // - The code was developed incrementally from a non-GPU version.
 // - The GPU code imposes some special constraints in order to run efficiently.
 // - Eigen::Tensor is slow for some cases where Eigen::Matrix is fast.
+//
+// You can think of Tensor2 as a rank-2 tensor with shape (w,h), Batch
+// as a rank-3 tensor with shape (w,h,2), and Sequence as a rank-4
+// tensor with shape (w,h,2,N). In standard tensor libraries, we would
+// simply express the various computations as computations over
+// slices, bit the Eigen Tensor library does not have full support for
+// tensor slices as independent objects.
 
 #include <memory>
 #include <unordered_map>
@@ -104,7 +112,8 @@ inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
 inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
 #endif
 
-inline void memcpy_gpu(void *dest, int dest_gpu, void *src, int src_gpu, int nbytes) {
+inline void memcpy_gpu(void *dest, int dest_gpu, void *src, int src_gpu,
+                       int nbytes) {
 #ifdef CLSTM_CUDA
   if (dest_gpu >= 0 && src_gpu >= 0) {
     cudaMemcpy(dest, src, nbytes, cudaMemcpyDeviceToDevice);
@@ -116,7 +125,7 @@ inline void memcpy_gpu(void *dest, int dest_gpu, void *src, int src_gpu, int nby
     memcpy(dest, src, nbytes);
   }
 #else
-  assert (dest_gpu<0 && src_gpu<0);
+  assert(dest_gpu < 0 && src_gpu < 0);
   memcpy(dest, src, nbytes);
 #endif
 }
@@ -144,7 +153,7 @@ struct Tensor2 {
   Tensor2() {}
   Tensor2(const Tensor2 &other) { *this = other; }
   ~Tensor2() { reset(); }
-  void displaceTo(Float *ptr, int n, int m,int gpu=-1) {
+  void displaceTo(Float *ptr, int n, int m, int gpu = -1) {
     displaced = true;
     this->gpu = gpu;
     this->ptr = ptr;
@@ -155,10 +164,10 @@ struct Tensor2 {
     if (!ptr) return;
     if (!displaced) {
       if (gpu < 0) {
-	free(ptr);
+        free(ptr);
       } else {
 #ifdef CLSTM_CUDA
-	cudaFree(ptr);
+        cudaFree(ptr);
 #endif
       }
     }
@@ -181,7 +190,7 @@ struct Tensor2 {
     // resizing to the same size is always allowed
     if (dims[0] == n && dims[1] == m) return;
     assert(resizeable);
-    assert(ptr==nullptr || !displaced);
+    assert(ptr == nullptr || !displaced);
     reset();
     if (n == 0 || m == 0) return;
     dims[0] = n;
@@ -208,9 +217,9 @@ struct Tensor2 {
   Float *data() { return ptr; }
 
   int dimension(int i) const { return dims[i]; }
-  int rows() { return dims[0]; }
-  int cols() { return dims[1]; }
-  int total_size() { return dims[0] * dims[1]; }
+  int rows() const { return dims[0]; }
+  int cols() const { return dims[1]; }
+  int total_size() const { return dims[0] * dims[1]; }
 
   // These operators allow easy access to the TensorMap version
   // of the tensor. Use these on the right hand side of an expression.
@@ -271,6 +280,7 @@ struct Tensor2 {
 #endif
     }
   }
+  int nbytes() const { return total_size() * sizeof(Float); }
   void operator=(TensorMap2 other) {
     resize(other.dimension(0), other.dimension(1));
     int nbytes = total_size() * sizeof(Float);
@@ -283,7 +293,7 @@ struct Tensor2 {
   }
   void setZero() {
 #ifdef CLSTM_CUDA
-    if (gpu >= 0) 
+    if (gpu >= 0)
       cudaMemset(ptr, 0, total_size() * sizeof(Float));
     else
       memset(ptr, 0, total_size() * sizeof(Float));

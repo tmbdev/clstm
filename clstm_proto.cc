@@ -38,7 +38,7 @@ void proto_of_params(clstm::Array *array, Params &params, bool weights = true) {
   TensorMap2 a = temp();
   int n = a.dimension(0), m = a.dimension(1);
   array->add_dim(n);
-  array->add_dim(m); 
+  array->add_dim(m);
   if (!weights) return;
   for (int i = 0; i < n; i++)
     for (int j = 0; j < m; j++) array->add_value(a(i, j));
