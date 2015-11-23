@@ -51,7 +51,7 @@ struct Sequence {
   Sequence(int N, int r, int b) {
     resize(N, r, b);
   }
-  int getGpu() { return gpu; }
+  int getGpu() const { return gpu; }
   void setGpu(int n) {
     gpu = n;
     clear();
@@ -78,17 +78,24 @@ struct Sequence {
   int rows() const { return dims[0]; }
   int cols() const { return dims[1]; }
   int total_size() const { return dims[0] * dims[1] * dims[2] * dims[3]; }
+  int nbytes() const { return total_size() * sizeof *data; }
   void check() const {
-    int N = steps.size();
-    if (N == 0) return;
+    assert(dims[3]==0?!data:true);
+    assert(!data?dims[3]==0:true);
+    if(!data) return;
     assert(steps[0].rows() > 0);
     assert(steps[0].cols() > 0);
+    int N = dims[3];
     for (int t = 0; t < N; t++) {
+      assert(steps[t].v.displaced);
+      assert(steps[t].d.displaced);
+      assert(steps[t].v.getGpu() == getGpu());
       assert(steps[t].rows() == steps[0].rows());
       assert(steps[t].cols() == steps[0].cols());
     }
   }
   void resize(int N, int n, int m) {
+    check();
     if (N==size() && n==rows() && m==cols()) {
       for (int t = 0; t < N; t++) {
 	steps[t].v.setZero();
@@ -99,29 +106,19 @@ struct Sequence {
       allocate(N, n, m);
       steps.resize(N);
       for (int t = 0; t < N; t++) {
-#if 0
-	if (steps[t].getGpu() != gpu) steps[t].setGpu(gpu);
-	steps[t].resize(n, m);
-	steps[t].v.resizeable = false;
-	steps[t].d.resizeable = false;
-#else
 	steps[t].v.displaceTo(data + (n*m)*(2*t), n, m, gpu);
 	steps[t].d.displaceTo(data + (n*m)*(2*t+1), n, m, gpu);
-#endif
       }
     }
   }
   void like(const Sequence &other) {
-    // don't assign GPU status
     resize(other.size(), other.rows(), other.cols());
   }
   void copy(const Sequence &other) {
-    // don't assign GPU status
     like(other);
     for (int t = 0; t < other.size(); t++) steps[t] = other.steps[t];
   }
   void operator=(Sequence &other) {
-    // don't assign GPU status
     copy(other);
   }
   Batch &operator[](int i) {

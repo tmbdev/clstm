@@ -104,6 +104,23 @@ inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
 inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
 #endif
 
+inline void memcpy_gpu(void *dest, int dest_gpu, void *src, int src_gpu, int nbytes) {
+#ifdef CLSTM_CUDA
+  if (dest_gpu >= 0 && src_gpu >= 0) {
+    cudaMemcpy(dest, src, nbytes, cudaMemcpyDeviceToDevice);
+  } else if (dest_gpu >= 0 && src_gpu < 0) {
+    cudaMemcpy(dest, src, nbytes, cudaMemcpyHostToDevice);
+  } else if (dest_gpu < 0 && src_gpu >= 0) {
+    cudaMemcpy(dest, src, nbytes, cudaMemcpyDeviceToHost);
+  } else {
+    memcpy(dest, src, nbytes);
+  }
+#else
+  assert (dest_gpu<0 && src_gpu<0);
+  memcpy(dest, src, nbytes);
+#endif
+}
+
 // A simple Tensor class that handles multiple device
 // types a bit more transparently. It handles allocation/deallocation,
 // plus assignment.
@@ -150,7 +167,7 @@ struct Tensor2 {
     dims[0] = 0;
     dims[1] = 0;
   }
-  int getGpu() { return gpu; }
+  int getGpu() const { return gpu; }
   void setGpu(int n) {
     reset();
 #ifdef CLSTM_CUDA
@@ -262,31 +279,17 @@ struct Tensor2 {
   void operator=(const Tensor2 &other) {
     resize(other.dimension(0), other.dimension(1));
     int nbytes = total_size() * sizeof(Float);
-#ifdef CLSTM_CUDA
-    if (gpu >= 0 && other.gpu >= 0) {
-      cudaMemcpy(ptr, other.ptr, nbytes, cudaMemcpyDeviceToDevice);
-    } else if (gpu >= 0 && other.gpu < 0) {
-      cudaMemcpy(ptr, other.ptr, nbytes, cudaMemcpyHostToDevice);
-    } else if (gpu < 0 && other.gpu >= 0) {
-      cudaMemcpy(ptr, other.ptr, nbytes, cudaMemcpyDeviceToHost);
-#else
-    if (0) {
-#endif
-    } else {
-      memcpy(ptr, other.ptr, nbytes);
-    }
+    memcpy_gpu(ptr, gpu, other.ptr, other.gpu, nbytes);
   }
   void setZero() {
 #ifdef CLSTM_CUDA
-    if (gpu >= 0) {
+    if (gpu >= 0) 
       cudaMemset(ptr, 0, total_size() * sizeof(Float));
+    else
+      memset(ptr, 0, total_size() * sizeof(Float));
 #else
-    if (0) {
+    memset(ptr, 0, total_size() * sizeof(Float));
 #endif
-    } else {
-      int N = total_size();
-      for (int i = 0; i < N; i++) ptr[i] = 0;
-    }
   }
   void setZero(int n, int m) {
     resize(n, m);
