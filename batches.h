@@ -74,9 +74,9 @@ struct Sequence {
     data = (Float*)malloc(total_size() * sizeof *data);
   }
 
-  int size() const { return steps.size(); }
-  int rows() const { return steps[0].rows(); }
-  int cols() const { return steps[0].cols(); }
+  int size() const { return dims[3]; }
+  int rows() const { return dims[0]; }
+  int cols() const { return dims[1]; }
   int total_size() const { return dims[0] * dims[1] * dims[2] * dims[3]; }
   void check() const {
     int N = steps.size();
