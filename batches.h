@@ -64,7 +64,7 @@ struct Sequence {
   }
   void clear() {
     steps.clear();
-    if (data) free(data);
+    if (data) free_gpu((void**)&data, gpu);
     data = nullptr;
     dims[0] = 0;
     dims[1] = 0;
@@ -77,7 +77,7 @@ struct Sequence {
     dims[1] = m;
     dims[2] = 2;
     dims[3] = N;
-    data = (Float *)malloc(total_size() * sizeof *data);
+    alloc_gpu((void**)&data, nbytes(), gpu);
   }
 
   int size() const { return dims[3]; }

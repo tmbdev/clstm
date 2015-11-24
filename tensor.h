@@ -112,6 +112,36 @@ inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
 inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
 #endif
 
+inline void alloc_gpu(void **p, int nbytes, int gpu) {
+  *p = nullptr;
+#ifdef CLSTM_CUDA
+  if (gpu < 0) {
+    *p = malloc(nbytes);
+  } else {
+    cudaMalloc(p, nbytes);
+  }
+#else
+  assert(gpu < 0 && "not compiled for CUDA");
+  *p = malloc(nbytes);
+#endif
+}
+
+inline void free_gpu(void **p, int gpu) {
+#ifdef CLSTM_CUDA
+  if (gpu < 0) {
+    free(*p);
+    *p = nullptr;
+  } else {
+    cudaFree(*p);
+    *p = nullptr;
+  }
+#else
+  assert(gpu < 0 && "not compiled for CUDA");
+  free(*p);
+  *p = nullptr;
+#endif
+}
+
 inline void memcpy_gpu(void *dest, int dest_gpu, void *src, int src_gpu,
                        int nbytes) {
 #ifdef CLSTM_CUDA
@@ -162,15 +192,7 @@ struct Tensor2 {
   }
   void reset() {
     if (!ptr) return;
-    if (!displaced) {
-      if (gpu < 0) {
-        free(ptr);
-      } else {
-#ifdef CLSTM_CUDA
-        cudaFree(ptr);
-#endif
-      }
-    }
+    if (!displaced) free_gpu((void**)&ptr, gpu);
     displaced = false;
     ptr = nullptr;
     dims[0] = 0;
@@ -195,17 +217,7 @@ struct Tensor2 {
     if (n == 0 || m == 0) return;
     dims[0] = n;
     dims[1] = m;
-    if (gpu < 0) {
-      ptr = (Float *)malloc(n * m * sizeof(Float));
-    } else {
-#ifdef CLSTM_CUDA
-      void *p;
-      cudaMalloc(&p, n * m * sizeof(Float));
-      ptr = (Float *)p;
-#else
-      assert(false && "not compiled for CUDA");
-#endif
-    }
+    alloc_gpu((void**)&ptr, n * m * sizeof (Float), gpu);
   }
   void like(Tensor2 &other) {
     setGpu(other.getGpu());
