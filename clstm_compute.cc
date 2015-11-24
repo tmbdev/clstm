@@ -51,7 +51,7 @@ inline void device_notify(Device *dev, int gpu) {
 // this code. That ensures that none of the rest of CLSTM has to know
 // about CUDA or nvcc.
 
-#ifdef CLSTM_USE_GPU
+#if defined(CLSTM_CUDA) && defined(__CUDACC__)
 #define MAXGPUS 64
 
 using std::unique_ptr;
