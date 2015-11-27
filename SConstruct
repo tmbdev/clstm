@@ -137,6 +137,7 @@ Alias('install',
 
 # A simple test of the C++ LSTM implementation.
 all += [env.Program("test-lstm", ["test-lstm.cc"], LIBS=[libclstm] + libs)]
+all += [env.Program("test-batchlstm", ["test-batchlstm.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)]
