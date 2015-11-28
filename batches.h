@@ -54,8 +54,8 @@ struct Sequence {
     copy(other);
   }
   Sequence(const Sequence &other) {
-    like((Sequence&)other);
-    copy((Sequence&)other);
+    like((Sequence &)other);
+    copy((Sequence &)other);
   }
   int getGpu() const { return gpu; }
   void setGpu(int n) {
@@ -64,7 +64,7 @@ struct Sequence {
   }
   void clear() {
     steps.clear();
-    if (data) free_gpu((void**)&data, gpu);
+    if (data) free_gpu((void **)&data, gpu);
     data = nullptr;
     dims[0] = 0;
     dims[1] = 0;
@@ -77,7 +77,7 @@ struct Sequence {
     dims[1] = m;
     dims[2] = 2;
     dims[3] = N;
-    alloc_gpu((void**)&data, nbytes(), gpu);
+    alloc_gpu((void **)&data, nbytes(), gpu);
   }
 
   int size() const { return dims[3]; }
@@ -100,8 +100,8 @@ struct Sequence {
       // all batches must be displaced to the right locations and consistent
       assert(steps[t].v.displaced);
       assert(steps[t].d.displaced);
-      assert(steps[t].v.ptr==data + (n * m) * (2 * t));
-      assert(steps[t].d.ptr==data + (n * m) * (2 * t + 1));
+      assert(steps[t].v.ptr == data + (n * m) * (2 * t));
+      assert(steps[t].d.ptr == data + (n * m) * (2 * t + 1));
       assert(steps[t].v.getGpu() == getGpu());
       assert(steps[t].rows() == steps[0].rows());
       assert(steps[t].cols() == steps[0].cols());
@@ -127,7 +127,7 @@ struct Sequence {
   void like(const Sequence &other) {
     resize(other.size(), other.rows(), other.cols());
   }
-  
+
   void copy(const Sequence &other) {
     other.check();
     like(other);
@@ -157,7 +157,16 @@ bool anynan(Batch &a);
 bool anynan(Params &a);
 bool anynan(Sequence &a);
 
-inline int gpu_id2() { return 0; }
+inline void check_normalized(Batch &a) {
+  for (int b = 0; b < a.cols(); b++) {
+    double total = 0.0;
+    for (int i = 0; i < a.rows(); i++) total += a.v(i, b);
+    assert(fabs(total - 1.0) < 1e-5);
+  }
+}
+inline void check_normalized(Sequence &a) {
+  for (int t = 0; t < a.size(); t++) check_normalized(a[t]);
+}
 }
 
 #endif

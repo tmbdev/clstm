@@ -7,6 +7,8 @@
 #include <string>
 #include "extras.h"
 #include "utils.h"
+#include <iostream>
+#include <iomanip>
 
 using std_string = std::string;
 #define string std_string
@@ -23,19 +25,20 @@ using namespace ocropus;
 int ntrain = getienv("ntrain", 100000);
 int ntest = getienv("ntest", 1000);
 int nfeatures = getienv("nfeatures", 1);
-int batchsize = getienv("batchsize", 1);
+int trainbatch = getienv("trainbatch", 1);
+int testbatch = getienv("testbatch", 1);
 int seqlength = getienv("seqlength", 20);
 double lrate = getdenv("lrate", 1e-4);
 
-void gentest(Sequence &xs, Sequence &ys) {
+void gentest(Sequence &xs, Sequence &ys, int batchsize=1) {
   int N = seqlength;
   int d = nfeatures;
   xs.resize(N, d, batchsize);
   xs.zero();
   ys.resize(N, 2, batchsize);
   ys.zero();
-  ys[0].v(0, 0) = 1;
   for (int b = 0; b < batchsize; b++) {
+    ys[0].v(0, b) = 1;
     for (int t = 0; t < N; t++) {
       int out = (drand48() < 0.3);
       for (int i = 0; i < d; i++)
@@ -46,11 +49,16 @@ void gentest(Sequence &xs, Sequence &ys) {
 }
 
 Float maxerr(Sequence &xs, Sequence &ys) {
+  Float threshold = getdenv("threshold", 0.1);
   Float merr = 0.0;
   for (int t = 0; t < xs.size(); t++) {
     for (int i = 0; i < xs.rows(); i++) {
       for (int j = 0; j < ys.cols(); j++) {
         Float err = fabs(xs[t].v(i, j) - ys[t].v(i, j));
+	if (err > threshold) {
+	  print("t", t, "i", i, "b", j, "err", err, "xs", xs[t].v(i,j), "ys", ys[t].v(i,j));
+	  assert(err <= threshold);
+	}
         merr = fmax(err, merr);
       }
     }
@@ -58,20 +66,33 @@ Float maxerr(Sequence &xs, Sequence &ys) {
   return merr;
 }
 
+void printseq(Sequence &s) {
+  for(int i=0; i<s.rows(); i++) {
+    for(int t=0; t<s.size(); t++) {
+      for(int b=0; b<s.cols(); b++) {
+	cerr << std::setw(3) << int(99.999 * s[t].v(i,b));
+      }
+      cerr << "|";
+    }
+    cerr << endl;
+  }
+}
+
 double test_net(Network net) {
   Float merr = 0.0;
   for (int i = 0; i < ntest; i++) {
     Sequence xs, ys;
-    gentest(xs, ys);
+    gentest(xs, ys, testbatch);
     set_inputs(net, xs);
     net->forward();
     if (getienv("verbose", 0)) {
-      for (int t = 0; t < xs.size(); t++) cout << xs[t].v(0, 0);
-      cout << endl;
-      for (int t = 0; t < net->outputs.size(); t++)
-        cout << int(0.5 + net->outputs[t].v(1, 0));
-      cout << endl;
-      cout << endl;
+      print("xs");
+      printseq(xs);
+      print("ys");
+      printseq(ys);
+      print("outputs");
+      printseq(net->outputs);
+      check_normalized(net->outputs);
     }
     Float err = maxerr(net->outputs, ys);
     if (err > merr) merr = err;
@@ -92,11 +113,12 @@ int main(int argc, char **argv) {
   save_net("__test0__.clstm", net);
   unlink("__test0__.clstm");
   print("training 1:4:2 network to learn delay");
-  for (int i = 0; i < ntrain / batchsize; i++) {
+  for (int i = 0; i < ntrain / trainbatch; i++) {
     Sequence xs, ys;
-    gentest(xs, ys);
+    gentest(xs, ys, trainbatch);
     set_inputs(net, xs);
     net->forward();
+    check_normalized(net->outputs);
     set_targets(net, ys);
     net->backward();
     sgd_update(net);
