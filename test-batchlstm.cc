@@ -102,7 +102,7 @@ double test_net(Network net) {
 
 int main(int argc, char **argv) {
   Network net;
-  int gpu = getienv("usegpu", -1);
+  int gpu = getienv("gpu", -1);
   net = make_net("lstm1", {
     {"ninput", nfeatures},
     {"nhidden", 4},
