@@ -47,6 +47,10 @@ struct Sequence {
   vector<BatchStorage> steps;
   Float *data = nullptr;
   int dims[4] = {0, 0, 0, 0};
+
+  TensorMap4 map4() {
+    return TensorMap4(data, dims[0], dims[1], dims[2], dims[3]);
+  }
   Sequence() {}
   Sequence(int N, int r, int b) { resize(N, r, b); }
   Sequence(Sequence &other) {

@@ -97,8 +97,12 @@ typedef Eigen::Tensor<Float, 1> EigenTensor1;
 typedef Eigen::Tensor<Float, 2> EigenTensor2;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 1>> TensorMap1;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 2>> TensorMap2;
+typedef Eigen::TensorMap<Eigen::Tensor<Float, 3>> TensorMap3;
+typedef Eigen::TensorMap<Eigen::Tensor<Float, 4>> TensorMap4;
 typedef Eigen::TensorRef<Eigen::Tensor<Float, 1>> TensorRef1;
 typedef Eigen::TensorRef<Eigen::Tensor<Float, 2>> TensorRef2;
+typedef Eigen::TensorRef<Eigen::Tensor<Float, 3>> TensorRef3;
+typedef Eigen::TensorRef<Eigen::Tensor<Float, 4>> TensorRef4;
 
 typedef Eigen::Matrix<Float, Eigen::Dynamic, 1> EigenVector;
 typedef Eigen::Matrix<Float, Eigen::Dynamic, Eigen::Dynamic> EigenMatrix;

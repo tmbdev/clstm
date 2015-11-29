@@ -320,6 +320,15 @@ struct TestReverse : Testcase {
   void forward() { forward_reverse(outputs, inputs); }
   void backward() { backward_reverse(outputs, inputs); }
 };
+struct TestBtswitch : Testcase {
+  virtual void init() {
+    randseq(inputs, 5, 7, 4);
+    randseq(targets, 4, 7, 5);
+    randparams(ps, {});
+  }
+  void forward() { forward_btswitch(outputs, inputs); }
+  void backward() { backward_btswitch(outputs, inputs); }
+};
 struct TestStatemem : Testcase {
   virtual void init() {
     randseq(inputs, 4, 7, 4);
@@ -390,6 +399,7 @@ int main(int argc, char **argv) {
     test_net(*new TestStack);
     test_net(*new TestStackDelay);
     test_net(*new TestReverse);
+    test_net(*new TestBtswitch);
     test_net(*new TestStatemem);
     test_net(*new TestNonlingate);
 #ifdef DEPRECATED

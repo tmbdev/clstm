@@ -84,6 +84,7 @@ typedef Eigen::IndexPair<int> IndexPair;
 typedef Eigen::array<IndexPair, 1> Axes1;
 typedef Eigen::array<ptrdiff_t, 1> Indexes1;
 typedef Eigen::array<ptrdiff_t, 2> Indexes2;
+typedef Eigen::array<ptrdiff_t, 3> Indexes3;
 
 ONBOTH inline Axes1 axispairs(int i, int j) {
   Axes1 result = {IndexPair(i, j)};
@@ -408,6 +409,40 @@ NOINLINE void forward_reverse(Device *dev, Sequence &y, Sequence &x) {
 NOINLINE void backward_reverse(Device *dev, Sequence &y, Sequence &x) {
   int N = x.size();
   for (int i = 0; i < N; i++) x[N - i - 1].d().device(*dev) += y[i].d();
+}
+
+// switch time and batch
+
+inline std::ostream &operator+(std::ostream &out, const TensorRef3 &t) {
+  out << "<TR3";
+  for(int i=0; i<3; i++) out << " " << t.dimension(i);
+  out << ">";
+  return out;
+}
+
+NOINLINE void forward_btswitch(Device *dev, Sequence &y, Sequence &x) {
+  TensorMap4 y4 = y.map4();
+  TensorMap4 x4 = x.map4();
+  // (i, b, 2, t)
+  assert(y4.dimension(0)==x4.dimension(0));
+  assert(y4.dimension(1)==x4.dimension(3));
+  assert(y4.dimension(2)==2);
+  assert(y4.dimension(3)==x4.dimension(1));
+
+  Indexes3 axes{0, 2, 1};
+  y4.chip(0,2).device(*dev) = x4.chip(0,2).shuffle(axes);
+}
+
+NOINLINE void backward_btswitch(Device *dev, Sequence &y, Sequence &x) {
+  TensorMap4 y4 = y.map4();
+  TensorMap4 x4 = x.map4();
+  assert(y4.dimension(0)==x4.dimension(0));
+  assert(y4.dimension(1)==x4.dimension(3));
+  assert(y4.dimension(2)==2);
+  assert(y4.dimension(3)==x4.dimension(1));
+
+  Indexes3 axes{0, 2, 1};
+  x4.chip(1,2).device(*dev) += y4.chip(1,2).shuffle(axes);
 }
 
 // combine the delayed gated state with the gated input

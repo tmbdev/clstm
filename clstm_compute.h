@@ -83,6 +83,8 @@ DEFGENERIC(forward_stack_delay, Batch &, Batch &, Sequence &, int);
 DEFGENERIC(backward_stack_delay, Batch &, Batch &, Sequence &, int);
 DEFGENERIC(forward_reverse, Sequence &, Sequence &);
 DEFGENERIC(backward_reverse, Sequence &, Sequence &);
+DEFGENERIC(forward_btswitch, Sequence &, Sequence &);
+DEFGENERIC(backward_btswitch, Sequence &, Sequence &);
 DEFGENERIC(forward_softmax, Batch &, Params &, Batch &);
 DEFGENERIC(backward_softmax, Batch &, Params &, Batch &);
 DEFGENERIC(forward_statemem, Batch &, Batch &, Batch &, Sequence &, int,
