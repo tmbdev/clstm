@@ -413,17 +413,10 @@ NOINLINE void backward_reverse(Device *dev, Sequence &y, Sequence &x) {
 
 // switch time and batch
 
-inline std::ostream &operator+(std::ostream &out, const TensorRef3 &t) {
-  out << "<TR3";
-  for(int i=0; i<3; i++) out << " " << t.dimension(i);
-  out << ">";
-  return out;
-}
-
 NOINLINE void forward_btswitch(Device *dev, Sequence &y, Sequence &x) {
   TensorMap4 y4 = y.map4();
   TensorMap4 x4 = x.map4();
-  // (i, b, 2, t)
+  // dimensions are: (feature, batch, 2, time)
   assert(y4.dimension(0)==x4.dimension(0));
   assert(y4.dimension(1)==x4.dimension(3));
   assert(y4.dimension(2)==2);
@@ -432,7 +425,6 @@ NOINLINE void forward_btswitch(Device *dev, Sequence &y, Sequence &x) {
   Indexes3 axes{0, 2, 1};
   y4.chip(0,2).device(*dev) = x4.chip(0,2).shuffle(axes);
 }
-
 NOINLINE void backward_btswitch(Device *dev, Sequence &y, Sequence &x) {
   TensorMap4 y4 = y.map4();
   TensorMap4 x4 = x.map4();

@@ -396,6 +396,17 @@ struct Reversed : INetwork {
 };
 REGISTER(Reversed);
 
+struct Btswitch : INetwork {
+  void forward() {
+    outputs.resize(inputs.cols(), inputs.rows(), inputs.size());
+    forward_btswitch(outputs, inputs);
+  }
+  void backward() {
+    backward_btswitch(outputs, inputs);
+  }
+};
+REGISTER(Btswitch);
+
 struct Parallel : INetwork {
   int noutput() {
     assert(sub[0]->noutput() > 0);

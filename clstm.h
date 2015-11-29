@@ -128,8 +128,8 @@ class INetwork {
   // and backward() methods.
   Sequence inputs;
   Sequence outputs;
-  virtual int ninput() { return -999999; }
-  virtual int noutput() { return -999999; }
+  virtual int ninput() { return attr.get("ninput"); }
+  virtual int noutput() { return attr.get("noutput"); }
 
   // Main methods for forward and backward propagation
   // of activations.

@@ -96,8 +96,9 @@ struct Maximizer {
   }
 };
 
-void test_net(Network net) {
-  print("testing", net->kind);
+void test_net(Network net, string id="") {
+  if (id=="") id = net->kind;
+  print("testing", id);
   int N = 4;
   int bs = 1;
   int ninput = net->ninput();
@@ -185,11 +186,17 @@ int main(int argc, char **argv) {
     test_net(
         layer("Reversed", 7, 3, {}, {layer("SigmoidLayer", 7, 3, {}, {})}));
     test_net(layer("Parallel", 7, 3, {}, {layer("SigmoidLayer", 7, 3, {}, {}),
-                                          layer("LinearLayer", 7, 3, {}, {})}));
+	    layer("LinearLayer", 7, 3, {}, {})}),
+      "parallel(sigmoid,linear)");
     test_net(make_net("bidi", {{"ninput", 7},
                                {"noutput", 3},
                                {"nhidden", 5},
-                               {"output_type", "SigmoidLayer"}}));
+                               {"output_type", "SigmoidLayer"}}),
+      "bidi");
+    test_net(layer("Stacked", 3, 3, {}, {
+	  layer("Btswitch", 3, 3, {}, {}),
+	    layer("Btswitch", 3, 3, {}, {})}),
+      "btswitch");
     // not testing: SoftmaxLayer and ReluLayer
   }
   CATCH(const char *message) { print("ERROR", message); }
