@@ -96,11 +96,10 @@ struct Maximizer {
   }
 };
 
-void test_net(Network net, string id="") {
+void test_net(Network net, string id="", int bs=1) {
   if (id=="") id = net->kind;
   print("testing", id);
   int N = 4;
-  int bs = 1;
   int ninput = net->ninput();
   int noutput = net->noutput();
   ;
@@ -197,6 +196,8 @@ int main(int argc, char **argv) {
 	  layer("Btswitch", 3, 3, {}, {}),
 	    layer("Btswitch", 3, 3, {}, {})}),
       "btswitch");
+    test_net(layer("Batchstack", 3, 9, {}, {}),
+      "Batchstack", 5);
     // not testing: SoftmaxLayer and ReluLayer
   }
   CATCH(const char *message) { print("ERROR", message); }

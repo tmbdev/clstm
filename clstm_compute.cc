@@ -472,8 +472,6 @@ NOINLINE void forward_batchstack(Device *dev, Sequence &y, Sequence &x, int pre,
     Indexes4 sizes{d, bs-crimp, 1, size};
     y4.slice(dest_offsets, sizes).device(*dev) = x4.slice(source_offsets, sizes);
   }
-  assert(y4(d, 4, 0, 0)==x4(0, 4, 0, 0));
-  assert(y4(2*d, 4, 0, 0)==x4(0, 5, 0, 0));
 }
 NOINLINE void backward_batchstack(Device *dev, Sequence &y, Sequence &x, int pre, int post) {
   TensorMap4 y4 = y.map4();

@@ -407,6 +407,23 @@ struct Btswitch : INetwork {
 };
 REGISTER(Btswitch);
 
+struct Batchstack : INetwork {
+  int pre = 1;
+  int post = 1;
+  void initialize() {
+    pre = attr.get("pre", 1);
+    post = attr.get("post", pre);
+  }
+  void forward() {
+    outputs.resize(inputs.size(), inputs.rows()*(pre+post+1), inputs.cols());
+    forward_batchstack(outputs, inputs);
+  }
+  void backward() {
+    backward_batchstack(outputs, inputs);
+  }
+};
+REGISTER(Batchstack);
+
 struct Parallel : INetwork {
   int noutput() {
     assert(sub[0]->noutput() > 0);
