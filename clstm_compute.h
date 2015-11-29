@@ -11,6 +11,7 @@ constexpr int LIN = 0;
 constexpr int SIG = 1;
 constexpr int TANH = 2;
 constexpr int RELU = 3;
+constexpr int LOGMAG = 4;
 
 extern Eigen::DefaultDevice default_device;
 

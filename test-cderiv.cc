@@ -261,6 +261,15 @@ struct TestFull1Tanh : Testcase {
   void forward() { forward_full1(outputs[0], ps[0], inputs[0], TANH); }
   void backward() { backward_full1(outputs[0], ps[0], inputs[0], TANH); }
 };
+struct TestFull1Logmag : Testcase {
+  virtual void init() {
+    randseq(inputs, 1, 7, 4);
+    randseq(targets, 1, 3, 4);
+    randparams(ps, {{3, 8}});
+  }
+  void forward() { forward_full1(outputs[0], ps[0], inputs[0], LOGMAG); }
+  void backward() { backward_full1(outputs[0], ps[0], inputs[0], LOGMAG); }
+};
 struct TestStack : Testcase {
   virtual void init() {
     randseq(inputs, 2, 7, 4);
@@ -377,6 +386,7 @@ int main(int argc, char **argv) {
   TRY {
     test_net(*new TestFull1Sigmoid);
     test_net(*new TestFull1Tanh);
+    test_net(*new TestFull1Logmag);
     test_net(*new TestStack);
     test_net(*new TestStackDelay);
     test_net(*new TestReverse);

@@ -110,6 +110,10 @@ NOINLINE void forward_tanh(Device *dev, Batch &y, Batch &x) {
 NOINLINE void forward_relu(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v().cwiseMax(Float(0));
 }
+NOINLINE void forward_logmag(Device *dev, Batch &y, Batch &x) {
+  y.v().device(*dev) = (x.v().abs() + Float(1)).log() *
+    ((x.v() < Float(0)).cast<Float>() * Float(-2) + Float(1));
+}
 NOINLINE void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   switch (nl) {
     case LIN:
@@ -123,6 +127,9 @@ NOINLINE void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
       break;
     case RELU:
       forward_relu(dev, y, x);
+      break;
+    case LOGMAG:
+      forward_logmag(dev, y, x);
       break;
     default:
       abort();
@@ -142,6 +149,9 @@ NOINLINE void backward_relu(Device *dev, Batch &y, Batch &x) {
   Float zero = 0;
   x.d().device(*dev) += y.d() * (y.v() > zero).cast<Float>();
 }
+NOINLINE void backward_logmag(Device *dev, Batch &y, Batch &x) {
+  x.d().device(*dev) += y.d() * (-y.v().abs()).exp();
+}
 NOINLINE void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   switch (nl) {
     case LIN:
@@ -155,6 +165,9 @@ NOINLINE void backward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
       break;
     case RELU:
       backward_relu(dev, y, x);
+      break;
+    case LOGMAG:
+      backward_logmag(dev, y, x);
       break;
     default:
       abort();
@@ -175,6 +188,11 @@ NOINLINE void forward_tanh0(Device *dev, Batch &y) {
 NOINLINE void forward_relu0(Device *dev, Batch &y) {
   y.v().device(*dev) = y.v().cwiseMax(Float(0));
 }
+NOINLINE void forward_logmag0(Device *dev, Batch &y) {
+  y.v().device(*dev) =
+    (y.v().abs() + Float(1)).log() *
+    ((y.v() < Float(0)).cast<Float>() * Float(-2) + Float(1));
+}
 NOINLINE void forward_nonlin0(Device *dev, Batch &y, int nl) {
   switch (nl) {
     case LIN:
@@ -188,6 +206,9 @@ NOINLINE void forward_nonlin0(Device *dev, Batch &y, int nl) {
       break;
     case RELU:
       forward_relu0(dev, y);
+      break;
+    case LOGMAG:
+      forward_logmag0(dev, y);
       break;
     default:
       abort();
@@ -207,6 +228,9 @@ NOINLINE void backward_relu0(Device *dev, Batch &y) {
   Float zero = 0;
   y.d().device(*dev) = y.d() * (y.v() > zero).cast<Float>();
 }
+NOINLINE void backward_logmag0(Device *dev, Batch &y) {
+  y.d().device(*dev) = y.d() * (-y.v().abs()).exp();
+}
 NOINLINE void backward_nonlin0(Device *dev, Batch &y, int nl) {
   switch (nl) {
     case LIN:
@@ -220,6 +244,9 @@ NOINLINE void backward_nonlin0(Device *dev, Batch &y, int nl) {
       break;
     case RELU:
       backward_relu0(dev, y);
+      break;
+    case LOGMAG:
+      backward_logmag0(dev, y);
       break;
     default:
       abort();
