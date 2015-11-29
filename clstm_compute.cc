@@ -2,6 +2,7 @@
 #include "clstm_compute.h"
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <iostream>
+#include <iomanip>
 
 // The NOINLINE attribute is used before all forward_/backward_ steps
 // to make execution profiles a little more readable (probably not
@@ -22,6 +23,15 @@
 #endif
 
 namespace ocropus {
+
+void print2d(TensorRef2 t) {
+  for(int i=0; i<t.dimension(0); i++) {
+    for(int j=0; j<t.dimension(1); j++) {
+      std::cerr << std::setw(8) << t(i,j);
+    }
+    std::cerr << "\n";
+  }
+}
 
 // We can generate code for different Eigen devices by defining
 // the DEVICE macro when compiling this compilation unit.
@@ -85,6 +95,7 @@ typedef Eigen::array<IndexPair, 1> Axes1;
 typedef Eigen::array<ptrdiff_t, 1> Indexes1;
 typedef Eigen::array<ptrdiff_t, 2> Indexes2;
 typedef Eigen::array<ptrdiff_t, 3> Indexes3;
+typedef Eigen::array<ptrdiff_t, 4> Indexes4;
 
 ONBOTH inline Axes1 axispairs(int i, int j) {
   Axes1 result = {IndexPair(i, j)};
@@ -435,6 +446,57 @@ NOINLINE void backward_btswitch(Device *dev, Sequence &y, Sequence &x) {
 
   Indexes3 axes{0, 2, 1};
   x4.chip(1,2).device(*dev) += y4.chip(1,2).shuffle(axes);
+}
+
+// stacking neighboring batches
+
+NOINLINE void forward_batchstack(Device *dev, Sequence &y, Sequence &x, int pre, int post) {
+  TensorMap4 y4 = y.map4();
+  TensorMap4 x4 = x.map4();
+  // dimensions are: (feature, batch, 2, time)
+  int d = x4.dimension(0);
+  int bs = x4.dimension(1);
+  int size =x4.dimension(3);
+  int copies = pre+post+1;
+  assert(y4.dimension(0)==copies*d);
+  assert(y4.dimension(1)==bs);
+  assert(y4.dimension(2)==2);
+  assert(y4.dimension(3)==x4.dimension(3));
+  y4.device(*dev) = y4.constant(Float(0));
+  for(int k=-pre; k<=post; k++) {
+    int source = max(k, 0);
+    int dest = max(-k, 0);
+    int crimp = abs(k);
+    Indexes4 source_offsets{0, source, 0, 0};
+    Indexes4 dest_offsets{d*(pre+k), dest, 0, 0};
+    Indexes4 sizes{d, bs-crimp, 1, size};
+    y4.slice(dest_offsets, sizes).device(*dev) = x4.slice(source_offsets, sizes);
+  }
+  assert(y4(d, 4, 0, 0)==x4(0, 4, 0, 0));
+  assert(y4(2*d, 4, 0, 0)==x4(0, 5, 0, 0));
+}
+NOINLINE void backward_batchstack(Device *dev, Sequence &y, Sequence &x, int pre, int post) {
+  TensorMap4 y4 = y.map4();
+  TensorMap4 x4 = x.map4();
+  // dimensions are: (feature, batch, 2, time)
+  int d = x4.dimension(0);
+  int bs = x4.dimension(1);
+  int size =x4.dimension(3);
+  int copies = pre+post+1;
+  assert(y4.dimension(0)==copies*d);
+  assert(y4.dimension(1)==bs);
+  assert(y4.dimension(2)==2);
+  assert(y4.dimension(3)==x4.dimension(3));
+  //x4.chip(1,2).device(*dev) = x4.chip(1,2).constant(Float(0));
+  for(int k=-pre; k<=post; k++) {
+    int source = max(k, 0);
+    int dest = max(-k, 0);
+    int crimp = abs(k);
+    Indexes4 source_offsets{0, source, 1, 0};
+    Indexes4 dest_offsets{d*(pre+k), dest, 1, 0};
+    Indexes4 sizes{d, bs-crimp, 1, size};
+    x4.slice(source_offsets, sizes).device(*dev) += y4.slice(dest_offsets, sizes);
+  }
 }
 
 // combine the delayed gated state with the gated input

@@ -85,6 +85,8 @@ DEFGENERIC(forward_reverse, Sequence &, Sequence &);
 DEFGENERIC(backward_reverse, Sequence &, Sequence &);
 DEFGENERIC(forward_btswitch, Sequence &, Sequence &);
 DEFGENERIC(backward_btswitch, Sequence &, Sequence &);
+DEFGENERIC(forward_batchstack, Sequence &, Sequence &, int pre=1, int post=1);
+DEFGENERIC(backward_batchstack, Sequence &, Sequence &, int pre=1, int post=1);
 DEFGENERIC(forward_softmax, Batch &, Params &, Batch &);
 DEFGENERIC(backward_softmax, Batch &, Params &, Batch &);
 DEFGENERIC(forward_statemem, Batch &, Batch &, Batch &, Sequence &, int,

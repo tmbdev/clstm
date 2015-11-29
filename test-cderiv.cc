@@ -36,12 +36,18 @@ double randu() {
 }
 
 void randseq(Sequence &a, int N, int n, int m) {
+  bool finit = getienv("finit", 0);
   a.resize(N, n, m);
   for (int t = 0; t < N; t++) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        a[t].v(i, j) = randu();
-        a[t].d(i, j) = randu();
+	if(finit) {
+	  a[t].v(i, j) = 10000*t+100*i+j;
+	  a[t].d(i, j) = 10000*t+100*i+j+0.5;
+	} else {
+	  a[t].v(i, j) = randu();
+	  a[t].d(i, j) = randu();
+	}
       }
     }
   }
@@ -195,7 +201,7 @@ void test_net(Testcase &tc) {
           double num_deriv = (out1 - out) / h;
           double error = fabs(1.0 - num_deriv / a_deriv / -2.0);
           if (verbose > 1)
-            print(t, i, b, ":", error, h, "/", num_deriv, a_deriv, out1, out);
+            print(t, i, b, ":", error, h, "num:", num_deriv, "analytic:", a_deriv, "out:", out1, out);
           minerr.add(error, h);
         }
         if (verbose) print("deltas", t, i, b, minerr.value, minerr.param);
@@ -329,6 +335,15 @@ struct TestBtswitch : Testcase {
   void forward() { forward_btswitch(outputs, inputs); }
   void backward() { backward_btswitch(outputs, inputs); }
 };
+struct TestBatchstack : Testcase {
+  virtual void init() {
+    randseq(inputs, 5, 4, 11);
+    randseq(targets, 5, 12, 11);
+    randparams(ps, {});
+  }
+  void forward() { forward_batchstack(outputs, inputs, 1, 1); }
+  void backward() { backward_batchstack(outputs, inputs, 1, 1); }
+};
 struct TestStatemem : Testcase {
   virtual void init() {
     randseq(inputs, 4, 7, 4);
@@ -393,6 +408,7 @@ void test_full() {
 
 int main(int argc, char **argv) {
   TRY {
+    test_net(*new TestBatchstack);
     test_net(*new TestFull1Sigmoid);
     test_net(*new TestFull1Tanh);
     test_net(*new TestFull1Logmag);
