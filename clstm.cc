@@ -455,11 +455,7 @@ struct GenericNPLSTM : INetwork {
   void initialize() {
     int ni = attr.get("ninput");
     int no = attr.get("noutput");
-#ifdef HOMOG
-    int nf = 1 + ni + no;
-#else
     int nf = ni + no;
-#endif
     string mode = attr.get("weight_mode", "pos");
     float weight_dev = attr.get("weight_dev", 0.01);
     this->ni = ni;
@@ -482,28 +478,16 @@ struct GenericNPLSTM : INetwork {
       outputs.setGpu(gpu);
     }
     assert(WGI.v.getGpu() == gpu);
-#ifdef HOMOG
-    rinit(WGI, no, nf, attr);
-    rinit(WGF, no, nf, attr);
-    rinit(WGO, no, nf, attr);
-    rinit(WCI, no, nf, attr);
-#else
     rinit(WGI, no, nf + 1, attr);
     rinit(WGF, no, nf + 1, attr);
     rinit(WGO, no, nf + 1, attr);
     rinit(WCI, no, nf + 1, attr);
-#endif
     assert(WGI.v.getGpu() == gpu);
   }
   void postLoad() {
     no = WGI.rows();
-#ifdef HOMOG
-    nf = WGI.cols();
-    ni = nf - no - 1;
-#else
     nf = WGI.cols() - 1;
     ni = nf - no;
-#endif
     assert(nf > no);
   }
   void forward() {
