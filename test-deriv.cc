@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <math.h>
+#include <cmath>
 #include <string>
 #include "extras.h"
 #include "utils.h"
@@ -77,7 +78,7 @@ void set_params(Network net, vector<Params> &params) {
 }
 
 struct Minimizer {
-  double value = 1e9;
+  double value = INFINITY;
   double param = 0;
   void add(double value, double param = NAN) {
     if (value >= this->value) return;
@@ -87,7 +88,7 @@ struct Minimizer {
 };
 
 struct Maximizer {
-  double value = -1e9;
+  double value = -INFINITY;
   double param = 0;
   void add(double value, double param = NAN) {
     if (value <= this->value) return;
