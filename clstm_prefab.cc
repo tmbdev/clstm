@@ -66,6 +66,19 @@ Network make_bidi(const Assoc &params) {
                 layer(output_type, 2 * nhidden, noutput, params, {})});
 }
 
+// A 1D bidirectional LSTM with Softmax/Sigmoid output layer.
+
+Network make_bidi0(const Assoc &params) {
+  int ninput = params.get("ninput");
+  int noutput = params.get("noutput");
+  string lstm_type = get(params, "lstm_type", "NPLSTM");
+  return layer("Parallel", ninput, 2 * noutput, {}, {
+      layer(lstm_type, ninput, noutput, params, {}),
+	layer("Reversed", ninput, ninput, {},
+	  {layer(lstm_type, ninput, noutput, params, {})}),
+	});
+}
+
 // Two stacked 1D bidirectional LSTM with Softmax/Sigmoid output layer.
 
 Network make_bidi2(const Assoc &params) {
@@ -93,11 +106,60 @@ Network make_bidi2(const Assoc &params) {
        layer(output_type, 2 * nhidden2, noutput, params, {})});
 }
 
+Network make_perplstm(const Assoc &params) {
+  int ninput = params.get("ninput");
+  int nhidden = params.get("nhidden");
+  int noutput = params.get("noutput");
+  string output_type = get(params, "output_type", "SigmoidLayer");
+  Network vertical = make_bidi({
+      {"ninput", ninput},
+      {"nhidden", nhidden},
+      {"noutput", noutput},
+      {"output_type", output_type}});
+  return layer(
+      "Stacked", ninput, noutput, {},{
+	  //layer("Btswitch", nhidden2, nhidden2, {}, {}),
+	  vertical,
+	  //layer("Btswitch", noutput, noutput, {}, {})
+	    });
+}
+
+// Two dimensional LSTM
+
+Network make_twod(const Assoc &params) {
+  int ninput = params.get("ninput");
+  int nhidden = params.get("nhidden");
+  int nhidden2 = params.get("nhidden2", nhidden);
+  int nhidden3 = params.get("nhidden3", nhidden2);
+  int noutput = params.get("noutput");
+  string output_type = get(params, "output_type",
+                           noutput == 1 ? "SigmoidLayer" : "SoftmaxLayer");
+  Network horizontal = make_bidi({
+      {"ninput", ninput},
+      {"nhidden", nhidden},
+      {"noutput", nhidden2},
+      {"output_type", "SigmoidLayer"}});
+  Network vertical = make_bidi({
+      {"ninput", nhidden2},
+      {"nhidden", nhidden3},
+      {"noutput", noutput},
+      {"output_type", output_type}});
+  return layer(
+      "Stacked", ninput, noutput, {},{
+	horizontal,
+	  layer("Btswitch", nhidden2, nhidden2, {}, {}),
+	  vertical,
+	  layer("Btswitch", noutput, noutput, {}, {})});
+}
+
 void init_clstm_prefab() {
   network_factories["lstm1"] = make_lstm1;
   network_factories["revlstm1"] = make_revlstm1;
   network_factories["bidi"] = make_bidi;
+  network_factories["bidi0"] = make_bidi0;
   network_factories["bidi2"] = make_bidi2;
+  network_factories["twod"] = make_twod;
+  network_factories["perplstm"] = make_perplstm;
 }
 
 static int init_ = (init_clstm_prefab(), 0);
