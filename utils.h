@@ -149,7 +149,7 @@ inline void dprint(T arg, Args... args) {
 template <class T>
 inline void report_params(const char *name, const T &value) {
   const char *flag = getenv("params");
-  if (!flag || !atoi(flag)) return;
+  if (flag && !atoi(flag)) return;
   cerr << "#: " << name << " = " << value << endl;
 }
 

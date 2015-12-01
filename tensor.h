@@ -95,6 +95,8 @@ using Eigen::TensorMap;
 typedef Float Scalar;
 typedef Eigen::Tensor<Float, 1> EigenTensor1;
 typedef Eigen::Tensor<Float, 2> EigenTensor2;
+typedef Eigen::Tensor<Float, 3> EigenTensor3;
+typedef Eigen::Tensor<Float, 4> EigenTensor4;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 1>> TensorMap1;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 2>> TensorMap2;
 typedef Eigen::TensorMap<Eigen::Tensor<Float, 3>> TensorMap3;
@@ -116,33 +118,35 @@ inline int rows(const EigenTensor2 &m) { return m.dimension(0); }
 inline int cols(const EigenTensor2 &m) { return m.dimension(1); }
 #endif
 
-inline void alloc_gpu(void **p, int nbytes, int gpu) {
-  *p = nullptr;
+template <class T>
+inline void alloc_gpu(T *&p, int nbytes, int gpu) {
+  p = nullptr;
 #ifdef CLSTM_CUDA
   if (gpu < 0) {
-    *p = malloc(nbytes);
+    p = (T *)malloc(nbytes);
   } else {
-    cudaMalloc(p, nbytes);
+    cudaMalloc((void**)&p, nbytes);
   }
 #else
   assert(gpu < 0 && "not compiled for CUDA");
-  *p = malloc(nbytes);
+  p = (T *)malloc(nbytes);
 #endif
 }
 
-inline void free_gpu(void **p, int gpu) {
+template <class T>
+inline void free_gpu(T *&p, int gpu) {
 #ifdef CLSTM_CUDA
   if (gpu < 0) {
-    free(*p);
-    *p = nullptr;
+    free((void*)p);
+    p = nullptr;
   } else {
-    cudaFree(*p);
-    *p = nullptr;
+    cudaFree((void**)&p);
+    p = nullptr;
   }
 #else
   assert(gpu < 0 && "not compiled for CUDA");
-  free(*p);
-  *p = nullptr;
+  free((void*)p);
+  p = nullptr;
 #endif
 }
 
@@ -196,7 +200,7 @@ struct Tensor2 {
   }
   void reset() {
     if (!ptr) return;
-    if (!displaced) free_gpu((void**)&ptr, gpu);
+    if (!displaced) free_gpu(ptr, gpu);
     displaced = false;
     ptr = nullptr;
     dims[0] = 0;
@@ -221,7 +225,7 @@ struct Tensor2 {
     if (n == 0 || m == 0) return;
     dims[0] = n;
     dims[1] = m;
-    alloc_gpu((void**)&ptr, n * m * sizeof (Float), gpu);
+    alloc_gpu(ptr, n * m * sizeof (Float), gpu);
   }
   void like(Tensor2 &other) {
     setGpu(other.getGpu());

@@ -24,7 +24,7 @@
 
 namespace ocropus {
 
-void print2d(TensorRef2 t) {
+inline void print2d(TensorRef2 t) {
   for(int i=0; i<t.dimension(0); i++) {
     for(int j=0; j<t.dimension(1); j++) {
       std::cerr << std::setw(8) << t(i,j);

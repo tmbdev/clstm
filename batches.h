@@ -61,6 +61,9 @@ struct Sequence {
     like((Sequence &)other);
     copy((Sequence &)other);
   }
+  ~Sequence() {
+    free_gpu(data, gpu);
+  }
   int getGpu() const { return gpu; }
   void setGpu(int n) {
     gpu = n;
@@ -68,7 +71,7 @@ struct Sequence {
   }
   void clear() {
     steps.clear();
-    if (data) free_gpu((void **)&data, gpu);
+    if (data) free_gpu(data, gpu);
     data = nullptr;
     dims[0] = 0;
     dims[1] = 0;
@@ -81,7 +84,7 @@ struct Sequence {
     dims[1] = m;
     dims[2] = 2;
     dims[3] = N;
-    alloc_gpu((void **)&data, nbytes(), gpu);
+    alloc_gpu(data, nbytes(), gpu);
   }
 
   int size() const { return dims[3]; }

@@ -143,6 +143,7 @@ all += [env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-timing", ["test-timing.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-gpu", ["test-gpu.cc"], LIBS=[libclstm] + libs)]
+all += [env.Program("test-2d", ["test-2d.cc"], LIBS=[libclstm] + libs)]
 
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"
