@@ -485,7 +485,7 @@ struct GenericNPLSTM : INetwork {
     int no = attr.get("noutput");
     int nf = ni + no;
     string mode = attr.get("weight_mode", "pos");
-    float weight_dev = attr.get("weight_dev", 0.01);
+    //float weight_dev = attr.get("weight_dev", 0.01);
     this->ni = ni;
     this->no = no;
     this->nf = nf;
@@ -542,7 +542,7 @@ struct GenericNPLSTM : INetwork {
   }
   void backward() {
     int N = inputs.size();
-    int bs = outputs.cols();
+    //int bs = outputs.cols();
     Sequence out;
     out.setGpu(gpu);
     out = outputs;

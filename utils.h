@@ -269,7 +269,7 @@ struct Trigger {
   int last_trigger = 0;
   int current_trigger = 0;
   Trigger(int every, int upto = -1, int start = 0)
-      : every(every), upto(upto), count(start) {}
+    : count(start), every(every), upto(upto) {}
   Trigger &skip0() {
     next += every;
     return *this;

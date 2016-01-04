@@ -49,7 +49,8 @@ using Eigen::Tensor;
 using Eigen::TensorMap;
 using Eigen::TensorRef;
 using Eigen::DSizes;
-using Eigen::Index;
+//using Eigen::Index;
+typedef ptrdiff_t Index;
 using Eigen::array;
 using std::shared_ptr;
 using std::unique_ptr;
@@ -83,7 +84,7 @@ inline Float limexp(Float x) {
 inline Float sigmoid(Float x) { return 1.0 / (1.0 + limexp(-x)); }
 
 inline Float log_add(Float x, Float y) {
-  if (abs(x - y) > 10) return fmax(x, y);
+  if (fabs(x - y) > 10) return fmax(x, y);
   return log(exp(x - y) + 1) + y;
 }
 

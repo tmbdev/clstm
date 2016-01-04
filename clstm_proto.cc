@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <typeinfo>
 #ifdef GOOGLE
-#include "third_party/clstm/clstm.pb.h"
+#include "third_party/clstm/tensor/clstm.pb.h"
 #else
 #include "clstm.pb.h"
 #endif
@@ -109,7 +109,7 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
   net->attr.set("noutput", proto->noutput());
   for (int i = 0; i < proto->attribute_size(); i++) {
     const clstm::KeyValue *attr = &proto->attribute(i);
-    net->attr.set(attr->key(), attr->value());
+    net->attr.set(attr->key(), std::string(attr->value()));
   }
   vector<int> icodec;
   for (int i = 0; i < proto->icodec_size(); i++)

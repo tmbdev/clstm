@@ -24,6 +24,13 @@ extern "C" {
 #include <assert.h>
 #include <math.h>
 #include <unistd.h>
+#define __sigsetjmp __sigsetjump0
+#ifdef GOOGLE
+#include "third_party/png/png.h"
+#else
+#include <png.h>
+#endif
+#undef __sigsetjmp
 }
 
 #include <string>
@@ -292,10 +299,6 @@ INormalizer *make_Normalizer(const string &name) {
 
 // PNG I/O (taken from iulib)
 
-#define __sigsetjmp __sigsetjump0
-#include <png.h>
-#undef __sigsetjmp
-
 #define CHECK_CONDITION(X)         \
   do {                             \
     if (!(X)) THROW("CHECK: " #X); \
@@ -454,7 +457,6 @@ void write_png(FILE *fp, Tensor<unsigned char, 3> &image) {
   unsigned int default_xres = 300;
   unsigned int default_yres = 300;
 
-  int rank = image.rank();
   CHECK_ARG(image.rank() == 2 ||
             (image.rank() == 3 && image.dimension(2) == 3));
 
