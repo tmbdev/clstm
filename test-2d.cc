@@ -95,7 +95,6 @@ void get_image(Tensor2 &image, Sequence &seq, int plane) {
   // image: (h, w, d) sequence: (t, d, h)
   int h = seq.cols();
   int w = seq.size();
-  int d = seq.rows();
   image.resize(h,w);
   TensorMap4 t = seq.map4();
   for(int i=0; i<h; i++)

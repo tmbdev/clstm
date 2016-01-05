@@ -13,9 +13,10 @@
 #include <map>
 #include <stdarg.h>
 #include <glob.h>
-#include "pstring.h"
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include "pstring.h"
 
 namespace ocropus {
 using std::string;

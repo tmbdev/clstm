@@ -9,6 +9,7 @@
 #include <string>
 #include <stdarg.h>
 #include <iostream>
+#include <memory>
 #include <unsupported/Eigen/CXX11/Tensor>
 
 namespace pytensor {

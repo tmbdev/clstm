@@ -272,7 +272,8 @@ NOINLINE void backward_nonlin0(Device *dev, Batch &y, int nl) {
 #endif
 
 NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
-  int n = W1.v.dimension(0), m = W1.v.dimension(1);
+  int n = W1.v.dimension(0);
+  int m = W1.v.dimension(1);
   assert(y.rows() == n);
   assert(y.cols() == x.cols());
   assert(x.rows() == m - 1);

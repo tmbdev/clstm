@@ -149,6 +149,7 @@ struct Testcase;
 vector<Testcase *> testcases;
 
 struct Testcase {
+  virtual ~Testcase() {}
   Sequence inputs;
   ParamVec ps;
   Sequence outputs;

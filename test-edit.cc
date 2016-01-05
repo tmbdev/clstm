@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
   ifstream file2(argv[2]);
 
   for (;;) {
-    string line1, line2;
+    std::string line1, line2;
     if (file1.eof() || file2.eof()) break;
     getline(file1, line1);
     getline(file2, line2);
