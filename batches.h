@@ -1,8 +1,8 @@
 #ifndef ocropus_batches__
 #define ocropus_batches__
 
-#include <vector>
 #include <array>
+#include <vector>
 #include "tensor.h"
 #include "utils.h"
 
@@ -61,9 +61,7 @@ struct Sequence {
     like((Sequence &)other);
     copy((Sequence &)other);
   }
-  ~Sequence() {
-    free_gpu(data, gpu);
-  }
+  ~Sequence() { free_gpu(data, gpu); }
   int getGpu() const { return gpu; }
   void setGpu(int n) {
     gpu = n;

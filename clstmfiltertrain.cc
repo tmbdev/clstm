@@ -1,16 +1,16 @@
-#include "pstring.h"
 #include "clstm.h"
-#include "clstmhl.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <math.h>
-#include <sstream>
 #include <fstream>
 #include <iostream>
+#include <iostream>
+#include <memory>
 #include <set>
+#include <sstream>
+#include <vector>
+#include "clstmhl.h"
 #include "extras.h"
+#include "pstring.h"
 #include "utils.h"
 
 using namespace Eigen;

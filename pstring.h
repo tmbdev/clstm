@@ -3,10 +3,10 @@
 #ifndef ocropus_clstm_pstring_
 #define ocropus_clstm_pstring_
 
-#include <wchar.h>
-#include <string>
-#include <iostream>
 #include <assert.h>
+#include <wchar.h>
+#include <iostream>
+#include <string>
 
 namespace {
 std::wstring utf8_to_utf32(std::string s) {

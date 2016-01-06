@@ -1,15 +1,15 @@
 #include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <memory>
 #include <math.h>
 #include <stdarg.h>
-#include <set>
 #include <fstream>
-#include "pstring.h"
+#include <iostream>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 #include "clstm_compute.h"
+#include "pstring.h"
 
 #ifndef MAXEXP
 #define MAXEXP 30
@@ -401,9 +401,7 @@ struct Btswitch : INetwork {
     outputs.resize(inputs.cols(), inputs.rows(), inputs.size());
     forward_btswitch(outputs, inputs);
   }
-  void backward() {
-    backward_btswitch(outputs, inputs);
-  }
+  void backward() { backward_btswitch(outputs, inputs); }
 };
 REGISTER(Btswitch);
 
@@ -415,12 +413,11 @@ struct Batchstack : INetwork {
     post = attr.get("post", pre);
   }
   void forward() {
-    outputs.resize(inputs.size(), inputs.rows()*(pre+post+1), inputs.cols());
+    outputs.resize(inputs.size(), inputs.rows() * (pre + post + 1),
+                   inputs.cols());
     forward_batchstack(outputs, inputs);
   }
-  void backward() {
-    backward_batchstack(outputs, inputs);
-  }
+  void backward() { backward_batchstack(outputs, inputs); }
 };
 REGISTER(Batchstack);
 
@@ -485,7 +482,7 @@ struct GenericNPLSTM : INetwork {
     int no = attr.get("noutput");
     int nf = ni + no;
     string mode = attr.get("weight_mode", "pos");
-    //float weight_dev = attr.get("weight_dev", 0.01);
+    // float weight_dev = attr.get("weight_dev", 0.01);
     this->ni = ni;
     this->no = no;
     this->nf = nf;
@@ -542,7 +539,7 @@ struct GenericNPLSTM : INetwork {
   }
   void backward() {
     int N = inputs.size();
-    //int bs = outputs.cols();
+    // int bs = outputs.cols();
     Sequence out;
     out.setGpu(gpu);
     out = outputs;
@@ -574,10 +571,21 @@ REGISTER(RELUNPLSTM);
 typedef GenericNPLSTM<SIG, RELU, RELU> RELU2NPLSTM;
 REGISTER(RELU2NPLSTM);
 
-void save_net(const string &file, Network net) {
-  save_as_proto(file, net.get());
+bool maybe_save_net(const string &file, Network net) {
+  return save_as_proto(file, net.get());
 }
-Network load_net(const string &file) { return load_as_proto(file); }
+Network maybe_load_net(const string &file) { 
+  return load_as_proto(file); 
+}
+void save_net(const string &file, Network net) {
+  if(save_as_proto(file, net.get())) return;
+  THROW("error saving network");
+}
+Network load_net(const string &file) { 
+  Network result = load_as_proto(file); 
+  if(!result) THROW("error loading network");
+  return result;
+}
 
 void set_inputs(Network net, TensorMap2 inputs) {
   int N = inputs.dimension(0);

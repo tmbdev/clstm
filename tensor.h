@@ -33,14 +33,14 @@
 // slices, bit the Eigen Tensor library does not have full support for
 // tensor slices as independent objects.
 
+#include <Eigen/Dense>
 #include <memory>
 #include <unordered_map>
 #include <unsupported/Eigen/CXX11/Tensor>
-#include <Eigen/Dense>
 
 #ifdef CLSTM_CUDA
-#include "cuda_runtime.h"
 #include "cuda.h"
+#include "cuda_runtime.h"
 #endif
 
 namespace ocropus {
@@ -49,7 +49,7 @@ using Eigen::Tensor;
 using Eigen::TensorMap;
 using Eigen::TensorRef;
 using Eigen::DSizes;
-//using Eigen::Index;
+// using Eigen::Index;
 typedef ptrdiff_t Index;
 using Eigen::array;
 using std::shared_ptr;
@@ -126,7 +126,7 @@ inline void alloc_gpu(T *&p, int nbytes, int gpu) {
   if (gpu < 0) {
     p = (T *)malloc(nbytes);
   } else {
-    cudaMalloc((void**)&p, nbytes);
+    cudaMalloc((void **)&p, nbytes);
   }
 #else
   assert(gpu < 0 && "not compiled for CUDA");
@@ -138,15 +138,15 @@ template <class T>
 inline void free_gpu(T *&p, int gpu) {
 #ifdef CLSTM_CUDA
   if (gpu < 0) {
-    free((void*)p);
+    free((void *)p);
     p = nullptr;
   } else {
-    cudaFree((void**)&p);
+    cudaFree((void **)&p);
     p = nullptr;
   }
 #else
   assert(gpu < 0 && "not compiled for CUDA");
-  free((void*)p);
+  free((void *)p);
   p = nullptr;
 #endif
 }
@@ -226,7 +226,7 @@ struct Tensor2 {
     if (n == 0 || m == 0) return;
     dims[0] = n;
     dims[1] = m;
-    alloc_gpu(ptr, n * m * sizeof (Float), gpu);
+    alloc_gpu(ptr, n * m * sizeof(Float), gpu);
   }
   void like(Tensor2 &other) {
     setGpu(other.getGpu());

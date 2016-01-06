@@ -6,10 +6,10 @@
 #ifndef NODISPLAY
 #include <zmqpp/zmqpp.hpp>
 #endif
-#include <string>
 #include <stdarg.h>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <unsupported/Eigen/CXX11/Tensor>
 
 namespace pytensor {

@@ -1,13 +1,13 @@
-#include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <math.h>
-#include <string>
-#include "extras.h"
-#include "clstm_compute.h"
 #include <initializer_list>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+#include "clstm.h"
+#include "clstm_compute.h"
+#include "extras.h"
 
 using namespace ocropus;
 using std::initializer_list;

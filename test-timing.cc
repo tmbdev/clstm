@@ -1,13 +1,13 @@
-#include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <math.h>
+#include <iostream>
+#include <memory>
 #include <string>
+#include <vector>
+#include "clstm.h"
+#include "clstm_compute.h"
 #include "extras.h"
 #include "utils.h"
-#include "clstm_compute.h"
 
 using namespace std;
 using std::vector;

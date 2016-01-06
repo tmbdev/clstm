@@ -1,14 +1,14 @@
-#include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <math.h>
+#include <iomanip>
+#include <iostream>
+#include <iostream>
+#include <memory>
 #include <string>
+#include <vector>
+#include "clstm.h"
 #include "extras.h"
 #include "utils.h"
-#include <iostream>
-#include <iomanip>
 
 using std_string = std::string;
 #define string std_string
@@ -30,7 +30,7 @@ int testbatch = getienv("testbatch", 1);
 int seqlength = getienv("seqlength", 20);
 double lrate = getdenv("lrate", 1e-4);
 
-void gentest(Sequence &xs, Sequence &ys, int batchsize=1) {
+void gentest(Sequence &xs, Sequence &ys, int batchsize = 1) {
   int N = seqlength;
   int d = nfeatures;
   xs.resize(N, d, batchsize);
@@ -41,8 +41,7 @@ void gentest(Sequence &xs, Sequence &ys, int batchsize=1) {
     ys[0].v(0, b) = 1;
     for (int t = 0; t < N; t++) {
       int out = (drand48() < 0.3);
-      for (int i = 0; i < d; i++)
-        xs[t].v(i, b) = out;
+      for (int i = 0; i < d; i++) xs[t].v(i, b) = out;
       if (t < N - 1) ys[t + 1].v(out, b) = 1.0;
     }
   }
@@ -55,10 +54,11 @@ Float maxerr(Sequence &xs, Sequence &ys) {
     for (int i = 0; i < xs.rows(); i++) {
       for (int j = 0; j < ys.cols(); j++) {
         Float err = fabs(xs[t].v(i, j) - ys[t].v(i, j));
-	if (err > threshold) {
-	  print("t", t, "i", i, "b", j, "err", err, "xs", xs[t].v(i,j), "ys", ys[t].v(i,j));
-	  assert(err <= threshold);
-	}
+        if (err > threshold) {
+          print("t", t, "i", i, "b", j, "err", err, "xs", xs[t].v(i, j), "ys",
+                ys[t].v(i, j));
+          assert(err <= threshold);
+        }
         merr = fmax(err, merr);
       }
     }
@@ -67,10 +67,10 @@ Float maxerr(Sequence &xs, Sequence &ys) {
 }
 
 void printseq(Sequence &s) {
-  for(int i=0; i<s.rows(); i++) {
-    for(int t=0; t<s.size(); t++) {
-      for(int b=0; b<s.cols(); b++) {
-	cerr << std::setw(3) << int(99.999 * s[t].v(i,b));
+  for (int i = 0; i < s.rows(); i++) {
+    for (int t = 0; t < s.size(); t++) {
+      for (int b = 0; b < s.cols(); b++) {
+        cerr << std::setw(3) << int(99.999 * s[t].v(i, b));
       }
       cerr << "|";
     }
@@ -103,12 +103,9 @@ double test_net(Network net) {
 int main(int argc, char **argv) {
   Network net;
   int gpu = getienv("gpu", -1);
-  net = make_net("lstm1", {
-    {"ninput", nfeatures},
-    {"nhidden", 4},
-    {"noutput", 2},
-    {"gpu", gpu}
-  });
+  net = make_net(
+      "lstm1",
+      {{"ninput", nfeatures}, {"nhidden", 4}, {"noutput", 2}, {"gpu", gpu}});
   net->setLearningRate(lrate, 0.9);
   save_net("__test0__.clstm", net);
   unlink("__test0__.clstm");

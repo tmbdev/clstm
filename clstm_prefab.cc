@@ -1,12 +1,12 @@
-#include "extras.h"
 #include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <memory>
 #include <math.h>
 #include <stdarg.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+#include "extras.h"
 #include "utils.h"
 
 namespace ocropus {
@@ -56,14 +56,15 @@ Network make_bidi(const Assoc &params) {
   string lstm_type = get(params, "lstm_type", "NPLSTM");
   string output_type = get(params, "output_type",
                            noutput == 1 ? "SigmoidLayer" : "SoftmaxLayer");
-  return layer("Stacked", ninput, noutput, {},
-               {layer("Parallel", ninput, 2 * nhidden, {},
-                      {
-                       layer(lstm_type, ninput, nhidden, params, {}),
-                       layer("Reversed", ninput, ninput, {},
-                             {layer(lstm_type, ninput, nhidden, params, {})}),
-                      }),
-                layer(output_type, 2 * nhidden, noutput, params, {})});
+  return layer(
+      "Stacked", ninput, noutput, {},
+      {layer("Parallel", ninput, 2 * nhidden, {},
+             {
+                 layer(lstm_type, ninput, nhidden, params, {}),
+                 layer("Reversed", ninput, ninput, {},
+                       {layer(lstm_type, ninput, nhidden, params, {})}),
+             }),
+       layer(output_type, 2 * nhidden, noutput, params, {})});
 }
 
 // A 1D bidirectional LSTM with Softmax/Sigmoid output layer.
@@ -72,11 +73,12 @@ Network make_bidi0(const Assoc &params) {
   int ninput = params.get("ninput");
   int noutput = params.get("noutput");
   string lstm_type = get(params, "lstm_type", "NPLSTM");
-  return layer("Parallel", ninput, 2 * noutput, {}, {
-      layer(lstm_type, ninput, noutput, params, {}),
-	layer("Reversed", ninput, ninput, {},
-	  {layer(lstm_type, ninput, noutput, params, {})}),
-	});
+  return layer("Parallel", ninput, 2 * noutput, {},
+               {
+                   layer(lstm_type, ninput, noutput, params, {}),
+                   layer("Reversed", ninput, ninput, {},
+                         {layer(lstm_type, ninput, noutput, params, {})}),
+               });
 }
 
 // Two stacked 1D bidirectional LSTM with Softmax/Sigmoid output layer.
@@ -93,15 +95,15 @@ Network make_bidi2(const Assoc &params) {
       "Stacked", ninput, noutput, {},
       {layer("Parallel", ninput, 2 * nhidden, {},
              {
-              layer(lstm_type, ninput, nhidden, params, {}),
-              layer("Reversed", ninput, ninput, {},
-                    {layer(lstm_type, ninput, nhidden, params, {})}),
+                 layer(lstm_type, ninput, nhidden, params, {}),
+                 layer("Reversed", ninput, ninput, {},
+                       {layer(lstm_type, ninput, nhidden, params, {})}),
              }),
        layer("Parallel", 2 * nhidden, 2 * nhidden2, {},
              {
-              layer(lstm_type, 2 * nhidden, nhidden2, params, {}),
-              layer("Reversed", 2 * nhidden, 2 * nhidden, {},
-                    {layer(lstm_type, 2 * nhidden, nhidden2, params, {})}),
+                 layer(lstm_type, 2 * nhidden, nhidden2, params, {}),
+                 layer("Reversed", 2 * nhidden, 2 * nhidden, {},
+                       {layer(lstm_type, 2 * nhidden, nhidden2, params, {})}),
              }),
        layer(output_type, 2 * nhidden2, noutput, params, {})});
 }
@@ -111,17 +113,16 @@ Network make_perplstm(const Assoc &params) {
   int nhidden = params.get("nhidden");
   int noutput = params.get("noutput");
   string output_type = get(params, "output_type", "SigmoidLayer");
-  Network vertical = make_bidi({
-      {"ninput", ninput},
-      {"nhidden", nhidden},
-      {"noutput", noutput},
-      {"output_type", output_type}});
-  return layer(
-      "Stacked", ninput, noutput, {},{
-	  //layer("Btswitch", nhidden2, nhidden2, {}, {}),
-	  vertical,
-	  //layer("Btswitch", noutput, noutput, {}, {})
-	    });
+  Network vertical = make_bidi({{"ninput", ninput},
+                                {"nhidden", nhidden},
+                                {"noutput", noutput},
+                                {"output_type", output_type}});
+  return layer("Stacked", ninput, noutput, {},
+               {
+                   // layer("Btswitch", nhidden2, nhidden2, {}, {}),
+                   vertical,
+                   // layer("Btswitch", noutput, noutput, {}, {})
+               });
 }
 
 // Two dimensional LSTM
@@ -134,22 +135,17 @@ Network make_twod(const Assoc &params) {
   int noutput = params.get("noutput");
   string output_type = get(params, "output_type",
                            noutput == 1 ? "SigmoidLayer" : "SoftmaxLayer");
-  Network horizontal = make_bidi({
-      {"ninput", ninput},
-      {"nhidden", nhidden},
-      {"noutput", nhidden2},
-      {"output_type", "SigmoidLayer"}});
-  Network vertical = make_bidi({
-      {"ninput", nhidden2},
-      {"nhidden", nhidden3},
-      {"noutput", noutput},
-      {"output_type", output_type}});
-  return layer(
-      "Stacked", ninput, noutput, {},{
-	horizontal,
-	  layer("Btswitch", nhidden2, nhidden2, {}, {}),
-	  vertical,
-	  layer("Btswitch", noutput, noutput, {}, {})});
+  Network horizontal = make_bidi({{"ninput", ninput},
+                                  {"nhidden", nhidden},
+                                  {"noutput", nhidden2},
+                                  {"output_type", "SigmoidLayer"}});
+  Network vertical = make_bidi({{"ninput", nhidden2},
+                                {"nhidden", nhidden3},
+                                {"noutput", noutput},
+                                {"output_type", output_type}});
+  return layer("Stacked", ninput, noutput, {},
+               {horizontal, layer("Btswitch", nhidden2, nhidden2, {}, {}),
+                vertical, layer("Btswitch", noutput, noutput, {}, {})});
 }
 
 void init_clstm_prefab() {

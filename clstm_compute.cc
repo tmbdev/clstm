@@ -1,8 +1,8 @@
-#include <memory>
 #include "clstm_compute.h"
-#include <unsupported/Eigen/CXX11/Tensor>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <memory>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 // The NOINLINE attribute is used before all forward_/backward_ steps
 // to make execution profiles a little more readable (probably not
@@ -25,9 +25,9 @@
 namespace ocropus {
 
 inline void print2d(TensorRef2 t) {
-  for(int i=0; i<t.dimension(0); i++) {
-    for(int j=0; j<t.dimension(1); j++) {
-      std::cerr << std::setw(8) << t(i,j);
+  for (int i = 0; i < t.dimension(0); i++) {
+    for (int j = 0; j < t.dimension(1); j++) {
+      std::cerr << std::setw(8) << t(i, j);
     }
     std::cerr << "\n";
   }
@@ -123,8 +123,9 @@ NOINLINE void forward_relu(Device *dev, Batch &y, Batch &x) {
   y.v().device(*dev) = x.v().cwiseMax(Float(0));
 }
 NOINLINE void forward_logmag(Device *dev, Batch &y, Batch &x) {
-  y.v().device(*dev) = (x.v().abs() + Float(1)).log() *
-    ((x.v() < Float(0)).cast<Float>() * Float(-2) + Float(1));
+  y.v().device(*dev) =
+      (x.v().abs() + Float(1)).log() *
+      ((x.v() < Float(0)).cast<Float>() * Float(-2) + Float(1));
 }
 NOINLINE void forward_nonlin(Device *dev, Batch &y, Batch &x, int nl) {
   switch (nl) {
@@ -202,8 +203,8 @@ NOINLINE void forward_relu0(Device *dev, Batch &y) {
 }
 NOINLINE void forward_logmag0(Device *dev, Batch &y) {
   y.v().device(*dev) =
-    (y.v().abs() + Float(1)).log() *
-    ((y.v() < Float(0)).cast<Float>() * Float(-2) + Float(1));
+      (y.v().abs() + Float(1)).log() *
+      ((y.v() < Float(0)).cast<Float>() * Float(-2) + Float(1));
 }
 NOINLINE void forward_nonlin0(Device *dev, Batch &y, int nl) {
   switch (nl) {
@@ -423,72 +424,76 @@ NOINLINE void forward_btswitch(Device *dev, Sequence &y, Sequence &x) {
   TensorMap4 y4 = y.map4();
   TensorMap4 x4 = x.map4();
   // dimensions are: (feature, batch, 2, time)
-  assert(y4.dimension(0)==x4.dimension(0));
-  assert(y4.dimension(1)==x4.dimension(3));
-  assert(y4.dimension(2)==2);
-  assert(y4.dimension(3)==x4.dimension(1));
+  assert(y4.dimension(0) == x4.dimension(0));
+  assert(y4.dimension(1) == x4.dimension(3));
+  assert(y4.dimension(2) == 2);
+  assert(y4.dimension(3) == x4.dimension(1));
 
   Indexes3 axes{0, 2, 1};
-  y4.chip(0,2).device(*dev) = x4.chip(0,2).shuffle(axes);
+  y4.chip(0, 2).device(*dev) = x4.chip(0, 2).shuffle(axes);
 }
 NOINLINE void backward_btswitch(Device *dev, Sequence &y, Sequence &x) {
   TensorMap4 y4 = y.map4();
   TensorMap4 x4 = x.map4();
-  assert(y4.dimension(0)==x4.dimension(0));
-  assert(y4.dimension(1)==x4.dimension(3));
-  assert(y4.dimension(2)==2);
-  assert(y4.dimension(3)==x4.dimension(1));
+  assert(y4.dimension(0) == x4.dimension(0));
+  assert(y4.dimension(1) == x4.dimension(3));
+  assert(y4.dimension(2) == 2);
+  assert(y4.dimension(3) == x4.dimension(1));
 
   Indexes3 axes{0, 2, 1};
-  x4.chip(1,2).device(*dev) += y4.chip(1,2).shuffle(axes);
+  x4.chip(1, 2).device(*dev) += y4.chip(1, 2).shuffle(axes);
 }
 
 // stacking neighboring batches
 
-NOINLINE void forward_batchstack(Device *dev, Sequence &y, Sequence &x, int pre, int post) {
+NOINLINE void forward_batchstack(Device *dev, Sequence &y, Sequence &x, int pre,
+                                 int post) {
   TensorMap4 y4 = y.map4();
   TensorMap4 x4 = x.map4();
   // dimensions are: (feature, batch, 2, time)
   int d = x4.dimension(0);
   int bs = x4.dimension(1);
-  int size =x4.dimension(3);
-  int copies = pre+post+1;
-  assert(y4.dimension(0)==copies*d);
-  assert(y4.dimension(1)==bs);
-  assert(y4.dimension(2)==2);
-  assert(y4.dimension(3)==x4.dimension(3));
+  int size = x4.dimension(3);
+  int copies = pre + post + 1;
+  assert(y4.dimension(0) == copies * d);
+  assert(y4.dimension(1) == bs);
+  assert(y4.dimension(2) == 2);
+  assert(y4.dimension(3) == x4.dimension(3));
   y4.device(*dev) = y4.constant(Float(0));
-  for(int k=-pre; k<=post; k++) {
+  for (int k = -pre; k <= post; k++) {
     int source = max(k, 0);
     int dest = max(-k, 0);
     int crimp = abs(k);
     Indexes4 source_offsets{0, source, 0, 0};
-    Indexes4 dest_offsets{d*(pre+k), dest, 0, 0};
-    Indexes4 sizes{d, bs-crimp, 1, size};
-    y4.slice(dest_offsets, sizes).device(*dev) = x4.slice(source_offsets, sizes);
+    Indexes4 dest_offsets{d * (pre + k), dest, 0, 0};
+    Indexes4 sizes{d, bs - crimp, 1, size};
+    y4.slice(dest_offsets, sizes).device(*dev) =
+        x4.slice(source_offsets, sizes);
   }
 }
-NOINLINE void backward_batchstack(Device *dev, Sequence &y, Sequence &x, int pre, int post) {
+NOINLINE void backward_batchstack(Device *dev, Sequence &y, Sequence &x,
+                                  int pre, int post) {
   TensorMap4 y4 = y.map4();
   TensorMap4 x4 = x.map4();
   // dimensions are: (feature, batch, 2, time)
   int d = x4.dimension(0);
   int bs = x4.dimension(1);
-  int size =x4.dimension(3);
-  int copies = pre+post+1;
-  assert(y4.dimension(0)==copies*d);
-  assert(y4.dimension(1)==bs);
-  assert(y4.dimension(2)==2);
-  assert(y4.dimension(3)==x4.dimension(3));
-  //x4.chip(1,2).device(*dev) = x4.chip(1,2).constant(Float(0));
-  for(int k=-pre; k<=post; k++) {
+  int size = x4.dimension(3);
+  int copies = pre + post + 1;
+  assert(y4.dimension(0) == copies * d);
+  assert(y4.dimension(1) == bs);
+  assert(y4.dimension(2) == 2);
+  assert(y4.dimension(3) == x4.dimension(3));
+  // x4.chip(1,2).device(*dev) = x4.chip(1,2).constant(Float(0));
+  for (int k = -pre; k <= post; k++) {
     int source = max(k, 0);
     int dest = max(-k, 0);
     int crimp = abs(k);
     Indexes4 source_offsets{0, source, 1, 0};
-    Indexes4 dest_offsets{d*(pre+k), dest, 1, 0};
-    Indexes4 sizes{d, bs-crimp, 1, size};
-    x4.slice(source_offsets, sizes).device(*dev) += y4.slice(dest_offsets, sizes);
+    Indexes4 dest_offsets{d * (pre + k), dest, 1, 0};
+    Indexes4 sizes{d, bs - crimp, 1, size};
+    x4.slice(source_offsets, sizes).device(*dev) +=
+        y4.slice(dest_offsets, sizes);
   }
 }
 

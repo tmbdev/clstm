@@ -33,13 +33,13 @@ extern "C" {
 #undef __sigsetjmp
 }
 
-#include <string>
-#include <memory>
-#include <vector>
 #include <iostream>
 #include <map>
-#include "pytensor.h"
+#include <memory>
+#include <string>
+#include <vector>
 #include "extras.h"
+#include "pytensor.h"
 #include "utils.h"
 
 namespace ocropus {

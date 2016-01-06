@@ -1,11 +1,11 @@
-#include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <memory>
 #include <math.h>
 #include <stdarg.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+#include "clstm.h"
 #include "clstm_compute.h"
 
 #ifndef MAXEXP

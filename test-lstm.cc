@@ -1,10 +1,10 @@
-#include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <math.h>
+#include <iostream>
+#include <memory>
 #include <string>
+#include <vector>
+#include "clstm.h"
 #include "extras.h"
 #include "utils.h"
 
@@ -74,11 +74,8 @@ double test_net(Network net) {
 int main(int argc, char **argv) {
   Network net;
   int gpu = getienv("gpu", -1);
-  net = make_net("lstm1", {
-      {"ninput", 1},
-	{"nhidden", 4},
-	  {"noutput", 2},
-	    {"gpu", gpu}});
+  net = make_net("lstm1",
+                 {{"ninput", 1}, {"nhidden", 4}, {"noutput", 2}, {"gpu", gpu}});
   net->setLearningRate(1e-4, 0.9);
   save_net("__test0__.clstm", net);
   unlink("__test0__.clstm");

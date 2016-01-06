@@ -2,17 +2,17 @@
 // See clstm.proto for the protocol buffer definitions used here.
 
 #include "clstm.h"
-#include "utils.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <memory>
 #include <math.h>
-#include <iostream>
-#include <fstream>
 #include <stdarg.h>
+#include <fstream>
+#include <iostream>
+#include <iostream>
+#include <memory>
+#include <string>
 #include <typeinfo>
+#include <vector>
+#include "utils.h"
 #ifdef GOOGLE
 #include "third_party/clstm/tensor/clstm.pb.h"
 #else
@@ -149,19 +149,17 @@ void debug_as_proto(INetwork *net, bool weights) {
   delete proto;
 }
 
-void write_as_proto(ostream &output, INetwork *net) {
+bool write_as_proto(ostream &output, INetwork *net) {
   unique_ptr<clstm::NetworkProto> proto;
   proto.reset(new clstm::NetworkProto());
   proto_of_net(proto.get(), net);
-  if (proto->SerializeToOstream(&output) == false) {
-    THROW("Serializing failed.");
-  }
+  return proto->SerializeToOstream(&output);
 }
 
-void save_as_proto(const string &fname, INetwork *net) {
+bool save_as_proto(const string &fname, INetwork *net) {
   ofstream stream;
   stream.open(fname, ios::binary);
-  write_as_proto(stream, net);
+  return write_as_proto(stream, net);
 }
 
 Network load_as_proto(const string &fname) {
@@ -171,7 +169,7 @@ Network load_as_proto(const string &fname) {
   unique_ptr<clstm::NetworkProto> proto;
   proto.reset(new clstm::NetworkProto());
   if (proto->ParseFromIstream(&stream) == false) {
-    THROW("Invalid message");
+    return Network();
   }
   return net_of_proto(proto.get());
 }

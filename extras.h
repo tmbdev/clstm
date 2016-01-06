@@ -6,16 +6,16 @@
 #ifndef ocropus_clstm_extras_
 #define ocropus_clstm_extras_
 
-#include "clstm.h"
-#include <string>
-#include <sys/time.h>
-#include <math.h>
-#include <stdlib.h>
-#include <map>
-#include <stdarg.h>
 #include <glob.h>
-#include "pstring.h"
+#include <math.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <sys/time.h>
 #include <iostream>
+#include <map>
+#include <string>
+#include "clstm.h"
+#include "pstring.h"
 
 namespace ocropus {
 using std::string;

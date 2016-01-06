@@ -1,14 +1,14 @@
-#include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <math.h>
-#include <string>
 #include <cmath>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+#include "clstm.h"
+#include "clstm_compute.h"
 #include "extras.h"
 #include "utils.h"
-#include "clstm_compute.h"
 
 using std_string = std::string;
 #define string std_string
@@ -41,13 +41,13 @@ void randseq(Sequence &a, int N, int n, int m) {
   for (int t = 0; t < N; t++) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-	if(finit) {
-	  a[t].v(i, j) = 10000*t+100*i+j;
-	  a[t].d(i, j) = 10000*t+100*i+j+0.5;
-	} else {
-	  a[t].v(i, j) = randu();
-	  a[t].d(i, j) = randu();
-	}
+        if (finit) {
+          a[t].v(i, j) = 10000 * t + 100 * i + j;
+          a[t].d(i, j) = 10000 * t + 100 * i + j + 0.5;
+        } else {
+          a[t].v(i, j) = randu();
+          a[t].d(i, j) = randu();
+        }
       }
     }
   }
@@ -202,7 +202,8 @@ void test_net(Testcase &tc) {
           double num_deriv = (out1 - out) / h;
           double error = fabs(1.0 - num_deriv / a_deriv / -2.0);
           if (verbose > 1)
-            print(t, i, b, ":", error, h, "num:", num_deriv, "analytic:", a_deriv, "out:", out1, out);
+            print(t, i, b, ":", error, h, "num:", num_deriv, "analytic:",
+                  a_deriv, "out:", out1, out);
           minerr.add(error, h);
         }
         if (verbose) print("deltas", t, i, b, minerr.value, minerr.param);

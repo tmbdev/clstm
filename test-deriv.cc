@@ -1,11 +1,11 @@
-#include "clstm.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <math.h>
 #include <cmath>
+#include <iostream>
+#include <memory>
 #include <string>
+#include <vector>
+#include "clstm.h"
 #include "extras.h"
 #include "utils.h"
 

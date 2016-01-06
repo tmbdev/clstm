@@ -8,15 +8,15 @@
 #define ocropus_lstm_
 
 #include <initializer_list>
-#include <vector>
+#include <map>
+#include <memory>
 #include <string>
 #include <typeinfo>
-#include <memory>
-#include <map>
+#include <vector>
 
+#include "batches.h"
 #include "clstm_compute.h"
 #include "enroll.h"
-#include "batches.h"
 
 namespace ocropus {
 using std::string;
@@ -187,12 +187,15 @@ Network make_net_init(const string &kind, const std::string &params);
 // new, proto-based I/O
 Network proto_clone_net(Network net);
 void debug_as_proto(INetwork *net, bool do_weights = false);
-void write_as_proto(std::ostream &output, INetwork *net);
-void save_as_proto(const string &fname, INetwork *net);
+bool write_as_proto(std::ostream &output, INetwork *net);
+bool save_as_proto(const string &fname, INetwork *net);
 Network load_as_proto(const string &fname);
 
 void save_net(const string &file, Network net);
 Network load_net(const string &file);
+
+bool maybe_save_net(const string &file, Network net);
+Network maybe_load_net(const string &file);
 
 // training with CTC
 // void forward_algorithm(Mat &lr, Mat &lmatch, double skip = -5.0);

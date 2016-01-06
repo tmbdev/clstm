@@ -1,17 +1,17 @@
-#include "pstring.h"
-#include "clstm.h"
-#include "clstmhl.h"
 #include <assert.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <math.h>
-#include <sstream>
 #include <fstream>
 #include <iostream>
-#include <set>
+#include <iostream>
+#include <memory>
 #include <regex>
+#include <set>
+#include <sstream>
+#include <vector>
+#include "clstm.h"
+#include "clstmhl.h"
 #include "extras.h"
+#include "pstring.h"
 #include "utils.h"
 
 using namespace Eigen;
@@ -69,8 +69,8 @@ Float meanerr(Sequence &xs, Sequence &ys) {
     for (int i = 0; i < xs.rows(); i++) {
       for (int j = 0; j < ys.cols(); j++) {
         Float err = fabs(xs[t].v(i, j) - ys[t].v(i, j));
-	merr += err;
-	count += 1;
+        merr += err;
+        count += 1;
       }
     }
   }
@@ -85,24 +85,22 @@ void set_image(Sequence &seq, TensorMap3 image) {
   seq.resize(w, d, h);
   TensorMap4 t = seq.map4();
   seq.zero();
-  for(int i=0; i<h; i++)
-    for(int j=0; j<w; j++)
-      for(int k=0; k<d; k++)
-	t(k, i, 0, j) = image(i, j, k);
+  for (int i = 0; i < h; i++)
+    for (int j = 0; j < w; j++)
+      for (int k = 0; k < d; k++) t(k, i, 0, j) = image(i, j, k);
 }
 
 void get_image(Tensor2 &image, Sequence &seq, int plane) {
   // image: (h, w, d) sequence: (t, d, h)
   int h = seq.cols();
   int w = seq.size();
-  image.resize(h,w);
+  image.resize(h, w);
   TensorMap4 t = seq.map4();
-  for(int i=0; i<h; i++)
-    for(int j=0; j<w; j++)
-      image(i,j) = t(plane, i, 0, j);
+  for (int i = 0; i < h; i++)
+    for (int j = 0; j < w; j++) image(i, j) = t(plane, i, 0, j);
 }
 
-void save_seq_as_image(const string &name, Sequence &seq, int plane=0) {
+void save_seq_as_image(const string &name, Sequence &seq, int plane = 0) {
   Tensor2 image;
   get_image(image, seq, plane);
   write_png(name.c_str(), image());
@@ -111,48 +109,46 @@ void save_seq_as_image(const string &name, Sequence &seq, int plane=0) {
 void gen_image(Sequence &input, Sequence &target) {
   int w = 256;
   int h = 256;
-  EigenTensor3 image(w,h,1);
+  EigenTensor3 image(w, h, 1);
   image.setZero();
 
   int r = 50;
-  int x = int(randu() * (w-r));
-  int y = int(randu() * (h-r));
-  for(int i=0; i<r; i++)
-    for(int j=0; j<r; j++)
-      image(x+i,y+j,0) = 1.0;
+  int x = int(randu() * (w - r));
+  int y = int(randu() * (h - r));
+  for (int i = 0; i < r; i++)
+    for (int j = 0; j < r; j++) image(x + i, y + j, 0) = 1.0;
 
   set_image(target, image);
-  for(int i=0; i<w; i++)
-    for(int j=0; j<h; j++)
-      image(i,j,0) += randn();
+  for (int i = 0; i < w; i++)
+    for (int j = 0; j < h; j++) image(i, j, 0) += randn();
 
   set_image(input, image);
 }
 
 int main1(int argc, char **argv) {
   int ntrain = getienv("ntrain", 100000);
-  Network net = make_net("twod", {
-      {"ninput", 1},
-	{"nhidden", 3},
-	  {"noutput", 1}});
+  Network net =
+      make_net("twod", {{"ninput", 1}, {"nhidden", 3}, {"noutput", 1}});
   double lr = getdenv("lrate", 1e-4);
   net->setLearningRate(lr, 0.9);
 
   Sequence inputs, targets;
-  for(int trial=0; trial<ntrain; trial++) {
+  for (int trial = 0; trial < ntrain; trial++) {
     gen_image(inputs, targets);
     set_inputs(net, inputs);
     net->forward();
-    if(trial%100==0) print(trial, maxerr(net->outputs,targets), meanerr(net->outputs,targets));
+    if (trial % 100 == 0)
+      print(trial, maxerr(net->outputs, targets),
+            meanerr(net->outputs, targets));
     set_targets(net, targets);
     net->backward();
     sgd_update(net);
-    if (trial%1000==0) {
+    if (trial % 1000 == 0) {
       string base = "_";
       base += std::to_string(trial);
-      save_seq_as_image(base+"_inputs.png", inputs);
-      save_seq_as_image(base+"_outputs.png", net->outputs);
-      save_seq_as_image(base+"_targets.png", targets);
+      save_seq_as_image(base + "_inputs.png", inputs);
+      save_seq_as_image(base + "_outputs.png", net->outputs);
+      save_seq_as_image(base + "_targets.png", targets);
       print("saved", base);
     }
   }

@@ -3,12 +3,12 @@
 #ifndef ocropus_clstmhl_
 #define ocropus_clstmhl_
 
-#include "pstring.h"
-#include "clstm.h"
-#include "extras.h"
 #include <memory>
 #include <string>
 #include <vector>
+#include "clstm.h"
+#include "extras.h"
+#include "pstring.h"
 #include "tensor.h"
 
 namespace ocropus {
@@ -20,6 +20,7 @@ struct CharPrediction {
   float p;
 };
 
+// Clstm network used for text input and output.
 struct CLSTMText {
   Network net;
   int nclasses = -1;
@@ -28,13 +29,44 @@ struct CLSTMText {
   Sequence targets;
   Sequence aligned;
   void setLearningRate(float lr, float mom) { net->setLearningRate(lr, mom); }
+
+  // Loads the network from the given file. If the file does not exist
+  // or the contents of the file cannot be read, throws an exception.
   void load(const std::string &fname) {
-    net = load_net(fname);
+    if (!maybe_load(fname)) {
+      THROW("Could not load CLSTMText net from file: " + fname);
+    }
+  }
+
+  // Tries to load a network from the given file. If the file does not exist
+  // or the contents of the file cannot be read, returns false.
+  bool maybe_load(const std::string &fname) {
+    net = maybe_load_net(fname);
+
+    if (!net) {
+      cerr << "WARNING: could not load CLSTMText net from " << fname;
+      return false;
+    }
     nclasses = net->codec.size();
     iclasses = net->icodec.size();
-    neps = net->attr.get("neps");
+    int neps = net->attr.get("neps", -1);
+    if (neps<0) cerr << "WARNING: no neps\n";
+    return true;
   }
-  void save(const std::string &fname) { save_net(fname, net); }
+
+  // Saves the network to the given file. If this operation fails, throws an
+  // exception.
+  void save(const std::string &fname) {
+    if (!maybe_save(fname)) {
+     THROW("Could not save CLSTMText net to file: " + fname);
+    }
+  }
+
+  // Saves the network to the given file. If this operation fails, return false.
+  bool maybe_save(const std::string &fname) {
+    return maybe_save_net(fname, net);
+  }
+
   void createBidi(const std::vector<int> &icodec, const std::vector<int> codec,
                   int nhidden) {
     // This is just the simplest case of creating a network. For more complex
@@ -66,6 +98,8 @@ struct CLSTMText {
     assert(index == seq.size());
     seq.check();
   }
+
+  // Trains the network using the given input and target using backpropagation.
   std::wstring train(const std::wstring &in, const std::wstring &target) {
     setInputs(in);
     net->forward();
@@ -117,13 +151,42 @@ struct CLSTMOCR {
   Sequence aligned, targets;
   Tensor2 image;
   void setLearningRate(float lr, float mom) { net->setLearningRate(lr, mom); }
-  void load(const std::string &fname) {
-    net = load_net(fname);
+
+  // Tries to load a network from the given file. If the file does not exist
+  // or the contents of the file cannot be read, returns false.
+  bool maybe_load(const std::string &fname) {
+    net = maybe_load_net(fname);
+    if (!net) {
+      cerr << "WARNING: could not load CLSTMOCR net from " << fname;
+      return false;
+    }
     nclasses = net->codec.size();
     normalizer.reset(make_CenterNormalizer());
     normalizer->target_height = target_height;
+    return true;
   }
-  void save(const std::string &fname) { save_net(fname, net); }
+
+  // Loads the network from the given file. If the file does not exist
+  // or the contents of the file cannot be read, throws an exception.
+  void load(const std::string &fname) {
+    if (!maybe_load(fname)) {
+      THROW("Could not load CLSTMOCR net from file: " + fname);
+    }
+  }
+
+  // Saves the network to the given file. If this operation fails, throws an
+  // exception.
+  void save(const std::string &fname) {
+    if (!maybe_save(fname)) {
+     THROW("Could not save CLSTMOCR net to file: " + fname);
+    }
+  }
+
+  // Saves the network to the given file. If this operation fails, return false.
+  bool maybe_save(const std::string &fname) {
+    return maybe_save_net(fname, net);
+  }
+
   void createBidi(const std::vector<int> codec, int nhidden) {
     nclasses = codec.size();
     net = make_net("bidi", {{"ninput", target_height},

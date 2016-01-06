@@ -6,15 +6,15 @@
 #ifndef ocropus_clstm_utils_
 #define ocropus_clstm_utils_
 
-#include <string>
-#include <sys/time.h>
-#include <math.h>
-#include <stdlib.h>
-#include <map>
-#include <stdarg.h>
 #include <glob.h>
-#include <iostream>
+#include <math.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <sys/time.h>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
 #include <vector>
 #include "pstring.h"
 
@@ -270,7 +270,7 @@ struct Trigger {
   int last_trigger = 0;
   int current_trigger = 0;
   Trigger(int every, int upto = -1, int start = 0)
-    : count(start), every(every), upto(upto) {}
+      : count(start), every(every), upto(upto) {}
   Trigger &skip0() {
     next += every;
     return *this;
