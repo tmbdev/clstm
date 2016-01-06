@@ -74,15 +74,19 @@ int main1(int argc, char **argv) {
 
   CLSTMText clstm;
 
+  int nhidden = -1;
+  double lrate = getdenv("lrate", 1e-4);
+  double momentum = getdenv("momentum", 0.9);
+
   if (load_name != "") {
     clstm.load(load_name);
   } else {
     vector<int> icodec, codec;
     get_codec(icodec, samples, &Sample::in);
     get_codec(codec, samples, &Sample::out);
-
-    clstm.createBidi(icodec, codec, getienv("nhidden", 100));
-    clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
+    nhidden = getienv("nhidden", 100);
+    clstm.createBidi(icodec, codec, nhidden);
+    clstm.setLearningRate(lrate, momentum);
   }
   network_info(clstm.net);
 
@@ -91,6 +95,7 @@ int main1(int argc, char **argv) {
   string save_name = getsenv("save_name", "_filter");
   int report_every = getienv("report_every", 100);
   int test_every = getienv("test_every", 10000);
+  bool use_exact = getienv("use_exact", 0);
 
   // Command to execute after testing the networks performance.
   string after_test = getsenv("after_test", "");
@@ -105,14 +110,20 @@ int main1(int argc, char **argv) {
         trial % test_every == 0) {
       double errors = 0.0;
       double count = 0.0;
+      double exact_matches = 0.0;
       for (int test = 0; test < test_samples.size(); test++) {
         wstring gt = test_samples[test].out;
         wstring pred = clstm.predict(test_samples[test].in);
         count += gt.size();
         errors += levenshtein(pred, gt);
+        if (pred == gt) exact_matches++;
       }
       test_error = errors / count;
-      print("ERROR", trial, test_error, "   ", errors, count);
+      double exact_test_error = 1.0 - exact_matches / test_samples.size();
+      print("ERROR", trial, test_error, "   ", errors, count, 
+            "exact_errors", exact_test_error,
+            "lrate", lrate, "momentum", momentum, "nhidden", nhidden);
+      if (use_exact) test_error = exact_test_error;
       if (save_every == 0 && test_error < best_error) {
         best_error = test_error;
         string fname = save_name + ".clstm";
