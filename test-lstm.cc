@@ -113,7 +113,9 @@ int main(int argc, char **argv) {
   int nparams = n_params(net);
   print("nparams", nparams);
   vector<float> params(nparams);
+  vector<float> backup;
   get_params(net, &params[0], nparams);
+  backup = params;
   share_params(net, &params[0], nparams);
   double merr2 = test_net(net);
   if (merr2 > 0.1) {
@@ -129,5 +131,14 @@ int main(int argc, char **argv) {
     exit(1);
   } else {
     print("OK (hacked-params)", merr3);
+  }
+  for (int i=0; i<nparams; i++)
+    params[i] = backup[i];
+  double merr4 = test_net(net);
+  if (merr4 > 0.1) {
+    print("FAILED (restored-params)", merr4);
+    exit(1);
+  } else {
+    print("OK (restored-params)", merr4);
   }
 }
