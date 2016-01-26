@@ -155,6 +155,13 @@ void walk_networks(Network net, NetworkFun f, const string &prefix = "");
 void network_info(Network net, string prefix = "");
 void network_detail(Network net, string prefix = "");
 
+int n_params(Network net);
+void clear_derivs(Network net);
+void share_params(Network net, Float *params, int total, int gpu=-1);
+void set_params(Network net, Float *params, int total, int gpu=-1);
+void get_params(Network net, Float *params, int total, int gpu=-1);
+void get_derivs(Network net, Float *params, int total, int gpu=-1);
+
 // setting inputs and outputs
 void set_classes(Network net, BatchClasses &classes);
 void set_classes(Network net, Classes &classes);

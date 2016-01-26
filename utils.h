@@ -147,10 +147,13 @@ inline void dprint(T arg, Args... args) {
 
 // get values from the environment, with defaults
 
+bool reported_params(const char *name);
+
 template <class T>
 inline void report_params(const char *name, const T &value) {
   const char *flag = getenv("params");
   if (flag && !atoi(flag)) return;
+  if (reported_params(name)) return;
   cerr << "#: " << name << " = " << value << endl;
 }
 

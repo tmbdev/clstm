@@ -17,6 +17,16 @@
 
 namespace ocropus {
 
+static vector<string> reported;
+
+bool reported_params(const char *name) {
+  string s(name);
+  for (int i=0; i<reported.size(); i++)
+    if (reported[i]==s) return true;
+  reported.push_back(s);
+  return false;
+}
+
 void rinit(Params &m, int r, int c, Assoc &attr, string prefix = "") {
   m.resize(r, c);
   float s = attr.get(prefix + "init_scale", 0.01);
@@ -663,6 +673,70 @@ void average_weights(vector<Network> &networks) {
     allparams[0][j]->v() = allparams[0][j]->v() * Float(1.0 / n);
   }
   distribute_weights(networks);
+}
+
+int n_params(Network net) {
+  int total = 0;
+  walk_params(net, [&] (const string &, Params *p) {
+    total += p->v.total_size();
+  });
+  return total;
+}
+
+void share_params(Network net, Float *params, int total, int gpu) {
+  int index = 0;
+  walk_params(net, [&] (const string &, Params *p) {
+    int n = p->v.rows();
+    int m = p->v.cols();
+    p->v.displaceTo(params+index, n, m, gpu);
+    index += p->v.total_size();
+  });
+  assert(index==total);
+}
+
+void set_params(Network net, Float *params, int total, int gpu) {
+  assert(gpu<0);
+  int index = 0;
+  walk_params(net, [&] (const string &, Params *p) {
+    int n = p->v.rows();
+    int m = p->v.cols();
+    int nbytes = p->v.total_size() * sizeof (Float);
+    memcpy(p->v.ptr, params+index, nbytes);
+    index += p->v.total_size();
+  });
+  assert(index==total);
+}
+
+void get_params(Network net, Float *params, int total, int gpu) {
+  assert(gpu<0);
+  int index = 0;
+  walk_params(net, [&] (const string &, Params *p) {
+    int n = p->v.rows();
+    int m = p->v.cols();
+    int nbytes = p->v.total_size() * sizeof (Float);
+    memcpy(params+index, p->v.ptr, nbytes);
+    index += p->v.total_size();
+  });
+  assert(index==total);
+}
+
+void clear_derivs(Network net) {
+  walk_params(net, [&] (const string &, Params *p) {
+    p->d.setZero();
+  });
+}
+
+void get_derivs(Network net, Float *params, int total, int gpu) {
+  assert(gpu<0);
+  int index = 0;
+  walk_params(net, [&] (const string &, Params *p) {
+    int n = p->v.rows();
+    int m = p->v.cols();
+    int nbytes = p->v.total_size() * sizeof (Float);
+    memcpy(params+index, p->d.ptr, nbytes);
+    index += p->v.total_size();
+  });
+  assert(index==total);
 }
 
 }  // namespace ocropus

@@ -110,4 +110,24 @@ int main(int argc, char **argv) {
   } else {
     print("OK", merr);
   }
+  int nparams = n_params(net);
+  print("nparams", nparams);
+  vector<float> params(nparams);
+  get_params(net, &params[0], nparams);
+  share_params(net, &params[0], nparams);
+  double merr2 = test_net(net);
+  if (merr2 > 0.1) {
+    print("FAILED (params)", merr2);
+    exit(1);
+  } else {
+    print("OK (params)", merr2);
+  }
+  for (int i=0; i<nparams; i++) params[i] = 0.0;
+  double merr3 = test_net(net);
+  if (merr3 < 0.1) {
+    print("FAILED (hacked-params)", merr3);
+    exit(1);
+  } else {
+    print("OK (hacked-params)", merr3);
+  }
 }
