@@ -63,7 +63,8 @@ inline string basename(string s) {
 }
 
 inline string read_text(string fname, int maxsize = 65536) {
-  char buf[maxsize];
+  vector<char> buf_v(maxsize);
+  char *buf = &buf_v[0];
   buf[maxsize - 1] = 0;
   ifstream stream(fname);
   stream.read(buf, maxsize - 1);
@@ -73,7 +74,8 @@ inline string read_text(string fname, int maxsize = 65536) {
 }
 
 inline wstring read_text32(string fname, int maxsize = 65536) {
-  char buf[maxsize];
+  vector<char> buf_v(maxsize);
+  char *buf = &buf_v[0];
   buf[maxsize - 1] = 0;
   ifstream stream(fname);
   stream.read(buf, maxsize - 1);

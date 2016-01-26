@@ -249,7 +249,7 @@ struct Tensor2 {
   //   *x, x(), x.map()
   //
   // Probably the x() is the most natural one to use in most expressions.
-  TensorMap2 operator*() { return TensorMap2(ptr, dims[0], dims[1]); }
+  TensorMap2 operator*() const { return TensorMap2(ptr, dims[0], dims[1]); }
   TensorMap2 operator()() { return **this; }
   TensorMap2 map() { return **this; }
 
@@ -270,6 +270,11 @@ struct Tensor2 {
   VectorMap vec1() { return VectorMap(ptr, dims[0]); }
 
   Float &operator()(int i, int j) {
+    assert(gpu < 0 && "use get() for gpu access");
+    return (**this)(i, j);
+  }
+
+  const Float &operator()(int i, int j) const {
     assert(gpu < 0 && "use get() for gpu access");
     return (**this)(i, j);
   }

@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
   } else {
     print("OK (params)", merr2);
   }
-  for (int i=0; i<nparams; i++) params[i] = 0.0;
+  for (int i = 0; i < nparams; i++) params[i] = 0.0;
   double merr3 = test_net(net);
   if (merr3 < 0.1) {
     print("FAILED (hacked-params)", merr3);
@@ -132,8 +132,7 @@ int main(int argc, char **argv) {
   } else {
     print("OK (hacked-params)", merr3);
   }
-  for (int i=0; i<nparams; i++)
-    params[i] = backup[i];
+  for (int i = 0; i < nparams; i++) params[i] = backup[i];
   double merr4 = test_net(net);
   if (merr4 > 0.1) {
     print("FAILED (restored-params)", merr4);
