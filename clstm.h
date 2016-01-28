@@ -146,64 +146,134 @@ class INetwork {
   virtual void postLoad() {}
 };
 
+// The walk_... functions iterate over the internal parameters,
+// sequences, or networks of a network. Use as in,
+// walk_states(net, [&] (const string &name, Sequence *seq) { ... }));
 typedef function<void(const string &, Params *)> ParamsFun;
 typedef function<void(const string &, Sequence *)> StateFun;
 typedef function<void(const string &, INetwork *)> NetworkFun;
 void walk_params(Network net, ParamsFun f, const string &prefix = "");
 void walk_states(Network net, StateFun f, const string &prefix = "");
 void walk_networks(Network net, NetworkFun f, const string &prefix = "");
+
+// output information about the network (for debugging)
 void network_info(Network net, string prefix = "");
 void network_detail(Network net, string prefix = "");
 
+// get the number of parameters in a network
 int n_params(Network net);
+
+// clear the parameter derivatives in a network
 bool clear_derivs(Network net);
+
+// given a vector of floating point numbers, alias the internal
+// weights to that vector; total must be the size and should be
+// equal to the result of n_params; gpu requests GPU storage
+// (total and gpu arguments mean the same in the following functions)
 bool share_params(Network net, Float *params, int total, int gpu = -1);
+
+// set the internal weights of the network from the params argument
 bool set_params(Network net, const Float *params, int total, int gpu = -1);
+
+// store the internal weights of the network in the params argument
 bool get_params(Network net, Float *params, int total, int gpu = -1);
+
+// store the internal weights derivatives in the params argument
 bool get_derivs(Network net, Float *params, int total, int gpu = -1);
+
+// get the number of internal state variables for the network; this
+// changes after every foward propagation pass; note that this includes
+// both numerical values and the shapes of internal tensors
 int n_states(Network net);
+
+// set the internal state variables of the network from the params argument
 bool set_states(Network net, const Float *params, int total, int gpu = -1);
+
+// store the internal state variables in the params argument
 bool get_states(Network net, Float *params, int total, int gpu = -1);
 
-// setting inputs and outputs
+// set the class targets of the network using hot-1 encoding
 void set_classes(Network net, BatchClasses &classes);
+
+// set the class targets of the network using hot-1 encoding, batch size=1
 void set_classes(Network net, Classes &classes);
+
+// set the class targets of the network using hot-1 encoding, batch size=1
 void set_classes(Network net, Tensor<int, 1> &targets);
+
+// set the inputs of the network from a given Sequence
 void set_inputs(Network net, Sequence &inputs);
+
+// set the inputs of the network from a rank 2 tensor (i.e., bath size = 1)
 void set_inputs(Network net, TensorMap2 inputs);
-void set_targets_accelerated(Network net, Sequence &targets);
-void set_targets_accelerated(Network net, TensorMap2 targets);
+
+// set the targets of the network from a Sequence; this computes deltas
 void set_targets(Network net, Sequence &targets);
+
+// set the targets of the network from a rank-2 Tensor (i.e., batch size = 1)
 void set_targets(Network net, TensorMap2 targets);
 
-// update methods
+// like set_targets, but using RNNLIB's "accelerated" deltas
+void set_targets_accelerated(Network net, Sequence &targets);
+void set_targets_accelerated(Network net, TensorMap2 targets);
+
+// update weights inside the network using stochastic gradient descent
 void sgd_update(Network net);
 
 // instantiating layers and networks
 
+// a function capable of making a layer
 typedef std::function<INetwork *(void)> ILayerFactory;
+
+// a registry for layer factories
 extern map<string, ILayerFactory> layer_factories;
+
+// given the name of a layer, produce an instance of its class
 Network make_layer(const string &kind);
 
 typedef std::vector<Network> Networks;
+
+// constructs a layer with the given parameters (ninput, noutput, args)
+// and adds the sublayer given in the last argument to it; this can be
+// used to construct entire network architectures in a single call
 Network layer(const string &kind, int ninput, int noutput, const Assoc &args,
               const Networks &subs);
 
+// network_factories is a registry for pre-constructed networks
+// (as opposed to layer_factories, which is a registry for individual
+// layers); if you have new standard network constructions, pick
+// a name and add your network constructor here
 typedef std::function<Network(const Assoc &)> INetworkFactory;
 extern map<string, INetworkFactory> network_factories;
+
+// construct a network of the given kind with the given parameters
 Network make_net(const string &kind, const Assoc &params);
+
+// construct a network of the given kind with the parameters given
+// as a single string of the form "name1=value1:name2=value2"
 Network make_net_init(const string &kind, const std::string &params);
 
-// new, proto-based I/O
-Network proto_clone_net(Network net);
-void debug_as_proto(INetwork *net, bool do_weights = false);
+// write a network to a stream as protocol buffers
 bool write_as_proto(std::ostream &output, INetwork *net);
+
+// read a network from an input stream as protocol buffers
+Network read_as_proto(std::istream &input);
+
+// convenience functions taking file names instead of streams
 bool save_as_proto(const string &fname, INetwork *net);
 Network load_as_proto(const string &fname);
 
+// write a network out as protocol buffer text
+void debug_as_proto(INetwork *net, bool do_weights = false);
+
+// clone a network via protocol buffers
+Network proto_clone_net(Network net);
+
+// convenience functions using Network instead of INetwork *
 void save_net(const string &file, Network net);
 Network load_net(const string &file);
 
+// functions that return booleans instead of throwing exceptions
 bool maybe_save_net(const string &file, Network net);
 Network maybe_load_net(const string &file);
 

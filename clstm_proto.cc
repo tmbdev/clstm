@@ -162,15 +162,19 @@ bool save_as_proto(const string &fname, INetwork *net) {
   return write_as_proto(stream, net);
 }
 
-Network load_as_proto(const string &fname) {
-  ifstream stream;
-  stream.open(fname, ios::binary);
-  if (!stream) throwf("cannot open: %s", fname.c_str());
+Network read_as_proto(istream &stream) {
   unique_ptr<clstm::NetworkProto> proto;
   proto.reset(new clstm::NetworkProto());
   if (proto->ParseFromIstream(&stream) == false) {
     return Network();
   }
   return net_of_proto(proto.get());
+}
+
+Network load_as_proto(const string &fname) {
+  ifstream stream;
+  stream.open(fname, ios::binary);
+  if (!stream) throwf("cannot open: %s", fname.c_str());
+  return read_as_proto(stream);
 }
 }
