@@ -149,6 +149,8 @@ all += [env.Program("test-2d", ["test-2d.cc"], LIBS=[libclstm] + libs)]
 # the recommended way of compiling it is with "python setup.py build"
 
 swigenv = env.Clone(SWIGFLAGS=["-python", "-c++"], SHLIBPREFIX="")
+swigenv.Tool("swig")
+swigenv.Append(SWIG="3.0")
 swigenv.Append(CPPPATH=[distutils.sysconfig.get_python_inc()])
 pyswig = swigenv.SharedLibrary("_clstm.so",
                                ["clstm.i", "clstm.cc", "clstm_proto.cc", "extras.cc",
