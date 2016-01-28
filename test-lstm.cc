@@ -80,11 +80,17 @@ int main(int argc, char **argv) {
   save_net("__test0__.clstm", net);
   unlink("__test0__.clstm");
   print("training 1:4:2 network to learn delay");
+  vector<float> states;
   for (int i = 0; i < ntrain; i++) {
     Sequence xs, ys;
     gentest(xs, ys);
     set_inputs(net, xs);
     net->forward();
+    int nstates = n_states(net);
+    states.resize(nstates);
+    if (i==0) print("nstates", nstates);
+    get_states(net, states.data(), nstates);
+    set_states(net, states.data(), nstates);
     set_targets(net, ys);
     net->backward();
     sgd_update(net);

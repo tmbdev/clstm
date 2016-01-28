@@ -62,7 +62,7 @@ void walk_params(Network net, ParamsFun f, const string &prefix) {
 }
 void walk_states(Network net, StateFun f, const string &prefix) {
   for (auto it : net->states) f(prefix + "." + it.first, it.second);
-  for (auto s : net->sub) walk_states(net, f, prefix + "." + s->kind);
+  for (auto s : net->sub) walk_states(s, f, prefix + "." + s->kind);
 }
 void walk_networks(Network net, NetworkFun f, const string &prefix) {
   string nprefix = prefix + "." + net->kind;
@@ -676,7 +676,7 @@ void average_weights(vector<Network> &networks) {
 int n_states(Network net) {
   int total = 0;
   walk_states(net, [&](const string &, Sequence *p) {
-    total += p->size() * p->rows() * p->cols();
+    total += p->size() * p->rows() * p->cols() + 4;
   });
   return total;
 }
@@ -684,6 +684,10 @@ int n_states(Network net) {
 bool get_states(Network net, Float *data, int total, int gpu) {
   int index = 0;
   walk_states(net, [&](const string &, Sequence *p) {
+    data[index++] = 999999;
+    data[index++] = p->size();
+    data[index++] = p->rows();
+    data[index++] = p->cols();
     for (int t = 0; t < p->size(); t++)
       for (int i = 0; i < p->rows(); i++)
         for (int b = 0; b < p->cols(); b++) data[index++] = (*p)[t].v(i, b);
@@ -694,6 +698,11 @@ bool get_states(Network net, Float *data, int total, int gpu) {
 bool set_states(Network net, const Float *data, int total, int gpu) {
   int index = 0;
   walk_states(net, [&](const string &, Sequence *p) {
+    int magic = int(data[index++]);
+    int size = int(data[index++]);
+    int rows = int(data[index++]);
+    int cols = int(data[index++]);
+    p->resize(size, rows, cols);
     for (int t = 0; t < p->size(); t++)
       for (int i = 0; i < p->rows(); i++)
         for (int b = 0; b < p->cols(); b++) (*p)[t].v(i, b) = data[index++];
