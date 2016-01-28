@@ -130,6 +130,7 @@ Network net_of_proto(const clstm::NetworkProto *proto) {
   }
   for (int i = 0; i < proto->sub_size(); i++) {
     net->add(net_of_proto(&proto->sub(i)));
+    net->sub[i]->attr.super = &net->attr;
   }
   net->postLoad();
   return net;
