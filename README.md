@@ -1,16 +1,17 @@
 # clstm
 
-CLSTM is currently undergoing refactoring and significant changes; if you want a stable basis to work with,
-check out the `separate-derivs` branch:
+CLSTM is an implementation of the LSTM recurrent neural network
+model in C++, using the Eigen library for numerical computations.
 
-    git clone git@github.com:tmbdev/clstm.git
-    cd clstm
-    git checkout separate-derivs
+# TODO
 
-If you want the cutting edge branch, just run:
+  - TensorFlow bindings
+  - more recurrent network types
+  - more 2D LSTM support
+  - multicore support
+  - better GPU support
 
-    git clone git@github.com:tmbdev/clstm.git
-    cd clstm
+# Getting Started
 
 There is a full set of tests in the current version of clstm; just
 run them with:
@@ -49,7 +50,8 @@ There are a bunch of options:
  - `display=1` build with display support for debugging (requires ZMQ, Python)
  - `prefix=...` install under a different prefix (untested)
  - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
- - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line programs (may need `hdf5_serial` in some environments)
+ - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line 
+   programs (may need `hdf5_serial` in some environments)
 
 After building the executables, you can run two simple test runs as follows:
 
@@ -60,6 +62,8 @@ To build the Python extension, run
 
     python setup.py build
     sudo python setup.py install
+
+(this is currently broken)
 
 # Documentation / Examples
 
@@ -73,11 +77,8 @@ http://nbviewer.ipython.org/github/tmbdev/clstm/tree/master/misc/
 
 The `clstm` library operates on the Sequence type as its fundamental
 data type, representing variable length sequences of fixed length vectors.
-Internally, this is represented as an STL vector of Eigen dynamic vectors
-
-    typedef stl::vector<Eigen::VectorXf> Sequence;
-
-NB: This will be changed to an Eigen::Tensor
+The underlying Sequence type is a rank 4 tensor with accessors for
+individual rank-2 tensors at different time steps.
 
 Networks are built from objects implementing the `INetwork` interface.
 The `INetwork` interface contains:
@@ -184,10 +185,3 @@ Note that most parameters are passed through the environment:
 See the notebooks in the `misc/` subdirectory for documentation on the parameters and examples of usage.
 
 (You can find all parameters via `grep 'get.env' *.cc`.)
-
-# TODO / UPCOMING
-
-  - Lua and Torch bindings
-  - more recurrent network types
-  - replacement of mdarray with Eigen Tensors
-  - 2D LSTM support
