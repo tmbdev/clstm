@@ -153,7 +153,8 @@ typedef function<void(const string &, Params *)> ParamsFun;
 typedef function<void(const string &, Sequence *)> StateFun;
 typedef function<void(const string &, INetwork *)> NetworkFun;
 void walk_params(Network net, ParamsFun f, const string &prefix = "");
-void walk_states(Network net, StateFun f, const string &prefix = "");
+void walk_states(Network net, StateFun f, const string &prefix = "",
+                 bool io = false);
 void walk_networks(Network net, NetworkFun f, const string &prefix = "");
 
 // output information about the network (for debugging)
@@ -184,13 +185,15 @@ bool get_derivs(Network net, Float *params, int total, int gpu = -1);
 // get the number of internal state variables for the network; this
 // changes after every foward propagation pass; note that this includes
 // both numerical values and the shapes of internal tensors
-int n_states(Network net);
+int n_states(Network net, bool io = true);
 
 // set the internal state variables of the network from the params argument
-bool set_states(Network net, const Float *params, int total, int gpu = -1);
+bool set_states(Network net, const Float *params, int total,
+                int gpu = -1, bool io = true);
 
 // store the internal state variables in the params argument
-bool get_states(Network net, Float *params, int total, int gpu = -1);
+bool get_states(Network net, Float *params, int total,
+                int gpu = -1, bool io = true);
 
 // set the class targets of the network using hot-1 encoding
 void set_classes(Network net, BatchClasses &classes);

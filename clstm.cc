@@ -60,9 +60,13 @@ void walk_params(Network net, ParamsFun f, const string &prefix) {
   for (auto it : net->parameters) f(prefix + "." + it.first, it.second);
   for (auto s : net->sub) walk_params(s, f, prefix + "." + s->kind);
 }
-void walk_states(Network net, StateFun f, const string &prefix) {
+void walk_states(Network net, StateFun f, const string &prefix, bool io) {
+  if (io) {
+    f(prefix + ".inputs", &net->inputs);
+    f(prefix + ".outputs", &net->outputs);
+  }
   for (auto it : net->states) f(prefix + "." + it.first, it.second);
-  for (auto s : net->sub) walk_states(s, f, prefix + "." + s->kind);
+  for (auto s : net->sub) walk_states(s, f, prefix + "." + s->kind, io);
 }
 void walk_networks(Network net, NetworkFun f, const string &prefix) {
   string nprefix = prefix + "." + net->kind;
@@ -673,40 +677,43 @@ void average_weights(vector<Network> &networks) {
   distribute_weights(networks);
 }
 
-int n_states(Network net) {
+int n_states(Network net, bool io) {
   int total = 0;
   walk_states(net, [&](const string &, Sequence *p) {
     total += p->size() * p->rows() * p->cols() + 4;
-  });
+  }, "", io);
   return total;
 }
 
-bool get_states(Network net, Float *data, int total, int gpu) {
+bool get_states(Network net, Float *data, int total, int gpu, bool io) {
   int index = 0;
   walk_states(net, [&](const string &, Sequence *p) {
     data[index++] = 999999;
     data[index++] = p->size();
     data[index++] = p->rows();
     data[index++] = p->cols();
+    if (index + p->size() * p->rows() * p->cols() > total) return;
     for (int t = 0; t < p->size(); t++)
       for (int i = 0; i < p->rows(); i++)
         for (int b = 0; b < p->cols(); b++) data[index++] = (*p)[t].v(i, b);
-  });
+  }, "", io);
   return total == index;
 }
 
-bool set_states(Network net, const Float *data, int total, int gpu) {
+bool set_states(Network net, const Float *data, int total, int gpu, bool io) {
   int index = 0;
   walk_states(net, [&](const string &, Sequence *p) {
     int magic = int(data[index++]);
+    if (magic != 999999) return;
     int size = int(data[index++]);
     int rows = int(data[index++]);
     int cols = int(data[index++]);
+    if (index + size * rows * cols > total) return;
     p->resize(size, rows, cols);
     for (int t = 0; t < p->size(); t++)
       for (int i = 0; i < p->rows(); i++)
         for (int b = 0; b < p->cols(); b++) (*p)[t].v(i, b) = data[index++];
-  });
+  }, "", io);
   return total == index;
 }
 
@@ -722,6 +729,7 @@ bool share_params(Network net, Float *params, int total, int gpu) {
   walk_params(net, [&](const string &, Params *p) {
     int n = p->v.rows();
     int m = p->v.cols();
+    if (index + p->v.total_size() > total) return;
     p->v.displaceTo(params + index, n, m, gpu);
     index += p->v.total_size();
   });
@@ -735,6 +743,7 @@ bool set_params(Network net, const Float *params, int total, int gpu) {
     int n = p->v.rows();
     int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
+    if (index + p->v.total_size() > total) return;
     memcpy(p->v.ptr, params + index, nbytes);
     index += p->v.total_size();
   });
@@ -748,6 +757,7 @@ bool get_params(Network net, Float *params, int total, int gpu) {
     int n = p->v.rows();
     int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
+    if (index + p->v.total_size() > total) return;
     memcpy(params + index, p->v.ptr, nbytes);
     index += p->v.total_size();
   });
