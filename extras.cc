@@ -295,6 +295,7 @@ INormalizer *make_Normalizer(const string &name) {
   if (name == "mean") return make_MeanNormalizer();
   if (name == "center") return make_CenterNormalizer();
   THROW("unknown normalizer name");
+  return 0;
 }
 
 // PNG I/O (taken from iulib)

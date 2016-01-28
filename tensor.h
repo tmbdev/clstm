@@ -291,6 +291,7 @@ struct Tensor2 {
       return value;
 #else
       THROW("not compiled for GPU");
+      return 0;
 #endif
     }
   }

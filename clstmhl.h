@@ -50,7 +50,7 @@ struct CLSTMText {
     nclasses = net->codec.size();
     iclasses = net->icodec.size();
     int neps = net->attr.get("neps", -1);
-    if (neps<0) cerr << "WARNING: no neps\n";
+    if (neps < 0) cerr << "WARNING: no neps\n";
     return true;
   }
 
@@ -58,7 +58,7 @@ struct CLSTMText {
   // exception.
   void save(const std::string &fname) {
     if (!maybe_save(fname)) {
-     THROW("Could not save CLSTMText net to file: " + fname);
+      THROW("Could not save CLSTMText net to file: " + fname);
     }
   }
 
@@ -178,7 +178,7 @@ struct CLSTMOCR {
   // exception.
   void save(const std::string &fname) {
     if (!maybe_save(fname)) {
-     THROW("Could not save CLSTMOCR net to file: " + fname);
+      THROW("Could not save CLSTMOCR net to file: " + fname);
     }
   }
 

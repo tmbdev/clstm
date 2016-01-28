@@ -111,12 +111,13 @@ int main(int argc, char **argv) {
     print("OK", merr);
   }
   int nparams = n_params(net);
+  assert(nparams > 0);
   print("nparams", nparams);
   vector<float> params(nparams);
   vector<float> backup;
-  get_params(net, &params[0], nparams);
+  assert(get_params(net, &params[0], nparams));
   backup = params;
-  share_params(net, &params[0], nparams);
+  assert(share_params(net, &params[0], nparams));
   double merr2 = test_net(net);
   if (merr2 > 0.1) {
     print("FAILED (params)", merr2);

@@ -673,6 +673,34 @@ void average_weights(vector<Network> &networks) {
   distribute_weights(networks);
 }
 
+int n_states(Network net) {
+  int total = 0;
+  walk_states(net, [&](const string &, Sequence *p) {
+    total += p->size() * p->rows() * p->cols();
+  });
+  return total;
+}
+
+bool get_states(Network net, Float *data, int total, int gpu) {
+  int index = 0;
+  walk_states(net, [&](const string &, Sequence *p) {
+    for (int t = 0; t < p->size(); t++)
+      for (int i = 0; i < p->rows(); i++)
+        for (int b = 0; b < p->cols(); b++) data[index++] = (*p)[t].v(i, b);
+  });
+  return total == index;
+}
+
+bool set_states(Network net, const Float *data, int total, int gpu) {
+  int index = 0;
+  walk_states(net, [&](const string &, Sequence *p) {
+    for (int t = 0; t < p->size(); t++)
+      for (int i = 0; i < p->rows(); i++)
+        for (int b = 0; b < p->cols(); b++) (*p)[t].v(i, b) = data[index++];
+  });
+  return total == index;
+}
+
 int n_params(Network net) {
   int total = 0;
   walk_params(net,
@@ -680,7 +708,7 @@ int n_params(Network net) {
   return total;
 }
 
-void share_params(Network net, Float *params, int total, int gpu) {
+bool share_params(Network net, Float *params, int total, int gpu) {
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
     int n = p->v.rows();
@@ -688,10 +716,10 @@ void share_params(Network net, Float *params, int total, int gpu) {
     p->v.displaceTo(params + index, n, m, gpu);
     index += p->v.total_size();
   });
-  assert(index == total);
+  return index == total;
 }
 
-void set_params(Network net, Float *params, int total, int gpu) {
+bool set_params(Network net, const Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
@@ -701,10 +729,10 @@ void set_params(Network net, Float *params, int total, int gpu) {
     memcpy(p->v.ptr, params + index, nbytes);
     index += p->v.total_size();
   });
-  assert(index == total);
+  return index == total;
 }
 
-void get_params(Network net, Float *params, int total, int gpu) {
+bool get_params(Network net, Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
@@ -714,14 +742,15 @@ void get_params(Network net, Float *params, int total, int gpu) {
     memcpy(params + index, p->v.ptr, nbytes);
     index += p->v.total_size();
   });
-  assert(index == total);
+  return index == total;
 }
 
-void clear_derivs(Network net) {
+bool clear_derivs(Network net) {
   walk_params(net, [&](const string &, Params *p) { p->d.setZero(); });
+  return true;
 }
 
-void get_derivs(Network net, Float *params, int total, int gpu) {
+bool get_derivs(Network net, Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
@@ -731,7 +760,7 @@ void get_derivs(Network net, Float *params, int total, int gpu) {
     memcpy(params + index, p->d.ptr, nbytes);
     index += p->v.total_size();
   });
-  assert(index == total);
+  return index == total;
 }
 
 }  // namespace ocropus

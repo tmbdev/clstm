@@ -120,9 +120,9 @@ int main1(int argc, char **argv) {
       }
       test_error = errors / count;
       double exact_test_error = 1.0 - exact_matches / test_samples.size();
-      print("ERROR", trial, test_error, "   ", errors, count, 
-            "exact_errors", exact_test_error,
-            "lrate", lrate, "momentum", momentum, "nhidden", nhidden);
+      print("ERROR", trial, test_error, "   ", errors, count, "exact_errors",
+            exact_test_error, "lrate", lrate, "momentum", momentum, "nhidden",
+            nhidden);
       if (use_exact) test_error = exact_test_error;
       if (save_every == 0 && test_error < best_error) {
         best_error = test_error;

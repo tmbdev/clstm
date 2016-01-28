@@ -30,6 +30,12 @@ using std::endl;
 using std::cout;
 using std::cerr;
 
+template <class A>
+inline void die(const A &arg) {
+  cerr << "EXCEPTION (" << arg << ")\n";
+  exit(255);
+}
+
 // get current time down to usec precision as a double
 
 inline double now() {
