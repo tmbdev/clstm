@@ -199,10 +199,10 @@ bool get_states(Network net, Float *params, int total,
                 int gpu = -1, bool io = true);
 
 // invalidate the derivatives in the network
-bool invalidate_state_derivs(Network net);
+void invalidate_state_derivs(Network net);
 
 // invalidate the derivatives in the network
-bool clear_state_derivs(Network net);
+void clear_state_derivs(Network net);
 
 // set the class targets of the network using hot-1 encoding
 void set_classes(Network net, BatchClasses &classes);

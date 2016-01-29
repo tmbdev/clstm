@@ -748,7 +748,7 @@ bool get_states(Network net, Float *data, int total, int gpu, bool io) {
   return total == index;
 }
 
-bool invalidate_state_derivs(Network net) {
+void invalidate_state_derivs(Network net) {
   walk_states(net, [&](const string &, Sequence *p) {
     for (int t = 0; t < p->size(); t++)
       for (int i = 0; i < p->rows(); i++)
@@ -757,7 +757,7 @@ bool invalidate_state_derivs(Network net) {
   }, "", true);
 }
 
-bool clear_state_derivs(Network net) {
+void clear_state_derivs(Network net) {
   walk_states(net, [&](const string &, Sequence *p) {
     for (int t = 0; t < p->size(); t++)
       for (int i = 0; i < p->rows(); i++)
