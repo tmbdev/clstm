@@ -257,20 +257,68 @@ void network_info(Network net, string prefix) {
   for (auto s : net->sub) network_info(s, nprefix);
 }
 
+struct Info {
+  double min = INFINITY;
+  double max = -INFINITY;
+  double sum = 0.0;
+  double count = 0.0;
+  void operator+=(double x) {
+    if(x<min) min = x;
+    if(x>max) max = x;
+    sum += x;
+    count += 1;
+  }
+  string info() {
+    return "["+to_string(min)+"|"+to_string(sum/count)+
+      "|"+to_string(max)+":"+to_string(int(count))+"]";
+  }
+};
+
+string info(Sequence &s) {
+  Info info, dinfo;
+  for(int t=0; t<s.size(); t++) {
+    for(int i=0; i<s.rows(); i++) {
+      for(int b=0; b<s.cols(); b++) {
+        info += s[t].v(i, b);
+        dinfo += s[t].d(i, b);
+      }
+    }
+  }
+  return "Seq:" + info.info() + dinfo.info();;
+}
+
+string info(Batch &s) {
+  Info info, dinfo;
+  for(int i=0; i<s.rows(); i++) {
+    for(int b=0; b<s.cols(); b++) {
+      info += s.v(i, b);
+      dinfo += s.d(i, b);
+    }
+  }
+  return "Bat:" + info.info() + dinfo.info();;
+}
+
 void network_detail(Network net, string prefix) {
   string nprefix = prefix + "." + net->kind;
   Float learning_rate = net->attr.get("learning_rate");
   Float momentum = net->attr.get("momentum");
-  cout << nprefix << ": " << learning_rate << " " << momentum << " ";
+  cout << nprefix << " <<<" << learning_rate << " " << momentum << " ";
   cout << "in " << net->inputs.size() << " " << net->ninput() << " ";
-  cout << "out " << net->outputs.size() << " " << net->noutput() << endl;
+  cout << "out " << net->outputs.size() << " " << net->noutput()
+       << ">>>" << endl;
   for (auto p : net->parameters) {
     cout << nprefix << "    " << p.first << " " << p.second->rows() << " "
-         << p.second->cols() << endl;
+         << p.second->cols() << " " << info(*p.second) << endl;
   }
+  auto show = [&] (const string &s, Sequence *p) {
+    cout << nprefix << "    " << s << " " << p->size() << " "
+         << p->rows() << " " << p->cols()
+         << " " << info(*p) << endl;
+  };
+  show("inputs", &net->inputs);
+  show("outputs", &net->outputs);
   for (auto p : net->states) {
-    cout << nprefix << "    " << p.first << " " << p.second->size() << " "
-         << p.second->rows() << " " << p.second->cols() << endl;
+    show(p.first, p.second);
   }
   for (auto s : net->sub) network_detail(s, nprefix);
 }
@@ -700,6 +748,24 @@ bool get_states(Network net, Float *data, int total, int gpu, bool io) {
   return total == index;
 }
 
+bool invalidate_state_derivs(Network net) {
+  walk_states(net, [&](const string &, Sequence *p) {
+    for (int t = 0; t < p->size(); t++)
+      for (int i = 0; i < p->rows(); i++)
+        for (int b = 0; b < p->cols(); b++)
+          (*p)[t].d(i, b) = NAN;
+  }, "", true);
+}
+
+bool clear_state_derivs(Network net) {
+  walk_states(net, [&](const string &, Sequence *p) {
+    for (int t = 0; t < p->size(); t++)
+      for (int i = 0; i < p->rows(); i++)
+        for (int b = 0; b < p->cols(); b++)
+          (*p)[t].d(i, b) = 0;
+  }, "", true);
+}
+
 bool set_states(Network net, const Float *data, int total, int gpu, bool io) {
   int index = 0;
   walk_states(net, [&](const string &, Sequence *p) {
@@ -777,6 +843,19 @@ bool get_derivs(Network net, Float *params, int total, int gpu) {
     int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
     memcpy(params + index, p->d.ptr, nbytes);
+    index += p->v.total_size();
+  });
+  return index == total;
+}
+
+bool set_derivs(Network net, Float *params, int total, int gpu) {
+  assert(gpu < 0);
+  int index = 0;
+  walk_params(net, [&](const string &, Params *p) {
+    int n = p->v.rows();
+    int m = p->v.cols();
+    int nbytes = p->v.total_size() * sizeof(Float);
+    memcpy(p->d.ptr, params + index, nbytes);
     index += p->v.total_size();
   });
   return index == total;

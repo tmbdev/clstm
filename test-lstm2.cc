@@ -1,3 +1,10 @@
+// Test case for copying parameters and states in/out of the network.
+
+// whether to run the copied test case
+#define COPIED
+// whether to run the direct test case
+#undef DIRECT
+
 #include <assert.h>
 #include <math.h>
 #include <iostream>
@@ -71,82 +78,61 @@ double test_net(Network net) {
   return merr;
 }
 
+#define die() (cerr<<"FATAL "<<__FILE__<<" "<<__LINE__<<"\n",abort(),true)
+
 int main(int argc, char **argv) {
-  Network net;
-  int gpu = getienv("gpu", -1);
-  net = make_net("lstm1",
-                 {{"ninput", 1}, {"nhidden", 4}, {"noutput", 2}, {"gpu", gpu}});
-  net->setLearningRate(1e-4, 0.9);
-  save_net("__test0__.clstm", net);
-  unlink("__test0__.clstm");
+  auto factory = []{
+    Network net = make_net("lstm1",
+    {{"ninput", 1}, {"nhidden", 4}, {"noutput", 2}, {"gpu", -1}});
+    net->setLearningRate(1e-1, 0.0);
+    return net;
+  };
+  Network net = factory();
   print("training 1:4:2 network to learn delay");
   vector<float> states;
+  vector<float> weights;
   for (int i = 0; i < ntrain; i++) {
     Sequence xs, ys;
     gentest(xs, ys);
     set_inputs(net, xs);
     net->forward();
-#if 0
+    clear_derivs(net);
+    clear_state_derivs(net);
+
+#ifdef COPIED
     int nstates = n_states(net);
+    int nweights = n_params(net);
     states.resize(nstates);
-    if (i==0) print("nstates", nstates);
-    get_states(net, states.data(), nstates);
-    set_states(net, states.data(), nstates);
+    weights.resize(nweights);
+    get_states(net, states.data(), nstates) || die();
+    get_params(net, weights.data(), nweights) || die();
 #endif
+    
+#ifdef DIRECT
     set_targets(net, ys);
     net->backward();
+    if(i==0) {cerr<<"DIRECT:\n";network_detail(net);}
     sgd_update(net);
+#endif
+
+#ifdef COPIED
+    net = factory();
+    set_states(net, states.data(), nstates) || die();
+    set_params(net, weights.data(), nweights) || die();
+    clear_derivs(net);
+    clear_state_derivs(net);
+    set_targets(net, ys);
+    net->backward();
+    if(i==0) {cerr<<"COPIED:\n";network_detail(net);}
+    sgd_update(net);
+#endif
   }
-  network_detail(net);
+  // network_detail(net);
   double merr0 = test_net(net);
   if (merr0 > 0.1) {
     print("FAILED (pre-save)", merr0);
     exit(1);
   } else {
     print("OK (pre-save)", merr0);
-  }
-  print("saving");
-  save_net("__test__.clstm", net);
-  net.reset();
-  print("loading");
-  net = load_net("__test__.clstm");
-  double merr = test_net(net);
-  unlink("__test__.clstm");
-  if (merr > 0.1) {
-    print("FAILED", merr);
-    exit(1);
-  } else {
-    print("OK", merr);
-  }
-  int nparams = n_params(net);
-  assert(nparams > 0);
-  print("nparams", nparams);
-  vector<float> params(nparams);
-  vector<float> backup;
-  assert(get_params(net, &params[0], nparams));
-  backup = params;
-  assert(share_params(net, &params[0], nparams));
-  double merr2 = test_net(net);
-  if (merr2 > 0.1) {
-    print("FAILED (params)", merr2);
-    exit(1);
-  } else {
-    print("OK (params)", merr2);
-  }
-  for (int i = 0; i < nparams; i++) params[i] = 0.0;
-  double merr3 = test_net(net);
-  if (merr3 < 0.1) {
-    print("FAILED (hacked-params)", merr3);
-    exit(1);
-  } else {
-    print("OK (hacked-params)", merr3);
-  }
-  for (int i = 0; i < nparams; i++) params[i] = backup[i];
-  double merr4 = test_net(net);
-  if (merr4 > 0.1) {
-    print("FAILED (restored-params)", merr4);
-    exit(1);
-  } else {
-    print("OK (restored-params)", merr4);
   }
 }

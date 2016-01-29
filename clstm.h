@@ -179,6 +179,9 @@ bool set_params(Network net, const Float *params, int total, int gpu = -1);
 // store the internal weights of the network in the params argument
 bool get_params(Network net, Float *params, int total, int gpu = -1);
 
+// restore the internal weights derivatives from the params argument
+bool set_derivs(Network net, Float *params, int total, int gpu = -1);
+
 // store the internal weights derivatives in the params argument
 bool get_derivs(Network net, Float *params, int total, int gpu = -1);
 
@@ -194,6 +197,12 @@ bool set_states(Network net, const Float *params, int total,
 // store the internal state variables in the params argument
 bool get_states(Network net, Float *params, int total,
                 int gpu = -1, bool io = true);
+
+// invalidate the derivatives in the network
+bool invalidate_state_derivs(Network net);
+
+// invalidate the derivatives in the network
+bool clear_state_derivs(Network net);
 
 // set the class targets of the network using hot-1 encoding
 void set_classes(Network net, BatchClasses &classes);
