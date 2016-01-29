@@ -18,6 +18,7 @@ scons -j 4 gpu=0 double=1 debug=$debug options="$options" test-cderiv test-deriv
 ./test-deriv
 ./test-ctc
 rm -f *.pb.h *.pb.cc
+scons -c all
 #scons -s -c pyswig
 #scons pyswig
 #python test-lstm.py
