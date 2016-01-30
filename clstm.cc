@@ -860,5 +860,4 @@ bool set_derivs(Network net, Float *params, int total, int gpu) {
   });
   return index == total;
 }
-
 }  // namespace ocropus
