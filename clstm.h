@@ -152,9 +152,17 @@ class INetwork {
 typedef function<void(const string &, Params *)> ParamsFun;
 typedef function<void(const string &, Sequence *)> StateFun;
 typedef function<void(const string &, INetwork *)> NetworkFun;
+
+// Walks through all the parameters of the network. Note
+// that this gives you both values and derivatives.
 void walk_params(Network net, ParamsFun f, const string &prefix = "");
+
+// Walks through any internal state sequences of the network.
+// If `io=true`, also walks through the inputs/outputs of all
+// layers.
 void walk_states(Network net, StateFun f, const string &prefix = "",
                  bool io = false);
+// Walks through all the layers (sub-networks) of the network.
 void walk_networks(Network net, NetworkFun f, const string &prefix = "");
 
 // output information about the network (for debugging)
