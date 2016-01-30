@@ -73,13 +73,14 @@ double test_net(Network net) {
   return merr;
 }
 
-#define die() (cerr<<"FATAL "<<__FILE__<<" "<<__LINE__<<"\n",abort(),true)
+#define die() \
+  (cerr << "FATAL " << __FILE__ << " " << __LINE__ << "\n", abort(), true)
 
 int main(int argc, char **argv) {
   float learning_rate = 0.01;
-  auto factory = [&]{
-    Network net = make_net("lstm1",
-    {{"ninput", 1}, {"nhidden", 4}, {"noutput", 2}, {"gpu", -1}});
+  auto factory = [&] {
+    Network net = make_net(
+        "lstm1", {{"ninput", 1}, {"nhidden", 4}, {"noutput", 2}, {"gpu", -1}});
     net->setLearningRate(learning_rate, 0.0);
     return net;
   };
@@ -101,11 +102,14 @@ int main(int argc, char **argv) {
     derivs.resize(nweights);
     get_states(net, states.data(), nstates) || die();
     get_params(net, weights.data(), nweights) || die();
-    
+
 #ifdef DIRECT
     set_targets(net, ys);
     net->backward();
-    if(i==0) {cerr<<"DIRECT:\n";network_detail(net);}
+    if (i == 0) {
+      cerr << "DIRECT:\n";
+      network_detail(net);
+    }
     sgd_update(net);
 #endif
 
@@ -116,7 +120,10 @@ int main(int argc, char **argv) {
     clear_state_derivs(net);
     set_targets(net, ys);
     net->backward();
-    if(i==0) {cerr<<"COPIED:\n";network_detail(net);}
+    if (i == 0) {
+      cerr << "COPIED:\n";
+      network_detail(net);
+    }
 
     // perform stochastic gradient descent on
     // the externalized weights instead of sgd_update(net)

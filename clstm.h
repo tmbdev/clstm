@@ -199,12 +199,12 @@ bool get_derivs(Network net, Float *params, int total, int gpu = -1);
 int n_states(Network net, bool io = true);
 
 // set the internal state variables of the network from the params argument
-bool set_states(Network net, const Float *params, int total,
-                int gpu = -1, bool io = true);
+bool set_states(Network net, const Float *params, int total, int gpu = -1,
+                bool io = true);
 
 // store the internal state variables in the params argument
-bool get_states(Network net, Float *params, int total,
-                int gpu = -1, bool io = true);
+bool get_states(Network net, Float *params, int total, int gpu = -1,
+                bool io = true);
 
 // invalidate the derivatives in the network
 void invalidate_state_derivs(Network net);

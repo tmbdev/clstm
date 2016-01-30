@@ -263,39 +263,41 @@ struct Info {
   double sum = 0.0;
   double count = 0.0;
   void operator+=(double x) {
-    if(x<min) min = x;
-    if(x>max) max = x;
+    if (x < min) min = x;
+    if (x > max) max = x;
     sum += x;
     count += 1;
   }
   string info() {
-    return "["+to_string(min)+"|"+to_string(sum/count)+
-      "|"+to_string(max)+":"+to_string(int(count))+"]";
+    return "[" + to_string(min) + "|" + to_string(sum / count) + "|" +
+           to_string(max) + ":" + to_string(int(count)) + "]";
   }
 };
 
 string info(Sequence &s) {
   Info info, dinfo;
-  for(int t=0; t<s.size(); t++) {
-    for(int i=0; i<s.rows(); i++) {
-      for(int b=0; b<s.cols(); b++) {
+  for (int t = 0; t < s.size(); t++) {
+    for (int i = 0; i < s.rows(); i++) {
+      for (int b = 0; b < s.cols(); b++) {
         info += s[t].v(i, b);
         dinfo += s[t].d(i, b);
       }
     }
   }
-  return "Seq:" + info.info() + dinfo.info();;
+  return "Seq:" + info.info() + dinfo.info();
+  ;
 }
 
 string info(Batch &s) {
   Info info, dinfo;
-  for(int i=0; i<s.rows(); i++) {
-    for(int b=0; b<s.cols(); b++) {
+  for (int i = 0; i < s.rows(); i++) {
+    for (int b = 0; b < s.cols(); b++) {
       info += s.v(i, b);
       dinfo += s.d(i, b);
     }
   }
-  return "Bat:" + info.info() + dinfo.info();;
+  return "Bat:" + info.info() + dinfo.info();
+  ;
 }
 
 void network_detail(Network net, string prefix) {
@@ -304,16 +306,15 @@ void network_detail(Network net, string prefix) {
   Float momentum = net->attr.get("momentum");
   cout << nprefix << " <<<" << learning_rate << " " << momentum << " ";
   cout << "in " << net->inputs.size() << " " << net->ninput() << " ";
-  cout << "out " << net->outputs.size() << " " << net->noutput()
-       << ">>>" << endl;
+  cout << "out " << net->outputs.size() << " " << net->noutput() << ">>>"
+       << endl;
   for (auto p : net->parameters) {
     cout << nprefix << "    " << p.first << " " << p.second->rows() << " "
          << p.second->cols() << " " << info(*p.second) << endl;
   }
-  auto show = [&] (const string &s, Sequence *p) {
-    cout << nprefix << "    " << s << " " << p->size() << " "
-         << p->rows() << " " << p->cols()
-         << " " << info(*p) << endl;
+  auto show = [&](const string &s, Sequence *p) {
+    cout << nprefix << "    " << s << " " << p->size() << " " << p->rows()
+         << " " << p->cols() << " " << info(*p) << endl;
   };
   show("inputs", &net->inputs);
   show("outputs", &net->outputs);
@@ -727,59 +728,69 @@ void average_weights(vector<Network> &networks) {
 
 int n_states(Network net, bool io) {
   int total = 0;
-  walk_states(net, [&](const string &, Sequence *p) {
-    total += p->size() * p->rows() * p->cols() + 4;
-  }, "", io);
+  walk_states(net,
+              [&](const string &, Sequence *p) {
+                total += p->size() * p->rows() * p->cols() + 4;
+              },
+              "", io);
   return total;
 }
 
 bool get_states(Network net, Float *data, int total, int gpu, bool io) {
   int index = 0;
-  walk_states(net, [&](const string &, Sequence *p) {
-    data[index++] = 999999;
-    data[index++] = p->size();
-    data[index++] = p->rows();
-    data[index++] = p->cols();
-    if (index + p->size() * p->rows() * p->cols() > total) return;
-    for (int t = 0; t < p->size(); t++)
-      for (int i = 0; i < p->rows(); i++)
-        for (int b = 0; b < p->cols(); b++) data[index++] = (*p)[t].v(i, b);
-  }, "", io);
+  walk_states(net,
+              [&](const string &, Sequence *p) {
+                data[index++] = 999999;
+                data[index++] = p->size();
+                data[index++] = p->rows();
+                data[index++] = p->cols();
+                if (index + p->size() * p->rows() * p->cols() > total) return;
+                for (int t = 0; t < p->size(); t++)
+                  for (int i = 0; i < p->rows(); i++)
+                    for (int b = 0; b < p->cols(); b++)
+                      data[index++] = (*p)[t].v(i, b);
+              },
+              "", io);
   return total == index;
 }
 
 void invalidate_state_derivs(Network net) {
-  walk_states(net, [&](const string &, Sequence *p) {
-    for (int t = 0; t < p->size(); t++)
-      for (int i = 0; i < p->rows(); i++)
-        for (int b = 0; b < p->cols(); b++)
-          (*p)[t].d(i, b) = NAN;
-  }, "", true);
+  walk_states(net,
+              [&](const string &, Sequence *p) {
+                for (int t = 0; t < p->size(); t++)
+                  for (int i = 0; i < p->rows(); i++)
+                    for (int b = 0; b < p->cols(); b++) (*p)[t].d(i, b) = NAN;
+              },
+              "", true);
 }
 
 void clear_state_derivs(Network net) {
-  walk_states(net, [&](const string &, Sequence *p) {
-    for (int t = 0; t < p->size(); t++)
-      for (int i = 0; i < p->rows(); i++)
-        for (int b = 0; b < p->cols(); b++)
-          (*p)[t].d(i, b) = 0;
-  }, "", true);
+  walk_states(net,
+              [&](const string &, Sequence *p) {
+                for (int t = 0; t < p->size(); t++)
+                  for (int i = 0; i < p->rows(); i++)
+                    for (int b = 0; b < p->cols(); b++) (*p)[t].d(i, b) = 0;
+              },
+              "", true);
 }
 
 bool set_states(Network net, const Float *data, int total, int gpu, bool io) {
   int index = 0;
-  walk_states(net, [&](const string &, Sequence *p) {
-    int magic = int(data[index++]);
-    if (magic != 999999) return;
-    int size = int(data[index++]);
-    int rows = int(data[index++]);
-    int cols = int(data[index++]);
-    if (index + size * rows * cols > total) return;
-    p->resize(size, rows, cols);
-    for (int t = 0; t < p->size(); t++)
-      for (int i = 0; i < p->rows(); i++)
-        for (int b = 0; b < p->cols(); b++) (*p)[t].v(i, b) = data[index++];
-  }, "", io);
+  walk_states(net,
+              [&](const string &, Sequence *p) {
+                int magic = int(data[index++]);
+                if (magic != 999999) return;
+                int size = int(data[index++]);
+                int rows = int(data[index++]);
+                int cols = int(data[index++]);
+                if (index + size * rows * cols > total) return;
+                p->resize(size, rows, cols);
+                for (int t = 0; t < p->size(); t++)
+                  for (int i = 0; i < p->rows(); i++)
+                    for (int b = 0; b < p->cols(); b++)
+                      (*p)[t].v(i, b) = data[index++];
+              },
+              "", io);
   return total == index;
 }
 
