@@ -37,12 +37,13 @@ Prerequisites:
 
 Optional: HDF5, ZMQ, Python
 
-On Ubuntu, this means:
+On Ubuntu 15.04, this means:
 
-    sudo apt-get install libeigen3-dev \
+    sudo apt-get install mercurial\
     hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py \
     libprotobuf-dev libprotobuf9 protobuf-compiler \
     libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3 libpng12-dev
+    cd /usr/local/include && hg clone http://bitbucket.org/eigen/eigen eigen3 && hg up tensorflow_fix && cd -
 
 There are a bunch of options:
 
