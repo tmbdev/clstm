@@ -735,7 +735,7 @@ int n_states(Network net) {
   return total;
 }
 
-bool get_states(Network net, Float *data, int total, int gpu) {
+void get_states(Network net, Float *data, int total, int gpu) {
   int index = 0;
   walk_states(  //
       net,
@@ -751,17 +751,16 @@ bool get_states(Network net, Float *data, int total, int gpu) {
             for (int b = 0; b < p->cols(); b++) data[index++] = (*p)[t].v(i, b);
       },
       "", true);
-  cerr << "get states: " << total << "\n";
-  return total == index;
+  if (index != total) THROW("size mismatch in get_states");
 }
 
-bool set_states(Network net, const Float *data, int total, int gpu) {
+void set_states(Network net, const Float *data, int total, int gpu) {
   int index = 0;
   walk_states(  //
       net,
       [&](const string &name, Sequence *p) {
         int magic = int(data[index++]);
-        assert(magic==999999);
+        assert(magic == 999999);
         if (magic != 999999) return;
         int size = int(data[index++]);
         int rows = int(data[index++]);
@@ -774,7 +773,7 @@ bool set_states(Network net, const Float *data, int total, int gpu) {
             for (int b = 0; b < cols; b++) (*p)[t].v(i, b) = data[index++];
       },
       "", true);
-  return total == index;
+  if (total != index) THROW("size mismatch in set_states");
 }
 
 void clear_states(Network net) {
@@ -812,52 +811,54 @@ int n_params(Network net) {
   return total;
 }
 
-bool share_params(Network net, Float *params, int total, int gpu) {
+void share_params(Network net, Float *params, int total, int gpu) {
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
     int n = p->v.rows();
     int m = p->v.cols();
-    if (index + p->v.total_size() > total) return;
+    if (index + p->v.total_size() > total) THROW("share_params size mismatch");
     p->v.displaceTo(params + index, n, m, gpu);
     index += p->v.total_size();
   });
-  return index == total;
+  if (index != total) THROW("share_params size mismatch");
 }
 
-bool set_params(Network net, const Float *params, int total, int gpu) {
+void set_params(Network net, const Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
     int n = p->v.rows();
     int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
-    if (index + p->v.total_size() > total) return;
+    if (index + p->v.total_size() > total) THROW("get_params size mismatch");
     memcpy(p->v.ptr, params + index, nbytes);
     index += p->v.total_size();
   });
-  return index == total;
+  if (index != total) THROW("get_params size mismatch");
 }
 
-bool get_params(Network net, Float *params, int total, int gpu) {
+void get_params(Network net, Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
     int n = p->v.rows();
     int m = p->v.cols();
     int nbytes = p->v.total_size() * sizeof(Float);
-    if (index + p->v.total_size() > total) return;
+    if (index + p->v.total_size() > total) THROW("get_params size mismatch");
     memcpy(params + index, p->v.ptr, nbytes);
     index += p->v.total_size();
   });
-  return index == total;
+  if (index != total) THROW("get_params size mismatch");
 }
 
-bool clear_derivs(Network net) {
+void clear_derivs(Network net) {
   walk_params(net, [&](const string &, Params *p) { p->d.setZero(); });
-  return true;
+  walk_states(net, [&](const string &, Sequence *p) {
+    for (int t = 0; t < p->size(); t++) (*p)[t].d.setZero();
+  });
 }
 
-bool get_derivs(Network net, Float *params, int total, int gpu) {
+void get_derivs(Network net, Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
@@ -867,10 +868,10 @@ bool get_derivs(Network net, Float *params, int total, int gpu) {
     memcpy(params + index, p->d.ptr, nbytes);
     index += p->v.total_size();
   });
-  return index == total;
+  if (index != total) THROW("get_derivs size mismatch");
 }
 
-bool set_derivs(Network net, Float *params, int total, int gpu) {
+void set_derivs(Network net, Float *params, int total, int gpu) {
   assert(gpu < 0);
   int index = 0;
   walk_params(net, [&](const string &, Params *p) {
@@ -880,6 +881,6 @@ bool set_derivs(Network net, Float *params, int total, int gpu) {
     memcpy(p->d.ptr, params + index, nbytes);
     index += p->v.total_size();
   });
-  return index == total;
+  if (index != total) THROW("set_derivs size mismatch");
 }
 }  // namespace ocropus

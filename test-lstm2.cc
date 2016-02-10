@@ -100,8 +100,8 @@ int main(int argc, char **argv) {
     states.resize(nstates);
     weights.resize(nweights);
     derivs.resize(nweights);
-    get_states(net, states.data(), nstates) || die();
-    get_params(net, weights.data(), nweights) || die();
+    get_states(net, states.data(), nstates);
+    get_params(net, weights.data(), nweights);
 
 #ifdef DIRECT
     set_targets(net, ys);
@@ -114,8 +114,8 @@ int main(int argc, char **argv) {
 #endif
 
     net = factory();
-    set_states(net, states.data(), nstates) || die();
-    set_params(net, weights.data(), nweights) || die();
+    set_states(net, states.data(), nstates);
+    set_params(net, weights.data(), nweights);
     clear_derivs(net);
     clear_state_derivs(net);
     set_targets(net, ys);

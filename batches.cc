@@ -83,6 +83,7 @@ bool anynan(TensorMap2 a) {
 }
 
 bool anynan(Batch &a) { return anynan(a.v()) || anynan(a.d()); }
+bool anynan(Params &a) { return anynan(a.v()) || anynan(a.d()); }
 
 bool anynan(Sequence &a) {
   for (int i = 0; i < a.size(); i++)

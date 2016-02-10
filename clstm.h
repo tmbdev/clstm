@@ -173,25 +173,25 @@ void network_detail(Network net, string prefix = "");
 int n_params(Network net);
 
 // clear the parameter derivatives in a network
-bool clear_derivs(Network net);
+void clear_derivs(Network net);
 
 // given a vector of floating point numbers, alias the internal
 // weights to that vector; total must be the size and should be
 // equal to the result of n_params; gpu requests GPU storage
 // (total and gpu arguments mean the same in the following functions)
-bool share_params(Network net, Float *params, int total, int gpu = -1);
+void share_params(Network net, Float *params, int total, int gpu = -1);
 
 // set the internal weights of the network from the params argument
-bool set_params(Network net, const Float *params, int total, int gpu = -1);
+void set_params(Network net, const Float *params, int total, int gpu = -1);
 
 // store the internal weights of the network in the params argument
-bool get_params(Network net, Float *params, int total, int gpu = -1);
+void get_params(Network net, Float *params, int total, int gpu = -1);
 
 // restore the internal weights derivatives from the params argument
-bool set_derivs(Network net, Float *params, int total, int gpu = -1);
+void set_derivs(Network net, Float *params, int total, int gpu = -1);
 
 // store the internal weights derivatives in the params argument
-bool get_derivs(Network net, Float *params, int total, int gpu = -1);
+void get_derivs(Network net, Float *params, int total, int gpu = -1);
 
 // get the number of internal state variables for the network; this
 // changes after every foward propagation pass; note that this includes
@@ -199,10 +199,10 @@ bool get_derivs(Network net, Float *params, int total, int gpu = -1);
 int n_states(Network net);
 
 // set the internal state variables of the network from the params argument
-bool set_states(Network net, const Float *params, int total, int gpu = -1);
+void set_states(Network net, const Float *params, int total, int gpu = -1);
 
 // store the internal state variables in the params argument
-bool get_states(Network net, Float *params, int total, int gpu = -1);
+void get_states(Network net, Float *params, int total, int gpu = -1);
 
 // clear all internal states
 void clear_states(Network net);
