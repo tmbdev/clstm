@@ -63,7 +63,7 @@ class Assoc : public std::map<std::string, String> {
     auto it = this->find(key);
     if (it == this->end()) {
       if (super) return super->get(key);
-      THROW("missing parameter");
+      throwf("missing parameter: %s", key.c_str());
     }
     return it->second;
   }
@@ -196,15 +196,16 @@ bool get_derivs(Network net, Float *params, int total, int gpu = -1);
 // get the number of internal state variables for the network; this
 // changes after every foward propagation pass; note that this includes
 // both numerical values and the shapes of internal tensors
-int n_states(Network net, bool io = true);
+int n_states(Network net);
 
 // set the internal state variables of the network from the params argument
-bool set_states(Network net, const Float *params, int total, int gpu = -1,
-                bool io = true);
+bool set_states(Network net, const Float *params, int total, int gpu = -1);
 
 // store the internal state variables in the params argument
-bool get_states(Network net, Float *params, int total, int gpu = -1,
-                bool io = true);
+bool get_states(Network net, Float *params, int total, int gpu = -1);
+
+// clear all internal states
+void clear_states(Network net);
 
 // invalidate the derivatives in the network
 void invalidate_state_derivs(Network net);

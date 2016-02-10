@@ -57,16 +57,16 @@ Assoc::Assoc(const string &s) {
 }
 
 void walk_params(Network net, ParamsFun f, const string &prefix) {
-  for (auto it : net->parameters) f(prefix + "." + it.first, it.second);
-  for (auto s : net->sub) walk_params(s, f, prefix + "." + s->kind);
+  for (auto &it : net->parameters) f(prefix + "." + it.first, it.second);
+  for (auto &s : net->sub) walk_params(s, f, prefix + "." + s->kind);
 }
 void walk_states(Network net, StateFun f, const string &prefix, bool io) {
   if (io) {
     f(prefix + ".inputs", &net->inputs);
     f(prefix + ".outputs", &net->outputs);
   }
-  for (auto it : net->states) f(prefix + "." + it.first, it.second);
-  for (auto s : net->sub) walk_states(s, f, prefix + "." + s->kind, io);
+  for (auto &it : net->states) f(prefix + "." + it.first, it.second);
+  for (auto &s : net->sub) walk_states(s, f, prefix + "." + s->kind, io);
 }
 void walk_networks(Network net, NetworkFun f, const string &prefix) {
   string nprefix = prefix + "." + net->kind;
@@ -726,72 +726,83 @@ void average_weights(vector<Network> &networks) {
   distribute_weights(networks);
 }
 
-int n_states(Network net, bool io) {
+int n_states(Network net) {
   int total = 0;
-  walk_states(net,
-              [&](const string &, Sequence *p) {
-                total += p->size() * p->rows() * p->cols() + 4;
-              },
-              "", io);
+  walk_states(  //
+      net, [&](const string &,
+               Sequence *p) { total += p->size() * p->rows() * p->cols() + 4; },
+      "", true);
   return total;
 }
 
-bool get_states(Network net, Float *data, int total, int gpu, bool io) {
+bool get_states(Network net, Float *data, int total, int gpu) {
   int index = 0;
-  walk_states(net,
-              [&](const string &, Sequence *p) {
-                data[index++] = 999999;
-                data[index++] = p->size();
-                data[index++] = p->rows();
-                data[index++] = p->cols();
-                if (index + p->size() * p->rows() * p->cols() > total) return;
-                for (int t = 0; t < p->size(); t++)
-                  for (int i = 0; i < p->rows(); i++)
-                    for (int b = 0; b < p->cols(); b++)
-                      data[index++] = (*p)[t].v(i, b);
-              },
-              "", io);
+  walk_states(  //
+      net,
+      [&](const string &, Sequence *p) {
+        data[index++] = 999999;
+        data[index++] = p->size();
+        data[index++] = p->rows();
+        data[index++] = p->cols();
+        if (index + p->size() * p->rows() * p->cols() > total)
+          THROW("size mismatch in get_states");
+        for (int t = 0; t < p->size(); t++)
+          for (int i = 0; i < p->rows(); i++)
+            for (int b = 0; b < p->cols(); b++) data[index++] = (*p)[t].v(i, b);
+      },
+      "", true);
+  cerr << "get states: " << total << "\n";
   return total == index;
+}
+
+bool set_states(Network net, const Float *data, int total, int gpu) {
+  int index = 0;
+  walk_states(  //
+      net,
+      [&](const string &name, Sequence *p) {
+        int magic = int(data[index++]);
+        assert(magic==999999);
+        if (magic != 999999) return;
+        int size = int(data[index++]);
+        int rows = int(data[index++]);
+        int cols = int(data[index++]);
+        if (index + size * rows * cols > total)
+          THROW("size mismatch in set_states");
+        p->resize(size, rows, cols);
+        for (int t = 0; t < size; t++)
+          for (int i = 0; i < rows; i++)
+            for (int b = 0; b < cols; b++) (*p)[t].v(i, b) = data[index++];
+      },
+      "", true);
+  return total == index;
+}
+
+void clear_states(Network net) {
+  int index = 0;
+  walk_states(  //
+      net, [&](const string &, Sequence *p) { p->clear(); }, "", true);
 }
 
 void invalidate_state_derivs(Network net) {
-  walk_states(net,
-              [&](const string &, Sequence *p) {
-                for (int t = 0; t < p->size(); t++)
-                  for (int i = 0; i < p->rows(); i++)
-                    for (int b = 0; b < p->cols(); b++) (*p)[t].d(i, b) = NAN;
-              },
-              "", true);
+  walk_states(  //
+      net,
+      [&](const string &, Sequence *p) {
+        for (int t = 0; t < p->size(); t++)
+          for (int i = 0; i < p->rows(); i++)
+            for (int b = 0; b < p->cols(); b++) (*p)[t].d(i, b) = NAN;
+      },
+      "", true);
 }
 
 void clear_state_derivs(Network net) {
-  walk_states(net,
-              [&](const string &, Sequence *p) {
-                for (int t = 0; t < p->size(); t++)
-                  for (int i = 0; i < p->rows(); i++)
-                    for (int b = 0; b < p->cols(); b++) (*p)[t].d(i, b) = 0;
-              },
-              "", true);
-}
-
-bool set_states(Network net, const Float *data, int total, int gpu, bool io) {
-  int index = 0;
-  walk_states(net,
-              [&](const string &, Sequence *p) {
-                int magic = int(data[index++]);
-                if (magic != 999999) return;
-                int size = int(data[index++]);
-                int rows = int(data[index++]);
-                int cols = int(data[index++]);
-                if (index + size * rows * cols > total) return;
-                p->resize(size, rows, cols);
-                for (int t = 0; t < p->size(); t++)
-                  for (int i = 0; i < p->rows(); i++)
-                    for (int b = 0; b < p->cols(); b++)
-                      (*p)[t].v(i, b) = data[index++];
-              },
-              "", io);
-  return total == index;
+  walk_states(  //
+      net,
+      [&](const string &, Sequence *p) {
+        for (int t = 0; t < p->size(); t++)
+          for (int i = 0; i < p->rows(); i++)
+            for (int b = 0; b < p->cols(); b++) (*p)[t].d(i, b) = 0;
+      },
+      "", true);
 }
 
 int n_params(Network net) {
