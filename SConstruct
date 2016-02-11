@@ -41,6 +41,7 @@ prefix = option('prefix', "/usr/local")
 
 env = Environment()
 env.Append(CPPDEFINES={'THROW': 'throw', 'CATCH': 'catch', 'TRY': 'try'})
+env.Append(CPPDEFINES={'CLSTM_ALL_TENSOR': '1'})
 env["BUILDERS"]["Protoc"] = protoc_builder
 
 options = option("options", "")

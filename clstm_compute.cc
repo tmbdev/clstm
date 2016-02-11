@@ -279,6 +279,7 @@ NOINLINE void forward_lin1(Device *dev, Batch &y, Params &W1, Batch &x) {
   assert(y.cols() == x.cols());
   assert(x.rows() == m - 1);
 #ifdef CLSTM_ALL_TENSOR
+  int bs = y.cols();
   Indexes2 offsets{0, 1};
   Indexes2 sizes{n, m - 1};
   Axes1 axes01{IndexPair(1, 0)};
@@ -326,6 +327,7 @@ NOINLINE void forward_softmax(Device *dev, Batch &z, Params &W1, Batch &x) {
   assert(n == z.v.dimension(0));
   assert(n >= 2);
 #ifdef CLSTM_ALL_TENSOR
+  int bs = x.cols();
   z.v().device(*dev) = W1.v.map1().contract(x.v(), axispairs(1, 0));
   z.v().device(*dev) +=
       W1.v.off1().reshape(indexes(n, 1)).broadcast(indexes(1, bs));

@@ -137,6 +137,11 @@ class INetwork {
   virtual void backward() = 0;
   virtual void initialize() {}
 
+  // Clearing
+  void clearStates();
+  void clearStateDerivs();
+  void clearWeightDerivs();
+
   // Data for encoding/decoding input/output strings.
   Codec codec, icodec;
 

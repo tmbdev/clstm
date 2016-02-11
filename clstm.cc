@@ -179,6 +179,25 @@ Float INetwork::effective_lr() {
   return lr;
 }
 
+void INetwork::clearStates() {
+  inputs.zero();
+  outputs.zero();
+  for (auto &it : states)
+    it.second->zero();
+}
+void INetwork::clearStateDerivs() {
+  // Clears the internal states (if any) and inputs.
+  // Does not clear outputs (which is assumed to have
+  // been set to the backwards gradient).
+  inputs.zeroGrad();
+  for (auto &it : states)
+    it.second->zeroGrad();
+}
+void INetwork::clearWeightDerivs() {
+  for (auto &it : parameters)
+    it.second->zeroGrad();
+}
+
 void sgd_update(Network net) {
   Float lr = net->effective_lr();
   Float momentum = net->attr.get("momentum", 0.9);
@@ -601,19 +620,33 @@ struct GenericNPLSTM : INetwork {
     }
   }
   void backward() {
+    clearStateDerivs();
     int N = inputs.size();
     // int bs = outputs.cols();
     Sequence out;
     out.setGpu(gpu);
     out = outputs;
     for (int t = N - 1; t >= 0; t--) {
+      assert(!anynan(source[t]));
       backward_nonlingate(out[t], state[t], go[t], H);
+      assert(!anynan(source[t]));
       backward_statemem(state[t], ci[t], gi[t], state, t - 1, gf[t]);
+      assert(!anynan(source[t]));
       backward_full1(ci[t], WCI, source[t], G);
+      assert(!anynan(source[t]));
       backward_full1(go[t], WGO, source[t], F);
+      assert(!anynan(source[t]));
       backward_full1(gf[t], WGF, source[t], F);
+      assert(!anynan(source[t]));
       backward_full1(gi[t], WGI, source[t], F);
+      assert(!anynan(out));
+      assert(!anynan(source[t]));
       backward_stack_delay(source[t], inputs[t], out, t - 1);
+      assert(!anynan(source[t]));
+      if(anynan(inputs[t])) {
+        print("oops", t);
+        assert(!anynan(inputs[t]));
+      }
     }
     nsteps += N;
     nseq += 1;
