@@ -85,7 +85,7 @@ if option("eigen", "") == "":
         /usr/local/include/eigen3
         /usr/include/eigen3""".split())
 else:
-    inc = findonpath("Eigen/Eigen", [option("eigen")])
+    inc = findonpath("Eigen/Eigen", [option("eigen", "")])
 
 env.Append(CPPPATH=[inc])
 env.Append(LIBS=["png", "protobuf"])
