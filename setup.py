@@ -1,51 +1,36 @@
-#!/usr/bin/env python
+import os
 
-import os, os.path
 from distutils.core import setup, Extension
-from numpy.distutils.misc_util import get_numpy_include_dirs
-from os.path import getctime
+from Cython.Build import cythonize
 
-import distutils.sysconfig
-config = distutils.sysconfig.get_config_vars()
-# OPT=-DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes
-# CFLAGS
-for k,v in config.items():
-  if type(v)==str and "-W" in v:
-    print k,v
-def remove_warnings(opt):
-  opt = opt.split()
-  opt = [s for s in opt if not s.startswith("-W")]
-  return " ".join(opt)
-config["OPT"] = remove_warnings(config["OPT"])
-config["CFLAGS"] = remove_warnings(config["CFLAGS"])
-config["CONFIGURE_CFLAGS"] = remove_warnings(config["CONFIGURE_CFLAGS"])
-config["LDSHARED"] = remove_warnings(config["LDSHARED"])
 
-# hgversion = os.popen("hg -q id").read().strip()
-hgversion = "unknown"
+def ensure_protobuf():
+    exists = os.path.exists("clstm.pb.cc")
+    stale = os.path.getctime("clstm.pb.cc") < os.path.getctime("clstm.proto")
+    if not exists or stale:
+        print "Generating proto file"
+        os.system("protoc clstm.proto --cpp_out=.")
 
-include_dirs = ['/usr/include/eigen3', '/usr/local/include/eigen3', '/usr/local/include', '/usr/include/hdf5/serial'] + get_numpy_include_dirs()
-swig_opts = ["-c++"] + ["-I" + d for d in include_dirs]
-swiglib = os.popen("swig -swiglib").read()[:-1]
+ext = Extension(
+    "pyclstm",
+    sources=['pyclstm.pyx', 'clstm.cc', 'clstm_prefab.cc', 'extras.cc',
+             'batches.cc', 'ctc.cc', 'clstm_proto.cc', 'clstm.pb.cc',
+             'clstm_compute.cc', 'tensor.cc'],
+    include_dirs=['/usr/include/eigen3', '/usr/local/include/eigen3',
+                  '/usr/local/include', '/usr/include/hdf5/serial',
+                  '/usr/include/hdf5'],
+    libraries=['protobuf', 'png'],
+    language='c++',
+    extra_compile_args=['-std=c++11', '-Wno-unused-result', '-g', '-Ofast',
+                        '-DNODISPLAY=1', '-DTHROW=throw', '-DNDEBUG',
+                        '-DEIGEN_NO_DEBUG', '-finline', '-ffast-math',
+                        '-fno-signaling-nans', '-funsafe-math-optimizations',
+                        '-ffinite-math-only', '-march=native'])
 
-if not os.path.exists("clstm.pb.cc") or \
-    getctime("clstm.pb.cc") < getctime("clstm.proto"):
-  print "making proto file"
-  os.system("protoc clstm.proto --cpp_out=.")
-
-clstm = Extension('_clstm',
-        libraries = ['png','protobuf'],
-        swig_opts = swig_opts,
-        include_dirs = include_dirs,
-        extra_compile_args = ['-std=c++11','-Wno-sign-compare',
-            '-Dadd_raw=add','-DNODISPLAY=1','-DTHROW=throw',
-            '-DHGVERSION="\\"'+hgversion+'\\""'],
-        sources=['clstm.i','clstm.cc','clstm_prefab.cc','extras.cc',
-                 'ctc.cc','clstm_proto.cc','clstm.pb.cc'])
-
-setup (name = 'clstm',
-       version = '0.0',
-       author      = "Thomas Breuel",
-       description = """clstm library bindings""",
-       ext_modules = [clstm],
-       py_modules = ["clstm"])
+ensure_protobuf()
+setup(
+    name='clstm',
+    version='0.1',
+    author="Thomas Breuel, Johannes Baiter",
+    description="CLSTM Python bindings",
+    ext_modules=cythonize([ext]))
