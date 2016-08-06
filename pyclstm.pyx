@@ -27,16 +27,24 @@ cpdef double levenshtein(unicode a, unicode b):
 
 
 cdef load_img(img, _clstm.Tensor2 *data):
+    """ Copy image data from a PIL image to an Eigen tensor.
+
+    :param img:     Image
+    :type img:      :py:class:`PIL.Image.Image`
+    """
     data.resize(img.width, img.height)
-    for i in range(img.height):
-        for j in range(img.width):
-            px = img.getpixel((j, i))
+    imgdata = img.load()
+    for i in range(img.width):
+        for j in range(img.height):
+            px = imgdata[i, j]
+            # Pillow returns pixels as [0, 255], but we need [0, 1]
             if isinstance(px, tuple):
+                # For color images, we use the mean across all channels
                 px = (sum(px)/len(px))/255.
             else:
                 px = px/255.
             px = -px + 1.
-            data[0].put(px, j, i)
+            data[0].put(px, i, j)
 
 
 cdef class ClstmOcr:
@@ -71,7 +79,7 @@ cdef class ClstmOcr:
         self._ocr.setLearningRate(learning_rate, momentum)
 
     def aligned(self):
-        return self._ocr.aligned_utf8()
+        return self._ocr.aligned_utf8().decode('utf8')
 
     def train(self, img, unicode text):
         cdef _clstm.Tensor2 data
