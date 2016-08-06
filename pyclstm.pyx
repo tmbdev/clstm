@@ -3,6 +3,7 @@ from libc.stddef cimport wchar_t
 from libc.stdlib cimport malloc, free
 from libcpp.vector cimport vector
 from libcpp.set cimport set
+from libcpp.string cimport string
 
 cimport _clstm
 
@@ -18,6 +19,11 @@ cdef extern from "Python.h":
     Py_ssize_t PyUnicode_AsWideChar(PyUnicodeObject *o, wchar_t *w,
                                     Py_ssize_t size)
     PyObject* PyUnicode_FromWideChar(wchar_t *w, Py_ssize_t size)
+
+
+cpdef double levenshtein(unicode a, unicode b):
+    return _clstm.levenshtein[string, string](
+        a.encode('utf8'), b.encode('utf8'))
 
 
 cdef load_img(img, _clstm.Tensor2 *data):

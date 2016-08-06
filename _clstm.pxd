@@ -22,6 +22,10 @@ cdef extern from "pstring.h":
     wstring utf8_to_utf32(string s)
 
 
+cdef extern from "clstm.h":
+    cdef double levenshtein[A, B](A a, B b)
+
+
 cdef extern from "clstm.h" namespace "ocropus":
     cdef cppclass Assoc:
         Assoc()
