@@ -11,6 +11,7 @@ def ensure_protobuf():
         print "Generating proto file"
         os.system("protoc clstm.proto --cpp_out=.")
 
+
 ext = Extension(
     "pyclstm",
     sources=['pyclstm.pyx', 'clstm.cc', 'clstm_prefab.cc', 'extras.cc',
