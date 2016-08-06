@@ -6,23 +6,31 @@ from libcpp.set cimport set
 
 cimport _clstm
 
+from collections import namedtuple
+
+
+CharPrediction = namedtuple("CharPrediction",
+                            ("x_position", "char", "confidence"))
+
+
 cdef extern from "Python.h":
     ctypedef PyObject PyUnicodeObject
     Py_ssize_t PyUnicode_AsWideChar(PyUnicodeObject *o, wchar_t *w,
                                     Py_ssize_t size)
+    PyObject* PyUnicode_FromWideChar(wchar_t *w, Py_ssize_t size)
 
 
-#cdef make_codec(texts):
-#    cdef set[int] codes
-#    cdef _clstm.wstring s
-#    for t in texts:
-#        s = _clstm.utf8_to_utf32(t.encode('utf8'))
-#        for c in s:
-##            codes.insert(<int>c)
-#    cdef vector[int] codec
-#    for c in codes:
-#        codec.push_back(c)
-#    return codes
+cdef load_img(img, _clstm.Tensor2 *data):
+    data.resize(img.width, img.height)
+    for i in range(img.height):
+        for j in range(img.width):
+            px = img.getpixel((j, i))
+            if isinstance(px, tuple):
+                px = (sum(px)/len(px))/255.
+            else:
+                px = px/255.
+            px = -px + 1.
+            data[0].put(px, j, i)
 
 
 cdef class ClstmOcr:
@@ -56,17 +64,33 @@ cdef class ClstmOcr:
     cpdef set_learning_rate(self, float learning_rate, float momentum):
         self._ocr.setLearningRate(learning_rate, momentum)
 
-    cpdef unicode train(self, img, unicode text):
+    def aligned(self):
+        return self._ocr.aligned_utf8()
+
+    def train(self, img, unicode text):
         cdef _clstm.Tensor2 data
-        data.resize(img.height, img.width)
-        for i in range(img.height):
-            for j in range(img.width):
-                px = img.getpixel((j, i))
-                if isinstance(px, tuple):
-                    px = sum(px)/len(px)
-                data.put(px, i, j)
+        load_img(img, &data)
         return self._ocr.train_utf8(
             data.map(), text.encode('utf8')).decode('utf8')
+
+    def recognize(self, img):
+        cdef _clstm.Tensor2 data
+        load_img(img, &data)
+        return self._ocr.predict_utf8(data.map()).decode('utf8')
+
+    def recognize_chars(self, img):
+        cdef _clstm.Tensor2 data
+        cdef vector[_clstm.CharPrediction] preds
+        cdef vector[_clstm.CharPrediction].iterator pred_it
+        cdef wchar_t[2] cur_char
+        load_img(img, &data)
+        self._ocr.predict(preds, data.map())
+        for i in range(preds.size()):
+            cur_char[0] = preds[i].c
+            yield CharPrediction(
+                preds[i].x,
+                <unicode>PyUnicode_FromWideChar(cur_char, 1),
+                preds[i].p)
 
     def __dealloc__(self):
         del self._ocr
