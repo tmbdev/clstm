@@ -47,6 +47,21 @@ cdef load_img(img, _clstm.Tensor2 *data):
             data[0].put(px, i, j)
 
 
+cdef load_nparray(npdata, _clstm.Tensor2 *data):
+    """ Copy image data from a numpy array to an Eigen tensor.
+
+    This assumes that all pixels are floating point numbers in the range [0, 1]
+    where 0 is white and 1 is black.
+
+    Currently this copies all data, but it should be possible to make Eigen
+    use the numpy-allocated data.
+    """
+    data.resize(npdata.shape[0], npdata.shape[1])
+    for i in range(npdata.shape[0]):
+        for j in range(npdata.shape[1]):
+            data[0].put(npdata[i,j], i, j)
+
+
 cdef class ClstmOcr:
     cdef _clstm.CLSTMOCR *_ocr
 
@@ -85,13 +100,19 @@ cdef class ClstmOcr:
 
     def train(self, img, unicode text):
         cdef _clstm.Tensor2 data
-        load_img(img, &data)
+        if hasattr(img, 'width'):
+            load_img(img, &data)
+        elif hasattr(img, 'shape'):
+            load_nparray(img, &data)
         return self._ocr.train_utf8(
             data.map(), text.encode('utf8')).decode('utf8')
 
     def recognize(self, img):
         cdef _clstm.Tensor2 data
-        load_img(img, &data)
+        if hasattr(img, 'width'):
+            load_img(img, &data)
+        elif hasattr(img, 'shape'):
+            load_nparray(img, &data)
         return self._ocr.predict_utf8(data.map()).decode('utf8')
 
     def recognize_chars(self, img):
@@ -99,7 +120,10 @@ cdef class ClstmOcr:
         cdef vector[_clstm.CharPrediction] preds
         cdef vector[_clstm.CharPrediction].iterator pred_it
         cdef wchar_t[2] cur_char
-        load_img(img, &data)
+        if hasattr(img, 'width'):
+            load_img(img, &data)
+        elif hasattr(img, 'shape'):
+            load_nparray(img, &data)
         self._ocr.predict(preds, data.map())
         for i in range(preds.size()):
             cur_char[0] = preds[i].c
