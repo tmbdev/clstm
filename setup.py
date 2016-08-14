@@ -6,7 +6,8 @@ from Cython.Build import cythonize
 
 def ensure_protobuf():
     exists = os.path.exists("clstm.pb.cc")
-    stale = os.path.getctime("clstm.pb.cc") < os.path.getctime("clstm.proto")
+    stale = (exists and
+             os.path.getctime("clstm.pb.cc") < os.path.getctime("clstm.proto"))
     if not exists or stale:
         print "Generating proto file"
         os.system("protoc clstm.proto --cpp_out=.")
