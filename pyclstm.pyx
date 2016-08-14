@@ -52,6 +52,8 @@ cdef class ClstmOcr:
 
     def __cinit__(self, str fname=None):
         self._ocr = new _clstm.CLSTMOCR()
+        if fname:
+            self.load(fname)
 
     cpdef load(self, str fname):
         cdef bint rv = self._ocr.maybe_load(fname)
