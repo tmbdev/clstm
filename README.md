@@ -1,3 +1,9 @@
+------------------------
+| Project Announcements
+|:-----------------------
+| Please welcome @zuphilip and @kba as additional project maintainers. @tmb is busy developing new DNN models for document analysis (among other things). (10/15/2016)
+------------------------
+
 # clstm
 
 CLSTM is an implementation of the LSTM recurrent neural network
