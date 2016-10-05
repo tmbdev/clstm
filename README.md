@@ -1,7 +1,7 @@
 ------------------------
 | Project Announcements
 |:-----------------------
-| Please welcome @zuphilip and @kba as additional project maintainers. @tmb is busy developing new DNN models for document analysis (among other things). (10/15/2016)
+| Please welcome @zuphilip and @kba as additional project maintainers. (10/15/2016)
 ------------------------
 
 # clstm
@@ -9,13 +9,14 @@
 CLSTM is an implementation of the LSTM recurrent neural network
 model in C++, using the Eigen library for numerical computations.
 
-# TODO
+# Future Plans
 
-  - TensorFlow bindings
-  - more recurrent network types
-  - more 2D LSTM support
-  - multicore support
-  - better GPU support
+CLSTM is mainly in maintenance mode now. It was created at a time when there weren't a lot of good LSTM
+implementations around, but several good options have become available over the last year. Nevertheless, if
+you need a small library for text line recognition with few dependencies, CLSTM is still a good option.
+I'm planning on creating a new open source text recognition system from the ground up, combining advances
+in recurrent neural networks, attention, GPU computing, and using some of the libraries that have become
+available now.
 
 # Getting Started
 
