@@ -75,15 +75,15 @@ cdef class ClstmOcr:
     pre-trained model from disk.
 
     For training, set your parameters with :py:meth:`prepare_training`, and
-    then iteratively supply a line image (:py:class:`PIL.Image` or
-    :py:class:`numpy ndarray`) and the ground truth for the line to
+    then iteratively supply a line image (:py:class:`PIL.Image.Image` or
+    :py:class:`numpy.ndarray`) and the ground truth for the line to
     :py:meth:`train`. Once finished with training, call :py:meth:`save`
     to persist the trained model to disk.
 
     For prediction, two methods are available. The simplest,
     :py:meth:`recognize` takes a line image (see above) and returns the
     recognized text as a string. If more information about the recognized
-    text is needed, use :py:meth:`recognize-chars`, which returns a generator
+    text is needed, use :py:meth:`recognize_chars`, which returns a generator
     that yields :py:class:`CharPrediction` objects that contain information
     about each character (x-offset, confidence and recognized character).
     """
@@ -159,12 +159,12 @@ cdef class ClstmOcr:
         """ Train the model with a line image and its ground truth.
 
         :param img:     The line image for the ground truth
-        :type img:      :py:class:`PIL.Image`/:py:class:`numpy.ndarray`
+        :type img:      :py:class:`PIL.Image.Image`/:py:class:`numpy.ndarray`
         :param text:    The ground truth text for the line image
         :type text:     unicode
         :returns:       The recognized text for the line image, can be used
                         to estimate error against the ground truth
-                        (via :py:function:`levenshtein`)
+                        (via :py:func:`levenshtein`)
         :rtype:         unicode
         """
         cdef _clstm.Tensor2 data
@@ -179,7 +179,7 @@ cdef class ClstmOcr:
         """ Recognize the text on the line image.
 
         :param img:     The line image for the ground truth
-        :type img:      :py:class:`PIL.Image`/:py:class:`numpy.ndarray`
+        :type img:      :py:class:`PIL.Image.Image`/:py:class:`numpy.ndarray`
         :returns:       The recognized text for the line
         :rtype:         unicode
         """
@@ -195,7 +195,7 @@ cdef class ClstmOcr:
             and confidence.
 
         :param img:     The line image for the ground truth
-        :type img:      :py:class:`PIL.Image`/:py:class:`numpy.ndarray`
+        :type img:      :py:class:`PIL.Image.Image`/:py:class:`numpy.ndarray`
         :returns:       The recognized text for the line, represented as
                         information about its composing characters.
         :rtype:         generator that yield :py:class:`CharPrediction`
