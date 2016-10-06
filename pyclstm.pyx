@@ -22,6 +22,12 @@ cdef extern from "Python.h":
 
 
 cpdef double levenshtein(unicode a, unicode b):
+    """ Determine the Levenshtein-distance between to unicode strings.
+
+    :type a:    unicode
+    :type b:    unicode
+    :rtype:     int
+    """
     return _clstm.levenshtein[string, string](
         a.encode('utf8'), b.encode('utf8'))
 
@@ -63,25 +69,73 @@ cdef load_nparray(npdata, _clstm.Tensor2 *data):
 
 
 cdef class ClstmOcr:
+    """ An OCR engine based on CLSTM, operating on line images.
+
+    Use this class to either train your own OCR model or to load a
+    pre-trained model from disk.
+
+    For training, set your parameters with :py:meth:`prepare_training`, and
+    then iteratively supply a line image (:py:class:`PIL.Image` or
+    :py:class:`numpy ndarray`) and the ground truth for the line to
+    :py:meth:`train`. Once finished with training, call :py:meth:`save`
+    to persist the trained model to disk.
+
+    For prediction, two methods are available. The simplest,
+    :py:meth:`recognize` takes a line image (see above) and returns the
+    recognized text as a string. If more information about the recognized
+    text is needed, use :py:meth:`recognize-chars`, which returns a generator
+    that yields :py:class:`CharPrediction` objects that contain information
+    about each character (x-offset, confidence and recognized character).
+    """
     cdef _clstm.CLSTMOCR *_ocr
 
     def __cinit__(self, str fname=None):
+        """ Initialize the OCR engine, optionally loading a model from disk.
+
+        :param fname:   Path to pre-trained model on disk
+        :type fname:    str
+        """
         self._ocr = new _clstm.CLSTMOCR()
         if fname:
             self.load(fname)
 
     cpdef load(self, str fname):
+        """ Load a pre-trained model from disk.
+
+        :param fname:   Path to pre-trained model on disk
+        :type fname:    str
+        """
         cdef bint rv = self._ocr.maybe_load(fname)
         if not rv:
             raise IOError("Could not load model from {}".format(fname))
 
     cpdef save(self, str fname):
+        """ Save the model to disk.
+
+        :param fname:   Path to store model in
+        :type fname:    str
+        """
         cdef bint rv = self._ocr.maybe_save(fname)
         if not rv:
             raise IOError("Could not save model to {}".format(fname))
 
     cpdef prepare_training(self, lexicon, int num_hidden=100,
                            float learning_rate=0.0001, float momentum=0.9):
+        """ Prepare training by setting the lexicon and hyperparameters.
+
+        :param lexicon:     Iterable of characters that are to be recognized
+                            by the OCR model, must not have duplicates
+        :type lexicon:      iterable of str/unicode
+        :param num_hidden:  Number of hidden units in the LSTM layers, larger
+                            values require more storage/memory and take longer
+                            for training and recognition, so try to find
+                            a good performance/cost tradeoff.
+        :type num_hidden:   int
+        :param learning_rate:   Learning rate for the model training
+        :type learning_rate:    float
+        :param momentum:        Momentum for the model training
+        :type momentum:         float
+        """
         lexicon_str = u"".join(sorted(lexicon))
         cdef vector[int] codec
         cdef Py_ssize_t length = len(lexicon_str.encode("UTF-16")) // 2
@@ -95,9 +149,24 @@ cdef class ClstmOcr:
         self._ocr.setLearningRate(learning_rate, momentum)
 
     def aligned(self):
+        """ Get the aligned output of the last trained sample.
+
+        :rtype:     unicode
+        """
         return self._ocr.aligned_utf8().decode('utf8')
 
     def train(self, img, unicode text):
+        """ Train the model with a line image and its ground truth.
+
+        :param img:     The line image for the ground truth
+        :type img:      :py:class:`PIL.Image`/:py:class:`numpy.ndarray`
+        :param text:    The ground truth text for the line image
+        :type text:     unicode
+        :returns:       The recognized text for the line image, can be used
+                        to estimate error against the ground truth
+                        (via :py:function:`levenshtein`)
+        :rtype:         unicode
+        """
         cdef _clstm.Tensor2 data
         if hasattr(img, 'width'):
             load_img(img, &data)
@@ -107,6 +176,13 @@ cdef class ClstmOcr:
             data.map(), text.encode('utf8')).decode('utf8')
 
     def recognize(self, img):
+        """ Recognize the text on the line image.
+
+        :param img:     The line image for the ground truth
+        :type img:      :py:class:`PIL.Image`/:py:class:`numpy.ndarray`
+        :returns:       The recognized text for the line
+        :rtype:         unicode
+        """
         cdef _clstm.Tensor2 data
         if hasattr(img, 'width'):
             load_img(img, &data)
@@ -115,6 +191,15 @@ cdef class ClstmOcr:
         return self._ocr.predict_utf8(data.map()).decode('utf8')
 
     def recognize_chars(self, img):
+        """ Recognize the characters on the line, along with their position
+            and confidence.
+
+        :param img:     The line image for the ground truth
+        :type img:      :py:class:`PIL.Image`/:py:class:`numpy.ndarray`
+        :returns:       The recognized text for the line, represented as
+                        information about its composing characters.
+        :rtype:         generator that yield :py:class:`CharPrediction`
+        """
         cdef _clstm.Tensor2 data
         cdef vector[_clstm.CharPrediction] preds
         cdef vector[_clstm.CharPrediction].iterator pred_it
