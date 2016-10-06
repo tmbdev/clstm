@@ -35,4 +35,4 @@ setup(
     version='0.1',
     author="Thomas Breuel, Johannes Baiter",
     description="CLSTM Python bindings",
-    ext_modules=cythonize([ext]))
+    ext_modules=cythonize([ext], compiler_directives={'embedsignature': True}))
