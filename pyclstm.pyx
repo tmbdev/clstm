@@ -80,19 +80,18 @@ cdef class ClstmOcr:
         if not rv:
             raise IOError("Could not save model to {}".format(fname))
 
-    cpdef create_bidi(self, chars, int num_hidden):
-        chars_str = u"".join(sorted(chars))
+    cpdef prepare_training(self, lexicon, int num_hidden=100,
+                           float learning_rate=0.0001, float momentum=0.9):
+        lexicon_str = u"".join(sorted(lexicon))
         cdef vector[int] codec
-        cdef Py_ssize_t length = len(chars_str.encode("UTF-16")) // 2
+        cdef Py_ssize_t length = len(lexicon_str.encode("UTF-16")) // 2
         cdef wchar_t *wchars = <wchar_t *>malloc(length * sizeof(wchar_t))
         cdef Py_ssize_t number_written = PyUnicode_AsWideChar(
-            <PyUnicodeObject *>chars_str, wchars, length)
+            <PyUnicodeObject *>lexicon_str, wchars, length)
         codec.push_back(0)
         for i in range(length-1):
             codec.push_back(<int>(wchars[i]))
         self._ocr.createBidi(codec, num_hidden)
-
-    cpdef set_learning_rate(self, float learning_rate, float momentum):
         self._ocr.setLearningRate(learning_rate, momentum)
 
     def aligned(self):
