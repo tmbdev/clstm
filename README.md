@@ -68,10 +68,7 @@ After building the executables, you can run two simple test runs as follows:
 
 To build the Python extension, run
 
-    python setup.py build
-    sudo python setup.py install
-
-(this is currently broken)
+    pip install .
 
 # Documentation / Examples
 
@@ -165,9 +162,10 @@ storage format.
 
 # Python API
 
-The `clstm.i` file implements a simple Python interface to clstm, plus
-a wrapper that makes an INetwork mostly a replacement for the lstm.py
-implementation from ocropy.
+The source code includes a Python interface to clstm (via Cython). Currently
+it only exposes the `CLSTMOCR` class for OCR training and prediction.
+To install it, just make sure you have the above dependencies and Cython
+installed and run `pip install .`.
 
 # Comand Line Drivers
 
