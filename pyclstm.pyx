@@ -22,7 +22,7 @@ cdef extern from "Python.h":
 
 
 cpdef double levenshtein(unicode a, unicode b):
-    """ Determine the Levenshtein-distance between to unicode strings.
+    """ Determine the Levenshtein-distance between two unicode strings.
 
     :type a:    unicode
     :type b:    unicode
