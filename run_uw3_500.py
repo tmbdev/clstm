@@ -16,8 +16,8 @@ train_data = all_data[:400]
 test_data = all_data[400:]
 
 ocr = pyclstm.ClstmOcr()
-ocr.create_bidi(set(chain.from_iterable(all_texts)), 100)
-ocr.set_learning_rate(0.0001, 0.9)
+graphemes = set(chain.from_iterable(all_texts))
+ocr.prepare_training(graphemes)
 
 for i in range(2000000):
     best_error = 1.
