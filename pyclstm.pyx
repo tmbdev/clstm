@@ -136,7 +136,7 @@ cdef class ClstmOcr:
         :param momentum:        Momentum for the model training
         :type momentum:         float
         """
-        graphemes_str = u"".join(sorted(graphemes_str))
+        graphemes_str = u"".join(sorted(graphemes))
         cdef vector[int] codec
         cdef Py_ssize_t length = len(graphemes_str.encode("UTF-16")) // 2
         cdef wchar_t *wchars = <wchar_t *>malloc(length * sizeof(wchar_t))
