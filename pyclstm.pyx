@@ -119,13 +119,13 @@ cdef class ClstmOcr:
         if not rv:
             raise IOError("Could not save model to {}".format(fname))
 
-    cpdef prepare_training(self, lexicon, int num_hidden=100,
+    cpdef prepare_training(self, graphemes, int num_hidden=100,
                            float learning_rate=0.0001, float momentum=0.9):
-        """ Prepare training by setting the lexicon and hyperparameters.
+        """ Prepare training by setting the graphemes and hyperparameters.
 
-        :param lexicon:     Iterable of characters that are to be recognized
+        :param graphemes:   Iterable of graphemes that are to be recognized
                             by the OCR model, must not have duplicates
-        :type lexicon:      iterable of str/unicode
+        :type graphemes:    iterable of str/unicode
         :param num_hidden:  Number of hidden units in the LSTM layers, larger
                             values require more storage/memory and take longer
                             for training and recognition, so try to find
@@ -136,12 +136,12 @@ cdef class ClstmOcr:
         :param momentum:        Momentum for the model training
         :type momentum:         float
         """
-        lexicon_str = u"".join(sorted(lexicon))
+        graphemes_str = u"".join(sorted(graphemes_str))
         cdef vector[int] codec
-        cdef Py_ssize_t length = len(lexicon_str.encode("UTF-16")) // 2
+        cdef Py_ssize_t length = len(graphemes_str.encode("UTF-16")) // 2
         cdef wchar_t *wchars = <wchar_t *>malloc(length * sizeof(wchar_t))
         cdef Py_ssize_t number_written = PyUnicode_AsWideChar(
-            <PyUnicodeObject *>lexicon_str, wchars, length)
+            <PyUnicodeObject *>graphemes_str, wchars, length)
         codec.push_back(0)
         for i in range(length-1):
             codec.push_back(<int>(wchars[i]))
