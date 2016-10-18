@@ -2,15 +2,19 @@ from __future__ import division
 
 import glob
 import random
+import sys
 from itertools import chain
 
 import pyclstm
 from PIL import Image
 
 all_imgs = [Image.open(p) for p in sorted(glob.glob("./book/*/*.png"))]
-all_texts = [open(p).read().strip().decode('utf8')
+all_texts = [open(p).read().strip()
              for p in sorted(glob.glob("./book/*/*.gt.txt"))]
-all_data = zip(all_imgs, all_texts)
+if sys.version <= (3,):
+    all_texts = [t.decode('utf8') for t in all_texts]
+
+all_data = list(zip(all_imgs, all_texts))
 
 train_data = all_data[:400]
 test_data = all_data[400:]

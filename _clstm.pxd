@@ -1,3 +1,4 @@
+from cpython.ref cimport PyObject
 from libc.stddef cimport wchar_t
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -16,6 +17,11 @@ cdef extern from "<string>" namespace "std":
             iterator operator!=(iterator)
         iterator begin()
         iterator end()
+
+
+cdef extern from "pyextra_defs.h":
+    cdef Py_ssize_t Unicode_AsWideChar(PyObject* ustr, Py_ssize_t length,
+                                       wchar_t* wchars)
 
 
 cdef extern from "pstring.h":

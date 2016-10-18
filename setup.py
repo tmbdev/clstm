@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 
 from distutils.core import setup, Extension
@@ -9,7 +11,7 @@ def ensure_protobuf():
     stale = (exists and
              os.path.getctime("clstm.pb.cc") < os.path.getctime("clstm.proto"))
     if not exists or stale:
-        print "Generating proto file"
+        print("Generating proto file")
         os.system("protoc clstm.proto --cpp_out=.")
 
 

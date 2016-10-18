@@ -140,8 +140,8 @@ cdef class ClstmOcr:
         cdef vector[int] codec
         cdef Py_ssize_t length = len(graphemes_str.encode("UTF-16")) // 2
         cdef wchar_t *wchars = <wchar_t *>malloc(length * sizeof(wchar_t))
-        cdef Py_ssize_t number_written = PyUnicode_AsWideChar(
-            <PyUnicodeObject *>graphemes_str, wchars, length)
+        cdef Py_ssize_t number_written = _clstm.Unicode_AsWideChar(
+            <PyObject*>graphemes_str, length, wchars)
         codec.push_back(0)
         for i in range(length-1):
             codec.push_back(<int>(wchars[i]))
