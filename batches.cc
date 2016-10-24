@@ -76,7 +76,7 @@ bool anynan(TensorMap2 a) {
   for (int j = 0; j < a.dimension(0); j++) {
     for (int k = 0; k < a.dimension(1); k++) {
       float x = a(j, k);
-      if (isnan(x)) return true;
+      if (std::isnan(x)) return true;
     }
   }
   return false;
