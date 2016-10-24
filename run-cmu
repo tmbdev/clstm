@@ -1,4 +1,4 @@
-#!/bin/sh -ax
+#!/bin/bash -ax
 ntrain=3000000
 hidden=50
 test_every=50000
