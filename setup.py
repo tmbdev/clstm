@@ -25,7 +25,7 @@ ext = Extension(
                   '/usr/include/hdf5/serial', '/usr/include/hdf5'],
     libraries=['protobuf', 'png'],
     language='c++',
-    extra_compile_args=['-w', '-std=c++11', '-Wno-unused-result', '-g',
+    extra_compile_args=['-w', '--std=c++11', '-Wno-unused-result', '-g',
                         '-DNODISPLAY=1', '-DTHROW=throw', '-DNDEBUG', '-Ofast',
                         '-DEIGEN_NO_DEBUG', '-finline', '-ffast-math',
                         '-fno-signaling-nans', '-funsafe-math-optimizations',
