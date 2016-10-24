@@ -164,8 +164,8 @@ int main1(int argc, char **argv) {
 
     if (test_trigger(trial)) {
       auto tse = test_set_error(clstm, testset);
-      double errors = tse.first;
-      double count = tse.second;
+      double count = tse.first;
+      double errors = tse.second;
       test_error = errors / count;
       print("ERROR", trial, test_error, "   ", errors, count);
       if (test_error < best_error) {
