@@ -18,6 +18,45 @@ I'm planning on creating a new open source text recognition system from the grou
 in recurrent neural networks, attention, GPU computing, and using some of the libraries that have become
 available now.
 
+# Prerequisites
+
+ - scons, Eigen
+ - protocol buffer library and compiler
+ - Optional: HDF5, ZMQ, Python
+
+```sh
+# Ubuntu 15.04 / Debian 8
+sudo apt-get install scons libprotobuf-dev libprotobuf9 protobuf-compiler
+
+# Ubuntu 14.04:
+sudo apt-get install scons libprotobuf-dev libprotobuf8 protobuf-compiler
+```
+
+Download [Eigen](http://eigen.tuxfamily.org) with Tensor support (> v3.3-beta1)
+and copy the header files to an `include` path:
+
+```sh
+curl 'http://bitbucket.org/eigen/eigen/get/3.3-rc1.tar.gz' | tar xf
+sudo mv 'eigen-eigen-bef509908b9d' /usr/local/include/eigen3
+```
+
+To use the [visual debugging methods](#user-content-display), additionally:
+
+```sh
+# Ubuntu 15.04:
+sudo apt-get install libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3 libpng12-dev
+```
+
+For [HDF5](#user-content-hdf5), additionally:
+
+```sh
+# Ubuntu 15.04:
+sudo apt-get install hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py
+
+# Ubuntu 14.04:
+sudo apt-get install hdf5-helpers libhdf5-7 libhdf5-dev python-h5py
+```
+
 # Getting Started
 
 There is a full set of tests in the current version of clstm; just
@@ -37,28 +76,13 @@ To build a standalone C library, run
     scons
     sudo scons install
 
-Prerequisites:
-
- - scons, Eigen
- - protocol buffer library and compiler
-
-Optional: HDF5, ZMQ, Python
-
-On Ubuntu 15.04, this means:
-
-    sudo apt-get install mercurial\
-    hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py \
-    libprotobuf-dev libprotobuf9 protobuf-compiler \
-    libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3 libpng12-dev
-    cd /usr/local/include && hg clone http://bitbucket.org/eigen/eigen eigen3 && hg up tensorflow_fix && cd -
-
 There are a bunch of options:
 
  - `debug=1` build with debugging options, no optimization
- - `display=1` build with display support for debugging (requires ZMQ, Python)
+ - <a id="display">`display=1`</a> build with display support for debugging (requires ZMQ, Python)
  - `prefix=...` install under a different prefix (untested)
  - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
- - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line 
+ - <a id="hdf5">`hdf5lib=hdf5`</a> what HDF5 library to use; enables HDF5 command line 
    programs (may need `hdf5_serial` in some environments)
 
 After building the executables, you can run two simple test runs as follows:
