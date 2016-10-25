@@ -1,6 +1,7 @@
 from __future__ import division
 
 import glob
+import os
 import random
 import sys
 from itertools import chain
@@ -8,10 +9,15 @@ from itertools import chain
 import pyclstm
 from PIL import Image
 
+if not os.path.isdir('./book'):
+    print("Please download the sample data:\n\t"
+          "curl -L http://tmbdev.net/ocrdata/uw3-500.tgz|tar xf")
+    sys.exit(1)
+
 all_imgs = [Image.open(p) for p in sorted(glob.glob("./book/*/*.png"))]
 all_texts = [open(p).read().strip()
              for p in sorted(glob.glob("./book/*/*.gt.txt"))]
-if sys.version <= (3,):
+if sys.version_info <= (3,):
     all_texts = [t.decode('utf8') for t in all_texts]
 
 all_data = list(zip(all_imgs, all_texts))
