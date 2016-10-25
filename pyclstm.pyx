@@ -1,5 +1,3 @@
-import sys
-
 from cpython.version cimport PY_MAJOR_VERSION
 from cpython.ref cimport PyObject
 from libc.stddef cimport wchar_t
