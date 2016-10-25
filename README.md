@@ -36,8 +36,8 @@ Download [Eigen](http://eigen.tuxfamily.org) with Tensor support (> v3.3-beta1)
 and copy the header files to an `include` path:
 
 ```sh
-curl 'http://bitbucket.org/eigen/eigen/get/3.3-rc1.tar.gz' | tar xf
-sudo mv 'eigen-eigen-bef509908b9d' /usr/local/include/eigen3
+sudo git clone --depth 1 --single-branch --branch 3.3-rc1 \
+  "https://github.com/RLovelett/eigen" /usr/local/include/eigen3
 ```
 
 To use the [visual debugging methods](#user-content-display), additionally:
