@@ -1,3 +1,6 @@
+import sys
+
+from cpython.version cimport PY_MAJOR_VERSION
 from cpython.ref cimport PyObject
 from libc.stddef cimport wchar_t
 from libc.stdlib cimport malloc, free
@@ -30,6 +33,16 @@ cpdef double levenshtein(unicode a, unicode b):
     """
     return _clstm.levenshtein[string, string](
         a.encode('utf8'), b.encode('utf8'))
+
+
+cdef safe_str(in_str):
+    cdef bint needs_encode = (
+        (PY_MAJOR_VERSION < 3 and not isinstance(in_str, str)) or
+        not isinstance(in_str, bytes))
+    if needs_encode:
+        return in_str.encode('utf8')
+    else:
+        return in_str
 
 
 cdef load_img(img, _clstm.Tensor2 *data):
@@ -89,32 +102,35 @@ cdef class ClstmOcr:
     """
     cdef _clstm.CLSTMOCR *_ocr
 
-    def __cinit__(self, str fname=None):
+    def __cinit__(self, fname=None):
         """ Initialize the OCR engine, optionally loading a model from disk.
 
         :param fname:   Path to pre-trained model on disk
-        :type fname:    str
+        :type fname:    str/unicode/bytes
         """
         self._ocr = new _clstm.CLSTMOCR()
         if fname:
+            fname = safe_str(fname)
             self.load(fname)
 
-    cpdef load(self, str fname):
+    cpdef load(self, fname):
         """ Load a pre-trained model from disk.
 
         :param fname:   Path to pre-trained model on disk
-        :type fname:    str
+        :type fname:    str/unicode/bytes
         """
+        fname = safe_str(fname)
         cdef bint rv = self._ocr.maybe_load(fname)
         if not rv:
             raise IOError("Could not load model from {}".format(fname))
 
-    cpdef save(self, str fname):
+    cpdef save(self, fname):
         """ Save the model to disk.
 
         :param fname:   Path to store model in
-        :type fname:    str
+        :type fname:    str/unicode/bytes
         """
+        fname = safe_str(fname)
         cdef bint rv = self._ocr.maybe_save(fname)
         if not rv:
             raise IOError("Could not save model to {}".format(fname))
@@ -161,7 +177,7 @@ cdef class ClstmOcr:
         :param img:     The line image for the ground truth
         :type img:      :py:class:`PIL.Image.Image`/:py:class:`numpy.ndarray`
         :param text:    The ground truth text for the line image
-        :type text:     unicode
+        :type text:     unicode/str
         :returns:       The recognized text for the line image, can be used
                         to estimate error against the ground truth
                         (via :py:func:`levenshtein`)
