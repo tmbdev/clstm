@@ -164,8 +164,8 @@ storage format.
 
 The source code includes a Python interface to clstm (via Cython). Currently
 it only exposes the `CLSTMOCR` class for OCR training and prediction.
-To install it, just make sure you have the above dependencies and Cython
-installed and run `pip install .`.
+To install it, just make sure you have the above dependencies and
+Cython (>=0.23) installed and run `pip install .`.
 
 # Comand Line Drivers
 

@@ -12,7 +12,7 @@ Installation
 **Requirements:**
     - A recent version of Eigen (>= 3.3) with development headers
     - A C++ compiler (g++ is recommended)
-    - Cython
+    - Cython (>= 0.23)
 
 **Installation:**
 
