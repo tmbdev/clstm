@@ -13,3 +13,11 @@ build/
 *.os
 *.a
 *.so
+.scons*
+clstm.pb.cc
+clstm.pb.h
+clstmtrain
+clstmfilter
+clstmfiltertrain
+clstmocr
+clstmocrtrain
