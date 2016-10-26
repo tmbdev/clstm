@@ -49,10 +49,14 @@ cdef load_img(img, _clstm.Tensor2 *data):
     :param img:     Image
     :type img:      :py:class:`PIL.Image.Image`
     """
-    data.resize(img.width, img.height)
+    if hasattr(img, 'width'):
+        width, height = img.width, img.height
+    elif hasattr(img, 'size'):
+        width, height = img.size
+    data.resize(width, height)
     imgdata = img.load()
-    for i in range(img.width):
-        for j in range(img.height):
+    for i in range(width):
+        for j in range(height):
             px = imgdata[i, j]
             # Pillow returns pixels as [0, 255], but we need [0, 1]
             if isinstance(px, tuple):
@@ -182,10 +186,10 @@ cdef class ClstmOcr:
         :rtype:         unicode
         """
         cdef _clstm.Tensor2 data
-        if hasattr(img, 'width'):
-            load_img(img, &data)
-        elif hasattr(img, 'shape'):
+        if hasattr(img, 'shape'):
             load_nparray(img, &data)
+        else:
+            load_img(img, &data)
         return self._ocr.train_utf8(
             data.map(), text.encode('utf8')).decode('utf8')
 
@@ -198,10 +202,10 @@ cdef class ClstmOcr:
         :rtype:         unicode
         """
         cdef _clstm.Tensor2 data
-        if hasattr(img, 'width'):
-            load_img(img, &data)
-        elif hasattr(img, 'shape'):
+        if hasattr(img, 'shape'):
             load_nparray(img, &data)
+        else:
+            load_img(img, &data)
         return self._ocr.predict_utf8(data.map()).decode('utf8')
 
     def recognize_chars(self, img):
@@ -218,10 +222,10 @@ cdef class ClstmOcr:
         cdef vector[_clstm.CharPrediction] preds
         cdef vector[_clstm.CharPrediction].iterator pred_it
         cdef wchar_t[2] cur_char
-        if hasattr(img, 'width'):
-            load_img(img, &data)
-        elif hasattr(img, 'shape'):
+        if hasattr(img, 'shape'):
             load_nparray(img, &data)
+        else:
+            load_img(img, &data)
         self._ocr.predict(preds, data.map())
         for i in range(preds.size()):
             cur_char[0] = preds[i].c
