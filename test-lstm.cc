@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <math.h>
+#include <unistd.h>
 #include <iostream>
 #include <memory>
 #include <string>

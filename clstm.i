@@ -73,8 +73,7 @@ struct Classes {
 }
 
 struct Batch {
-  void resize(int,int);
-  void setZero(int,int);
+  void clear();
   int rows();
   int cols();
   float &v(int,int);
@@ -163,14 +162,12 @@ void mktargets(Sequence &seq, Classes &targets, int ndim);
 void save_net(const string &file, Network net);
 Network load_net(const string &file);
 
-%rename(network_info) network_info_as_strings;
-
 %inline %{
 int string_edit_distance(string a, string b) {
     return levenshtein(a, b);
 }
 
-string network_info_as_string(Network net) {
+string network_info(Network net) {
     string result = "";
     walk_networks(net, [&result] (string s, INetwork *net) {
         double lr = net->attr.get("learning_rate","-1");
