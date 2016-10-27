@@ -35,6 +35,12 @@ ensure_protobuf()
 setup(
     name='clstm',
     version='0.1',
+    packages = ['pyclstm_cli'],
     author="Thomas Breuel, Johannes Baiter",
     description="CLSTM Python bindings",
+    entry_points = {
+        'console_scripts':[
+            'pyclstm-train=pyclstm_cli.train:main'
+        ]
+    },
     ext_modules=cythonize([ext], compiler_directives={'embedsignature': True}))
