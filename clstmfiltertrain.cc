@@ -88,7 +88,7 @@ int main1(int argc, char **argv) {
     clstm.createBidi(icodec, codec, nhidden);
     clstm.setLearningRate(lrate, momentum);
   }
-  network_info(clstm.net);
+  network_info(clstm.net, "");
 
   int ntrain = getienv("ntrain", 10000000);
   int save_every = getienv("save_every", 10000);

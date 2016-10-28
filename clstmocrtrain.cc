@@ -115,7 +115,7 @@ int main1(int argc, char **argv) {
     clstm.createBidi(codec.codec, getienv("nhidden", 100));
     clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
   }
-  network_info(clstm.net);
+  network_info(clstm.net, "");
 
   double test_error = 9999.0;
   double best_error = 1e38;
