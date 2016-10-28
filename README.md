@@ -1,15 +1,17 @@
-------------------------
+# clstm
+
+[![CircleCI](https://circleci.com/gh/tmbdev/clstm/tree/master.svg?style=svg)](https://circleci.com/gh/tmbdev/clstm/tree/master)
+
+CLSTM is an implementation of the
+[LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory) recurrent neural
+network model in C++, using the [Eigen](http://eigen.tuxfamily.org) library for
+numerical computations.
+
+# Future Plans
+
 | Project Announcements
 |:-----------------------
 | Please welcome @zuphilip and @kba as additional project maintainers. (10/15/2016)
-------------------------
-
-# clstm
-
-CLSTM is an implementation of the LSTM recurrent neural network
-model in C++, using the Eigen library for numerical computations.
-
-# Future Plans
 
 CLSTM is mainly in maintenance mode now. It was created at a time when there weren't a lot of good LSTM
 implementations around, but several good options have become available over the last year. Nevertheless, if
