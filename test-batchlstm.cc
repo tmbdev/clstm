@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unistd.h>     // unlink
 #include <vector>
 #include "clstm.h"
 #include "extras.h"
