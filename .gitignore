@@ -1,4 +1,4 @@
-OLD
+DONE
 JUNK
 .hg
 book/
@@ -13,3 +13,15 @@ build/
 *.os
 *.a
 *.so
+.scons*
+clstm.pb.cc
+clstm.pb.h
+clstmtrain
+clstmfilter
+clstmfiltertrain
+clstmocr
+clstmocrtrain
+test-lstm
+test-lstm2
+clstm.py
+clstm_wrap.cc
