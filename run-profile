@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -x
 export hidden=50
 export lrate=1e-2
