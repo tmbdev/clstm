@@ -143,7 +143,6 @@ all += [env.Program("test-batchlstm", ["test-batchlstm.cc"], LIBS=[libclstm] + l
 all += [env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)]
-all += [env.Program("test-timing", ["test-timing.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-gpu", ["test-gpu.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-2d", ["test-2d.cc"], LIBS=[libclstm] + libs)]
 
