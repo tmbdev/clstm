@@ -1,4 +1,4 @@
-OLD
+DONE
 JUNK
 .hg
 book/
@@ -21,3 +21,7 @@ clstmfilter
 clstmfiltertrain
 clstmocr
 clstmocrtrain
+test-lstm
+test-lstm2
+clstm.py
+clstm_wrap.cc
