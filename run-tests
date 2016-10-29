@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 debug=${debug:-0}
 options=${options:-}
@@ -7,17 +7,17 @@ export PS4='
 trap "echo TEST FAILED" EXIT
 set -x
 export seed=0.222
-scons -s -c; rm -f *.o *.a
-scons -j 4 gpu=0 debug=$debug options="$options" clstmocrtrain clstmfiltertrain clstmfilter clstmocr test-lstm
+scons -s -c; rm -f ./*.o ./*.a
+scons -j 4 gpu=0 debug="$debug" options="$options" clstmocrtrain clstmfiltertrain clstmfilter clstmocr test-lstm
 time ./test-lstm
 time ./test-filter.sh
 time ./test-ocr.sh
-scons -s -c; rm -f *.o *.a
-scons -j 4 gpu=0 double=1 debug=$debug options="$options" test-cderiv test-deriv test-ctc
+scons -s -c; rm -f ./*.o ./*.a
+scons -j 4 gpu=0 double=1 debug="$debug" options="$options" test-cderiv test-deriv test-ctc
 ./test-cderiv
 ./test-deriv
 ./test-ctc
-rm -f *.pb.h *.pb.cc
+rm -f ./*.pb.h ./*.pb.cc
 scons -c all
 #scons -s -c pyswig
 #scons pyswig

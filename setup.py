@@ -40,8 +40,8 @@ clstm = Extension('_clstm',
         extra_compile_args = ['-std=c++11','-Wno-sign-compare',
             '-Dadd_raw=add','-DNODISPLAY=1','-DTHROW=throw',
             '-DHGVERSION="\\"'+hgversion+'\\""'],
-        sources=['clstm.i','clstm.cc','clstm_prefab.cc','extras.cc',
-                 'ctc.cc','clstm_proto.cc','clstm.pb.cc'])
+        sources=['clstm.i','clstm.cc','clstm_prefab.cc','extras.cc', 'batches.cc',
+                 'clstm_compute.cc', 'ctc.cc','clstm_proto.cc','clstm.pb.cc'])
 
 setup (name = 'clstm',
        version = '0.0',

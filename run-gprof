@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 scons -c
 scons profile=1 options="${options:-}" -j 4 clstmocrtrain
