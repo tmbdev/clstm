@@ -53,7 +53,7 @@ int print_usage(char **argv) {
 }
 
 int main1(int argc, char **argv) {
-  if (argc != 2 || (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")))
+  if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
       return print_usage(argv);
   const char *fname = argv[1];
 
