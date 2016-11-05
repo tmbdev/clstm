@@ -42,8 +42,8 @@ and copy the header files to an `include` path:
 # with wget
 wget 'https://github.com/RLovelett/eigen/archive/3.3-rc1.tar.gz'
 tar xf 3.3-rc1.tar.gz
-mv eigen-3.3-rc1 eigen3
-mv eigen3 /usr/local/include
+rm -f /usr/local/include/eigen3
+mv eigen-3.3-rc1 /usr/local/include/eigen3
 # or with git:
 sudo git clone --depth 1 --single-branch --branch 3.3-rc1 \
   "https://github.com/RLovelett/eigen" /usr/local/include/eigen3
@@ -82,6 +82,11 @@ There are a bunch of options:
  - <a id="hdf5">`hdf5lib=hdf5`</a> what HDF5 library to use; enables HDF5 command line 
    programs (may need `hdf5_serial` in some environments)
 
+After building the executables, you can run two simple test runs as follows:
+
+ - `run-cmu` will train an English-to-IPA LSTM
+ - `run-uw3-500` will download a small OCR training/test set and train an OCR LSTM
+
 There is a full set of tests in the current version of clstm; just
 run them with:
 
@@ -93,11 +98,6 @@ This will check:
  - training a simple model through the C++ API
  - training a simple model through the Python API
  - checking the command line training tools, including loading and saving
-
-After building the executables, you can run two simple test runs as follows:
-
- - `run-cmu` will train an English-to-IPA LSTM
- - `run-uw3-500` will download a small OCR training/test set and train an OCR LSTM
 
 To build the Python extension, run
 
