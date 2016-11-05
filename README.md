@@ -24,14 +24,15 @@ available now.
 
  - scons, Eigen
  - protocol buffer library and compiler
+ - libpng
  - Optional: HDF5, ZMQ, Python
 
 ```sh
 # Ubuntu 15.04 / Debian 8
-sudo apt-get install scons libprotobuf-dev libprotobuf9 protobuf-compiler
+sudo apt-get install scons libprotobuf-dev libprotobuf9 protobuf-compiler libpng-dev
 
 # Ubuntu 14.04:
-sudo apt-get install scons libprotobuf-dev libprotobuf8 protobuf-compiler
+sudo apt-get install scons libprotobuf-dev libprotobuf8 protobuf-compiler libpng-dev
 ```
 
 Download [Eigen](http://eigen.tuxfamily.org) with Tensor support (> v3.3-beta1)
@@ -41,7 +42,8 @@ and copy the header files to an `include` path:
 # with wget
 wget 'https://github.com/RLovelett/eigen/archive/3.3-rc1.tar.gz'
 tar xf 3.3-rc1.tar.gz
-mv eigen-3.3-rc1 /usr/local/include
+mv eigen-3.3-rc1 eigen3
+mv eigen3 /usr/local/include
 # or with git:
 sudo git clone --depth 1 --single-branch --branch 3.3-rc1 \
   "https://github.com/RLovelett/eigen" /usr/local/include/eigen3
@@ -66,18 +68,6 @@ sudo apt-get install hdf5-helpers libhdf5-7 libhdf5-dev python-h5py
 
 # Getting Started
 
-There is a full set of tests in the current version of clstm; just
-run them with:
-
-    ./run-tests
-
-This will check:
-
- - gradient checkers for layers and compute steps
- - training a simple model through the C++ API
- - training a simple model through the Python API
- - checking the command line training tools, including loading and saving
-
 To build a standalone C library, run
 
     scons
@@ -91,6 +81,18 @@ There are a bunch of options:
  - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
  - <a id="hdf5">`hdf5lib=hdf5`</a> what HDF5 library to use; enables HDF5 command line 
    programs (may need `hdf5_serial` in some environments)
+
+There is a full set of tests in the current version of clstm; just
+run them with:
+
+    ./run-tests
+
+This will check:
+
+ - gradient checkers for layers and compute steps
+ - training a simple model through the C++ API
+ - training a simple model through the Python API
+ - checking the command line training tools, including loading and saving
 
 After building the executables, you can run two simple test runs as follows:
 
