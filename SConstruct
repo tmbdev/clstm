@@ -98,6 +98,9 @@ if option("display", 0):
 else:
     env.Append(CPPDEFINES={'NODISPLAY': 1})
 
+if option("openmp", 0):
+    env.Append(CCFLAGS="-fopenmp")
+
 # We need to compile the protocol buffer definition as part of the build.
 
 env.Protoc("clstm.proto")
