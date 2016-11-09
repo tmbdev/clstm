@@ -92,7 +92,7 @@ int print_usage(char **argv) {
     cerr << "Usage: [VAR=VAL...] " << argv[0] << " TRAININGLIST [TESTLIST]\n";
     cerr << "\n";
     cerr << "  Arguments:\n";
-    cerr << "    TRAININGSET      File with filenames to train with\n";
+    cerr << "    TRAININGLIST     File with filenames to train with\n";
     cerr << "    TESTLIST         File with filenames to evaluate training\n";
     cerr << "  \n";
     cerr << "  Variables:\n";
