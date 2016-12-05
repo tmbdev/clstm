@@ -204,7 +204,7 @@ The `clstm.i` file implements a simple Python interface to clstm, plus
 a wrapper that makes an INetwork mostly a replacement for the lstm.py
 implementation from ocropy.
 
-# Comand Line Drivers
+# Command Line Drivers
 
 There are several command line drivers:
 
