@@ -22,20 +22,22 @@ available now.
 
 # Prerequisites
 
- - scons, Eigen
+ - scons, swig, Eigen
  - protocol buffer library and compiler
  - libpng
  - Optional: HDF5, ZMQ, Python
 
 ```sh
 # Ubuntu 15.04 / Debian 8
-sudo apt-get install scons libprotobuf-dev libprotobuf9 protobuf-compiler libpng-dev
+sudo apt-get install scons libprotobuf-dev libprotobuf9 protobuf-compiler libpng-dev libeigen3-dev swig
 
 # Ubuntu 14.04:
-sudo apt-get install scons libprotobuf-dev libprotobuf8 protobuf-compiler libpng-dev
+sudo apt-get install scons libprotobuf-dev libprotobuf8 protobuf-compiler libpng-dev swig
 ```
 
-Download [Eigen](http://eigen.tuxfamily.org) with Tensor support (> v3.3-beta1)
+The Debian repositories jessie-backports and stretch include sufficiently new libeigen3-dev packages.
+
+It is also possible to download [Eigen](http://eigen.tuxfamily.org) with Tensor support (> v3.3-beta1)
 and copy the header files to an `include` path:
 
 ```sh
@@ -202,7 +204,7 @@ The `clstm.i` file implements a simple Python interface to clstm, plus
 a wrapper that makes an INetwork mostly a replacement for the lstm.py
 implementation from ocropy.
 
-# Comand Line Drivers
+# Command Line Drivers
 
 There are several command line drivers:
 
