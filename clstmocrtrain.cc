@@ -85,7 +85,7 @@ pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset) {
     count += gt.size();
     errors += levenshtein(pred, gt);
   }
-  return make_pair(count, errors);
+  return make_pair(errors, count);
 }
 
 int print_usage(char **argv) {
