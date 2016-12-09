@@ -20,7 +20,46 @@ I'm planning on creating a new open source text recognition system from the grou
 in recurrent neural networks, attention, GPU computing, and using some of the libraries that have become
 available now.
 
-# Prerequisites
+# Installation using Docker
+
+You can train and run clstm without installation to the local machine using the
+docker image, which is based on Ubuntu 16.04. This is the best option for
+running clstm on a Windows host.
+
+You can either run the [last version of the clstm
+image](https://hub.docker.com/r/kbai/clstm) from Docker Hub or build the Docker
+image from the repo (see [`./docker/Dockerfile`](./docker/Dockerfile)).
+
+The command line syntax differs from a native installation:
+
+
+```
+docker run --rm -it -e [VARIABLES...] kbai/clstm BINARY [ARGS...]
+```
+
+is equivalent to
+
+```
+[VARIABLES...] BINARY [ARGS...]
+```
+
+For example:
+
+
+```
+docker run --rm -it -e ntrain=1000 kbai/clstm clstmocrtrain traininglist.txt
+```
+
+is equivalent to
+
+```
+ntrain=1000 clstmocrtrain traininglist.txt
+
+```
+
+# Installation from source
+
+## Prerequisites
 
  - scons, swig, Eigen
  - protocol buffer library and compiler
@@ -68,7 +107,7 @@ sudo apt-get install hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5p
 sudo apt-get install hdf5-helpers libhdf5-7 libhdf5-dev python-h5py
 ```
 
-# Getting Started
+## Building
 
 To build a standalone C library, run
 
@@ -83,6 +122,8 @@ There are a bunch of options:
  - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
  - <a id="hdf5">`hdf5lib=hdf5`</a> what HDF5 library to use; enables HDF5 command line 
    programs (may need `hdf5_serial` in some environments)
+
+## Running the tests
 
 After building the executables, you can run two simple test runs as follows:
 
@@ -100,6 +141,8 @@ This will check:
  - training a simple model through the C++ API
  - training a simple model through the Python API
  - checking the command line training tools, including loading and saving
+
+## Python bindings
 
 To build the Python extension, run
 
