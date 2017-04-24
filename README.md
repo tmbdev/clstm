@@ -95,7 +95,9 @@ After building the executables, you can run two simple test runs as follows:
 There is a full set of tests in the current version of clstm; just
 run them with:
 
-    ./run-tests
+```sh
+./run-tests
+```
 
 This will check:
 
@@ -106,8 +108,10 @@ This will check:
 
 To build the Python extension, run
 
-    python setup.py build
-    sudo python setup.py install
+```sh
+python setup.py build
+sudo python setup.py install
+```
 
 (this is currently broken)
 
@@ -129,26 +133,30 @@ individual rank-2 tensors at different time steps.
 Networks are built from objects implementing the `INetwork` interface.
 The `INetwork` interface contains:
 
-    struct INetwork {
-        Sequence inputs, d_inputs;      // input sequence, input deltas
-        Sequence outputs, d_outputs;    // output sequence, output deltas
-        void forward();                 // propagate inputs to outputs
-        void backward();                // propagate d_outputs to d_inputs
-        void update();                  // update weights from the last backward() step
-        void setLearningRate(Float,Float); // set learning rates
-        ...
-    };
+```c++
+struct INetwork {
+    Sequence inputs, d_inputs;      // input sequence, input deltas
+    Sequence outputs, d_outputs;    // output sequence, output deltas
+    void forward();                 // propagate inputs to outputs
+    void backward();                // propagate d_outputs to d_inputs
+    void update();                  // update weights from the last backward() step
+    void setLearningRate(Float,Float); // set learning rates
+    ...
+};
+```
 
 Network structures can be hierarchical and there are some network
 implementations whose purpose it is to combine other networks into more
 complex structures.
 
-    struct INetwork {
-        ...
-        vector<shared_ptr<INetwork>> sub;
-        void add(shared_ptr<INetwork> net);
-        ...
-    };
+```c++
+struct INetwork {
+    ...
+    vector<shared_ptr<INetwork>> sub;
+    void add(shared_ptr<INetwork> net);
+    ...
+};
+```
 
 At its lowest level, layers are created by:
 
@@ -175,10 +183,12 @@ This can be used to construct network architectures in C++ pretty
 easily. For example, the following creates a network that stacks
 a softmax output layer on top of a standard LSTM layer:
 
-    Network net = layer("Stacked", ninput, noutput, {}, {
-        layer("LSTM", ninput, nhidden,{},{}),
-        layer("SoftmaxLayer", nhidden, noutput,{},{})
-    });
+```c++
+Network net = layer("Stacked", ninput, noutput, {}, {
+    layer("LSTM", ninput, nhidden,{},{}),
+    layer("SoftmaxLayer", nhidden, noutput,{},{})
+});
+```
 
 Note that you need to make sure that the number of input and
 output units are consistent between layers.
@@ -226,7 +236,9 @@ There are several command line drivers:
 
 Note that most parameters are passed through the environment:
 
-    lrate=3e-5 clstmctc uw3-dew.h5
+```
+lrate=3e-5 clstmctc uw3-dew.h5
+```
 
 See the notebooks in the `misc/` subdirectory for documentation on the parameters and examples of usage.
 
