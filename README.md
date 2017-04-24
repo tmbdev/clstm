@@ -28,6 +28,9 @@ available now.
  - Optional: HDF5, ZMQ, Python
 
 ```sh
+# Ubuntu 16.04
+sudo apt-get install scons libprotobuf-dev libprotobuf9v5 protobuf-compiler libpng-dev libeigen3-dev swig
+
 # Ubuntu 15.04 / Debian 8
 sudo apt-get install scons libprotobuf-dev libprotobuf9 protobuf-compiler libpng-dev libeigen3-dev swig
 
