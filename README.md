@@ -28,14 +28,11 @@ available now.
  - Optional: HDF5, ZMQ, Python
 
 ```sh
-# Ubuntu 16.04
-sudo apt-get install scons libprotobuf-dev libprotobuf9v5 protobuf-compiler libpng-dev libeigen3-dev swig
-
-# Ubuntu 15.04 / Debian 8
-sudo apt-get install scons libprotobuf-dev libprotobuf9 protobuf-compiler libpng-dev libeigen3-dev swig
+# Ubuntu 15.04, 16.04 / Debian 8, 9
+sudo apt-get install scons libprotobuf-dev protobuf-compiler libpng-dev libeigen3-dev swig
 
 # Ubuntu 14.04:
-sudo apt-get install scons libprotobuf-dev libprotobuf8 protobuf-compiler libpng-dev swig
+sudo apt-get install scons libprotobuf-dev protobuf-compiler libpng-dev swig
 ```
 
 The Debian repositories jessie-backports and stretch include sufficiently new libeigen3-dev packages.
