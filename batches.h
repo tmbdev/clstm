@@ -114,12 +114,7 @@ struct Sequence {
   }
   void resize(int N, int n, int m) {
     check();
-    if (N == size() && n == rows() && m == cols()) {
-      for (int t = 0; t < N; t++) {
-        steps[t].v.setZero();
-        steps[t].d.setZero();
-      }
-    } else {
+    if (N != size() || n != rows() || m != cols()) {
       clear();
       allocate(N, n, m);
       steps.resize(N);
@@ -128,6 +123,8 @@ struct Sequence {
         steps[t].d.displaceTo(data + (n * m) * (2 * t + 1), n, m, gpu);
       }
     }
+    //reset data, whether new or reused
+    memset(data,0,nbytes());
   }
   void like(const Sequence &other) {
     resize(other.size(), other.rows(), other.cols());
