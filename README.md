@@ -7,18 +7,11 @@ CLSTM is an implementation of the
 network model in C++, using the [Eigen](http://eigen.tuxfamily.org) library for
 numerical computations.
 
-# Future Plans
-
-| Project Announcements
-|:-----------------------
-| Please welcome @zuphilip and @kba as additional project maintainers. (10/15/2016)
+# Status and scope
 
 CLSTM is mainly in maintenance mode now. It was created at a time when there weren't a lot of good LSTM
 implementations around, but several good options have become available over the last year. Nevertheless, if
 you need a small library for text line recognition with few dependencies, CLSTM is still a good option.
-I'm planning on creating a new open source text recognition system from the ground up, combining advances
-in recurrent neural networks, attention, GPU computing, and using some of the libraries that have become
-available now.
 
 # Installation using Docker
 
@@ -32,7 +25,6 @@ image from the repo (see [`./docker/Dockerfile`](./docker/Dockerfile)).
 
 The command line syntax differs from a native installation:
 
-
 ```
 docker run --rm -it -e [VARIABLES...] kbai/clstm BINARY [ARGS...]
 ```
@@ -45,7 +37,6 @@ is equivalent to
 
 For example:
 
-
 ```
 docker run --rm -it -e ntrain=1000 kbai/clstm clstmocrtrain traininglist.txt
 ```
@@ -54,7 +45,6 @@ is equivalent to
 
 ```
 ntrain=1000 clstmocrtrain traininglist.txt
-
 ```
 
 # Installation from source
