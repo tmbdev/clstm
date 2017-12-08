@@ -81,8 +81,9 @@ elif debug<0:
 
 if option("eigen", "") == "":
     inc = findonpath("Eigen/Eigen", """
-        /usr/include
+        /usr/local/include
         /usr/local/include/eigen3
+        /usr/include
         /usr/include/eigen3""".split())
 else:
     inc = findonpath("Eigen/Eigen", [option("eigen", "")])
