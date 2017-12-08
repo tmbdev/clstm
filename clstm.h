@@ -171,7 +171,7 @@ void walk_states(Network net, StateFun f, const string &prefix = "",
 void walk_networks(Network net, NetworkFun f, const string &prefix = "");
 
 // output information about the network (for debugging)
-void network_info(Network net, string prefix = "");
+void network_info(Network net, string prefix);
 void network_detail(Network net, string prefix = "");
 
 // get the number of parameters in a network
@@ -199,7 +199,7 @@ void set_derivs(Network net, Float *params, int total, int gpu = -1);
 void get_derivs(Network net, Float *params, int total, int gpu = -1);
 
 // get the number of internal state variables for the network; this
-// changes after every foward propagation pass; note that this includes
+// changes after every forward propagation pass; note that this includes
 // both numerical values and the shapes of internal tensors
 int n_states(Network net);
 

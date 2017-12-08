@@ -85,15 +85,43 @@ pair<double, double> test_set_error(CLSTMOCR &clstm, Dataset &testset) {
     count += gt.size();
     errors += levenshtein(pred, gt);
   }
-  return make_pair(count, errors);
+  return make_pair(errors, count);
+}
+
+int print_usage(char **argv) {
+    cerr << "Usage: [VAR=VAL...] " << argv[0] << " TRAININGLIST [TESTLIST]\n";
+    cerr << "\n";
+    cerr << "  Arguments:\n";
+    cerr << "    TRAININGLIST     File with filenames to train with\n";
+    cerr << "    TESTLIST         File with filenames to evaluate training\n";
+    cerr << "  \n";
+    cerr << "  Variables:\n";
+    cerr << "     load            Filename of model file to load. Default: ''\n";
+    cerr << "     save_name       Basename of model file to save. Default: '_ocr'\n";
+    cerr << "     nhidden         Number of hidden Default: 100\n";
+    cerr << "     lrate           Learning rate. Default: 1e-4\n";
+    cerr << "     momentum        Momentum. Default: 0.9\n";
+    cerr << "     target_height   Line height to normalize. Default: 48\n";
+    cerr << "     ntrain          Number of iterations. Default: 10000000\n";
+    cerr << "     start           Initial iteration. Default: -1\n";
+    cerr << "     charsep         Separator between characters in ground truth. Default: ''\n";
+    cerr << "     report_time     Set to 1 to report time. Default: 0\n";
+    cerr << "     test_every      Evaluate model every n-th iteration. Default: 10000\n";
+    cerr << "     report_every    Log current state every n-th iteration. Default: 100\n";
+    cerr << "     save_every      Save model with iteration as suffix every n-th\n";
+    cerr << "                     iteration. Default: 10000\n";
+    cerr << "     display_every   Update display every n-th iteration. Requires compilation\n";
+    cerr << "                     with 'scons display=1'. Default: 0\n";
+    cerr << "     params          Whether to report variable values on read. Default: 1\n";
 }
 
 int main1(int argc, char **argv) {
+  if (argc < 2 || argc > 3 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
+      return print_usage(argv);
   int ntrain = getienv("ntrain", 10000000);
   string save_name = getsenv("save_name", "_ocr");
   int report_time = getienv("report_time", 0);
 
-  if (argc < 2 || argc > 3) THROW("... training [testing]");
   Dataset trainingset(argv[1]);
   assert(trainingset.size() > 0);
   Dataset testset;
@@ -115,7 +143,7 @@ int main1(int argc, char **argv) {
     clstm.createBidi(codec.codec, getienv("nhidden", 100));
     clstm.setLearningRate(getdenv("lrate", 1e-4), getdenv("momentum", 0.9));
   }
-  network_info(clstm.net);
+  network_info(clstm.net, "");
 
   double test_error = 9999.0;
   double best_error = 1e38;

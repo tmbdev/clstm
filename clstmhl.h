@@ -161,6 +161,7 @@ struct CLSTMOCR {
       return false;
     }
     nclasses = net->codec.size();
+    target_height = net->ninput();
     normalizer.reset(make_CenterNormalizer());
     normalizer->target_height = target_height;
     return true;

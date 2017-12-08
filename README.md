@@ -1,29 +1,134 @@
-------------------------
-| Project Announcements
-|:-----------------------
-| Please welcome @zuphilip and @kba as additional project maintainers. (10/15/2016)
-------------------------
-
 # clstm
 
-CLSTM is an implementation of the LSTM recurrent neural network
-model in C++, using the Eigen library for numerical computations.
+[![CircleCI](https://circleci.com/gh/tmbdev/clstm/tree/master.svg?style=svg)](https://circleci.com/gh/tmbdev/clstm/tree/master)
 
-# Future Plans
+CLSTM is an implementation of the
+[LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory) recurrent neural
+network model in C++, using the [Eigen](http://eigen.tuxfamily.org) library for
+numerical computations.
+
+# Status and scope
 
 CLSTM is mainly in maintenance mode now. It was created at a time when there weren't a lot of good LSTM
 implementations around, but several good options have become available over the last year. Nevertheless, if
 you need a small library for text line recognition with few dependencies, CLSTM is still a good option.
-I'm planning on creating a new open source text recognition system from the ground up, combining advances
-in recurrent neural networks, attention, GPU computing, and using some of the libraries that have become
-available now.
 
-# Getting Started
+# Installation using Docker
+
+You can train and run clstm without installation to the local machine using the
+docker image, which is based on Ubuntu 16.04. This is the best option for
+running clstm on a Windows host.
+
+You can either run the [last version of the clstm
+image](https://hub.docker.com/r/kbai/clstm) from Docker Hub or build the Docker
+image from the repo (see [`./docker/Dockerfile`](./docker/Dockerfile)).
+
+The command line syntax differs from a native installation:
+
+```
+docker run --rm -it -e [VARIABLES...] kbai/clstm BINARY [ARGS...]
+```
+
+is equivalent to
+
+```
+[VARIABLES...] BINARY [ARGS...]
+```
+
+For example:
+
+```
+docker run --rm -it -e ntrain=1000 kbai/clstm clstmocrtrain traininglist.txt
+```
+
+is equivalent to
+
+```
+ntrain=1000 clstmocrtrain traininglist.txt
+```
+
+# Installation from source
+
+## Prerequisites
+
+ - scons, swig, Eigen
+ - protocol buffer library and compiler
+ - libpng
+ - Optional: HDF5, ZMQ, Python
+
+```sh
+# Ubuntu 15.04, 16.04 / Debian 8, 9
+sudo apt-get install scons libprotobuf-dev protobuf-compiler libpng-dev libeigen3-dev swig
+
+# Ubuntu 14.04:
+sudo apt-get install scons libprotobuf-dev protobuf-compiler libpng-dev swig
+```
+
+The Debian repositories jessie-backports and stretch include sufficiently new libeigen3-dev packages.
+
+It is also possible to download [Eigen](http://eigen.tuxfamily.org) with Tensor support (> v3.3-beta1)
+and copy the header files to an `include` path:
+
+```sh
+# with wget
+wget 'https://github.com/RLovelett/eigen/archive/3.3-rc1.tar.gz'
+tar xf 3.3-rc1.tar.gz
+rm -f /usr/local/include/eigen3
+mv eigen-3.3-rc1 /usr/local/include/eigen3
+# or with git:
+sudo git clone --depth 1 --single-branch --branch 3.3-rc1 \
+  "https://github.com/RLovelett/eigen" /usr/local/include/eigen3
+```
+
+To use the [visual debugging methods](#user-content-display), additionally:
+
+```sh
+# Ubuntu 15.04:
+sudo apt-get install libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3 libpng12-dev
+```
+
+For [HDF5](#user-content-hdf5), additionally:
+
+```sh
+# Ubuntu 15.04:
+sudo apt-get install hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py
+
+# Ubuntu 14.04:
+sudo apt-get install hdf5-helpers libhdf5-7 libhdf5-dev python-h5py
+```
+
+## Building
+
+To build a standalone C library, run
+
+    scons
+    sudo scons install
+
+There are a bunch of options:
+
+ - `debug=1` build with debugging options, no optimization
+ - <a id="display">`display=1`</a> build with display support for debugging (requires ZMQ, Python)
+ - `prefix=...` install under a different prefix (untested)
+ - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
+ - `openmp=...` build with multi-processing support. Set the
+   [`OMP_NUM_THREADS`](https://eigen.tuxfamily.org/dox/TopicMultiThreading.html)
+   environment variable to the number of threads for Eigen to use.
+ - <a id="hdf5">`hdf5lib=hdf5`</a> what HDF5 library to use; enables HDF5 command line 
+   programs (may need `hdf5_serial` in some environments)
+
+## Running the tests
+
+After building the executables, you can run two simple test runs as follows:
+
+ - `run-cmu` will train an English-to-IPA LSTM
+ - `run-uw3-500` will download a small OCR training/test set and train an OCR LSTM
 
 There is a full set of tests in the current version of clstm; just
 run them with:
 
-    ./run-tests
+```sh
+./run-tests
+```
 
 This will check:
 
@@ -32,39 +137,7 @@ This will check:
  - training a simple model through the Python API
  - checking the command line training tools, including loading and saving
 
-To build a standalone C library, run
-
-    scons
-    sudo scons install
-
-Prerequisites:
-
- - scons, Eigen
- - protocol buffer library and compiler
-
-Optional: HDF5, ZMQ, Python
-
-On Ubuntu 15.04, this means:
-
-    sudo apt-get install mercurial\
-    hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py \
-    libprotobuf-dev libprotobuf9 protobuf-compiler \
-    libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3 libpng12-dev
-    cd /usr/local/include && hg clone http://bitbucket.org/eigen/eigen eigen3 && hg up tensorflow_fix && cd -
-
-There are a bunch of options:
-
- - `debug=1` build with debugging options, no optimization
- - `display=1` build with display support for debugging (requires ZMQ, Python)
- - `prefix=...` install under a different prefix (untested)
- - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
- - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line 
-   programs (may need `hdf5_serial` in some environments)
-
-After building the executables, you can run two simple test runs as follows:
-
- - `run-cmu` will train an English-to-IPA LSTM
- - `run-uw3-500` will download a small OCR training/test set and train an OCR LSTM
+## Python bindings
 
 To build the Python extension, run
 
@@ -88,26 +161,30 @@ individual rank-2 tensors at different time steps.
 Networks are built from objects implementing the `INetwork` interface.
 The `INetwork` interface contains:
 
-    struct INetwork {
-        Sequence inputs, d_inputs;      // input sequence, input deltas
-        Sequence outputs, d_outputs;    // output sequence, output deltas
-        void forward();                 // propagate inputs to outputs
-        void backward();                // propagate d_outputs to d_inputs
-        void update();                  // update weights from the last backward() step
-        void setLearningRate(Float,Float); // set learning rates
-        ...
-    };
+```c++
+struct INetwork {
+    Sequence inputs, d_inputs;      // input sequence, input deltas
+    Sequence outputs, d_outputs;    // output sequence, output deltas
+    void forward();                 // propagate inputs to outputs
+    void backward();                // propagate d_outputs to d_inputs
+    void update();                  // update weights from the last backward() step
+    void setLearningRate(Float,Float); // set learning rates
+    ...
+};
+```
 
 Network structures can be hierarchical and there are some network
 implementations whose purpose it is to combine other networks into more
 complex structures.
 
-    struct INetwork {
-        ...
-        vector<shared_ptr<INetwork>> sub;
-        void add(shared_ptr<INetwork> net);
-        ...
-    };
+```c++
+struct INetwork {
+    ...
+    vector<shared_ptr<INetwork>> sub;
+    void add(shared_ptr<INetwork> net);
+    ...
+};
+```
 
 At its lowest level, layers are created by:
 
@@ -134,10 +211,12 @@ This can be used to construct network architectures in C++ pretty
 easily. For example, the following creates a network that stacks
 a softmax output layer on top of a standard LSTM layer:
 
-    Network net = layer("Stacked", ninput, noutput, {}, {
-        layer("LSTM", ninput, nhidden,{},{}),
-        layer("SoftmaxLayer", nhidden, noutput,{},{})
-    });
+```c++
+Network net = layer("Stacked", ninput, noutput, {}, {
+    layer("LSTM", ninput, nhidden,{},{}),
+    layer("SoftmaxLayer", nhidden, noutput,{},{})
+});
+```
 
 Note that you need to make sure that the number of input and
 output units are consistent between layers.
@@ -167,7 +246,7 @@ it only exposes the `CLSTMOCR` class for OCR training and prediction.
 To install it, just make sure you have the above dependencies and
 Cython (>=0.23) installed and run `pip install .`.
 
-# Comand Line Drivers
+# Command Line Drivers
 
 There are several command line drivers:
 
@@ -186,7 +265,9 @@ There are several command line drivers:
 
 Note that most parameters are passed through the environment:
 
-    lrate=3e-5 clstmctc uw3-dew.h5
+```
+lrate=3e-5 clstmctc uw3-dew.h5
+```
 
 See the notebooks in the `misc/` subdirectory for documentation on the parameters and examples of usage.
 

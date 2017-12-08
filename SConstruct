@@ -81,8 +81,9 @@ elif debug<0:
 
 if option("eigen", "") == "":
     inc = findonpath("Eigen/Eigen", """
-        /usr/include
+        /usr/local/include
         /usr/local/include/eigen3
+        /usr/include
         /usr/include/eigen3""".split())
 else:
     inc = findonpath("Eigen/Eigen", [option("eigen", "")])
@@ -97,6 +98,9 @@ if option("display", 0):
     env.Append(CPPDEFINES={'add_raw': option("add_raw", 'add')})
 else:
     env.Append(CPPDEFINES={'NODISPLAY': 1})
+
+if option("openmp", 0):
+    env.Append(CCFLAGS="-fopenmp")
 
 # We need to compile the protocol buffer definition as part of the build.
 
@@ -143,14 +147,12 @@ all += [env.Program("test-batchlstm", ["test-batchlstm.cc"], LIBS=[libclstm] + l
 all += [env.Program("test-deriv", ["test-deriv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-cderiv", ["test-cderiv.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-ctc", ["test-ctc.cc"], LIBS=[libclstm] + libs)]
-all += [env.Program("test-timing", ["test-timing.cc"], LIBS=[libclstm] + libs)]
-all += [env.Program("test-gpu", ["test-gpu.cc"], LIBS=[libclstm] + libs)]
 all += [env.Program("test-2d", ["test-2d.cc"], LIBS=[libclstm] + libs)]
 
 # You can construct the Python extension from scons using the `pyswig` target; however,
 # the recommended way of compiling it is with "python setup.py build"
 
-swigenv = env.Clone(SWIGFLAGS=["-python", "-c++"], SHLIBPREFIX="")
+swigenv = env.Clone()
 swigenv.Tool("swig")
 swigenv.Append(SWIG="3.0")
 swigenv.Append(CPPPATH=[distutils.sysconfig.get_python_inc()])
@@ -158,6 +160,8 @@ pyswig = swigenv.SharedLibrary("_clstm.so",
                                ["clstm.i", "clstm.cc", "clstm_proto.cc", "extras.cc",
                                 "clstm.pb.cc", "clstm_compute.cc",
                                "clstm_prefab.cc", "ctc.cc"],
+                               SWIGFLAGS=['-python', '-c++'],
+                               SHLIBPREFIX="",
                                LIBS=libs)
 Alias('pyswig', [pyswig])
 

@@ -39,8 +39,22 @@ inline float scaled_log(float x) {
   return (l + thresh) / thresh;
 }
 
+int print_usage(char **argv) {
+    cerr << "Usage: [VAR=VAL...] " << argv[0] << " IMAGEFILE\n";
+    cerr << "\n";
+    cerr << "  Arguments:\n";
+    cerr << "    IMAGEFILE      Image file to OCR\n";
+    cerr << "  \n";
+    cerr << "  Variables:\n";
+    cerr << "     load          Model to recognize with. Required\n";
+    cerr << "     conf          Output character-wise predictions. Default: 0\n";
+    cerr << "     output        Output format, either 'text' or 'posteriors'. Default: 'text'\n";
+    cerr << "     save_text     Save text to IMAGEFILE.txt. Default: 1\n";
+}
+
 int main1(int argc, char **argv) {
-  if (argc != 2) THROW("give text file as an argument");
+  if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
+      return print_usage(argv);
   const char *fname = argv[1];
 
   string load_name = getsenv("load", "");
