@@ -120,6 +120,9 @@ There are a bunch of options:
  - <a id="display">`display=1`</a> build with display support for debugging (requires ZMQ, Python)
  - `prefix=...` install under a different prefix (untested)
  - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
+ - `openmp=...` build with multi-processing support. Set the
+   [`OMP_NUM_THREADS`](https://eigen.tuxfamily.org/dox/TopicMultiThreading.html)
+   environment variable to the number of threads for Eigen to use.
  - <a id="hdf5">`hdf5lib=hdf5`</a> what HDF5 library to use; enables HDF5 command line 
    programs (may need `hdf5_serial` in some environments)
 
