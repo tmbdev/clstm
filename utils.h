@@ -44,16 +44,6 @@ inline double now() {
   return tv.tv_sec + 1e-6 * tv.tv_usec;
 }
 
-inline void glob(vector<string> &result, const string &arg) {
-  result.clear();
-  glob_t buf;
-  glob(arg.c_str(), GLOB_TILDE, nullptr, &buf);
-  for (int i = 0; i < buf.gl_pathc; i++) {
-    result.push_back(buf.gl_pathv[i]);
-  }
-  if (buf.gl_pathc > 0) globfree(&buf);
-}
-
 inline string basename(string s) {
   int start = 0;
   for (;;) {
