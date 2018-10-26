@@ -113,6 +113,7 @@ int print_usage(char **argv) {
     cerr << "     display_every   Update display every n-th iteration. Requires compilation\n";
     cerr << "                     with 'scons display=1'. Default: 0\n";
     cerr << "     params          Whether to report variable values on read. Default: 1\n";
+    return EXIT_FAILURE;
 }
 
 int main1(int argc, char **argv) {

@@ -50,6 +50,7 @@ int print_usage(char **argv) {
     cerr << "     conf          Output character-wise predictions. Default: 0\n";
     cerr << "     output        Output format, either 'text' or 'posteriors'. Default: 'text'\n";
     cerr << "     save_text     Save text to IMAGEFILE.txt. Default: 1\n";
+    return EXIT_FAILURE;
 }
 
 int main1(int argc, char **argv) {
