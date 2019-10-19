@@ -8,7 +8,7 @@ net.setLearningRate(1e-4, 0.9)
 N = 20
 ntrain = 30000
 ntest = 1000
-print "training 1:4:2 network to learn delay"
+print("training 1:4:2 network to learn delay")
 for i in range(ntrain):
     xs = array(rand(N) < 0.3, 'f')
     ys = roll(xs, 1)
@@ -19,7 +19,7 @@ for i in range(ntrain):
     net.outputs.dset(ys.reshape(N, 2, 1) - net.outputs.array())
     net.backward()
     clstm.sgd_update(net)
-print "testing", ntest, "random instances"
+print("testing", ntest, "random instances")
 maxerr = 0.0
 for i in range(ntest):
     xs = array(rand(N) < 0.3, 'f')
@@ -31,4 +31,4 @@ for i in range(ntest):
     err = abs(amax(abs(ys - preds)))
     assert (err < 0.1), err
     maxerr = maximum(err, maxerr)
-print "OK", maxerr
+print("OK", maxerr)
