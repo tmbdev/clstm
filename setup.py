@@ -11,7 +11,7 @@ config = distutils.sysconfig.get_config_vars()
 # CFLAGS
 for k,v in config.items():
   if type(v)==str and "-W" in v:
-    print k,v
+    print(k,v)
 def remove_warnings(opt):
   opt = opt.split()
   opt = [s for s in opt if not s.startswith("-W")]
@@ -30,7 +30,7 @@ swiglib = os.popen("swig -swiglib").read()[:-1]
 
 if not os.path.exists("clstm.pb.cc") or \
     getctime("clstm.pb.cc") < getctime("clstm.proto"):
-  print "making proto file"
+  print("making proto file")
   os.system("protoc clstm.proto --cpp_out=.")
 
 clstm = Extension('_clstm',
@@ -43,9 +43,18 @@ clstm = Extension('_clstm',
         sources=['clstm.i','clstm.cc','clstm_prefab.cc','extras.cc', 'batches.cc',
                  'clstm_compute.cc', 'ctc.cc','clstm_proto.cc','clstm.pb.cc'])
 
-setup (name = 'clstm',
-       version = '0.0',
-       author      = "Thomas Breuel",
-       description = """clstm library bindings""",
-       ext_modules = [clstm],
-       py_modules = ["clstm"])
+from setuptools import setup, find_packages
+
+setup(
+    name = 'clstm',
+    version = '0.1',
+    author      = "Thomas Breuel",
+    description = """clstm library bindings""",
+    url='https://github.com/tmbdev/clstm',
+    license='Apache License 2.0',
+    install_requires=[
+        'wheel >= 0.33',
+    ],
+    ext_modules = [clstm],
+    py_modules = ["clstm"]
+)

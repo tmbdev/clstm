@@ -52,7 +52,7 @@ void rinit(TensorMap2 a, Float s, const char *mode_, Float offset) {
 }
 
 void rinit(Tensor2 &t, int r, int c, Float s, const char *mode_, Float offset) {
-  // use a temperary so that initialization of GPU tensors works
+  // use a temporary so that initialization of GPU tensors works
   Tensor2 temp;
   temp.resize(r, c);
   rinit(temp(), s, mode_, offset);
